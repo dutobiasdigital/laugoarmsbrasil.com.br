@@ -5,7 +5,7 @@ const PROTECTED_ROUTES = ["/minha-conta"];
 const ADMIN_ROUTES = ["/admin"];
 const AUTH_ROUTES = ["/auth/login", "/auth/cadastro", "/auth/esqueci-senha"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
