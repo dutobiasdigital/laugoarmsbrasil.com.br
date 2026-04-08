@@ -1,0 +1,242 @@
+// ─────────────────────────────────────────────
+// Prisma Schema — Revista Magnum
+// ─────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────
+
+enum UserRole {
+  ADMIN
+  SUBSCRIBER
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REFUNDED
+  CANCELLED
+}
+
+enum EditionType {
+  REGULAR
+  SPECIAL
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AdPosition {
+  HOME_TOP
+  HOME_SIDEBAR
+  ARTICLE_INLINE
+  ARTICLE_SIDEBAR
+  EDITIONS_TOP
+}
+
+enum ImpressionType {
+  VIEW
+  CLICK
+}
+
+// ─────────────────────────────────────────────
+// Models
+// ─────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(uuid())
+  authId    String   @unique
+  name      String
+  email     String   @unique
+  phone     String?
+  role      UserRole @default(SUBSCRIBER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscription Subscription?
+  payments     Payment[]
+
+  @@map("users")
+}
+
+model SubscriptionPlan {
+  id             String  @id @default(uuid())
+  name           String
+  slug           String  @unique
+  description    String?
+  priceInCents   Int
+  intervalMonths Int
+  mpPlanId       String? @unique
+  active         Boolean @default(true)
+  createdAt      DateTime @default(now())
+
+  subscriptions Subscription[]
+
+  @@map("subscription_plans")
+}
+
+model Subscription {
+  id                  String             @id @default(uuid())
+  userId              String             @unique
+  planId              String
+  status              SubscriptionStatus @default(PENDING)
+  mpSubscriptionId    String?            @unique
+  currentPeriodStart  DateTime
+  currentPeriodEnd    DateTime
+  planPriceInCents    Int
+  intervalMonths      Int
+  subscribedAt        DateTime           @default(now())
+  canceledAt          DateTime?
+  lastRenewedAt       DateTime?
+  notes               String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  user     User             @relation(fields: [userId], references: [id])
+  plan     SubscriptionPlan @relation(fields: [planId], references: [id])
+  payments Payment[]
+
+  @@map("subscriptions")
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  userId         String
+  subscriptionId String
+  mpPaymentId    String        @unique
+  mpOrderId      String?
+  amountInCents  Int
+  currency       String        @default("BRL")
+  status         PaymentStatus
+  statusDetail   String?
+  paidAt         DateTime?
+  refundedAt     DateTime?
+  periodStart    DateTime?
+  periodEnd      DateTime?
+  paymentMethod  String?
+  paymentBrand   String?
+  lastFourDigits String?
+  createdAt      DateTime      @default(now())
+
+  user         User         @relation(fields: [userId], references: [id])
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@map("payments")
+}
+
+model Edition {
+  id               String      @id @default(uuid())
+  type             EditionType @default(REGULAR)
+  number           Int?
+  title            String
+  slug             String      @unique
+  editorial        String?
+  tableOfContents  String?
+  pageCount        Int?
+  coverImageUrl    String?
+  indexImageUrl    String?
+  pageFlipUrl      String?
+  pdfStoragePath   String?
+  publishedAt      DateTime?
+  isPublished      Boolean     @default(false)
+  isFeatured       Boolean     @default(false)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@map("editions")
+}
+
+model ArticleCategory {
+  id       String    @id @default(uuid())
+  name     String
+  slug     String    @unique
+  articles Article[]
+
+  @@map("article_categories")
+}
+
+model ArticleTag {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  slug     String    @unique
+  articles Article[]
+
+  @@map("article_tags")
+}
+
+model Article {
+  id              String        @id @default(uuid())
+  title           String
+  slug            String        @unique
+  excerpt         String?
+  content         String
+  authorName      String        @default("Redação Magnum")
+  featureImageUrl String?
+  featureImageAlt String?
+  seoTitle        String?
+  seoDescription  String?
+  seoKeywords     String?
+  canonicalUrl    String?
+  categoryId      String
+  isExclusive     Boolean       @default(false)
+  status          ArticleStatus @default(DRAFT)
+  publishedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  category ArticleCategory @relation(fields: [categoryId], references: [id])
+  tags     ArticleTag[]
+
+  @@map("articles")
+}
+
+model Advertisement {
+  id             String      @id @default(uuid())
+  name           String
+  advertiser     String
+  imageUrl       String
+  targetUrl      String
+  position       AdPosition
+  active         Boolean     @default(true)
+  startsAt       DateTime?
+  endsAt         DateTime?
+  maxImpressions Int?
+  createdAt      DateTime    @default(now())
+
+  impressions AdImpression[]
+
+  @@map("advertisements")
+}
+
+model AdImpression {
+  id        String         @id @default(uuid())
+  adId      String
+  type      ImpressionType
+  createdAt DateTime       @default(now())
+
+  ad Advertisement @relation(fields: [adId], references: [id])
+
+  @@map("ad_impressions")
+}
