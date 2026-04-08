@@ -3,6 +3,8 @@ import prisma from "@/lib/prisma";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Revista Magnum — O Mundo das Armas em Suas Mãos",
   description:
