@@ -12,285 +12,337 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  let latestEditions: { id: string; title: string; number: number | null; slug: string; coverImageUrl: string | null; publishedAt: Date | null; type: string }[] = [];
-  let totalEditions = 0;
+  let latestEditions: {
+    id: string; title: string; number: number | null; slug: string;
+    coverImageUrl: string | null; publishedAt: Date | null; type: string;
+    pageCount: number | null;
+  }[] = [];
+
+  let latestArticles: {
+    id: string; title: string; slug: string; categoryId: string;
+    featureImageUrl: string | null; publishedAt: Date | null;
+    isExclusive: boolean;
+    category: { name: string; slug: string };
+  }[] = [];
+
+  let featuredEdition: typeof latestEditions[0] | null = null;
 
   try {
-    [latestEditions, totalEditions] = await Promise.all([
+    [latestEditions, latestArticles] = await Promise.all([
       prisma.edition.findMany({
         where: { isPublished: true },
         orderBy: { publishedAt: "desc" },
-        take: 6,
+        take: 3,
         select: {
-          id: true,
-          title: true,
-          number: true,
-          slug: true,
-          coverImageUrl: true,
-          publishedAt: true,
-          type: true,
+          id: true, title: true, number: true, slug: true,
+          coverImageUrl: true, publishedAt: true, type: true, pageCount: true,
         },
       }),
-      prisma.edition.count({ where: { isPublished: true } }),
+      prisma.article.findMany({
+        where: { status: "PUBLISHED" },
+        orderBy: { publishedAt: "desc" },
+        take: 3,
+        select: {
+          id: true, title: true, slug: true, categoryId: true,
+          featureImageUrl: true, publishedAt: true, isExclusive: true,
+          category: { select: { name: true, slug: true } },
+        },
+      }),
     ]);
+    featuredEdition = latestEditions[0] ?? null;
   } catch {
-    // DB unavailable — renders page with empty data
+    // DB unavailable
   }
 
+  const mostRead = [
+    "Glock 17 Gen 5: Análise Completa",
+    "Legislação CAC 2026: Novas regras",
+    "Recarga para .308 Winchester",
+    "Pistolas de serviço policial 2026",
+    "Balística terminal: fundamentos",
+  ];
+
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen bg-[#09090b] flex flex-col">
       <Header />
 
-      {/* Hero */}
-      <section className="relative flex flex-col items-center justify-center text-center px-6 pt-32 pb-24 overflow-hidden">
-        {/* Background grid */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
-            backgroundSize: "60px 60px",
-          }}
-        />
-        {/* Red accent line */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-32 bg-gradient-to-b from-transparent to-[#ff1f1f]" />
+      {/* Ad — HOME_TOP */}
+      <div className="bg-[#18181b] flex flex-col items-center justify-center h-[110px] mt-16 shrink-0">
+        <p className="text-[9px] font-semibold text-[#52525b] tracking-[1.5px] uppercase mb-2">
+          Publicidade
+        </p>
+        <div className="bg-[#27272a] border border-[#27272a] rounded h-[90px] w-full max-w-[728px] flex items-center justify-center">
+          <p className="font-mono text-[#52525b] text-[12px]">728 × 90 — Leaderboard</p>
+        </div>
+      </div>
 
-        <div className="relative max-w-4xl">
-          <div className="inline-flex items-center gap-2 bg-[#ff1f1f]/10 border border-[#ff1f1f]/20 rounded-full px-4 py-1.5 mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#ff1f1f] animate-pulse" />
-            <span className="text-xs text-[#ff1f1f] font-medium tracking-widest uppercase">
-              Acervo digital disponível
+      {/* Hero */}
+      <section className="bg-[#09090b] flex items-center px-5 lg:px-20 py-16 lg:py-0 lg:h-[580px] gap-6">
+        {/* Red stripe */}
+        <div className="hidden lg:block w-[3px] h-[520px] bg-[#ff1f1f] rounded-[2px] shrink-0" />
+        <div className="hidden lg:block w-6 shrink-0" />
+
+        {/* Text */}
+        <div className="flex flex-col gap-5 flex-1 max-w-[760px]">
+          <div className="bg-[#ff1f1f] inline-flex px-2 py-1 rounded-[2px] self-start">
+            <span className="text-white text-[10px] font-semibold tracking-[0.5px]">
+              ÚLTIMA EDIÇÃO
             </span>
           </div>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.05] mb-6 font-['Barlow_Condensed']">
-            O MUNDO DAS ARMAS
-            <br />
-            <span className="text-[#ff1f1f]">EM SUAS MÃOS</span>
-          </h1>
+          <div className="font-['Barlow_Condensed'] font-extrabold text-[#fafafa] text-5xl lg:text-[64px] leading-tight">
+            <p>{featuredEdition ? `Revista Magnum` : "Revista Magnum"}</p>
+            <p>{featuredEdition?.number ? `Edição ${featuredEdition.number}` : "Acervo Digital"}</p>
+          </div>
 
-          <p className="text-zinc-400 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            Acesse o maior acervo de publicações especializadas em armas,
-            munições e legislação do Brasil. Mais de{" "}
-            <span className="text-white font-medium">{totalEditions > 0 ? totalEditions : "300"}+ edições</span>{" "}
-            disponíveis para assinantes.
+          <p className="text-[#52525b] text-[14px]">
+            {featuredEdition?.publishedAt
+              ? `${featuredEdition.publishedAt.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}  ·  ${featuredEdition.pageCount ? `${featuredEdition.pageCount} páginas` : ""}  ·  ${featuredEdition.type === "SPECIAL" ? "Edição Especial" : "Edição Regular"}`
+              : "O maior acervo especializado do Brasil"}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <p className="text-[#a1a1aa] text-[16px] max-w-2xl leading-relaxed">
+            Nesta edição: teste completo da Beretta APX-A1, guia de recarga para .308 Win, legislação CAC 2026 e cobertura dos principais lançamentos do mercado nacional e internacional.
+          </p>
+
+          <div className="flex items-center gap-3 flex-wrap">
             <Link
-              href="/assine"
-              className="inline-flex items-center justify-center gap-2 bg-[#ff1f1f] hover:bg-[#cc0000] text-white font-bold px-8 py-4 rounded text-sm tracking-wide transition-colors"
+              href={featuredEdition ? `/minha-conta/edicoes` : "/assine"}
+              className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold px-7 py-3 rounded transition-colors"
             >
-              Assinar agora
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              {featuredEdition?.number ? `Ler Edição ${featuredEdition.number}` : "Assinar agora"}
             </Link>
             <Link
               href="/edicoes"
-              className="inline-flex items-center justify-center gap-2 bg-transparent border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white font-semibold px-8 py-4 rounded text-sm tracking-wide transition-colors"
+              className="border border-[#3f3f46] hover:border-zinc-500 text-[#a1a1aa] hover:text-white text-[15px] font-semibold px-6 py-3 rounded transition-colors"
             >
-              Ver edições
+              Ver Todas as Edições
             </Link>
           </div>
         </div>
 
-        {/* Bottom divider */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
-      </section>
+        <div className="flex-1 hidden lg:block" />
 
-      {/* Stats */}
-      <section className="border-y border-zinc-800 bg-zinc-900/50">
-        <div className="max-w-5xl mx-auto px-6 py-10 grid grid-cols-2 lg:grid-cols-4 gap-8">
-          {[
-            { value: "38+", label: "Anos de história" },
-            { value: "300+", label: "Edições publicadas" },
-            { value: "1985", label: "Fundada em" },
-            { value: "100%", label: "Conteúdo especializado" },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="text-3xl font-bold text-white font-['Barlow_Condensed'] mb-1">
-                {stat.value}
-              </div>
-              <div className="text-xs text-zinc-500 uppercase tracking-widest">
-                {stat.label}
-              </div>
+        {/* Cover */}
+        <div className="hidden lg:flex w-[340px] h-[480px] bg-[#27272a] rounded-lg items-center justify-center shrink-0">
+          {featuredEdition?.coverImageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={featuredEdition.coverImageUrl}
+              alt={featuredEdition.title}
+              className="w-full h-full object-cover rounded-lg"
+            />
+          ) : (
+            <div className="font-['Barlow_Condensed'] font-bold text-[#3f3f46] text-[18px] text-center leading-snug">
+              <p>CAPA</p>
+              <p>{featuredEdition?.number ? `EDIÇÃO ${featuredEdition.number}` : "MAGNUM"}</p>
             </div>
-          ))}
+          )}
         </div>
       </section>
 
-      {/* Latest editions */}
-      {latestEditions.length > 0 && (
-        <section className="max-w-5xl mx-auto px-6 py-16 w-full">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <p className="text-xs text-[#ff1f1f] font-semibold uppercase tracking-widest mb-2">
-                Acervo
-              </p>
-              <h2 className="text-2xl font-bold text-white font-['Barlow_Condensed'] tracking-wide">
-                ÚLTIMAS EDIÇÕES
+      {/* Content row */}
+      <div className="bg-[#09090b] flex gap-10 px-5 lg:px-20 py-16 items-start">
+
+        {/* Main column */}
+        <div className="flex flex-col gap-14 flex-1 min-w-0">
+
+          {/* Últimas Edições */}
+          <section>
+            <div className="flex items-center mb-6">
+              <h2 className="font-['Barlow_Condensed'] font-bold text-[#fafafa] text-[30px]">
+                Últimas Edições
               </h2>
+              <div className="flex-1" />
+              <Link href="/edicoes" className="text-[#ff1f1f] text-[13px] font-semibold hover:text-[#ff4444] transition-colors">
+                Ver todas →
+              </Link>
             </div>
-            <Link
-              href="/edicoes"
-              className="text-sm text-zinc-500 hover:text-white transition-colors"
-            >
-              Ver todas →
-            </Link>
-          </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {latestEditions.map((edition) => (
-              <Link key={edition.id} href="/assine" className="group block">
-                <div className="aspect-[3/4] bg-zinc-800 rounded overflow-hidden mb-2 relative">
-                  {edition.coverImageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={edition.coverImageUrl}
-                      alt={edition.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900 p-3">
-                      <div className="w-0.5 h-6 bg-[#ff1f1f] mb-2" />
-                      <div className="text-[8px] font-bold tracking-widest text-zinc-500 text-center mb-1">
-                        REVISTA MAGNUM
-                      </div>
-                      {edition.number && (
-                        <div className="text-2xl font-bold text-zinc-600">
-                          {edition.number}
-                        </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(latestEditions.length > 0 ? latestEditions : Array(3).fill(null)).map((edition, i) => (
+                <div
+                  key={edition?.id ?? i}
+                  className="bg-[#18181b] border border-[#27272a] rounded-lg overflow-hidden flex flex-col"
+                >
+                  {/* Cover */}
+                  <div className="bg-[#27272a] h-[370px] flex items-center justify-center rounded-t-lg">
+                    {edition?.coverImageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={edition.coverImageUrl}
+                        alt={edition.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <p className="font-['Barlow_Condensed'] font-bold text-[#52525b] text-[13px]">
+                        {edition?.number ? `CAPA ${edition.number}` : "CAPA"}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex flex-col gap-2 px-4 pt-3.5 pb-4">
+                    <div className="flex items-center gap-1.5">
+                      <span className="bg-[#27272a] text-[#a1a1aa] text-[9px] font-semibold tracking-[0.5px] px-2 py-[3px] rounded-[2px]">
+                        {edition?.type === "SPECIAL" ? "ESPECIAL" : "REGULAR"}
+                      </span>
+                      {edition?.number && (
+                        <span className="bg-[#ff1f1f] text-white text-[9px] font-semibold px-2 py-[3px] rounded-[2px]">
+                          Nº {edition.number}
+                        </span>
                       )}
                     </div>
-                  )}
-                  <div className="absolute inset-0 bg-zinc-950/0 group-hover:bg-zinc-950/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <span className="text-white text-xs font-semibold bg-[#ff1f1f] px-3 py-1.5 rounded">
-                      Assinar
-                    </span>
+
+                    <p className="font-['Barlow_Condensed'] font-bold text-[#fafafa] text-[17px] leading-snug">
+                      {edition?.title ?? "Revista Magnum"}
+                    </p>
+
+                    <p className="text-[#52525b] text-[12px]">
+                      {edition?.publishedAt
+                        ? `${edition.publishedAt.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}  ·  ${edition.pageCount ? `${edition.pageCount} págs` : ""}`
+                        : "Em breve"}
+                    </p>
+
+                    {i === 0 ? (
+                      <Link
+                        href="/minha-conta/edicoes"
+                        className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[13px] font-semibold h-[38px] flex items-center justify-center rounded mt-1 transition-colors"
+                      >
+                        Ler Edição
+                      </Link>
+                    ) : (
+                      <Link
+                        href="/assine"
+                        className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#a1a1aa] hover:text-white text-[13px] font-semibold h-[38px] flex items-center justify-center rounded mt-1 transition-colors"
+                      >
+                        Assine para Ler
+                      </Link>
+                    )}
                   </div>
                 </div>
-                <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">
-                  {edition.number ? `Nº ${edition.number}` : edition.title}
-                </p>
+              ))}
+            </div>
+          </section>
+
+          {/* Artigos Recentes */}
+          <section>
+            <div className="flex items-center mb-6">
+              <h2 className="font-['Barlow_Condensed'] font-bold text-[#fafafa] text-[30px]">
+                Artigos Recentes
+              </h2>
+              <div className="flex-1" />
+              <Link href="/blog" className="text-[#ff1f1f] text-[13px] font-semibold hover:text-[#ff4444] transition-colors">
+                Ver todos →
               </Link>
-            ))}
-          </div>
-        </section>
-      )}
+            </div>
 
-      {/* Features */}
-      <section className="border-t border-zinc-800 bg-zinc-900/30">
-        <div className="max-w-5xl mx-auto px-6 py-16">
-          <div className="text-center mb-12">
-            <p className="text-xs text-[#ff1f1f] font-semibold uppercase tracking-widest mb-2">
-              Por que assinar
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(latestArticles.length > 0
+                ? latestArticles
+                : [
+                    { id: "1", title: "Glock 17 Gen 5: Análise Completa em Campo", slug: "glock-17", category: { name: "AVALIAÇÕES", slug: "avaliacoes" }, featureImageUrl: null, publishedAt: new Date("2026-04-15"), isExclusive: false, categoryId: "1" },
+                    { id: "2", title: "Guia de Recarga para .308 Winchester", slug: "recarga-308", category: { name: "MUNIÇÕES", slug: "municoes" }, featureImageUrl: null, publishedAt: new Date("2026-04-10"), isExclusive: true, categoryId: "2" },
+                    { id: "3", title: "CAC 2026: Novas regras do SINARM", slug: "cac-2026", category: { name: "LEGISLAÇÃO", slug: "legislacao" }, featureImageUrl: null, publishedAt: new Date("2026-04-05"), isExclusive: false, categoryId: "3" },
+                  ]
+              ).map((article) => (
+                <Link key={article.id} href={`/blog/${article.slug}`} className="group block bg-[#18181b] border border-[#27272a] rounded-lg overflow-hidden hover:border-[#3f3f46] transition-colors">
+                  {/* Image */}
+                  <div className="bg-[#27272a] h-[176px] relative rounded-t-lg overflow-hidden">
+                    {article.featureImageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={article.featureImageUrl} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    ) : null}
+                    {article.isExclusive && (
+                      <div className="absolute top-3 left-3">
+                        <span className="bg-[#ff1f1f] text-white text-[9px] font-semibold px-2 py-1 rounded-[2px] tracking-[0.5px]">
+                          EXCLUSIVO
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex flex-col gap-2 px-3.5 pt-3.5 pb-4">
+                    <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1px] uppercase">
+                      {article.category.name}
+                    </p>
+                    <p className="font-['Barlow_Condensed'] font-bold text-[#fafafa] text-[17px] leading-snug line-clamp-2">
+                      {article.title}
+                    </p>
+                    <p className="text-[#52525b] text-[12px]">
+                      {article.publishedAt
+                        ? article.publishedAt.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })
+                        : ""}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          {/* CTA Banner */}
+          <section className="bg-[#120000] border border-[#3d0000] rounded-lg px-12 h-[180px] flex items-center gap-8">
+            <div className="flex flex-col gap-2.5 flex-1">
+              <p className="font-['Barlow_Condensed'] font-extrabold text-[#fafafa] text-[32px] leading-tight">
+                Acervo completo nas suas mãos
+              </p>
+              <p className="text-[#52525b] text-[15px]">
+                145 edições regulares + 62 especiais. Escolha seu plano.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0 flex-wrap">
+              <Link href="/assine" className="border border-[#3f3f46] hover:border-zinc-500 text-white text-[13px] font-semibold px-4 py-2.5 rounded transition-colors">
+                Trimestral
+              </Link>
+              <Link href="/assine" className="border border-[#3f3f46] hover:border-zinc-500 text-white text-[13px] font-semibold px-4 py-2.5 rounded transition-colors">
+                Semestral
+              </Link>
+              <Link href="/assine" className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[13px] font-semibold px-4 py-2.5 rounded transition-colors">
+                Anual — Melhor custo
+              </Link>
+            </div>
+          </section>
+        </div>
+
+        {/* Sidebar */}
+        <aside className="hidden lg:flex flex-col gap-8 w-[300px] shrink-0">
+          {/* Ad 300×250 */}
+          <div className="flex flex-col items-center gap-1.5">
+            <p className="text-[9px] font-semibold text-[#52525b] tracking-[1.5px] uppercase">
+              Publicidade
             </p>
-            <h2 className="text-2xl font-bold text-white font-['Barlow_Condensed'] tracking-wide">
-              TUDO QUE VOCÊ PRECISA
-            </h2>
+            <div className="bg-[#18181b] border border-[#27272a] rounded w-[300px] h-[250px] flex items-center justify-center">
+              <p className="font-mono text-[#52525b] text-[12px]">300×250</p>
+            </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                icon: (
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                ),
-                title: "Acervo completo",
-                desc: "Acesso a todas as edições publicadas desde a fundação da revista.",
-              },
-              {
-                icon: (
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                ),
-                title: "Leitura online",
-                desc: "Folheie as revistas digitalmente, como se estivesse com o exemplar impresso.",
-              },
-              {
-                icon: (
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                ),
-                title: "Download em PDF",
-                desc: "Baixe as edições em PDF e leia offline quando quiser.",
-              },
-              {
-                icon: (
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                ),
-                title: "Acesso mobile",
-                desc: "Leia em qualquer dispositivo — celular, tablet ou computador.",
-              },
-              {
-                icon: (
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                ),
-                title: "Conteúdo verificado",
-                desc: "Informações técnicas precisas com o rigor editorial de 38 anos.",
-              },
-              {
-                icon: (
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                ),
-                title: "Novas edições",
-                desc: "Acesso imediato a cada nova edição assim que publicada.",
-              },
-            ].map((feature) => (
-              <div
-                key={feature.title}
-                className="flex gap-4 p-5 bg-zinc-900 border border-zinc-800 rounded-lg hover:border-zinc-700 transition-colors"
-              >
-                <div className="flex-shrink-0 w-10 h-10 rounded bg-[#ff1f1f]/10 border border-[#ff1f1f]/20 flex items-center justify-center text-[#ff1f1f]">
-                  {feature.icon}
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-white mb-1">{feature.title}</h3>
-                  <p className="text-xs text-zinc-500 leading-relaxed">{feature.desc}</p>
-                </div>
+          {/* Mais Lidos */}
+          <div className="bg-[#18181b] border border-[#27272a] rounded-lg p-5 flex flex-col gap-3">
+            <p className="font-['Barlow_Condensed'] font-bold text-[#fafafa] text-[18px]">
+              Mais Lidos
+            </p>
+            {mostRead.map((title, i) => (
+              <div key={i} className="flex items-start gap-2.5">
+                <span className="font-['Barlow_Condensed'] font-extrabold text-[#27272a] text-[20px] leading-none shrink-0 w-7">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <p className="text-[#a1a1aa] text-[13px] leading-snug">{title}</p>
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* CTA */}
-      <section className="max-w-5xl mx-auto px-6 py-16 w-full">
-        <div className="bg-gradient-to-br from-zinc-900 to-zinc-900 border border-zinc-800 rounded-xl p-10 text-center relative overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-[#ff1f1f]" />
-          <div className="relative">
-            <p className="text-xs text-[#ff1f1f] font-semibold uppercase tracking-widest mb-3">
-              Comece hoje
+          {/* Ad 300×600 */}
+          <div className="flex flex-col items-center gap-1.5">
+            <p className="text-[9px] font-semibold text-[#52525b] tracking-[1.5px] uppercase">
+              Publicidade
             </p>
-            <h2 className="text-3xl font-bold text-white font-['Barlow_Condensed'] tracking-wide mb-4">
-              ACESSO ILIMITADO AO ACERVO
-            </h2>
-            <p className="text-zinc-400 text-sm max-w-md mx-auto mb-8">
-              Assine agora e tenha acesso imediato a todas as edições da Revista Magnum.
-            </p>
-            <Link
-              href="/assine"
-              className="inline-flex items-center gap-2 bg-[#ff1f1f] hover:bg-[#cc0000] text-white font-bold px-10 py-4 rounded text-sm tracking-wide transition-colors"
-            >
-              Ver planos e assinar
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
+            <div className="bg-[#18181b] border border-[#27272a] rounded w-[300px] h-[600px] flex items-center justify-center">
+              <p className="font-mono text-[#52525b] text-[12px]">300×600</p>
+            </div>
           </div>
-        </div>
-      </section>
+        </aside>
+      </div>
 
       <Footer />
     </div>
