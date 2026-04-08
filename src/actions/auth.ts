@@ -3,7 +3,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
-export async function login(formData: FormData) {
+export type AuthState = {
+  error?: string;
+  success?: boolean;
+  message?: string;
+};
+
+export async function login(
+  _prevState: AuthState,
+  formData: FormData
+): Promise<AuthState> {
   const supabase = await createClient();
 
   const email = formData.get("email") as string;
@@ -18,7 +27,10 @@ export async function login(formData: FormData) {
   redirect("/minha-conta");
 }
 
-export async function signup(formData: FormData) {
+export async function signup(
+  _prevState: AuthState,
+  formData: FormData
+): Promise<AuthState> {
   const supabase = await createClient();
 
   const email = formData.get("email") as string;
@@ -47,7 +59,10 @@ export async function logout() {
   redirect("/");
 }
 
-export async function forgotPassword(formData: FormData) {
+export async function forgotPassword(
+  _prevState: AuthState,
+  formData: FormData
+): Promise<AuthState> {
   const supabase = await createClient();
 
   const email = formData.get("email") as string;
@@ -60,10 +75,13 @@ export async function forgotPassword(formData: FormData) {
     return { error: error.message };
   }
 
-  return { success: true, message: "E-mail de recuperação enviado." };
+  return { success: true, message: "E-mail de recuperação enviado. Verifique sua caixa de entrada." };
 }
 
-export async function updatePassword(formData: FormData) {
+export async function updatePassword(
+  _prevState: AuthState,
+  formData: FormData
+): Promise<AuthState> {
   const supabase = await createClient();
 
   const password = formData.get("password") as string;

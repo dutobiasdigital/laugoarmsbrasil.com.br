@@ -1,11 +1,12 @@
+"use client";
+
+import { useActionState } from "react";
 import { login } from "@/actions/auth";
 import Link from "next/link";
 
-export default function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
+export default function LoginPage() {
+  const [state, formAction, pending] = useActionState(login, {});
+
   return (
     <div className="min-h-screen bg-zinc-950 flex">
       {/* Brand panel */}
@@ -28,7 +29,6 @@ export default function LoginPage({
       {/* Form panel */}
       <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8">
         <div className="w-full max-w-md">
-          {/* Logo mobile */}
           <div className="lg:hidden text-center mb-10">
             <div className="text-2xl font-bold tracking-widest text-white font-['Barlow_Condensed']">
               REVISTA MAGNUM
@@ -42,7 +42,13 @@ export default function LoginPage({
             Entre na sua conta para acessar o acervo completo
           </p>
 
-          <form action={login} className="space-y-4">
+          {state?.error && (
+            <div className="bg-red-950/50 border border-red-800 text-red-300 text-sm px-4 py-3 rounded mb-4">
+              {state.error}
+            </div>
+          )}
+
+          <form action={formAction} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-zinc-300 mb-1.5">
                 E-mail
@@ -80,9 +86,10 @@ export default function LoginPage({
 
             <button
               type="submit"
-              className="w-full bg-[#ff1f1f] hover:bg-[#cc0000] text-white font-semibold py-2.5 px-6 rounded text-sm transition-colors"
+              disabled={pending}
+              className="w-full bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white font-semibold py-2.5 px-6 rounded text-sm transition-colors"
             >
-              Entrar
+              {pending ? "Entrando..." : "Entrar"}
             </button>
           </form>
 
