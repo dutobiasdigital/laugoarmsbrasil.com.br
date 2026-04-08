@@ -19,10 +19,16 @@ function formatCurrency(cents: number) {
 }
 
 export default async function AssinePage() {
-  const plans = await prisma.subscriptionPlan.findMany({
-    where: { active: true },
-    orderBy: { priceInCents: "asc" },
-  });
+  let plans: { id: string; name: string; slug: string; description: string | null; priceInCents: number; intervalMonths: number }[] = [];
+
+  try {
+    plans = await prisma.subscriptionPlan.findMany({
+      where: { active: true },
+      orderBy: { priceInCents: "asc" },
+    });
+  } catch {
+    // DB unavailable — uses fallback plans below
+  }
 
   // Fallback plans se não tiver no DB ainda
   const displayPlans =

@@ -11,21 +11,27 @@ export const metadata = {
 };
 
 export default async function EdicoesPublicaPage() {
-  const editions = await prisma.edition.findMany({
-    where: { isPublished: true },
-    orderBy: { publishedAt: "desc" },
-    select: {
-      id: true,
-      title: true,
-      number: true,
-      slug: true,
-      coverImageUrl: true,
-      publishedAt: true,
-      type: true,
-      pageCount: true,
-      editorial: true,
-    },
-  });
+  let editions: { id: string; title: string; number: number | null; slug: string; coverImageUrl: string | null; publishedAt: Date | null; type: string; pageCount: number | null; editorial: string | null }[] = [];
+
+  try {
+    editions = await prisma.edition.findMany({
+      where: { isPublished: true },
+      orderBy: { publishedAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        number: true,
+        slug: true,
+        coverImageUrl: true,
+        publishedAt: true,
+        type: true,
+        pageCount: true,
+        editorial: true,
+      },
+    });
+  } catch {
+    // DB unavailable
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col">

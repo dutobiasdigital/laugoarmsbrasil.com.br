@@ -12,23 +12,30 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  const [latestEditions, totalEditions] = await Promise.all([
-    prisma.edition.findMany({
-      where: { isPublished: true },
-      orderBy: { publishedAt: "desc" },
-      take: 6,
-      select: {
-        id: true,
-        title: true,
-        number: true,
-        slug: true,
-        coverImageUrl: true,
-        publishedAt: true,
-        type: true,
-      },
-    }),
-    prisma.edition.count({ where: { isPublished: true } }),
-  ]);
+  let latestEditions: { id: string; title: string; number: number | null; slug: string; coverImageUrl: string | null; publishedAt: Date | null; type: string }[] = [];
+  let totalEditions = 0;
+
+  try {
+    [latestEditions, totalEditions] = await Promise.all([
+      prisma.edition.findMany({
+        where: { isPublished: true },
+        orderBy: { publishedAt: "desc" },
+        take: 6,
+        select: {
+          id: true,
+          title: true,
+          number: true,
+          slug: true,
+          coverImageUrl: true,
+          publishedAt: true,
+          type: true,
+        },
+      }),
+      prisma.edition.count({ where: { isPublished: true } }),
+    ]);
+  } catch {
+    // DB unavailable — renders page with empty data
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col">
