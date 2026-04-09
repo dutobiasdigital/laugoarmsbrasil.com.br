@@ -20,14 +20,15 @@ export default async function BlogPage({
   const { categoria, pagina } = await searchParams;
   const page = Math.max(1, parseInt(pagina ?? "1", 10));
 
-  let featured: {
+  type ArticleItem = {
     id: string; title: string; slug: string; excerpt: string | null;
     featureImageUrl: string | null; publishedAt: Date | null;
     isExclusive: boolean; authorName: string;
     category: { name: string };
-  } | null = null;
+  };
 
-  let articles: typeof featured[] = [];
+  let featured: ArticleItem | null = null;
+  let articles: ArticleItem[] = [];
   let total = 0;
   let categories: string[] = [];
 
