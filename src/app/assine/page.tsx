@@ -7,142 +7,205 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Assine — Revista Magnum",
-  description:
-    "Assine a Revista Magnum e acesse o maior acervo de publicações especializadas em armas do Brasil.",
+  description: "Acesso completo a 207 edições. Planos a partir de R$ 29,90/trimestre.",
 };
 
 function formatCurrency(cents: number) {
-  return (cents / 100).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
+  return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+const FALLBACK_PLANS = [
+  {
+    id: "trimestral", name: "Trimestral", slug: "trimestral",
+    description: "Cobrança a cada 3 meses",
+    priceInCents: 2990, intervalMonths: 3,
+    highlight: false, badge: null,
+    features: [
+      "Acesso ao acervo completo",
+      "207 edições disponíveis",
+      "Leitura em qualquer dispositivo",
+      "Suporte padrão",
+    ],
+  },
+  {
+    id: "semestral", name: "Semestral", slug: "semestral",
+    description: "Cobrança a cada 6 meses",
+    priceInCents: 5490, intervalMonths: 6,
+    highlight: true, badge: "MAIS POPULAR",
+    savings: "Economize 8% vs trimestral",
+    features: [
+      "Acesso ao acervo completo",
+      "207 edições disponíveis",
+      "Leitura em qualquer dispositivo",
+      "Suporte prioritário",
+      "Economize 8% vs trimestral",
+    ],
+  },
+  {
+    id: "anual", name: "Anual", slug: "anual",
+    description: "Cobrança anual",
+    priceInCents: 9990, intervalMonths: 12,
+    highlight: false, badge: "MELHOR VALOR",
+    savings: "Economize 17% vs trimestral",
+    features: [
+      "Acesso ao acervo completo",
+      "207 edições disponíveis",
+      "Leitura em qualquer dispositivo",
+      "Suporte VIP",
+      "Economize 17% vs trimestral",
+      "Acesso antecipado a edições",
+    ],
+  },
+];
+
+const FAQS = [
+  {
+    q: "Quando posso cancelar?",
+    a: "Você pode cancelar a qualquer momento. O acesso permanece ativo até o fim do período pago.",
+  },
+  {
+    q: "Quais formas de pagamento?",
+    a: "Aceitamos cartão de crédito, PIX e boleto bancário via Mercado Pago.",
+  },
+  {
+    q: "Posso acessar edições antigas?",
+    a: "Sim! Com qualquer plano você acessa as 145 edições regulares e 62 edições especiais do acervo.",
+  },
+  {
+    q: "A assinatura renova automaticamente?",
+    a: "Sim. Você será notificado por e-mail 3 dias antes da renovação. Cancele quando quiser.",
+  },
+];
+
+const TESTIMONIALS = [
+  { quote: "Melhor investimento para quem é apaixonado por armas. Acervo completo e incrível.", author: "Carlos M." },
+  { quote: "Uso para pesquisa de legislação. Fundamental para o meu trabalho como instrutor CAC.", author: "Roberto S." },
+  { quote: "Assino há 2 anos. As edições especiais valem muito a pena. Recomendo!", author: "Ana P." },
+];
+
 export default async function AssinePage() {
-  let plans: { id: string; name: string; slug: string; description: string | null; priceInCents: number; intervalMonths: number }[] = [];
+  let dbPlans: { id: string; name: string; slug: string; description: string | null; priceInCents: number; intervalMonths: number }[] = [];
 
   try {
-    plans = await prisma.subscriptionPlan.findMany({
+    dbPlans = await prisma.subscriptionPlan.findMany({
       where: { active: true },
       orderBy: { priceInCents: "asc" },
     });
   } catch {
-    // DB unavailable — uses fallback plans below
+    // DB unavailable
   }
 
-  // Fallback plans se não tiver no DB ainda
-  const displayPlans =
-    plans.length > 0
-      ? plans.map((p) => ({
-          id: p.id,
-          name: p.name,
-          slug: p.slug,
-          description: p.description,
-          priceInCents: p.priceInCents,
-          intervalMonths: p.intervalMonths,
-          highlight: p.intervalMonths >= 12,
-        }))
-      : [
-          {
-            id: "mensal",
-            name: "Mensal",
-            slug: "mensal",
-            description: "Acesso completo ao acervo",
-            priceInCents: 2990,
-            intervalMonths: 1,
-            highlight: false,
-          },
-          {
-            id: "anual",
-            name: "Anual",
-            slug: "anual",
-            description: "Melhor custo-benefício — 2 meses grátis",
-            priceInCents: 29900,
-            intervalMonths: 12,
-            highlight: true,
-          },
-        ];
-
-  const features = [
-    "Acesso a todas as edições publicadas",
-    "Leitura online com virador de páginas",
-    "Download em PDF",
-    "Novas edições assim que publicadas",
-    "Acesso em todos os dispositivos",
-    "Cancele quando quiser",
-  ];
+  const plans = dbPlans.length > 0
+    ? dbPlans.map((p) => ({
+        ...p,
+        highlight: p.intervalMonths === 6,
+        badge: p.intervalMonths === 6 ? "MAIS POPULAR" : p.intervalMonths === 12 ? "MELHOR VALOR" : null,
+        savings: p.intervalMonths === 6 ? "Economize 8% vs trimestral" : p.intervalMonths === 12 ? "Economize 17% vs trimestral" : undefined,
+        features: [
+          "Acesso ao acervo completo",
+          "207 edições disponíveis",
+          "Leitura em qualquer dispositivo",
+          p.intervalMonths >= 12 ? "Suporte VIP" : p.intervalMonths >= 6 ? "Suporte prioritário" : "Suporte padrão",
+          ...(p.intervalMonths >= 12 ? ["Acesso antecipado a edições"] : []),
+        ],
+      }))
+    : FALLBACK_PLANS;
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen bg-[#09090b] flex flex-col">
       <Header />
 
-      <main className="flex-1 pt-24 pb-16">
-        <div className="max-w-4xl mx-auto px-6">
-          {/* Header */}
-          <div className="text-center mb-14">
-            <p className="text-xs text-[#ff1f1f] font-semibold uppercase tracking-widest mb-3">
-              Planos
-            </p>
-            <h1 className="text-4xl font-bold text-white font-['Barlow_Condensed'] tracking-wide mb-4">
-              ACESSO ILIMITADO AO ACERVO
-            </h1>
-            <p className="text-zinc-400 text-sm max-w-lg mx-auto">
-              Assine e acesse imediatamente todas as edições da Revista Magnum —
-              o maior acervo especializado em armas do Brasil.
-            </p>
+      <main className="flex-1 pt-16">
+        {/* Red accent bar */}
+        <div className="h-[4px] bg-[#ff1f1f] w-full" />
+
+        {/* Hero */}
+        <div className="bg-[#18181b] py-16 flex flex-col items-center px-5">
+          <div className="flex items-center gap-2 bg-[#27272a] border border-[#ff1f1f]/40 px-3.5 py-1.5 rounded-full mb-6">
+            <span className="text-[#ff1f1f] text-[10px] font-semibold tracking-[1px] uppercase">
+              ⭐ Mais de 20 anos
+            </span>
+          </div>
+          <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[40px] lg:text-[56px] leading-[44px] lg:leading-[60px] text-center mb-4">
+            Assine a Revista Magnum
+          </h1>
+          <p className="text-[#d4d4da] text-[16px] lg:text-[18px] text-center max-w-[760px]">
+            Acesso completo a 207 edições · Novidades mensais · Leia em qualquer dispositivo
+          </p>
+        </div>
+
+        {/* Trust bar */}
+        <div className="bg-[#27272a] border-y border-[#27272a]">
+          <div className="flex flex-wrap items-center justify-center gap-6 lg:gap-10 px-5 py-4">
+            {[
+              "✓  Cancele quando quiser",
+              "✓  Sem fidelidade obrigatória",
+              "✓  Acesso imediato após pagamento",
+              "✓  Suporte via WhatsApp",
+            ].map((item) => (
+              <span key={item} className="text-[#d4d4da] text-[14px]">{item}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Plans */}
+        <div className="px-5 lg:px-20 pt-14 pb-16">
+          <div className="flex flex-col lg:flex-row items-end gap-4 mb-10">
+            <div>
+              <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[40px] lg:text-[44px] leading-none mb-2">
+                Escolha seu plano
+              </h2>
+              <p className="text-[#a1a1aa] text-[16px]">
+                Todos os planos incluem acesso ao acervo completo
+              </p>
+            </div>
           </div>
 
-          {/* Plans */}
-          <div className={`grid gap-6 mb-14 ${displayPlans.length === 1 ? "max-w-sm mx-auto" : "sm:grid-cols-2"}`}>
-            {displayPlans.map((plan) => (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            {plans.map((plan) => (
               <div
                 key={plan.id}
-                className={`relative rounded-xl border p-8 flex flex-col ${
+                className={`relative flex flex-col rounded-xl p-7 ${
                   plan.highlight
-                    ? "bg-zinc-900 border-[#ff1f1f]/40"
-                    : "bg-zinc-900 border-zinc-800"
+                    ? "bg-[#1f0a0a] border-2 border-[#ff1f1f]"
+                    : "bg-[#18181b] border border-[#27272a]"
                 }`}
               >
-                {plan.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-[#ff1f1f] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-                      Mais popular
+                {plan.badge && (
+                  <div className="absolute -top-3 left-6">
+                    <span className={`text-[10px] font-semibold px-3 py-1 rounded-full uppercase tracking-[0.5px] ${
+                      plan.highlight ? "bg-[#ff1f1f] text-white" : "bg-[#27272a] text-[#a1a1aa]"
+                    }`}>
+                      {plan.badge}
                     </span>
                   </div>
                 )}
 
-                <div className="mb-6">
-                  <h2 className="text-lg font-bold text-white mb-1">{plan.name}</h2>
-                  {plan.description && (
-                    <p className="text-sm text-zinc-500">{plan.description}</p>
-                  )}
+                <div className="mb-5">
+                  <h3 className={`text-[20px] font-semibold mb-0.5 ${plan.highlight ? "text-white" : "text-[#d4d4da]"}`}>
+                    {plan.name}
+                  </h3>
+                  <p className="text-[#52525b] text-[12px]">{plan.description}</p>
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-5">
                   <div className="flex items-end gap-1">
-                    <span className="text-4xl font-bold text-white">
+                    <span className={`font-['Barlow_Condensed'] font-bold text-[52px] leading-none ${plan.highlight ? "text-[#ff1f1f]" : "text-white"}`}>
                       {formatCurrency(plan.priceInCents)}
                     </span>
-                    <span className="text-zinc-500 text-sm mb-1">
-                      /{plan.intervalMonths === 1 ? "mês" : `${plan.intervalMonths} meses`}
+                    <span className="text-[#a1a1aa] text-[15px] mb-1.5">
+                      /{plan.intervalMonths === 1 ? "mês" : plan.intervalMonths === 3 ? "trimestre" : plan.intervalMonths === 6 ? "semestre" : "ano"}
                     </span>
                   </div>
-                  {plan.intervalMonths > 1 && (
-                    <p className="text-xs text-zinc-500 mt-1">
-                      {formatCurrency(Math.round(plan.priceInCents / plan.intervalMonths))}/mês
-                    </p>
-                  )}
+                  <p className="text-[#22c55e] text-[13px] mt-1">
+                    {formatCurrency(Math.round(plan.priceInCents / plan.intervalMonths))}/mês
+                  </p>
                 </div>
 
-                <ul className="space-y-2.5 mb-8 flex-1">
-                  {features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-zinc-400">
-                      <svg
-                        className="w-4 h-4 text-[#ff1f1f] flex-shrink-0 mt-0.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
+                <ul className="flex flex-col gap-2.5 mb-7 flex-1">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-[14px] text-[#d4d4da]">
+                      <svg className="w-4 h-4 text-[#22c55e] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       {f}
@@ -151,39 +214,51 @@ export default async function AssinePage() {
                 </ul>
 
                 <Link
-                  href={`/auth/cadastro?plano=${plan.slug}`}
-                  className={`w-full flex items-center justify-center gap-2 font-bold py-3.5 px-6 rounded text-sm transition-colors ${
+                  href={`/checkout?plano=${plan.slug}`}
+                  className={`w-full h-[48px] flex items-center justify-center rounded-[8px] text-[15px] font-semibold transition-colors ${
                     plan.highlight
                       ? "bg-[#ff1f1f] hover:bg-[#cc0000] text-white"
-                      : "bg-zinc-800 hover:bg-zinc-700 text-white"
+                      : "bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da]"
                   }`}
                 >
-                  Assinar {plan.name}
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  {plan.highlight ? "Assinar agora →" : "Escolher plano"}
                 </Link>
               </div>
             ))}
           </div>
+        </div>
 
-          {/* Trust */}
-          <div className="text-center border-t border-zinc-800 pt-10">
-            <p className="text-xs text-zinc-600 mb-6">
-              Pagamento seguro via Mercado Pago · Cancele quando quiser · Sem fidelidade
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-8">
-              {[
-                { icon: "🔒", label: "Pagamento seguro" },
-                { icon: "✓", label: "Sem fidelidade" },
-                { icon: "↩", label: "Cancele quando quiser" },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-2">
-                  <span className="text-zinc-600">{item.icon}</span>
-                  <span className="text-xs text-zinc-600">{item.label}</span>
+        {/* FAQ */}
+        <div className="px-5 lg:px-20 pb-16">
+          <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[40px] mb-8 text-center">
+            Perguntas frequentes
+          </h2>
+          <div className="flex flex-col gap-3 max-w-[1040px] mx-auto">
+            {FAQS.map((faq) => (
+              <div key={faq.q} className="bg-[#18181b] border border-[#27272a] rounded-[8px] px-6 py-5 flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-white text-[16px] font-semibold mb-1.5">{faq.q}</p>
+                  <p className="text-[#a1a1aa] text-[14px] leading-[20px]">{faq.a}</p>
                 </div>
-              ))}
-            </div>
+                <span className="text-[#52525b] text-[18px] shrink-0">∨</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Testimonials */}
+        <div className="px-5 lg:px-20 pb-20">
+          <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[40px] mb-8">
+            O que nossos leitores dizem
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            {TESTIMONIALS.map((t) => (
+              <div key={t.author} className="bg-[#18181b] border border-[#27272a] rounded-[10px] p-5">
+                <p className="text-[#ff1f1f] text-[14px] mb-3">★★★★★</p>
+                <p className="text-[#d4d4da] text-[14px] leading-[22px] mb-3">"{t.quote}"</p>
+                <p className="text-[#52525b] text-[13px] font-medium">— {t.author}</p>
+              </div>
+            ))}
           </div>
         </div>
       </main>

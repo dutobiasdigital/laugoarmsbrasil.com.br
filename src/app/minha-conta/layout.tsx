@@ -19,17 +19,38 @@ export default async function MinhaConta({
 
   if (!user) redirect("/auth/login");
 
-  const profile = await prisma.user.findUnique({
-    where: { authId: user.id },
-    select: { id: true, name: true, email: true, role: true },
-  });
+  let profile: { id: string; name: string; email: string; role: string; planName?: string | null; isActive?: boolean } | null = null;
+
+  try {
+    const raw = await prisma.user.findUnique({
+      where: { authId: user.id },
+      select: {
+        id: true, name: true, email: true, role: true,
+        subscription: { select: { status: true, plan: { select: { name: true } } } },
+      },
+    });
+    if (raw) {
+      profile = {
+        id: raw.id,
+        name: raw.name,
+        email: raw.email,
+        role: raw.role,
+        planName: raw.subscription?.plan?.name ?? null,
+        isActive: raw.subscription?.status === "ACTIVE",
+      };
+    }
+  } catch {
+    // DB unavailable
+  }
 
   if (!profile) redirect("/auth/login");
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex">
+    <div className="min-h-screen bg-[#09090b] flex">
       <SidebarNav user={profile} />
-      <main className="flex-1 lg:ml-64 p-6 lg:p-8">{children}</main>
+      <main className="flex-1 lg:ml-[240px] pt-14 lg:pt-0 pb-20 lg:pb-0 px-5 lg:px-8 py-7">
+        {children}
+      </main>
     </div>
   );
 }
