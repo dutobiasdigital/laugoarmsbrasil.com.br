@@ -3,49 +3,13 @@
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { createAd } from "../actions";
 
 const inputCls =
   "bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#52525b] focus:outline-none focus:border-[#ff1f1f] w-full";
 const labelCls = "block text-[#a1a1aa] text-[12px] font-semibold mb-1.5";
 const selectCls =
   "bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full";
-
-async function createAd(_: unknown, formData: FormData) {
-  "use server";
-  const { revalidatePath } = await import("next/cache");
-  const prisma = (await import("@/lib/prisma")).default;
-
-  try {
-    await prisma.advertisement.create({
-      data: {
-        name: formData.get("name") as string,
-        advertiser: formData.get("advertiser") as string,
-        imageUrl: formData.get("imageUrl") as string,
-        targetUrl: formData.get("targetUrl") as string,
-        position: formData.get("position") as
-          | "HOME_TOP"
-          | "HOME_SIDEBAR"
-          | "ARTICLE_INLINE"
-          | "ARTICLE_SIDEBAR"
-          | "EDITIONS_TOP",
-        active: formData.get("active") === "on",
-        startsAt: formData.get("startsAt")
-          ? new Date(formData.get("startsAt") as string)
-          : null,
-        endsAt: formData.get("endsAt")
-          ? new Date(formData.get("endsAt") as string)
-          : null,
-        maxImpressions: formData.get("maxImpressions")
-          ? Number(formData.get("maxImpressions"))
-          : null,
-      },
-    });
-    revalidatePath("/admin/anuncios");
-    return { success: true };
-  } catch (e: unknown) {
-    return { error: (e as Error).message || "Erro ao criar anúncio." };
-  }
-}
 
 export default function NovoAnuncioPage() {
   const router = useRouter();
@@ -92,27 +56,51 @@ export default function NovoAnuncioPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
           <div>
             <label className={labelCls}>Nome do anúncio *</label>
-            <input name="name" required placeholder="Ex: Banner Loja ABC — Nov 2025" className={inputCls} />
+            <input
+              name="name"
+              required
+              placeholder="Ex: Banner Loja ABC — Nov 2025"
+              className={inputCls}
+            />
           </div>
           <div>
             <label className={labelCls}>Anunciante *</label>
-            <input name="advertiser" required placeholder="Nome da empresa" className={inputCls} />
+            <input
+              name="advertiser"
+              required
+              placeholder="Nome da empresa"
+              className={inputCls}
+            />
           </div>
 
           <div className="lg:col-span-2">
             <label className={labelCls}>URL da Imagem do Banner *</label>
-            <input name="imageUrl" required type="url" placeholder="https://..." className={inputCls} />
+            <input
+              name="imageUrl"
+              required
+              type="url"
+              placeholder="https://..."
+              className={inputCls}
+            />
           </div>
 
           <div className="lg:col-span-2">
             <label className={labelCls}>URL de Destino (clique) *</label>
-            <input name="targetUrl" required type="url" placeholder="https://..." className={inputCls} />
+            <input
+              name="targetUrl"
+              required
+              type="url"
+              placeholder="https://..."
+              className={inputCls}
+            />
           </div>
 
           <div>
             <label className={labelCls}>Posição *</label>
             <select name="position" required defaultValue="" className={selectCls}>
-              <option value="" disabled>Selecione uma posição</option>
+              <option value="" disabled>
+                Selecione uma posição
+              </option>
               <option value="HOME_TOP">Home — Topo</option>
               <option value="HOME_SIDEBAR">Home — Sidebar</option>
               <option value="ARTICLE_INLINE">Artigo — Inline</option>
@@ -123,7 +111,12 @@ export default function NovoAnuncioPage() {
 
           <div>
             <label className={labelCls}>Máximo de Impressões</label>
-            <input name="maxImpressions" type="number" placeholder="Deixe em branco para ilimitado" className={inputCls} />
+            <input
+              name="maxImpressions"
+              type="number"
+              placeholder="Deixe em branco para ilimitado"
+              className={inputCls}
+            />
           </div>
 
           <div>
