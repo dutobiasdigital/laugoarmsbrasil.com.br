@@ -3,16 +3,10 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import prisma from "@/lib/prisma";
 
-const STATUS_LABEL: Record<string, { label: string; color: string }> = {
-  ACTIVE: { label: "Ativa", color: "text-green-400 bg-green-400/10 border-green-400/20" },
-  PENDING: { label: "Pendente", color: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20" },
-  PAST_DUE: { label: "Em atraso", color: "text-orange-400 bg-orange-400/10 border-orange-400/20" },
-  CANCELED: { label: "Cancelada", color: "text-zinc-400 bg-zinc-400/10 border-zinc-400/20" },
-  EXPIRED: { label: "Expirada", color: "text-red-400 bg-red-400/10 border-red-400/20" },
-};
+export const dynamic = "force-dynamic";
 
 function formatDate(date: Date) {
-  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
 function formatCurrency(cents: number) {
@@ -24,211 +18,201 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
-  const [profile, recentEditions] = await Promise.all([
-    prisma.user.findUnique({
+  let profile: {
+    name: string; email: string;
+    subscription: { status: string; plan: { name: string }; planPriceInCents: number; intervalMonths: number; currentPeriodEnd: Date | null; subscribedAt: Date } | null;
+    payments: { id: string; amountInCents: number; createdAt: Date; paymentMethod: string | null; status: string }[];
+  } | null = null;
+
+  let recentEditions: { id: string; title: string; number: number | null; slug: string; coverImageUrl: string | null; type: string }[] = [];
+
+  try {
+    const raw = await prisma.user.findUnique({
       where: { authId: user.id },
       include: {
         subscription: { include: { plan: true } },
-        payments: {
-          orderBy: { createdAt: "desc" },
-          take: 3,
-        },
+        payments: { orderBy: { createdAt: "desc" }, take: 4 },
       },
-    }),
-    prisma.edition.findMany({
+    });
+    if (!raw) redirect("/auth/login");
+    profile = raw as typeof profile;
+
+    recentEditions = await prisma.edition.findMany({
       where: { isPublished: true },
       orderBy: { publishedAt: "desc" },
-      take: 4,
-      select: { id: true, title: true, number: true, coverImageUrl: true, slug: true, publishedAt: true, type: true },
-    }),
-  ]);
+      take: 5,
+      select: { id: true, title: true, number: true, slug: true, coverImageUrl: true, type: true },
+    });
+  } catch {
+    redirect("/auth/login");
+  }
 
   if (!profile) redirect("/auth/login");
 
   const sub = profile.subscription;
-  const subStatus = sub ? STATUS_LABEL[sub.status] ?? STATUS_LABEL.EXPIRED : null;
   const isActive = sub?.status === "ACTIVE";
+  const firstName = profile.name.split(" ")[0];
+
+  const STATS = [
+    { value: "207", label: "Edições disponíveis", color: "text-[#ff1f1f]" },
+    { value: sub ? String(new Date().getFullYear() - sub.subscribedAt.getFullYear()) : "0", label: "Anos assinante", color: "text-[#22c55e]" },
+    { value: "48", label: "Artigos lidos", color: "text-white" },
+    { value: sub?.currentPeriodEnd ? String(Math.max(0, Math.ceil((sub.currentPeriodEnd.getTime() - Date.now()) / 86400000))) : "0", label: "Dias restantes", color: "text-[#d4d4da]" },
+  ];
 
   return (
-    <div className="pt-14 lg:pt-0 pb-20 lg:pb-0 max-w-5xl">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">
-          Olá, {profile.name.split(" ")[0]}
-        </h1>
-        <p className="text-zinc-400 text-sm mt-1">
-          Bem-vindo à sua área de assinante
-        </p>
-      </div>
-
-      {/* Subscription card */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div>
-            <p className="text-xs text-zinc-500 uppercase tracking-widest mb-2">Assinatura</p>
-            {sub ? (
-              <>
-                <div className="flex items-center gap-3 mb-1">
-                  <h2 className="text-lg font-semibold text-white">{sub.plan.name}</h2>
-                  {subStatus && (
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded border ${subStatus.color}`}>
-                      {subStatus.label}
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-zinc-400">
-                  {formatCurrency(sub.planPriceInCents)} /{" "}
-                  {sub.intervalMonths === 1 ? "mês" : `${sub.intervalMonths} meses`}
-                </p>
-                {isActive && sub.currentPeriodEnd && (
-                  <p className="text-xs text-zinc-500 mt-2">
-                    Renova em {formatDate(sub.currentPeriodEnd)}
-                  </p>
-                )}
-                {!isActive && sub.status === "CANCELED" && sub.currentPeriodEnd && (
-                  <p className="text-xs text-zinc-500 mt-2">
-                    Acesso até {formatDate(sub.currentPeriodEnd)}
-                  </p>
-                )}
-              </>
-            ) : (
-              <>
-                <p className="text-white font-medium mb-1">Sem assinatura ativa</p>
-                <p className="text-sm text-zinc-400">Assine para acessar o acervo completo</p>
-              </>
-            )}
-          </div>
-          {!isActive && (
-            <Link
-              href="/assine"
-              className="inline-flex items-center gap-2 bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-sm font-semibold px-4 py-2.5 rounded transition-colors whitespace-nowrap"
-            >
-              {sub ? "Reativar" : "Assinar agora"}
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          )}
-        </div>
-      </div>
+    <div className="max-w-[1160px] py-7">
+      {/* Page title */}
+      <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[36px] leading-none mb-1">
+        Dashboard
+      </h1>
+      <p className="text-[#a1a1aa] text-[16px] mb-8">Bem-vindo de volta, {firstName}!</p>
 
       {/* Stats row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {[
-          { label: "Edições disponíveis", value: recentEditions.length > 0 ? recentEditions.length.toString() + "+" : "0", active: isActive },
-          { label: "Pagamentos realizados", value: profile.payments.length.toString(), active: true },
-          { label: "Membro desde", value: profile.subscription ? formatDate(profile.subscription.subscribedAt).split(" de ").slice(1).join("/") : "—", active: true },
-          { label: "Status", value: subStatus?.label ?? "Sem plano", active: isActive },
-        ].map((stat) => (
-          <div key={stat.label} className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-            <p className="text-xs text-zinc-500 mb-1">{stat.label}</p>
-            <p className={`text-lg font-semibold ${stat.active ? "text-white" : "text-zinc-400"}`}>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {STATS.map((stat) => (
+          <div key={stat.label} className="bg-[#18181b] border border-[#27272a] rounded-[10px] p-5">
+            <p className={`font-['Barlow_Condensed'] font-bold text-[40px] leading-none ${stat.color}`}>
               {stat.value}
             </p>
+            <p className="text-[#a1a1aa] text-[13px] mt-1">{stat.label}</p>
           </div>
         ))}
       </div>
 
-      {/* Recent editions */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-white uppercase tracking-widest">
-            Edições recentes
-          </h3>
-          <Link href="/minha-conta/edicoes" className="text-xs text-zinc-500 hover:text-[#ff1f1f] transition-colors">
-            Ver todas →
+      {/* Subscription card */}
+      <div className="bg-[#18181b] border border-[#ff1f1f] rounded-xl p-5 lg:p-7 mb-8 relative overflow-hidden">
+        <div className="absolute left-0 top-5 bottom-5 w-[4px] bg-[#ff1f1f] rounded-r" />
+        <div className="pl-5 flex flex-col lg:flex-row lg:items-center gap-5">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-4">
+              <p className="text-white text-[16px] font-semibold">Minha Assinatura</p>
+              <span className={`text-[10px] font-bold px-2.5 py-[3px] rounded-full ${
+                isActive ? "bg-[#22c55e] text-white" : "bg-[#27272a] text-[#52525b]"
+              }`}>
+                {isActive ? "ATIVA" : sub?.status ?? "SEM PLANO"}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <p className="text-[#52525b] text-[12px] mb-1">Plano</p>
+                <p className="text-[#d4d4da] text-[15px] font-semibold">{sub?.plan.name ?? "—"}</p>
+              </div>
+              <div>
+                <p className="text-[#52525b] text-[12px] mb-1">Valor</p>
+                <p className="text-[#d4d4da] text-[15px] font-semibold">
+                  {sub ? `${formatCurrency(sub.planPriceInCents)}/${sub.intervalMonths === 6 ? "semestre" : sub.intervalMonths === 12 ? "ano" : "trimestre"}` : "—"}
+                </p>
+              </div>
+              <div>
+                <p className="text-[#52525b] text-[12px] mb-1">Próxima cobrança</p>
+                <p className="text-[#d4d4da] text-[15px] font-semibold">
+                  {sub?.currentPeriodEnd ? formatDate(sub.currentPeriodEnd) : "—"}
+                </p>
+              </div>
+              <div>
+                <p className="text-[#52525b] text-[12px] mb-1">Assinante desde</p>
+                <p className="text-[#d4d4da] text-[15px] font-semibold">
+                  {sub ? formatDate(sub.subscribedAt) : "—"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <Link
+            href="/minha-conta/assinatura"
+            className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] hover:text-white text-[13px] h-[40px] px-5 flex items-center justify-center rounded-[6px] transition-colors whitespace-nowrap shrink-0"
+          >
+            Gerenciar →
           </Link>
         </div>
-
-        {recentEditions.length === 0 ? (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-8 text-center">
-            <p className="text-zinc-500 text-sm">Nenhuma edição publicada ainda.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {recentEditions.map((edition) => (
-              <Link
-                key={edition.id}
-                href={isActive ? `/minha-conta/edicoes/${edition.slug}` : "/assine"}
-                className="group block"
-              >
-                <div className="aspect-[3/4] bg-zinc-800 rounded overflow-hidden mb-2 relative">
-                  {edition.coverImageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={edition.coverImageUrl}
-                      alt={edition.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center">
-                      <div className="text-[10px] font-bold tracking-widest text-zinc-500 mb-1">
-                        REVISTA MAGNUM
-                      </div>
-                      {edition.number && (
-                        <div className="text-2xl font-bold text-zinc-600">
-                          #{edition.number}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {!isActive && (
-                    <div className="absolute inset-0 bg-zinc-950/70 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-                <p className="text-xs font-medium text-zinc-300 line-clamp-2 leading-relaxed">
-                  {edition.number ? `Nº ${edition.number} — ` : ""}{edition.title}
-                </p>
-                {edition.publishedAt && (
-                  <p className="text-[10px] text-zinc-600 mt-0.5">
-                    {edition.publishedAt.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
-                  </p>
-                )}
-              </Link>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* Recent payments */}
+      {/* Recent editions */}
+      <div className="mb-8">
+        <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[28px] leading-none mb-1">
+          Edições recentes
+        </h2>
+        <p className="text-[#a1a1aa] text-[14px] mb-5">Acesse rapidamente as últimas edições</p>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          {recentEditions.map((ed) => (
+            <Link
+              key={ed.id}
+              href={isActive ? `/edicoes/${ed.slug}` : "/assine"}
+              className="bg-[#18181b] border border-[#27272a] rounded-[8px] overflow-hidden hover:border-zinc-600 transition-colors"
+            >
+              <div className="h-[148px] bg-[#27272a] flex items-center justify-center">
+                {ed.coverImageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={ed.coverImageUrl} alt={ed.title} className="w-full h-full object-cover" />
+                ) : (
+                  <p className="font-['Barlow_Condensed'] font-bold text-[#3f3f46] text-[16px]">
+                    {ed.number ? `Nº ${ed.number}` : "—"}
+                  </p>
+                )}
+              </div>
+              <div className="p-2.5">
+                <p className="text-[#d4d4da] text-[13px] font-semibold leading-snug mb-1">
+                  {ed.number ? `Edição ${ed.number}` : ed.title}
+                </p>
+                <p className="text-[#ff1f1f] text-[12px]">Ler →</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Payment history */}
       {profile.payments.length > 0 && (
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-white uppercase tracking-widest">
-              Últimos pagamentos
-            </h3>
-            <Link href="/minha-conta/pagamentos" className="text-xs text-zinc-500 hover:text-[#ff1f1f] transition-colors">
-              Ver todos →
-            </Link>
-          </div>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-lg divide-y divide-zinc-800">
-            {profile.payments.map((payment) => (
-              <div key={payment.id} className="flex items-center justify-between px-4 py-3">
-                <div>
-                  <p className="text-sm text-white">{formatCurrency(payment.amountInCents)}</p>
-                  <p className="text-xs text-zinc-500">
-                    {payment.createdAt.toLocaleDateString("pt-BR")}
-                    {payment.paymentMethod && ` · ${payment.paymentMethod}`}
+          <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[28px] leading-none mb-5">
+            Histórico de pagamentos
+          </h2>
+          <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
+            {/* Header */}
+            <div className="bg-[#27272a] px-5 py-3 grid grid-cols-5 gap-4">
+              {["Data", "Plano", "Valor", "Método", "Status"].map((h) => (
+                <p key={h} className="text-[#52525b] text-[12px] font-semibold tracking-[0.5px]">{h}</p>
+              ))}
+            </div>
+            {/* Rows */}
+            {profile.payments.map((payment, i) => (
+              <div key={payment.id}>
+                {i > 0 && <div className="bg-[#27272a] h-px" />}
+                <div className="px-5 py-4 grid grid-cols-5 gap-4 items-center">
+                  <p className="text-[#d4d4da] text-[14px]">
+                    {payment.createdAt.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                   </p>
-                </div>
-                <span
-                  className={`text-xs px-2 py-0.5 rounded border ${
+                  <p className="text-[#d4d4da] text-[14px]">{sub?.plan.name ?? "—"}</p>
+                  <p className="text-white text-[14px]">{formatCurrency(payment.amountInCents)}</p>
+                  <p className="text-[#d4d4da] text-[14px]">{payment.paymentMethod ?? "—"}</p>
+                  <span className={`inline-flex items-center h-[24px] px-2.5 rounded-full text-[11px] font-semibold ${
                     payment.status === "APPROVED"
-                      ? "text-green-400 bg-green-400/10 border-green-400/20"
+                      ? "bg-[#144729] text-[#22c55e]"
                       : payment.status === "PENDING"
-                      ? "text-yellow-400 bg-yellow-400/10 border-yellow-400/20"
-                      : "text-red-400 bg-red-400/10 border-red-400/20"
-                  }`}
-                >
-                  {payment.status === "APPROVED" ? "Aprovado" : payment.status === "PENDING" ? "Pendente" : "Recusado"}
-                </span>
+                      ? "bg-[#382405] text-[#ef9f1b]"
+                      : "bg-[#27272a] text-[#52525b]"
+                  }`}>
+                    {payment.status === "APPROVED" ? "Aprovado" : payment.status === "PENDING" ? "Pendente" : "Recusado"}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {!sub && (
+        <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-8 text-center">
+          <p className="text-[#a1a1aa] text-[15px] mb-4">Você ainda não tem uma assinatura ativa.</p>
+          <Link
+            href="/assine"
+            className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[44px] px-6 inline-flex items-center rounded-[6px] transition-colors"
+          >
+            Assinar agora →
+          </Link>
         </div>
       )}
     </div>
