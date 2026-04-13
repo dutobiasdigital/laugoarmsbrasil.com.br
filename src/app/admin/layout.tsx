@@ -27,7 +27,7 @@ export default async function AdminLayout({
     firstName = profile.name.split(" ")[0];
     initials = profile.name.slice(0, 2).toUpperCase();
   } catch {
-    redirect("/auth/login");
+    redirect("/");
   }
 
   return (
