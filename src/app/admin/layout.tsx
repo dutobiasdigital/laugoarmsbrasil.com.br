@@ -1,7 +1,4 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import prisma from "@/lib/prisma";
 import AdminSidebarNav from "./_components/AdminSidebarNav";
 
 export default async function AdminLayout({
@@ -9,26 +6,8 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login");
-
-  let initials = "AD";
-  let firstName = "Admin";
-
-  try {
-    const profile = await prisma.user.findUnique({
-      where: { authId: user.id },
-      select: { name: true, role: true },
-    });
-    if (!profile || profile.role !== "ADMIN") redirect("/minha-conta");
-    firstName = profile.name.split(" ")[0];
-    initials = profile.name.slice(0, 2).toUpperCase();
-  } catch {
-    redirect("/");
-  }
+  const initials = "AD";
+  const firstName = "Admin";
 
   return (
     <div className="min-h-screen bg-[#060608]">
