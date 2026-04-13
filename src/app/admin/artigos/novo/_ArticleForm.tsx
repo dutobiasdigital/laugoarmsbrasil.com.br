@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const RichEditor = dynamic(() => import("@/components/admin/RichEditor"), { ssr: false });
 
 const inputCls =
   "bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#52525b] focus:outline-none focus:border-[#ff1f1f] w-full";
@@ -20,15 +23,17 @@ export default function ArticleForm({ categories }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [content, setContent] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError(null);
     const formData = new FormData(e.currentTarget);
+    const body = { ...Object.fromEntries(formData), content };
     const res = await fetch("/api/admin/artigos", {
       method: "POST",
-      body: JSON.stringify(Object.fromEntries(formData)),
+      body: JSON.stringify(body),
       headers: { "Content-Type": "application/json" },
     });
     const data = await res.json();
@@ -50,84 +55,46 @@ export default function ArticleForm({ categories }: Props) {
 
       <form onSubmit={handleSubmit} className="max-w-[900px]">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
-          {/* Title - full width */}
           <div className="lg:col-span-3">
             <label className={labelCls}>Título *</label>
-            <input
-              name="title"
-              required
-              placeholder="Título do artigo"
-              className={inputCls}
-            />
+            <input name="title" required placeholder="Título do artigo" className={inputCls} />
           </div>
 
-          {/* Slug */}
           <div className="lg:col-span-2">
             <label className={labelCls}>Slug (URL)</label>
-            <input
-              name="slug"
-              placeholder="gerado automaticamente"
-              className={inputCls}
-            />
+            <input name="slug" placeholder="gerado automaticamente" className={inputCls} />
           </div>
 
-          {/* Author */}
           <div>
             <label className={labelCls}>Autor</label>
-            <input
-              name="authorName"
-              defaultValue="Redação Magnum"
-              className={inputCls}
-            />
+            <input name="authorName" defaultValue="Redação Magnum" className={inputCls} />
           </div>
 
-          {/* Excerpt */}
           <div className="lg:col-span-3">
             <label className={labelCls}>Resumo / Excerpt</label>
-            <textarea
-              name="excerpt"
-              rows={2}
-              placeholder="Breve descrição do artigo (exibida na listagem)"
-              className={textareaCls}
-            />
+            <textarea name="excerpt" rows={2} placeholder="Breve descrição do artigo" className={textareaCls} />
           </div>
 
-          {/* Content */}
           <div className="lg:col-span-3">
-            <label className={labelCls}>Conteúdo (HTML)</label>
-            <textarea
-              name="content"
-              rows={14}
-              placeholder="<h2>Introdução</h2><p>Conteúdo do artigo aqui...</p>"
-              className={textareaCls}
-            />
+            <label className={labelCls}>Conteúdo</label>
+            <RichEditor value="" onChange={setContent} />
           </div>
 
-          {/* Feature image */}
           <div className="lg:col-span-3">
             <label className={labelCls}>URL da Imagem de Destaque</label>
-            <input
-              name="featureImageUrl"
-              type="url"
-              placeholder="https://..."
-              className={inputCls}
-            />
+            <input name="featureImageUrl" type="url" placeholder="https://..." className={inputCls} />
           </div>
 
-          {/* Category */}
           <div>
             <label className={labelCls}>Categoria *</label>
             <select name="categoryId" required className={selectCls}>
               <option value="">Selecione uma categoria</option>
               {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
             </select>
           </div>
 
-          {/* Status */}
           <div>
             <label className={labelCls}>Status</label>
             <select name="status" defaultValue="DRAFT" className={selectCls}>
@@ -137,38 +104,22 @@ export default function ArticleForm({ categories }: Props) {
             </select>
           </div>
 
-          {/* Published at */}
           <div>
             <label className={labelCls}>Data de Publicação</label>
             <input name="publishedAt" type="date" className={inputCls} />
           </div>
 
-          {/* isExclusive */}
           <div className="flex items-center gap-3 pt-5">
-            <input
-              id="isExclusive"
-              name="isExclusive"
-              type="checkbox"
-              className="w-[16px] h-[16px] accent-[#ff1f1f]"
-            />
-            <label htmlFor="isExclusive" className="text-[#d4d4da] text-[14px]">
-              Conteúdo exclusivo para assinantes
-            </label>
+            <input id="isExclusive" name="isExclusive" type="checkbox" className="w-[16px] h-[16px] accent-[#ff1f1f]" />
+            <label htmlFor="isExclusive" className="text-[#d4d4da] text-[14px]">Conteúdo exclusivo para assinantes</label>
           </div>
         </div>
 
         <div className="flex gap-3 pt-2">
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[14px] font-semibold h-[44px] px-7 rounded-[6px] transition-colors"
-          >
+          <button type="submit" disabled={loading} className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[14px] font-semibold h-[44px] px-7 rounded-[6px] transition-colors">
             {loading ? "Salvando..." : "Criar Artigo"}
           </button>
-          <Link
-            href="/admin/artigos"
-            className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[44px] px-6 flex items-center rounded-[6px] transition-colors"
-          >
+          <Link href="/admin/artigos" className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[44px] px-6 flex items-center rounded-[6px] transition-colors">
             Cancelar
           </Link>
         </div>
