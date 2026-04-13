@@ -1,36 +1,48 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "@/actions/auth";
+import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [state, formAction, pending] = useActionState(login, {});
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
 
-  useEffect(() => {
-    if (state?.success) {
-      router.push("/minha-conta");
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setPending(true);
+    setError(null);
+
+    const form = e.currentTarget;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      setError(error.message);
+      setPending(false);
+      return;
     }
-  }, [state, router]);
+
+    router.push("/minha-conta");
+    router.refresh();
+  }
 
   return (
     <div className="min-h-screen bg-[#09090b] flex flex-col lg:flex-row">
       {/* Left panel — Branding */}
       <div className="hidden lg:flex relative w-[720px] shrink-0 bg-[#18181b] flex-col p-20 justify-between">
-        {/* Red stripe */}
         <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-[#ff1f1f]" />
-
-        {/* Logo */}
         <div className="flex items-center gap-2">
           <div className="w-[40px] h-[40px] bg-[#ff1f1f] rounded-[3px]" />
           <span className="font-['Barlow_Condensed'] font-bold text-white text-[24px] tracking-[3px]">
             MAGNUM
           </span>
         </div>
-
-        {/* Hero copy */}
         <div className="flex flex-col gap-6">
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[64px] leading-[68px]">
             Sua revista de<br />armas favorita.
@@ -38,8 +50,6 @@ export default function LoginPage() {
           <p className="text-[#d4d4da] text-[18px] leading-[28px] max-w-[520px]">
             O maior acervo especializado em armas, munições e legislação do Brasil. Acesse 207 edições a qualquer hora.
           </p>
-
-          {/* Stats */}
           <div className="flex gap-12 mt-2">
             <div className="flex flex-col gap-1">
               <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[40px] leading-none">207</span>
@@ -54,7 +64,6 @@ export default function LoginPage() {
               <span className="text-[#a1a1aa] text-[14px]">Leitores</span>
             </div>
           </div>
-
           <div className="bg-[#3f3f46] h-px w-[560px]" />
           <p className="text-[#a1a1aa] text-[14px] leading-[22px]">
             "A melhor cobertura de armas e defesa do Brasil"
@@ -64,7 +73,6 @@ export default function LoginPage() {
 
       {/* Right panel — Form */}
       <div className="flex-1 flex flex-col items-center justify-center p-8 lg:p-16">
-        {/* Mobile logo */}
         <div className="flex lg:hidden items-center gap-2 mb-10">
           <div className="w-[32px] h-[32px] bg-[#ff1f1f] rounded-[2px]" />
           <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[22px] tracking-wide">MAGNUM</span>
@@ -79,14 +87,13 @@ export default function LoginPage() {
           </p>
           <div className="bg-[#27272a] h-px mb-6" />
 
-          {state?.error && (
+          {error && (
             <div className="bg-red-950/50 border border-red-800 text-red-300 text-[13px] px-4 py-3 rounded-[6px] mb-5">
-              {state.error}
+              {error}
             </div>
           )}
 
-          <form action={formAction} className="flex flex-col gap-5">
-            {/* Email */}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">
               <label className="text-[#a1a1aa] text-[13px] font-medium">E-mail</label>
               <input
@@ -98,36 +105,22 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Password */}
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
                 <label className="text-[#a1a1aa] text-[13px] font-medium">Senha</label>
-                <Link
-                  href="/auth/esqueceu-senha"
-                  className="text-[#ff1f1f] hover:text-[#ff4444] text-[13px] transition-colors"
-                >
+                <Link href="/auth/esqueceu-senha" className="text-[#ff1f1f] hover:text-[#ff4444] text-[13px] transition-colors">
                   Esqueceu a senha?
                 </Link>
               </div>
-              <div className="relative">
-                <input
-                  type="password"
-                  name="password"
-                  required
-                  placeholder="••••••••"
-                  className="w-full bg-[#27272a] border border-[#3f3f46] text-white placeholder-[#52525b] rounded-[6px] h-[48px] px-4 text-[15px] focus:outline-none focus:border-[#ff1f1f] transition-colors"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#52525b] text-[16px] cursor-pointer">◉</span>
-              </div>
+              <input
+                type="password"
+                name="password"
+                required
+                placeholder="••••••••"
+                className="w-full bg-[#27272a] border border-[#3f3f46] text-white placeholder-[#52525b] rounded-[6px] h-[48px] px-4 text-[15px] focus:outline-none focus:border-[#ff1f1f] transition-colors"
+              />
             </div>
 
-            {/* Remember me */}
-            <div className="flex items-center gap-2">
-              <div className="w-[16px] h-[16px] bg-[#27272a] border border-[#3f3f46] rounded-[3px] shrink-0" />
-              <label className="text-[#d4d4da] text-[14px]">Manter conectado</label>
-            </div>
-
-            {/* CTA */}
             <button
               type="submit"
               disabled={pending}
@@ -137,19 +130,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 my-5">
-            <div className="flex-1 bg-[#27272a] h-px" />
-            <span className="text-[#52525b] text-[13px]">ou</span>
-            <div className="flex-1 bg-[#27272a] h-px" />
-          </div>
-
-          {/* Google */}
-          <button className="w-full bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] text-[15px] font-medium h-[48px] rounded-[6px] transition-colors">
-            G&nbsp;&nbsp;Entrar com Google
-          </button>
-
-          <div className="flex items-center justify-center gap-1 mt-6">
+          <div className="flex items-center gap-1 mt-6 justify-center">
             <span className="text-[#a1a1aa] text-[14px]">Ainda não tem conta?</span>
             <Link href="/auth/cadastro" className="text-[#ff1f1f] hover:text-[#ff4444] text-[14px] font-semibold transition-colors">
               {" "}Criar conta grátis →
