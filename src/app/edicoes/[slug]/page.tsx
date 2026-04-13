@@ -137,9 +137,10 @@ export default async function EdicaoDetalhePage({
             {edition.editorial && (
               <>
                 <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase">Editorial</p>
-                <p className="text-[#d4d4da] text-[14px] leading-[22px] max-w-[560px]">
-                  {edition.editorial}
-                </p>
+                <div
+                  className="text-[#d4d4da] text-[14px] leading-[22px] max-w-[560px] prose-sm prose-invert"
+                  dangerouslySetInnerHTML={{ __html: edition.editorial }}
+                />
               </>
             )}
 
@@ -183,15 +184,38 @@ export default async function EdicaoDetalhePage({
             Índice da Edição
           </p>
           <div className="bg-[#18181b] border border-[#27272a] rounded-lg p-6 lg:p-8">
-            {edition.tableOfContents ? (
-              <div className="text-[#d4d4da] text-[14px] leading-relaxed whitespace-pre-wrap">
-                {edition.tableOfContents}
-              </div>
-            ) : (
-              <p className="text-[#52525b] text-[13px] text-center py-4">
-                Índice não disponível para esta edição.
-              </p>
-            )}
+            {(() => {
+              let toc: { page: string; title: string; category: string }[] = [];
+              try { toc = JSON.parse(edition.tableOfContents ?? "[]"); } catch { toc = []; }
+              if (toc.length === 0) {
+                return (
+                  <p className="text-[#52525b] text-[13px] text-center py-4">
+                    Índice não disponível para esta edição.
+                  </p>
+                );
+              }
+              return (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-0">
+                  {toc.map((item, i) => (
+                    <div key={i} className="flex items-start gap-3 py-3 border-b border-[#27272a] last:border-0">
+                      <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[22px] w-[40px] shrink-0 leading-none pt-0.5">
+                        {item.page}
+                      </span>
+                      <div className="flex flex-col gap-1 min-w-0">
+                        <span className="text-[#d4d4da] text-[13px] font-medium leading-snug">
+                          {item.title}
+                        </span>
+                        {item.category && (
+                          <span className="inline-block text-[#6f6f77] text-[10px] bg-[#27272a] px-1.5 py-[2px] rounded-[2px] self-start">
+                            {item.category}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         </div>
 
