@@ -210,21 +210,16 @@ export default async function EdicoesPage({
                               : "Em breve"}
                           </p>
 
-                          {isFirst ? (
-                            <Link
-                              href="/minha-conta/edicoes"
-                              className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[12px] font-semibold h-[34px] flex items-center justify-center rounded mt-1 transition-colors"
-                            >
-                              Ler Edição
-                            </Link>
-                          ) : (
-                            <Link
-                              href="/assine"
-                              className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#a1a1aa] hover:text-white text-[12px] font-semibold h-[34px] flex items-center justify-center rounded mt-1 transition-colors"
-                            >
-                              Assine para Ler
-                            </Link>
-                          )}
+                          <Link
+                            href={`/edicoes/${edition.slug}`}
+                            className={`text-[12px] font-semibold h-[34px] flex items-center justify-center rounded mt-1 transition-colors ${
+                              isFirst
+                                ? "bg-[#ff1f1f] hover:bg-[#cc0000] text-white"
+                                : "bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#a1a1aa] hover:text-white"
+                            }`}
+                          >
+                            {isFirst ? "Ler Edição" : "Ver Detalhes"}
+                          </Link>
                         </div>
                       </div>
                     );

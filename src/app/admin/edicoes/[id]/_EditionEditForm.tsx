@@ -19,9 +19,11 @@ interface Props {
     number: number | null;
     type: string;
     editorial: string | null;
+    tableOfContents: string | null;
     pageCount: number | null;
     coverImageUrl: string | null;
     pdfStoragePath: string | null;
+    pageFlipUrl: string | null;
     isPublished: boolean;
     publishedAt: string | null;
   };
@@ -119,6 +121,11 @@ export default function EditionEditForm({ edition }: Props) {
           </div>
 
           <div className="lg:col-span-2">
+            <label className={labelCls}>URL do Page Flip (leitor online)</label>
+            <input name="pageFlipUrl" defaultValue={edition.pageFlipUrl ?? ""} placeholder="https://online.fliphtml5.com/..." className={inputCls} />
+          </div>
+
+          <div className="lg:col-span-2">
             <label className={labelCls}>Caminho do PDF (Storage)</label>
             <input name="pdfStoragePath" defaultValue={edition.pdfStoragePath ?? ""} placeholder="edicoes/207/revista-magnum-207.pdf" className={inputCls} />
           </div>
@@ -126,6 +133,11 @@ export default function EditionEditForm({ edition }: Props) {
           <div className="lg:col-span-2">
             <label className={labelCls}>Editorial / Descrição</label>
             <textarea name="editorial" rows={4} defaultValue={edition.editorial ?? ""} className={textareaCls} />
+          </div>
+
+          <div className="lg:col-span-2">
+            <label className={labelCls}>Índice da Edição</label>
+            <textarea name="tableOfContents" rows={6} defaultValue={edition.tableOfContents ?? ""} placeholder={"p.4 — Editorial\np.8 — Legislação\np.18 — Avaliação..."} className={textareaCls} />
           </div>
 
           <div>

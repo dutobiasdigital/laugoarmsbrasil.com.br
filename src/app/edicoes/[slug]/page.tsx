@@ -18,6 +18,7 @@ export default async function EdicaoDetalhePage({
     id: string; title: string; number: number | null; slug: string;
     coverImageUrl: string | null; publishedAt: Date | null;
     type: string; pageCount: number | null; editorial: string | null;
+    pageFlipUrl: string | null; tableOfContents: string | null;
   } | null = null;
 
   let related: {
@@ -44,7 +45,8 @@ export default async function EdicaoDetalhePage({
       select: {
         id: true, title: true, number: true, slug: true,
         coverImageUrl: true, publishedAt: true, type: true,
-        pageCount: true, editorial: true,
+        pageCount: true, editorial: true, pageFlipUrl: true,
+        tableOfContents: true,
       },
     });
 
@@ -144,20 +146,20 @@ export default async function EdicaoDetalhePage({
             {/* CTAs */}
             <div className="flex flex-wrap items-center gap-3 mt-2">
               {isSubscriber ? (
-                <>
-                  <Link
-                    href="/minha-conta/edicoes"
-                    className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[48px] px-8 flex items-center justify-center rounded-[4px] transition-colors"
+                edition.pageFlipUrl ? (
+                  <a
+                    href={edition.pageFlipUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[48px] px-8 flex items-center justify-center rounded-[4px] transition-colors gap-2"
                   >
-                    Ler Edição
-                  </Link>
-                  <Link
-                    href="/minha-conta/edicoes"
-                    className="bg-[#09090b] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] text-[15px] font-medium h-[48px] px-8 flex items-center justify-center rounded-[4px] transition-colors"
-                  >
-                    Baixar PDF
-                  </Link>
-                </>
+                    <span>📖</span> Ler Edição
+                  </a>
+                ) : (
+                  <span className="bg-[#27272a] text-[#52525b] text-[14px] h-[48px] px-8 flex items-center justify-center rounded-[4px] cursor-default">
+                    Leitura em breve
+                  </span>
+                )
               ) : (
                 <Link
                   href="/assine"
@@ -174,37 +176,22 @@ export default async function EdicaoDetalhePage({
           </div>
         </div>
 
-        {/* Table of Contents placeholder */}
+        {/* Table of Contents */}
         <div className="px-5 lg:px-20 pb-12">
           <div className="bg-[#27272a] h-px w-full mb-8" />
           <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase mb-4">
             Índice da Edição
           </p>
           <div className="bg-[#18181b] border border-[#27272a] rounded-lg p-6 lg:p-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-1">
-              {[
-                { page: 4, title: "Editorial", category: "Abertura" },
-                { page: 8, title: "Legislação e regulamentação", category: "Legislação" },
-                { page: 18, title: "Avaliação de armas de fogo", category: "Avaliações" },
-                { page: 32, title: "Munições — Guia de performance", category: "Munições" },
-                { page: 44, title: "Técnicas de recarga manual", category: "Recarga" },
-                { page: 58, title: "Equipamentos táticos", category: "Avaliações" },
-                { page: 70, title: "Mercado de armas usadas", category: "Defesa" },
-                { page: 82, title: "Facas táticas", category: "Facas" },
-                { page: 96, title: "Retrospectiva", category: "Legislação" },
-                { page: 112, title: "Anúncios e classificados", category: "Informativo" },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-3 py-2.5 border-b border-[#27272a] last:border-0">
-                  <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[22px] w-[36px] shrink-0">
-                    {item.page}
-                  </span>
-                  <span className="text-[#d4d4da] text-[13px] flex-1">{item.title}</span>
-                  <span className="text-[10px] text-[#52525b] bg-[#27272a] px-1.5 py-[2px] rounded-[2px] shrink-0">
-                    {item.category}
-                  </span>
-                </div>
-              ))}
-            </div>
+            {edition.tableOfContents ? (
+              <div className="text-[#d4d4da] text-[14px] leading-relaxed whitespace-pre-wrap">
+                {edition.tableOfContents}
+              </div>
+            ) : (
+              <p className="text-[#52525b] text-[13px] text-center py-4">
+                Índice não disponível para esta edição.
+              </p>
+            )}
           </div>
         </div>
 

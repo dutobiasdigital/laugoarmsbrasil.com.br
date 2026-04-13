@@ -18,9 +18,11 @@ export async function POST(req: NextRequest) {
     const number = body.number ? Number(body.number) : null;
     const type = (body.type as string) || "REGULAR";
     const editorial = (body.editorial as string) || null;
+    const tableOfContents = (body.tableOfContents as string) || null;
     const pageCount = body.pageCount ? Number(body.pageCount) : null;
     const coverImageUrl = (body.coverImageUrl as string) || null;
     const pdfStoragePath = (body.pdfStoragePath as string) || null;
+    const pageFlipUrl = (body.pageFlipUrl as string) || null;
     const isPublished = body.isPublished === "on" || body.isPublished === true || body.isPublished === "true";
     const publishedAt = body.publishedAt ? new Date(body.publishedAt as string) : null;
 
@@ -31,9 +33,11 @@ export async function POST(req: NextRequest) {
         number,
         type: type as "REGULAR" | "SPECIAL",
         editorial,
+        tableOfContents,
         pageCount,
         coverImageUrl,
         pdfStoragePath,
+        pageFlipUrl,
         isPublished,
         publishedAt,
       },
@@ -57,9 +61,11 @@ export async function PUT(req: NextRequest) {
     const number = body.number ? Number(body.number) : null;
     const type = (body.type as string) || "REGULAR";
     const editorial = (body.editorial as string) || null;
+    const tableOfContents = (body.tableOfContents as string) || null;
     const pageCount = body.pageCount ? Number(body.pageCount) : null;
     const coverImageUrl = (body.coverImageUrl as string) || null;
     const pdfStoragePath = (body.pdfStoragePath as string) || null;
+    const pageFlipUrl = (body.pageFlipUrl as string) || null;
     const isPublished = body.isPublished === "on" || body.isPublished === true || body.isPublished === "true";
     const publishedAt = body.publishedAt ? new Date(body.publishedAt as string) : null;
 
@@ -71,9 +77,11 @@ export async function PUT(req: NextRequest) {
         number,
         type: type as "REGULAR" | "SPECIAL",
         editorial,
+        tableOfContents,
         pageCount,
         coverImageUrl,
         pdfStoragePath,
+        pageFlipUrl,
         isPublished,
         publishedAt,
       },

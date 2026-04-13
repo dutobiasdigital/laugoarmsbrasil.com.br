@@ -19,9 +19,11 @@ export default async function EditarEdicaoPage({
     number: number | null;
     type: string;
     editorial: string | null;
+    tableOfContents: string | null;
     pageCount: number | null;
     coverImageUrl: string | null;
     pdfStoragePath: string | null;
+    pageFlipUrl: string | null;
     isPublished: boolean;
     publishedAt: Date | null;
   } | null = null;
@@ -36,9 +38,11 @@ export default async function EditarEdicaoPage({
         number: true,
         type: true,
         editorial: true,
+        tableOfContents: true,
         pageCount: true,
         coverImageUrl: true,
         pdfStoragePath: true,
+        pageFlipUrl: true,
         isPublished: true,
         publishedAt: true,
       },
