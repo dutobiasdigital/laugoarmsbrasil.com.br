@@ -1,10 +1,6 @@
 import { createServerClient, type SetAllCookies } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED_ROUTES = ["/minha-conta"];
-const ADMIN_ROUTES = ["/admin"];
-const AUTH_ROUTES = ["/auth/login", "/auth/cadastro", "/auth/esqueci-senha"];
-
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -29,38 +25,8 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { pathname } = request.nextUrl;
-
-  // Redireciona usuário autenticado tentando acessar páginas de auth
-  if (user && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
-    return NextResponse.redirect(new URL("/minha-conta", request.url));
-  }
-
-  // Protege rotas de usuário logado
-  if (!user && PROTECTED_ROUTES.some((r) => pathname.startsWith(r))) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
-  }
-
-  // Protege rotas de admin
-  if (ADMIN_ROUTES.some((r) => pathname.startsWith(r))) {
-    if (!user) {
-      return NextResponse.redirect(new URL("/auth/login", request.url));
-    }
-    // Verifica role ADMIN na tabela users
-    const { data: profile } = await supabase
-      .from("users")
-      .select("role")
-      .eq("authId", user.id)
-      .single();
-
-    if (profile?.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-  }
+  // Refresh session tokens — routing/auth protection is handled at page level
+  await supabase.auth.getUser();
 
   return supabaseResponse;
 }
