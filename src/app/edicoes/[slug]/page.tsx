@@ -17,7 +17,7 @@ export default async function EdicaoDetalhePage({
   let edition: {
     id: string; title: string; number: number | null; slug: string;
     coverImageUrl: string | null; publishedAt: Date | null;
-    type: string; pageCount: number | null; description: string | null;
+    type: string; pageCount: number | null; editorial: string | null;
   } | null = null;
 
   let related: {
@@ -44,7 +44,7 @@ export default async function EdicaoDetalhePage({
       select: {
         id: true, title: true, number: true, slug: true,
         coverImageUrl: true, publishedAt: true, type: true,
-        pageCount: true, description: true,
+        pageCount: true, editorial: true,
       },
     });
 
@@ -132,11 +132,11 @@ export default async function EdicaoDetalhePage({
             <div className="bg-[#27272a] h-px w-full" />
 
             {/* Editorial */}
-            {edition.description && (
+            {edition.editorial && (
               <>
                 <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase">Editorial</p>
                 <p className="text-[#d4d4da] text-[14px] leading-[22px] max-w-[560px]">
-                  {edition.description}
+                  {edition.editorial}
                 </p>
               </>
             )}
