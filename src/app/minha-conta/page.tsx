@@ -35,7 +35,27 @@ export default async function DashboardPage() {
       },
     });
     if (!raw) redirect("/auth/login");
-    profile = raw as typeof profile;
+    profile = {
+      name: raw.name,
+      email: raw.email,
+      subscription: raw.subscription
+        ? {
+            status: raw.subscription.status,
+            plan: { name: raw.subscription.plan.name },
+            planPriceInCents: raw.subscription.planPriceInCents,
+            intervalMonths: raw.subscription.intervalMonths,
+            currentPeriodEnd: raw.subscription.currentPeriodEnd,
+            subscribedAt: raw.subscription.subscribedAt,
+          }
+        : null,
+      payments: raw.payments.map((p) => ({
+        id: p.id,
+        amountInCents: p.amountInCents,
+        createdAt: p.createdAt,
+        paymentMethod: p.paymentMethod,
+        status: p.status,
+      })),
+    };
 
     recentEditions = await prisma.edition.findMany({
       where: { isPublished: true },
