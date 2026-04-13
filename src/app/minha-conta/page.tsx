@@ -34,7 +34,7 @@ export default async function DashboardPage() {
         payments: { orderBy: { createdAt: "desc" }, take: 4 },
       },
     });
-    if (!raw) redirect("/auth/login");
+    if (!raw) redirect("/");
     profile = {
       name: raw.name,
       email: raw.email,
