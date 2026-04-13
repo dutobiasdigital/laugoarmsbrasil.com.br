@@ -8,6 +8,7 @@ const ITEMS = [
   { href: "/admin/assinantes", label: "Assinantes", icon: "👥" },
   { href: "/admin/edicoes", label: "Edições", icon: "📰" },
   { href: "/admin/artigos", label: "Artigos", icon: "📝" },
+  { href: "/admin/categorias", label: "Categorias", icon: "🏷" },
   { href: "/admin/anuncios", label: "Anúncios", icon: "📢" },
   { href: "/admin/pagamentos", label: "Pagamentos", icon: "💳" },
   { href: "/admin/planos", label: "Planos", icon: "⭐" },
