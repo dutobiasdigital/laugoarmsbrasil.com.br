@@ -64,7 +64,7 @@ export default async function DashboardPage() {
       select: { id: true, title: true, number: true, slug: true, coverImageUrl: true, type: true },
     });
   } catch {
-    redirect("/auth/login");
+    redirect("/");
   }
 
   if (!profile) redirect("/auth/login");
