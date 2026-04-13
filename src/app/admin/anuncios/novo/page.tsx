@@ -1,9 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createAd } from "../actions";
 
 const inputCls =
   "bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#52525b] focus:outline-none focus:border-[#ff1f1f] w-full";
@@ -13,17 +12,27 @@ const selectCls =
 
 export default function NovoAnuncioPage() {
   const router = useRouter();
-  const [state, action, pending] = useActionState(
-    async (_: unknown, formData: FormData) => {
-      const result = await createAd(_, formData);
-      if (result.success) {
-        router.push("/admin/anuncios");
-        return result;
-      }
-      return result;
-    },
-    null
-  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const formData = new FormData(e.currentTarget);
+    const res = await fetch("/api/admin/anuncios", {
+      method: "POST",
+      body: JSON.stringify(Object.fromEntries(formData)),
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error || "Erro ao criar anúncio.");
+      setLoading(false);
+      return;
+    }
+    router.push("/admin/anuncios");
+  }
 
   return (
     <>
@@ -46,13 +55,13 @@ export default function NovoAnuncioPage() {
       </p>
       <div className="bg-[#27272a] h-px mb-6" />
 
-      {state?.error && (
+      {error && (
         <div className="bg-[#2d0a0a] border border-[#ff1f1f] rounded-[8px] px-4 py-3 mb-5 text-[#ff6b6b] text-[13px]">
-          {state.error}
+          {error}
         </div>
       )}
 
-      <form action={action} className="max-w-[700px]">
+      <form onSubmit={handleSubmit} className="max-w-[700px]">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
           <div>
             <label className={labelCls}>Nome do anúncio *</label>
@@ -146,10 +155,10 @@ export default function NovoAnuncioPage() {
         <div className="flex gap-3 pt-2">
           <button
             type="submit"
-            disabled={pending}
+            disabled={loading}
             className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[14px] font-semibold h-[44px] px-7 rounded-[6px] transition-colors"
           >
-            {pending ? "Salvando..." : "Criar Anúncio"}
+            {loading ? "Salvando..." : "Criar Anúncio"}
           </button>
           <Link
             href="/admin/anuncios"
