@@ -25,10 +25,9 @@ export async function login(
       return { error: error.message };
     }
 
-    redirect("/minha-conta");
-  } catch (err) {
-    // redirect() lança um erro especial — precisa ser re-lançado
-    if (err && typeof err === "object" && "digest" in err) throw err;
+    // Return success so the client can navigate after the cookie is set
+    return { success: true };
+  } catch {
     return { error: "Erro de conexão. Verifique sua internet e tente novamente." };
   }
 }

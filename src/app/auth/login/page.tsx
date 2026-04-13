@@ -1,11 +1,19 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { login } from "@/actions/auth";
 import Link from "next/link";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(login, {});
+
+  useEffect(() => {
+    if (state?.success) {
+      router.push("/minha-conta");
+    }
+  }, [state, router]);
 
   return (
     <div className="min-h-screen bg-[#09090b] flex flex-col lg:flex-row">
