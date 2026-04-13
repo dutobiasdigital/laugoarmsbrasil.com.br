@@ -13,18 +13,24 @@ export async function login(
   _prevState: AuthState,
   formData: FormData
 ): Promise<AuthState> {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (error) {
-    return { error: error.message };
+    if (error) {
+      return { error: error.message };
+    }
+
+    redirect("/minha-conta");
+  } catch (err) {
+    // redirect() lança um erro especial — precisa ser re-lançado
+    if (err && typeof err === "object" && "digest" in err) throw err;
+    return { error: "Erro de conexão. Verifique sua internet e tente novamente." };
   }
-
-  redirect("/minha-conta");
 }
 
 export async function signup(
