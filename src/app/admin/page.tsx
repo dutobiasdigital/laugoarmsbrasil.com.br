@@ -26,16 +26,19 @@ export default async function AdminDashboardPage() {
       subscribedAt: Date;
     } | null;
   }[] = [];
-  let kpis = { totalActive: 0, newThisMonth: 0, canceled: 0 };
+  let kpis = { totalActive: 0, newThisMonth: 0, canceled: 0, monthlyRevenue: 0, revenueChange: 0 };
 
   try {
-    const [activeCount, newCount, canceledCount, recentSubs] = await Promise.all([
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    const [activeCount, newCount, canceledCount, recentSubs, monthRev, lastMonthRev] = await Promise.all([
       prisma.user.count({ where: { subscription: { status: "ACTIVE" } } }),
       prisma.user.count({
         where: {
           subscription: {
-            status: "ACTIVE",
-            subscribedAt: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
+            subscribedAt: { gte: startOfMonth },
           },
         },
       }),
@@ -58,9 +61,23 @@ export default async function AdminDashboardPage() {
           },
         },
       }),
+      prisma.payment.aggregate({
+        where: { status: "APPROVED", paidAt: { gte: startOfMonth } },
+        _sum: { amountInCents: true },
+      }),
+      prisma.payment.aggregate({
+        where: { status: "APPROVED", paidAt: { gte: startOfLastMonth, lt: startOfMonth } },
+        _sum: { amountInCents: true },
+      }),
     ]);
 
-    kpis = { totalActive: activeCount, newThisMonth: newCount, canceled: canceledCount };
+    const thisMonthCents = monthRev._sum.amountInCents ?? 0;
+    const lastMonthCents = lastMonthRev._sum.amountInCents ?? 0;
+    const revenueChange = lastMonthCents > 0
+      ? Math.round(((thisMonthCents - lastMonthCents) / lastMonthCents) * 100)
+      : 0;
+
+    kpis = { totalActive: activeCount, newThisMonth: newCount, canceled: canceledCount, monthlyRevenue: thisMonthCents, revenueChange };
     subscribers = recentSubs;
   } catch {
     // DB unavailable
@@ -85,28 +102,30 @@ export default async function AdminDashboardPage() {
           {
             value: kpis.totalActive.toLocaleString("pt-BR") || "0",
             label: "Assinantes ativos",
-            trend: "+12 hoje",
+            trend: `${kpis.newThisMonth} novo${kpis.newThisMonth !== 1 ? "s" : ""} este mês`,
             trendColor: "text-[#22c55e]",
             barColor: "bg-[#22c55e]",
           },
           {
-            value: "R$ 18.240",
+            value: (kpis.monthlyRevenue / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
             label: "Receita mensal",
-            trend: "+8% vs mês ant.",
-            trendColor: "text-[#22c55e]",
+            trend: kpis.revenueChange >= 0
+              ? `+${kpis.revenueChange}% vs mês ant.`
+              : `${kpis.revenueChange}% vs mês ant.`,
+            trendColor: kpis.revenueChange >= 0 ? "text-[#22c55e]" : "text-[#ef9f1b]",
             barColor: "bg-[#22c55e]",
           },
           {
             value: String(kpis.newThisMonth || 0),
             label: "Novos assinantes",
-            trend: "↑ este mês",
+            trend: "este mês",
             trendColor: "text-[#22c55e]",
             barColor: "bg-[#3c82f6]",
           },
           {
             value: String(kpis.canceled || 0),
             label: "Cancelamentos",
-            trend: "-6% vs mês ant.",
+            trend: "total acumulado",
             trendColor: "text-[#ef9f1b]",
             barColor: "bg-[#ef9f1b]",
           },
@@ -210,7 +229,7 @@ export default async function AdminDashboardPage() {
             </div>
             <div className="text-right">
               <p className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[28px] leading-none">
-                R$ 18.240
+                {(kpis.monthlyRevenue / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
               </p>
               <p className="text-[#52525b] text-[12px]">mês atual</p>
             </div>

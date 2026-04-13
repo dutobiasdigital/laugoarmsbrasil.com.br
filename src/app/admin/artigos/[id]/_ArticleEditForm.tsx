@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import ImageUpload, { slugify } from "@/components/admin/ImageUpload";
 
 const RichEditor = dynamic(() => import("@/components/admin/RichEditor"), { ssr: false });
 
@@ -37,6 +38,9 @@ export default function ArticleEditForm({ article, categories }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [content, setContent] = useState(article.content);
+  const [title, setTitle] = useState(article.title);
+
+  const imageFilename = title ? `artigo-${slugify(title)}` : undefined;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -72,7 +76,13 @@ export default function ArticleEditForm({ article, categories }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
           <div className="lg:col-span-3">
             <label className={labelCls}>Título *</label>
-            <input name="title" required defaultValue={article.title} className={inputCls} />
+            <input
+              name="title"
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className={inputCls}
+            />
           </div>
 
           <div className="lg:col-span-2">
@@ -96,8 +106,14 @@ export default function ArticleEditForm({ article, categories }: Props) {
           </div>
 
           <div className="lg:col-span-3">
-            <label className={labelCls}>URL da Imagem de Destaque</label>
-            <input name="featureImageUrl" type="url" defaultValue={article.featureImageUrl ?? ""} placeholder="https://..." className={inputCls} />
+            <label className={labelCls}>Imagem de Destaque</label>
+            <ImageUpload
+              folder="artigos"
+              filename={imageFilename}
+              defaultUrl={article.featureImageUrl ?? ""}
+              inputName="featureImageUrl"
+              aspectHint="Proporção recomendada: 16:9"
+            />
           </div>
 
           <div>

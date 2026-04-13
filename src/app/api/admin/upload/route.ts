@@ -15,13 +15,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Nenhum arquivo enviado." }, { status: 400 });
     }
 
+    const folder = (formData.get("folder") as string | null)?.trim() || "";
+    const filenameBase = (formData.get("filename") as string | null)?.trim() || "";
     const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-    const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+    let storagePath: string;
+    if (filenameBase) {
+      storagePath = folder ? `${folder}/${filenameBase}.${ext}` : `${filenameBase}.${ext}`;
+    } else {
+      const random = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      storagePath = folder ? `${folder}/${random}.${ext}` : `${random}.${ext}`;
+    }
+
     const buffer = Buffer.from(await file.arrayBuffer());
 
+    // upsert: true para permitir substituição se mesmo nome
     const { error } = await supabase.storage
       .from("magnum-media")
-      .upload(name, buffer, { contentType: file.type, upsert: false });
+      .upload(storagePath, buffer, { contentType: file.type, upsert: true });
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -29,7 +40,7 @@ export async function POST(req: NextRequest) {
 
     const { data: urlData } = supabase.storage
       .from("magnum-media")
-      .getPublicUrl(name);
+      .getPublicUrl(storagePath);
 
     return NextResponse.json({ url: urlData.publicUrl });
   } catch (e) {

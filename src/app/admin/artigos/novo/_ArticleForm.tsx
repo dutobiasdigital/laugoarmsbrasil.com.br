@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import ImageUpload, { slugify } from "@/components/admin/ImageUpload";
 
 const RichEditor = dynamic(() => import("@/components/admin/RichEditor"), { ssr: false });
 
@@ -24,6 +25,9 @@ export default function ArticleForm({ categories }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [content, setContent] = useState("");
+  const [title, setTitle] = useState("");
+
+  const imageFilename = title ? `artigo-${slugify(title)}` : undefined;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -57,7 +61,14 @@ export default function ArticleForm({ categories }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
           <div className="lg:col-span-3">
             <label className={labelCls}>Título *</label>
-            <input name="title" required placeholder="Título do artigo" className={inputCls} />
+            <input
+              name="title"
+              required
+              placeholder="Título do artigo"
+              className={inputCls}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
           </div>
 
           <div className="lg:col-span-2">
@@ -81,8 +92,13 @@ export default function ArticleForm({ categories }: Props) {
           </div>
 
           <div className="lg:col-span-3">
-            <label className={labelCls}>URL da Imagem de Destaque</label>
-            <input name="featureImageUrl" type="url" placeholder="https://..." className={inputCls} />
+            <label className={labelCls}>Imagem de Destaque</label>
+            <ImageUpload
+              folder="artigos"
+              filename={imageFilename}
+              inputName="featureImageUrl"
+              aspectHint="Proporção recomendada: 16:9"
+            />
           </div>
 
           <div>

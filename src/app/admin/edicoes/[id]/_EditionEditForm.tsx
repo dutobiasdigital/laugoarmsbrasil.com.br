@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 const inputCls =
   "bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#52525b] focus:outline-none focus:border-[#ff1f1f] w-full";
@@ -30,6 +31,11 @@ export default function EditionEditForm({ edition }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editionNumber, setEditionNumber] = useState(String(edition.number ?? ""));
+  const [editionType, setEditionType] = useState(edition.type);
+
+  const folder = editionType === "REGULAR" ? "edicoes/regular" : "edicoes/especiais";
+  const filename = editionNumber ? `ed${String(editionNumber).padStart(3, "0")}-capa` : undefined;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -64,12 +70,7 @@ export default function EditionEditForm({ edition }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
           <div className="lg:col-span-2">
             <label className={labelCls}>Título *</label>
-            <input
-              name="title"
-              required
-              defaultValue={edition.title}
-              className={inputCls}
-            />
+            <input name="title" required defaultValue={edition.title} className={inputCls} />
           </div>
 
           <div>
@@ -82,7 +83,8 @@ export default function EditionEditForm({ edition }: Props) {
             <input
               name="number"
               type="number"
-              defaultValue={edition.number ?? ""}
+              value={editionNumber}
+              onChange={(e) => setEditionNumber(e.target.value)}
               className={inputCls}
             />
           </div>
@@ -91,7 +93,8 @@ export default function EditionEditForm({ edition }: Props) {
             <label className={labelCls}>Tipo</label>
             <select
               name="type"
-              defaultValue={edition.type}
+              value={editionType}
+              onChange={(e) => setEditionType(e.target.value)}
               className="bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full"
             >
               <option value="REGULAR">Regular</option>
@@ -101,53 +104,33 @@ export default function EditionEditForm({ edition }: Props) {
 
           <div>
             <label className={labelCls}>Número de Páginas</label>
-            <input
-              name="pageCount"
-              type="number"
-              defaultValue={edition.pageCount ?? ""}
-              className={inputCls}
-            />
+            <input name="pageCount" type="number" defaultValue={edition.pageCount ?? ""} className={inputCls} />
           </div>
 
           <div className="lg:col-span-2">
-            <label className={labelCls}>URL da Capa</label>
-            <input
-              name="coverImageUrl"
-              type="url"
-              defaultValue={edition.coverImageUrl ?? ""}
-              placeholder="https://..."
-              className={inputCls}
+            <label className={labelCls}>Imagem da Capa</label>
+            <ImageUpload
+              folder={folder}
+              filename={filename}
+              defaultUrl={edition.coverImageUrl ?? ""}
+              inputName="coverImageUrl"
+              aspectHint={`Será salva em: ${folder}/${filename ?? "ed{numero}-capa"}.jpg`}
             />
           </div>
 
           <div className="lg:col-span-2">
             <label className={labelCls}>Caminho do PDF (Storage)</label>
-            <input
-              name="pdfStoragePath"
-              defaultValue={edition.pdfStoragePath ?? ""}
-              placeholder="edicoes/207/revista-magnum-207.pdf"
-              className={inputCls}
-            />
+            <input name="pdfStoragePath" defaultValue={edition.pdfStoragePath ?? ""} placeholder="edicoes/207/revista-magnum-207.pdf" className={inputCls} />
           </div>
 
           <div className="lg:col-span-2">
             <label className={labelCls}>Editorial / Descrição</label>
-            <textarea
-              name="editorial"
-              rows={4}
-              defaultValue={edition.editorial ?? ""}
-              className={textareaCls}
-            />
+            <textarea name="editorial" rows={4} defaultValue={edition.editorial ?? ""} className={textareaCls} />
           </div>
 
           <div>
             <label className={labelCls}>Data de Publicação</label>
-            <input
-              name="publishedAt"
-              type="date"
-              defaultValue={edition.publishedAt ?? ""}
-              className={inputCls}
-            />
+            <input name="publishedAt" type="date" defaultValue={edition.publishedAt ?? ""} className={inputCls} />
           </div>
 
           <div className="flex items-center gap-3 pt-6">

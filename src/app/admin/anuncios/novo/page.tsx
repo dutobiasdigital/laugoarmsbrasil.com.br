@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ImageUpload, { slugify } from "@/components/admin/ImageUpload";
 
 const inputCls =
   "bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#52525b] focus:outline-none focus:border-[#ff1f1f] w-full";
@@ -14,6 +15,9 @@ export default function NovoAnuncioPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [advertiser, setAdvertiser] = useState("");
+
+  const imageFilename = advertiser ? `anuncio-${slugify(advertiser)}` : undefined;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -37,10 +41,7 @@ export default function NovoAnuncioPage() {
   return (
     <>
       <div className="flex items-center gap-3 mb-6">
-        <Link
-          href="/admin/anuncios"
-          className="text-[#a1a1aa] hover:text-white text-[14px] transition-colors"
-        >
+        <Link href="/admin/anuncios" className="text-[#a1a1aa] hover:text-white text-[14px] transition-colors">
           ← Anúncios
         </Link>
         <span className="text-[#27272a]">/</span>
@@ -50,9 +51,7 @@ export default function NovoAnuncioPage() {
       <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">
         Novo Anúncio
       </h1>
-      <p className="text-[#a1a1aa] text-[14px] mb-6">
-        Cadastre um novo banner publicitário.
-      </p>
+      <p className="text-[#a1a1aa] text-[14px] mb-6">Cadastre um novo banner publicitário.</p>
       <div className="bg-[#27272a] h-px mb-6" />
 
       {error && (
@@ -65,12 +64,7 @@ export default function NovoAnuncioPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
           <div>
             <label className={labelCls}>Nome do anúncio *</label>
-            <input
-              name="name"
-              required
-              placeholder="Ex: Banner Loja ABC — Nov 2025"
-              className={inputCls}
-            />
+            <input name="name" required placeholder="Ex: Banner Loja ABC — Nov 2025" className={inputCls} />
           </div>
           <div>
             <label className={labelCls}>Anunciante *</label>
@@ -79,37 +73,30 @@ export default function NovoAnuncioPage() {
               required
               placeholder="Nome da empresa"
               className={inputCls}
+              value={advertiser}
+              onChange={(e) => setAdvertiser(e.target.value)}
             />
           </div>
 
           <div className="lg:col-span-2">
-            <label className={labelCls}>URL da Imagem do Banner *</label>
-            <input
-              name="imageUrl"
-              required
-              type="url"
-              placeholder="https://..."
-              className={inputCls}
+            <label className={labelCls}>Imagem do Banner *</label>
+            <ImageUpload
+              folder="anuncios"
+              filename={imageFilename}
+              inputName="imageUrl"
+              aspectHint="Preencha o anunciante antes de fazer upload para nomear o arquivo corretamente"
             />
           </div>
 
           <div className="lg:col-span-2">
             <label className={labelCls}>URL de Destino (clique) *</label>
-            <input
-              name="targetUrl"
-              required
-              type="url"
-              placeholder="https://..."
-              className={inputCls}
-            />
+            <input name="targetUrl" required type="url" placeholder="https://..." className={inputCls} />
           </div>
 
           <div>
             <label className={labelCls}>Posição *</label>
             <select name="position" required defaultValue="" className={selectCls}>
-              <option value="" disabled>
-                Selecione uma posição
-              </option>
+              <option value="" disabled>Selecione uma posição</option>
               <option value="HOME_TOP">Home — Topo</option>
               <option value="HOME_SIDEBAR">Home — Sidebar</option>
               <option value="ARTICLE_INLINE">Artigo — Inline</option>
@@ -120,12 +107,7 @@ export default function NovoAnuncioPage() {
 
           <div>
             <label className={labelCls}>Máximo de Impressões</label>
-            <input
-              name="maxImpressions"
-              type="number"
-              placeholder="Deixe em branco para ilimitado"
-              className={inputCls}
-            />
+            <input name="maxImpressions" type="number" placeholder="Deixe em branco para ilimitado" className={inputCls} />
           </div>
 
           <div>
@@ -139,16 +121,8 @@ export default function NovoAnuncioPage() {
           </div>
 
           <div className="flex items-center gap-3 pt-4">
-            <input
-              id="active"
-              name="active"
-              type="checkbox"
-              defaultChecked
-              className="w-[16px] h-[16px] accent-[#ff1f1f]"
-            />
-            <label htmlFor="active" className="text-[#d4d4da] text-[14px]">
-              Ativo (exibir imediatamente)
-            </label>
+            <input id="active" name="active" type="checkbox" defaultChecked className="w-[16px] h-[16px] accent-[#ff1f1f]" />
+            <label htmlFor="active" className="text-[#d4d4da] text-[14px]">Ativo (exibir imediatamente)</label>
           </div>
         </div>
 
