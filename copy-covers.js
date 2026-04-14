@@ -43,7 +43,7 @@ const specialNumbers = [
 
 specialNumbers.forEach((num, idx) => {
   const especial_idx = idx + 1;
-  const src = path.join(srcBase, "rm-ed-especial", `rm-ed-${String(num).padStart(2, "0")}`, "content", "pages", "page1.jpg");
+  const src = path.join(srcBase, "rm-ed-especial", `rm-ed-especial-${String(num).padStart(2, "0")}`, "content", "pages", "page1.jpg");
   const dest = path.join(destBase, "especiais", `esp${String(especial_idx).padStart(3, "0")}-capa.jpg`);
 
   if (fs.existsSync(src)) {
