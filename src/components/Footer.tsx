@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Footer() {
@@ -7,11 +8,14 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-10 mb-10">
           {/* Brand */}
           <div className="sm:col-span-1">
-            <div className="flex items-center gap-1 mb-3">
-              <div className="w-[22px] h-[22px] bg-[#ff1f1f] rounded-[2px]" />
-              <span className="font-['Barlow_Condensed'] font-extrabold text-[18px] text-[#ff1f1f]">
-                MAGNUM
-              </span>
+            <div className="flex items-center gap-2 mb-3">
+              <Image
+                src="/logo.png"
+                alt="Revista Magnum"
+                width={28}
+                height={28}
+                className="w-[28px] h-auto"
+              />
             </div>
             <p className="text-xs text-[#52525b] leading-relaxed">
               O maior acervo especializado em armas, munições e legislação do Brasil. Desde 1985.

@@ -21,6 +21,9 @@ const barlowCondensed = Barlow_Condensed({
 export const metadata: Metadata = {
   title: "Revista Magnum — O Mundo das Armas em Suas Mãos",
   description: "O maior acervo de publicações especializadas em armas, munições e legislação do Brasil.",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({

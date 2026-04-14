@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
@@ -10,11 +11,14 @@ export default async function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#09090b] border-b border-[#27272a] h-16 flex items-center px-5 lg:px-20">
       {/* Logo */}
-      <Link href="/" className="flex items-center gap-1 shrink-0">
-        <div className="w-[26px] h-[26px] bg-[#ff1f1f] rounded-[2px]" />
-        <span className="font-['Barlow_Condensed'] font-extrabold text-[20px] text-[#ff1f1f] leading-none tracking-wide">
-          MAGNUM
-        </span>
+      <Link href="/" className="flex items-center gap-2 shrink-0">
+        <Image
+          src="/logo.png"
+          alt="Revista Magnum"
+          width={32}
+          height={32}
+          className="w-[32px] h-auto"
+        />
       </Link>
 
       <div className="w-12 shrink-0" />
