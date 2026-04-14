@@ -33,7 +33,7 @@ export default async function AdminEdicoesPage({
     [editions, total] = await Promise.all([
       prisma.edition.findMany({
         where,
-        orderBy: { publishedAt: "desc" },
+        orderBy: { number: "asc" },
         skip: (page - 1) * PER_PAGE,
         take: PER_PAGE,
         select: {
