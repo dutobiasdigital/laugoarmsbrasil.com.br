@@ -5,8 +5,8 @@ export const dynamic = "force-dynamic";
 
 const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> = {
   PUBLISHED: { bg: "bg-[#0f381f]", text: "text-[#22c55e]", label: "PUBLICADO" },
-  DRAFT: { bg: "bg-[#27272a]", text: "text-[#a1a1aa]", label: "RASCUNHO" },
-  ARCHIVED: { bg: "bg-[#27272a]", text: "text-[#52525b]", label: "ARQUIVADO" },
+  DRAFT: { bg: "bg-[#141d2c]", text: "text-[#7a9ab5]", label: "RASCUNHO" },
+  ARCHIVED: { bg: "bg-[#141d2c]", text: "text-[#253750]", label: "ARQUIVADO" },
 };
 
 export default async function AdminArtigosPage({
@@ -72,7 +72,7 @@ export default async function AdminArtigosPage({
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">
             Artigos
           </h1>
-          <p className="text-[#a1a1aa] text-[14px]">
+          <p className="text-[#7a9ab5] text-[14px]">
             {total.toLocaleString("pt-BR")} artigos cadastrados
           </p>
         </div>
@@ -84,7 +84,7 @@ export default async function AdminArtigosPage({
         </Link>
       </div>
 
-      <div className="bg-[#27272a] h-px mb-6" />
+      <div className="bg-[#141d2c] h-px mb-6" />
 
       {/* Filters */}
       <form method="GET" className="flex flex-wrap gap-2 mb-5">
@@ -92,12 +92,12 @@ export default async function AdminArtigosPage({
           name="q"
           defaultValue={q}
           placeholder="🔍 Buscar por título..."
-          className="bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#52525b] focus:outline-none focus:border-[#ff1f1f] w-[260px]"
+          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-[260px]"
         />
         <select
           name="status"
           defaultValue={status ?? "TODOS"}
-          className="bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f]"
+          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f]"
         >
           <option value="TODOS">Todos os status</option>
           <option value="PUBLISHED">Publicado</option>
@@ -106,14 +106,14 @@ export default async function AdminArtigosPage({
         </select>
         <button
           type="submit"
-          className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[38px] px-4 rounded-[6px] transition-colors"
+          className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[38px] px-4 rounded-[6px] transition-colors"
         >
           Filtrar
         </button>
         {(q || status) && (
           <Link
             href="/admin/artigos"
-            className="text-[#a1a1aa] hover:text-white text-[13px] h-[38px] flex items-center px-2 transition-colors"
+            className="text-[#7a9ab5] hover:text-white text-[13px] h-[38px] flex items-center px-2 transition-colors"
           >
             Limpar
           </Link>
@@ -121,17 +121,17 @@ export default async function AdminArtigosPage({
       </form>
 
       {/* Table */}
-      <div className="bg-[#18181b] border border-[#27272a] rounded-[10px] overflow-hidden">
-        <div className="bg-[#27272a] px-5 py-3 grid grid-cols-6 gap-3">
+      <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
+        <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-6 gap-3">
           {["Imagem", "Título", "Categoria", "Autor", "Status", "Ações"].map((h) => (
-            <p key={h} className="text-[#52525b] text-[11px] font-semibold tracking-[0.5px]">
+            <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">
               {h}
             </p>
           ))}
         </div>
 
         {articles.length === 0 ? (
-          <p className="text-[#52525b] text-[13px] p-8 text-center">
+          <p className="text-[#253750] text-[13px] p-8 text-center">
             Nenhum artigo encontrado.
           </p>
         ) : (
@@ -139,9 +139,9 @@ export default async function AdminArtigosPage({
             const st = STATUS_STYLE[art.status] ?? STATUS_STYLE.DRAFT;
             return (
               <div key={art.id}>
-                {i > 0 && <div className="bg-[#27272a] h-px" />}
+                {i > 0 && <div className="bg-[#141d2c] h-px" />}
                 <div className="px-5 py-3.5 grid grid-cols-6 gap-3 items-center">
-                  <div className="w-[52px] h-[36px] bg-[#27272a] rounded-[2px] overflow-hidden flex items-center justify-center">
+                  <div className="w-[52px] h-[36px] bg-[#141d2c] rounded-[2px] overflow-hidden flex items-center justify-center">
                     {art.featureImageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -150,7 +150,7 @@ export default async function AdminArtigosPage({
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span className="text-[#52525b] text-[10px]">—</span>
+                      <span className="text-[#253750] text-[10px]">—</span>
                     )}
                   </div>
                   <div className="min-w-0">
@@ -159,10 +159,10 @@ export default async function AdminArtigosPage({
                       <span className="text-[#ff1f1f] text-[10px] font-semibold">EXCLUSIVO</span>
                     )}
                   </div>
-                  <span className="bg-[#27272a] text-[#a1a1aa] text-[11px] px-2 py-[2px] rounded-full">
+                  <span className="bg-[#141d2c] text-[#7a9ab5] text-[11px] px-2 py-[2px] rounded-full">
                     {art.category.name}
                   </span>
-                  <p className="text-[#a1a1aa] text-[13px] truncate">{art.authorName}</p>
+                  <p className="text-[#7a9ab5] text-[13px] truncate">{art.authorName}</p>
                   <span
                     className={`inline-flex items-center h-[20px] px-2.5 rounded-full text-[10px] font-bold ${st.bg} ${st.text}`}
                   >
@@ -171,7 +171,7 @@ export default async function AdminArtigosPage({
                   <div className="flex items-center gap-3">
                     <Link
                       href={`/admin/artigos/${art.id}`}
-                      className="text-[#a1a1aa] hover:text-white text-[13px] transition-colors"
+                      className="text-[#7a9ab5] hover:text-white text-[13px] transition-colors"
                     >
                       Editar
                     </Link>
@@ -179,7 +179,7 @@ export default async function AdminArtigosPage({
                       <Link
                         href={`/blog/${art.slug}`}
                         target="_blank"
-                        className="text-[#52525b] hover:text-[#a1a1aa] text-[13px] transition-colors"
+                        className="text-[#253750] hover:text-[#7a9ab5] text-[13px] transition-colors"
                       >
                         Ver
                       </Link>
@@ -192,8 +192,8 @@ export default async function AdminArtigosPage({
         )}
 
         {totalPages > 1 && (
-          <div className="px-5 py-3 flex items-center justify-between border-t border-[#27272a]">
-            <p className="text-[#52525b] text-[13px]">
+          <div className="px-5 py-3 flex items-center justify-between border-t border-[#141d2c]">
+            <p className="text-[#253750] text-[13px]">
               {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, total)} de{" "}
               {total.toLocaleString("pt-BR")} artigos
             </p>
@@ -205,7 +205,7 @@ export default async function AdminArtigosPage({
                   className={`w-[30px] h-[30px] flex items-center justify-center rounded-[4px] text-[13px] font-semibold transition-colors ${
                     p === page
                       ? "bg-[#ff1f1f] text-white"
-                      : "bg-[#27272a] border border-[#3f3f46] text-[#a1a1aa] hover:text-white"
+                      : "bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
                   }`}
                 >
                   {p}

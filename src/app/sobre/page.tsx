@@ -24,7 +24,7 @@ const NUMBERS = [
 
 export default function SobrePage() {
   return (
-    <div className="min-h-screen bg-[#09090b] flex flex-col">
+    <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
 
       <main className="flex-1 pt-16">
@@ -39,7 +39,7 @@ export default function SobrePage() {
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[56px] lg:text-[72px] leading-[1] mb-6 max-w-[760px]">
             A publicação de referência em armamento do Brasil
           </h1>
-          <p className="text-[#a1a1aa] text-[18px] lg:text-[20px] leading-[30px] max-w-[640px]">
+          <p className="text-[#7a9ab5] text-[18px] lg:text-[20px] leading-[30px] max-w-[640px]">
             Desde 1998, a Revista Magnum informa e educa atiradores, colecionadores,
             caçadores e profissionais de segurança com jornalismo especializado,
             análises técnicas e cobertura legislativa.
@@ -52,12 +52,12 @@ export default function SobrePage() {
             {NUMBERS.map((n) => (
               <div
                 key={n.label}
-                className="bg-[#18181b] border border-[#27272a] rounded-[10px] p-6 text-center"
+                className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-6 text-center"
               >
                 <p className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[44px] leading-none mb-2">
                   {n.value}
                 </p>
-                <p className="text-[#a1a1aa] text-[14px]">{n.label}</p>
+                <p className="text-[#7a9ab5] text-[14px]">{n.label}</p>
               </div>
             ))}
           </div>
@@ -88,7 +88,7 @@ export default function SobrePage() {
                 </p>
               </div>
             </div>
-            <div className="bg-[#18181b] border border-[#27272a] rounded-[12px] p-8 lg:p-10">
+            <div className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] p-8 lg:p-10">
               <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase mb-4">
                 Nossos pilares
               </p>
@@ -103,7 +103,7 @@ export default function SobrePage() {
                     <div className="w-[4px] bg-[#ff1f1f] rounded shrink-0 mt-1" />
                     <div>
                       <p className="text-white text-[15px] font-semibold mb-1">{p.title}</p>
-                      <p className="text-[#a1a1aa] text-[13px] leading-[20px]">{p.desc}</p>
+                      <p className="text-[#7a9ab5] text-[13px] leading-[20px]">{p.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -114,7 +114,7 @@ export default function SobrePage() {
 
         {/* Team */}
         <div className="px-5 lg:px-20 pb-16">
-          <div className="bg-[#27272a] h-px mb-10" />
+          <div className="bg-[#141d2c] h-px mb-10" />
           <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase mb-2">
             Time editorial
           </p>
@@ -125,13 +125,13 @@ export default function SobrePage() {
             {TEAM.map((member) => (
               <div
                 key={member.name}
-                className="bg-[#18181b] border border-[#27272a] rounded-[10px] p-5 text-center"
+                className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5 text-center"
               >
-                <div className="w-[64px] h-[64px] rounded-full bg-[#27272a] flex items-center justify-center text-[20px] font-bold text-[#a1a1aa] mx-auto mb-3">
+                <div className="w-[64px] h-[64px] rounded-full bg-[#141d2c] flex items-center justify-center text-[20px] font-bold text-[#7a9ab5] mx-auto mb-3">
                   {member.initials}
                 </div>
                 <p className="text-white text-[15px] font-semibold mb-0.5">{member.name}</p>
-                <p className="text-[#52525b] text-[13px]">{member.role}</p>
+                <p className="text-[#253750] text-[13px]">{member.role}</p>
               </div>
             ))}
           </div>
@@ -139,12 +139,12 @@ export default function SobrePage() {
 
         {/* CTA */}
         <div className="px-5 lg:px-20 pb-16">
-          <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-8 lg:p-12 flex flex-col lg:flex-row items-center gap-6">
+          <div className="bg-[#0e1520] border border-[#141d2c] rounded-xl p-8 lg:p-12 flex flex-col lg:flex-row items-center gap-6">
             <div className="flex-1">
               <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[40px] leading-none mb-3">
                 Junte-se a mais de 50 mil leitores
               </h2>
-              <p className="text-[#a1a1aa] text-[16px] leading-[26px]">
+              <p className="text-[#7a9ab5] text-[16px] leading-[26px]">
                 Acesse todas as edições, artigos exclusivos e conteúdo especializado
                 com uma assinatura Magnum.
               </p>
@@ -158,7 +158,7 @@ export default function SobrePage() {
               </Link>
               <Link
                 href="/blog"
-                className="bg-[#09090b] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] text-[15px] font-medium h-[52px] px-8 flex items-center justify-center rounded-[6px] transition-colors whitespace-nowrap"
+                className="bg-[#070a12] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[15px] font-medium h-[52px] px-8 flex items-center justify-center rounded-[6px] transition-colors whitespace-nowrap"
               >
                 Ver artigos gratuitos
               </Link>

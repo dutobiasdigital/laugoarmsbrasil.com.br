@@ -64,11 +64,11 @@ export default async function EditarEdicaoPage({
       <div className="flex items-center gap-3 mb-6">
         <Link
           href="/admin/edicoes"
-          className="text-[#a1a1aa] hover:text-white text-[14px] transition-colors"
+          className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors"
         >
           ← Edições
         </Link>
-        <span className="text-[#27272a]">/</span>
+        <span className="text-[#141d2c]">/</span>
         <span className="text-[#d4d4da] text-[14px] truncate max-w-[300px]">
           {edition.title}
         </span>
@@ -77,10 +77,10 @@ export default async function EditarEdicaoPage({
       <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">
         Editar Edição
       </h1>
-      <p className="text-[#a1a1aa] text-[14px] mb-6">
+      <p className="text-[#7a9ab5] text-[14px] mb-6">
         {edition.number ? `Edição Nº ${edition.number}` : edition.title}
       </p>
-      <div className="bg-[#27272a] h-px mb-6" />
+      <div className="bg-[#141d2c] h-px mb-6" />
 
       <EditionEditForm edition={serialized} />
     </>

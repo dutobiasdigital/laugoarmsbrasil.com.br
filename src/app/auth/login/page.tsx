@@ -33,9 +33,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#09090b] flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-[#070a12] flex flex-col lg:flex-row">
       {/* Left panel — Branding */}
-      <div className="hidden lg:flex relative w-[720px] shrink-0 bg-[#18181b] flex-col p-20 justify-between">
+      <div className="hidden lg:flex relative w-[720px] shrink-0 bg-[#0e1520] flex-col p-20 justify-between">
         <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-[#ff1f1f]" />
         <div className="flex items-center gap-2">
           <div className="w-[40px] h-[40px] bg-[#ff1f1f] rounded-[3px]" />
@@ -53,19 +53,19 @@ export default function LoginPage() {
           <div className="flex gap-12 mt-2">
             <div className="flex flex-col gap-1">
               <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[40px] leading-none">207</span>
-              <span className="text-[#a1a1aa] text-[14px]">Edições</span>
+              <span className="text-[#7a9ab5] text-[14px]">Edições</span>
             </div>
             <div className="flex flex-col gap-1">
               <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[40px] leading-none">25+</span>
-              <span className="text-[#a1a1aa] text-[14px]">Anos</span>
+              <span className="text-[#7a9ab5] text-[14px]">Anos</span>
             </div>
             <div className="flex flex-col gap-1">
               <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[40px] leading-none">50k+</span>
-              <span className="text-[#a1a1aa] text-[14px]">Leitores</span>
+              <span className="text-[#7a9ab5] text-[14px]">Leitores</span>
             </div>
           </div>
-          <div className="bg-[#3f3f46] h-px w-[560px]" />
-          <p className="text-[#a1a1aa] text-[14px] leading-[22px]">
+          <div className="bg-[#1c2a3e] h-px w-[560px]" />
+          <p className="text-[#7a9ab5] text-[14px] leading-[22px]">
             "A melhor cobertura de armas e defesa do Brasil"
           </p>
         </div>
@@ -82,10 +82,10 @@ export default function LoginPage() {
           <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[36px] leading-none mb-2">
             Entrar na sua conta
           </h2>
-          <p className="text-[#a1a1aa] text-[15px] mb-6">
+          <p className="text-[#7a9ab5] text-[15px] mb-6">
             Acesse o acervo completo da Revista Magnum
           </p>
-          <div className="bg-[#27272a] h-px mb-6" />
+          <div className="bg-[#141d2c] h-px mb-6" />
 
           {error && (
             <div className="bg-red-950/50 border border-red-800 text-red-300 text-[13px] px-4 py-3 rounded-[6px] mb-5">
@@ -95,19 +95,19 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[#a1a1aa] text-[13px] font-medium">E-mail</label>
+              <label className="text-[#7a9ab5] text-[13px] font-medium">E-mail</label>
               <input
                 type="email"
                 name="email"
                 required
                 placeholder="seu@email.com"
-                className="w-full bg-[#27272a] border border-[#3f3f46] text-white placeholder-[#52525b] rounded-[6px] h-[48px] px-4 text-[15px] focus:outline-none focus:border-[#ff1f1f] transition-colors"
+                className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[48px] px-4 text-[15px] focus:outline-none focus:border-[#ff1f1f] transition-colors"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-[#a1a1aa] text-[13px] font-medium">Senha</label>
+                <label className="text-[#7a9ab5] text-[13px] font-medium">Senha</label>
                 <Link href="/auth/esqueceu-senha" className="text-[#ff1f1f] hover:text-[#ff4444] text-[13px] transition-colors">
                   Esqueceu a senha?
                 </Link>
@@ -117,7 +117,7 @@ export default function LoginPage() {
                 name="password"
                 required
                 placeholder="••••••••"
-                className="w-full bg-[#27272a] border border-[#3f3f46] text-white placeholder-[#52525b] rounded-[6px] h-[48px] px-4 text-[15px] focus:outline-none focus:border-[#ff1f1f] transition-colors"
+                className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[48px] px-4 text-[15px] focus:outline-none focus:border-[#ff1f1f] transition-colors"
               />
             </div>
 
@@ -131,13 +131,13 @@ export default function LoginPage() {
           </form>
 
           <div className="flex items-center gap-1 mt-6 justify-center">
-            <span className="text-[#a1a1aa] text-[14px]">Ainda não tem conta?</span>
+            <span className="text-[#7a9ab5] text-[14px]">Ainda não tem conta?</span>
             <Link href="/auth/cadastro" className="text-[#ff1f1f] hover:text-[#ff4444] text-[14px] font-semibold transition-colors">
               {" "}Criar conta grátis →
             </Link>
           </div>
 
-          <p className="text-[#52525b] text-[12px] text-center mt-4">
+          <p className="text-[#253750] text-[12px] text-center mt-4">
             🔒 Conexão segura · Dados protegidos com criptografia
           </p>
         </div>

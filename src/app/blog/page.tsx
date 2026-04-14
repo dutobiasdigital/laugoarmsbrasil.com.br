@@ -76,7 +76,7 @@ export default async function BlogPage({
     cat === "Todos" ? "/blog" : `/blog?categoria=${encodeURIComponent(cat)}`;
 
   return (
-    <div className="min-h-screen bg-[#09090b] flex flex-col">
+    <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
 
       <main className="flex-1 pt-16">
@@ -85,7 +85,7 @@ export default async function BlogPage({
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[56px] leading-none mb-3">
             Blog
           </h1>
-          <p className="text-[#a1a1aa] text-[16px]">
+          <p className="text-[#7a9ab5] text-[16px]">
             Artigos, avaliações e análises sobre armas, munições e legislação
           </p>
         </div>
@@ -101,7 +101,7 @@ export default async function BlogPage({
                 className={`h-[34px] px-4 rounded-full text-[13px] font-semibold transition-colors flex items-center ${
                   active
                     ? "bg-[#ff1f1f] text-white"
-                    : "bg-[#27272a] border border-[#3f3f46] text-[#a1a1aa] hover:text-white"
+                    : "bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
                 }`}
               >
                 {cat}
@@ -115,14 +115,14 @@ export default async function BlogPage({
           {featured && (
             <Link
               href={`/blog/${featured.slug}`}
-              className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden flex flex-col lg:flex-row hover:border-zinc-600 transition-colors"
+              className="bg-[#0e1520] border border-[#141d2c] rounded-xl overflow-hidden flex flex-col lg:flex-row hover:border-zinc-600 transition-colors"
             >
-              <div className="lg:w-[580px] h-[240px] lg:h-auto bg-[#27272a] shrink-0 flex items-center justify-center order-first lg:order-last">
+              <div className="lg:w-[580px] h-[240px] lg:h-auto bg-[#141d2c] shrink-0 flex items-center justify-center order-first lg:order-last">
                 {featured.featureImageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={featured.featureImageUrl} alt={featured.title} className="w-full h-full object-cover" />
                 ) : (
-                  <p className="text-[#3f3f46] text-[13px] font-mono">Imagem</p>
+                  <p className="text-[#1c2a3e] text-[13px] font-mono">Imagem</p>
                 )}
               </div>
               <div className="flex flex-col gap-3 p-6 lg:p-8 flex-1 justify-center">
@@ -132,7 +132,7 @@ export default async function BlogPage({
                       Exclusivo
                     </span>
                   )}
-                  <span className="bg-[#27272a] border border-[#3f3f46] text-[#a1a1aa] text-[11px] px-2.5 py-[3px] rounded-full">
+                  <span className="bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] text-[11px] px-2.5 py-[3px] rounded-full">
                     {featured.category.name}
                   </span>
                 </div>
@@ -144,7 +144,7 @@ export default async function BlogPage({
                     {featured.excerpt}
                   </p>
                 )}
-                <p className="text-[#52525b] text-[13px]">
+                <p className="text-[#253750] text-[13px]">
                   {featured.authorName}
                   {featured.publishedAt && ` · ${featured.publishedAt.toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" })}`}
                 </p>
@@ -153,7 +153,7 @@ export default async function BlogPage({
                     Ler artigo →
                   </span>
                   {featured.isExclusive && (
-                    <span className="text-[#52525b] text-[12px]">🔒 Para assinantes</span>
+                    <span className="text-[#253750] text-[12px]">🔒 Para assinantes</span>
                   )}
                 </div>
               </div>
@@ -172,14 +172,14 @@ export default async function BlogPage({
                     <Link
                       key={art.id}
                       href={`/blog/${art.slug}`}
-                      className="bg-[#18181b] border border-[#27272a] rounded-[10px] overflow-hidden flex flex-col hover:border-zinc-600 transition-colors"
+                      className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden flex flex-col hover:border-zinc-600 transition-colors"
                     >
-                      <div className="h-[180px] bg-[#27272a] flex items-center justify-center">
+                      <div className="h-[180px] bg-[#141d2c] flex items-center justify-center">
                         {art.featureImageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={art.featureImageUrl} alt={art.title} className="w-full h-full object-cover" />
                         ) : (
-                          <p className="text-[#3f3f46] text-[11px] font-mono">Imagem</p>
+                          <p className="text-[#1c2a3e] text-[11px] font-mono">Imagem</p>
                         )}
                       </div>
                       <div className="flex flex-col gap-2 p-4">
@@ -189,7 +189,7 @@ export default async function BlogPage({
                               Exclusivo
                             </span>
                           )}
-                          <span className="bg-[#27272a] border border-[#3f3f46] text-[#a1a1aa] text-[10px] px-2 py-[2px] rounded-full">
+                          <span className="bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] text-[10px] px-2 py-[2px] rounded-full">
                             {art.category.name}
                           </span>
                         </div>
@@ -197,11 +197,11 @@ export default async function BlogPage({
                           {art.title}
                         </h3>
                         {art.excerpt && (
-                          <p className="text-[#a1a1aa] text-[13px] leading-[20px] line-clamp-2">
+                          <p className="text-[#7a9ab5] text-[13px] leading-[20px] line-clamp-2">
                             {art.excerpt}
                           </p>
                         )}
-                        <p className="text-[#52525b] text-[12px] mt-auto pt-1">
+                        <p className="text-[#253750] text-[12px] mt-auto pt-1">
                           {art.publishedAt?.toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" })}
                         </p>
                       </div>
@@ -213,7 +213,7 @@ export default async function BlogPage({
           )}
 
           {articles.length === 0 && !featured && (
-            <p className="text-[#52525b] text-sm py-12 text-center">Nenhum artigo encontrado.</p>
+            <p className="text-[#253750] text-sm py-12 text-center">Nenhum artigo encontrado.</p>
           )}
 
           {/* Pagination */}
@@ -226,7 +226,7 @@ export default async function BlogPage({
                   className={`w-[36px] h-[36px] flex items-center justify-center rounded-[4px] text-[14px] font-semibold transition-colors ${
                     p === page
                       ? "bg-[#ff1f1f] text-white"
-                      : "bg-[#27272a] border border-[#3f3f46] text-[#a1a1aa] hover:text-white"
+                      : "bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
                   }`}
                 >
                   {p}

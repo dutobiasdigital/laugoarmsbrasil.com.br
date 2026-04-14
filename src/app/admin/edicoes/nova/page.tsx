@@ -9,8 +9,8 @@ import ImageUpload from "@/components/admin/ImageUpload";
 const RichEditor = dynamic(() => import("@/components/admin/RichEditor"), { ssr: false });
 
 const inputCls =
-  "bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#52525b] focus:outline-none focus:border-[#ff1f1f] w-full";
-const labelCls = "block text-[#a1a1aa] text-[12px] font-semibold mb-1.5";
+  "bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full";
+const labelCls = "block text-[#7a9ab5] text-[12px] font-semibold mb-1.5";
 
 interface TocItem { page: string; title: string; category: string; }
 interface Category { id: string; name: string; slug: string; }
@@ -95,16 +95,16 @@ export default function NovaEdicaoPage() {
   return (
     <>
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/edicoes" className="text-[#a1a1aa] hover:text-white text-[14px] transition-colors">
+        <Link href="/admin/edicoes" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">
           ← Edições
         </Link>
-        <span className="text-[#27272a]">/</span>
+        <span className="text-[#141d2c]">/</span>
         <span className="text-[#d4d4da] text-[14px]">Nova Edição</span>
       </div>
 
       <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">Nova Edição</h1>
-      <p className="text-[#a1a1aa] text-[14px] mb-6">Preencha os dados da nova edição da revista.</p>
-      <div className="bg-[#27272a] h-px mb-6" />
+      <p className="text-[#7a9ab5] text-[14px] mb-6">Preencha os dados da nova edição da revista.</p>
+      <div className="bg-[#141d2c] h-px mb-6" />
 
       {error && (
         <div className="bg-[#2d0a0a] border border-[#ff1f1f] rounded-[8px] px-4 py-3 mb-5 text-[#ff6b6b] text-[13px]">{error}</div>
@@ -126,7 +126,7 @@ export default function NovaEdicaoPage() {
           </div>
           <div>
             <label className={labelCls}>Tipo</label>
-            <select name="type" value={editionType} onChange={(e) => setEditionType(e.target.value)} className="bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full">
+            <select name="type" value={editionType} onChange={(e) => setEditionType(e.target.value)} className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full">
               <option value="REGULAR">Regular</option>
               <option value="SPECIAL">Especial</option>
             </select>
@@ -165,8 +165,8 @@ export default function NovaEdicaoPage() {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="text-[#a1a1aa] text-[12px] font-semibold uppercase tracking-[1px]">Índice da Edição</p>
-              <p className="text-[#52525b] text-[11px] mt-0.5">Cada linha vira uma entrada no índice da edição pública.</p>
+              <p className="text-[#7a9ab5] text-[12px] font-semibold uppercase tracking-[1px]">Índice da Edição</p>
+              <p className="text-[#253750] text-[11px] mt-0.5">Cada linha vira uma entrada no índice da edição pública.</p>
             </div>
             <div className="flex items-center gap-2">
               {addingCat ? (
@@ -176,42 +176,42 @@ export default function NovaEdicaoPage() {
                     onChange={(e) => setNewCatName(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCategory())}
                     placeholder="Nome da categoria"
-                    className="bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[32px] px-2.5 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-[180px]"
+                    className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[32px] px-2.5 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-[180px]"
                     autoFocus
                   />
                   <button type="button" onClick={addCategory} disabled={savingCat} className="bg-[#ff1f1f] text-white text-[12px] h-[32px] px-3 rounded-[6px] disabled:opacity-50">
                     {savingCat ? "..." : "Salvar"}
                   </button>
-                  <button type="button" onClick={() => { setAddingCat(false); setNewCatName(""); }} className="text-[#52525b] hover:text-[#a1a1aa] text-[12px] h-[32px] px-2">✕</button>
+                  <button type="button" onClick={() => { setAddingCat(false); setNewCatName(""); }} className="text-[#253750] hover:text-[#7a9ab5] text-[12px] h-[32px] px-2">✕</button>
                 </div>
               ) : (
-                <button type="button" onClick={() => setAddingCat(true)} className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#a1a1aa] text-[12px] h-[32px] px-3 rounded-[6px] transition-colors">
+                <button type="button" onClick={() => setAddingCat(true)} className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#7a9ab5] text-[12px] h-[32px] px-3 rounded-[6px] transition-colors">
                   + Nova categoria
                 </button>
               )}
-              <button type="button" onClick={addTocItem} className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] text-[12px] h-[32px] px-3 rounded-[6px] transition-colors">
+              <button type="button" onClick={addTocItem} className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[12px] h-[32px] px-3 rounded-[6px] transition-colors">
                 + Adicionar item
               </button>
             </div>
           </div>
-          <div className="bg-[#18181b] border border-[#27272a] rounded-[8px] overflow-hidden">
-            <div className="bg-[#27272a] px-4 py-2 grid grid-cols-[100px_1fr_180px_36px] gap-3">
+          <div className="bg-[#0e1520] border border-[#141d2c] rounded-[8px] overflow-hidden">
+            <div className="bg-[#141d2c] px-4 py-2 grid grid-cols-[100px_1fr_180px_36px] gap-3">
               {["Página", "Título da Matéria", "Categoria", ""].map((h) => (
-                <p key={h} className="text-[#52525b] text-[10px] font-semibold tracking-[0.5px] uppercase">{h}</p>
+                <p key={h} className="text-[#253750] text-[10px] font-semibold tracking-[0.5px] uppercase">{h}</p>
               ))}
             </div>
             {tocItems.length === 0 ? (
-              <p className="text-[#52525b] text-[13px] text-center py-6">Nenhum item. Clique em "+ Adicionar item" para começar.</p>
+              <p className="text-[#253750] text-[13px] text-center py-6">Nenhum item. Clique em "+ Adicionar item" para começar.</p>
             ) : (
               tocItems.map((item, i) => (
-                <div key={i} className={`px-4 py-2.5 grid grid-cols-[100px_1fr_180px_36px] gap-3 items-center ${i > 0 ? "border-t border-[#27272a]" : ""}`}>
-                  <input type="number" placeholder="Ex: 4" value={item.page} onChange={(e) => updateTocItem(i, "page", e.target.value)} className="bg-[#27272a] border border-[#3f3f46] rounded-[4px] h-[34px] px-2.5 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full" />
-                  <input type="text" placeholder="Título do artigo ou seção" value={item.title} onChange={(e) => updateTocItem(i, "title", e.target.value)} className="bg-[#27272a] border border-[#3f3f46] rounded-[4px] h-[34px] px-2.5 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full" />
-                  <select value={item.category} onChange={(e) => updateTocItem(i, "category", e.target.value)} className="bg-[#27272a] border border-[#3f3f46] rounded-[4px] h-[34px] px-2 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full">
+                <div key={i} className={`px-4 py-2.5 grid grid-cols-[100px_1fr_180px_36px] gap-3 items-center ${i > 0 ? "border-t border-[#141d2c]" : ""}`}>
+                  <input type="number" placeholder="Ex: 4" value={item.page} onChange={(e) => updateTocItem(i, "page", e.target.value)} className="bg-[#141d2c] border border-[#1c2a3e] rounded-[4px] h-[34px] px-2.5 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full" />
+                  <input type="text" placeholder="Título do artigo ou seção" value={item.title} onChange={(e) => updateTocItem(i, "title", e.target.value)} className="bg-[#141d2c] border border-[#1c2a3e] rounded-[4px] h-[34px] px-2.5 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full" />
+                  <select value={item.category} onChange={(e) => updateTocItem(i, "category", e.target.value)} className="bg-[#141d2c] border border-[#1c2a3e] rounded-[4px] h-[34px] px-2 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full">
                     <option value="">Sem categoria</option>
                     {categories.map((cat) => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
                   </select>
-                  <button type="button" onClick={() => removeTocItem(i)} className="text-[#52525b] hover:text-[#ff6b6b] text-[16px] h-[34px] flex items-center justify-center transition-colors">✕</button>
+                  <button type="button" onClick={() => removeTocItem(i)} className="text-[#253750] hover:text-[#ff6b6b] text-[16px] h-[34px] flex items-center justify-center transition-colors">✕</button>
                 </div>
               ))
             )}
@@ -222,7 +222,7 @@ export default function NovaEdicaoPage() {
           <button type="submit" disabled={loading} className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[14px] font-semibold h-[44px] px-7 rounded-[6px] transition-colors">
             {loading ? "Salvando..." : "Criar Edição"}
           </button>
-          <Link href="/admin/edicoes" className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[44px] px-6 flex items-center rounded-[6px] transition-colors">
+          <Link href="/admin/edicoes" className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[44px] px-6 flex items-center rounded-[6px] transition-colors">
             Cancelar
           </Link>
         </div>

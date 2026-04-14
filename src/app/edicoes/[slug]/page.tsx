@@ -70,13 +70,13 @@ export default async function EdicaoDetalhePage({
     : null;
 
   return (
-    <div className="min-h-screen bg-[#09090b] flex flex-col">
+    <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
 
       <main className="flex-1 pt-16">
         {/* Breadcrumb */}
         <div className="px-5 lg:px-20 pt-7 pb-2">
-          <Link href="/edicoes" className="text-[#a1a1aa] hover:text-white text-[14px] transition-colors">
+          <Link href="/edicoes" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">
             ← Edições
           </Link>
         </div>
@@ -86,8 +86,8 @@ export default async function EdicaoDetalhePage({
           {/* Cover */}
           <div
             className={`w-full max-w-[320px] mx-auto lg:mx-0 h-[428px] flex items-center justify-center rounded-[4px] shrink-0 ${
-              isSpecial ? "bg-[#cc0000]" : "bg-[#27272a]"
-            } border border-[#3f3f46]`}
+              isSpecial ? "bg-[#cc0000]" : "bg-[#141d2c]"
+            } border border-[#1c2a3e]`}
           >
             {edition.coverImageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -97,7 +97,7 @@ export default async function EdicaoDetalhePage({
                 className="w-full h-full object-cover rounded-[4px]"
               />
             ) : (
-              <p className={`font-['Barlow_Condensed'] font-bold text-[28px] ${isSpecial ? "text-[#7a0000]" : "text-[#3f3f46]"}`}>
+              <p className={`font-['Barlow_Condensed'] font-bold text-[28px] ${isSpecial ? "text-[#7a0000]" : "text-[#1c2a3e]"}`}>
                 {edition.number ? `Nº ${edition.number}` : "—"}
               </p>
             )}
@@ -108,7 +108,7 @@ export default async function EdicaoDetalhePage({
             {/* Badges */}
             <div className="flex items-center gap-2">
               <span className={`text-[10px] font-semibold tracking-[1px] px-2 py-[3px] rounded-[2px] ${
-                isSpecial ? "bg-[#ff1f1f] text-white" : "bg-[#27272a] text-[#a1a1aa]"
+                isSpecial ? "bg-[#ff1f1f] text-white" : "bg-[#141d2c] text-[#7a9ab5]"
               }`}>
                 {isSpecial ? "ESPECIAL" : "REGULAR"}
               </span>
@@ -126,12 +126,12 @@ export default async function EdicaoDetalhePage({
 
             {/* Meta */}
             {(publishMeta || edition.pageCount) && (
-              <p className="text-[#a1a1aa] text-[14px]">
+              <p className="text-[#7a9ab5] text-[14px]">
                 {publishMeta}{edition.pageCount ? ` · ${edition.pageCount} páginas` : ""}
               </p>
             )}
 
-            <div className="bg-[#27272a] h-px w-full" />
+            <div className="bg-[#141d2c] h-px w-full" />
 
             {/* Editorial */}
             {edition.editorial && (
@@ -157,7 +157,7 @@ export default async function EdicaoDetalhePage({
                     <span>📖</span> Ler Edição
                   </a>
                 ) : (
-                  <span className="bg-[#27272a] text-[#52525b] text-[14px] h-[48px] px-8 flex items-center justify-center rounded-[4px] cursor-default">
+                  <span className="bg-[#141d2c] text-[#253750] text-[14px] h-[48px] px-8 flex items-center justify-center rounded-[4px] cursor-default">
                     Leitura em breve
                   </span>
                 )
@@ -171,7 +171,7 @@ export default async function EdicaoDetalhePage({
               )}
             </div>
 
-            <p className="text-[#52525b] text-[12px]">
+            <p className="text-[#253750] text-[12px]">
               🔒 Acesso exclusivo para assinantes ativos
             </p>
           </div>
@@ -179,17 +179,17 @@ export default async function EdicaoDetalhePage({
 
         {/* Table of Contents */}
         <div className="px-5 lg:px-20 pb-12">
-          <div className="bg-[#27272a] h-px w-full mb-8" />
+          <div className="bg-[#141d2c] h-px w-full mb-8" />
           <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase mb-4">
             Índice da Edição
           </p>
-          <div className="bg-[#18181b] border border-[#27272a] rounded-lg p-6 lg:p-8">
+          <div className="bg-[#0e1520] border border-[#141d2c] rounded-lg p-6 lg:p-8">
             {(() => {
               let toc: { page: string; title: string; category: string }[] = [];
               try { toc = JSON.parse(edition.tableOfContents ?? "[]"); } catch { toc = []; }
               if (toc.length === 0) {
                 return (
-                  <p className="text-[#52525b] text-[13px] text-center py-4">
+                  <p className="text-[#253750] text-[13px] text-center py-4">
                     Índice não disponível para esta edição.
                   </p>
                 );
@@ -197,7 +197,7 @@ export default async function EdicaoDetalhePage({
               return (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-0">
                   {toc.map((item, i) => (
-                    <div key={i} className="flex items-start gap-3 py-3 border-b border-[#27272a] last:border-0">
+                    <div key={i} className="flex items-start gap-3 py-3 border-b border-[#141d2c] last:border-0">
                       <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[22px] w-[40px] shrink-0 leading-none pt-0.5">
                         {item.page}
                       </span>
@@ -206,7 +206,7 @@ export default async function EdicaoDetalhePage({
                           {item.title}
                         </span>
                         {item.category && (
-                          <span className="inline-block text-[#6f6f77] text-[10px] bg-[#27272a] px-1.5 py-[2px] rounded-[2px] self-start">
+                          <span className="inline-block text-[#6f6f77] text-[10px] bg-[#141d2c] px-1.5 py-[2px] rounded-[2px] self-start">
                             {item.category}
                           </span>
                         )}
@@ -222,7 +222,7 @@ export default async function EdicaoDetalhePage({
         {/* CTA Banner */}
         {!isSubscriber && (
           <div className="px-5 lg:px-20 pb-12">
-            <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-6 lg:p-10 flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
+            <div className="bg-[#0e1520] border border-[#141d2c] rounded-xl p-6 lg:p-10 flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
               <div className="w-1 h-[80px] bg-[#ff1f1f] rounded shrink-0 hidden lg:block" />
               <div className="flex flex-col gap-2 flex-1">
                 <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[36px] leading-none">
@@ -242,7 +242,7 @@ export default async function EdicaoDetalhePage({
                 </Link>
                 <Link
                   href="/auth/login"
-                  className="bg-[#09090b] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] text-[14px] font-medium h-[48px] px-6 flex items-center justify-center rounded-[4px] transition-colors whitespace-nowrap"
+                  className="bg-[#070a12] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] font-medium h-[48px] px-6 flex items-center justify-center rounded-[4px] transition-colors whitespace-nowrap"
                 >
                   Entrar na conta
                 </Link>
@@ -254,7 +254,7 @@ export default async function EdicaoDetalhePage({
         {/* Related Editions */}
         {related.length > 0 && (
           <div className="px-5 lg:px-20 pb-16">
-            <p className="text-[#a1a1aa] text-[11px] font-semibold tracking-[1.5px] uppercase mb-2">
+            <p className="text-[#7a9ab5] text-[11px] font-semibold tracking-[1.5px] uppercase mb-2">
               Outras Edições
             </p>
             <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] mb-6">
@@ -267,14 +267,14 @@ export default async function EdicaoDetalhePage({
                   <Link
                     key={rel.id}
                     href={`/edicoes/${rel.slug}`}
-                    className="bg-[#18181b] border border-[#27272a] rounded-[6px] overflow-hidden hover:border-zinc-600 transition-colors"
+                    className="bg-[#0e1520] border border-[#141d2c] rounded-[6px] overflow-hidden hover:border-zinc-600 transition-colors"
                   >
-                    <div className={`h-[160px] flex items-center justify-center ${relSpecial ? "bg-[#cc0000]" : "bg-[#27272a]"}`}>
+                    <div className={`h-[160px] flex items-center justify-center ${relSpecial ? "bg-[#cc0000]" : "bg-[#141d2c]"}`}>
                       {rel.coverImageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={rel.coverImageUrl} alt={rel.title} className="w-full h-full object-cover" />
                       ) : (
-                        <p className={`font-['Barlow_Condensed'] font-semibold text-[18px] ${relSpecial ? "text-[#7a0000]" : "text-[#3f3f46]"}`}>
+                        <p className={`font-['Barlow_Condensed'] font-semibold text-[18px] ${relSpecial ? "text-[#7a0000]" : "text-[#1c2a3e]"}`}>
                           {rel.number ? `Nº ${rel.number}` : "—"}
                         </p>
                       )}
@@ -283,7 +283,7 @@ export default async function EdicaoDetalhePage({
                       <p className="text-[#d4d4da] text-[14px] font-semibold leading-snug mb-2">
                         {rel.number ? `Edição ${rel.number}` : rel.title}
                       </p>
-                      <div className="bg-[#09090b] border border-[#3f3f46] h-[36px] flex items-center justify-center rounded-[4px] text-[#a1a1aa] text-[13px]">
+                      <div className="bg-[#070a12] border border-[#1c2a3e] h-[36px] flex items-center justify-center rounded-[4px] text-[#7a9ab5] text-[13px]">
                         Assine para Ler
                       </div>
                     </div>

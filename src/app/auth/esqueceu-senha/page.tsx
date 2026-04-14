@@ -13,9 +13,9 @@ export default function EsqueceuSenhaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#09090b] flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-[#070a12] flex flex-col lg:flex-row">
       {/* Left panel */}
-      <div className="hidden lg:flex relative w-[720px] shrink-0 bg-[#18181b] flex-col p-20 justify-between">
+      <div className="hidden lg:flex relative w-[720px] shrink-0 bg-[#0e1520] flex-col p-20 justify-between">
         <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-[#ff1f1f]" />
 
         {/* Logo */}
@@ -31,7 +31,7 @@ export default function EsqueceuSenhaPage() {
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[64px] leading-[68px]">
             Recupere seu<br />acesso agora.
           </h1>
-          <p className="text-[#a1a1aa] text-[18px] leading-[28px]">Simples e seguro.</p>
+          <p className="text-[#7a9ab5] text-[18px] leading-[28px]">Simples e seguro.</p>
         </div>
       </div>
 
@@ -52,7 +52,7 @@ export default function EsqueceuSenhaPage() {
               <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[36px] leading-none">
                 E-mail enviado!
               </h2>
-              <p className="text-[#a1a1aa] text-[15px] max-w-[400px]">
+              <p className="text-[#7a9ab5] text-[15px] max-w-[400px]">
                 Verifique sua caixa de entrada e siga o link para redefinir sua senha. O link é válido por 24 horas.
               </p>
               <Link href="/auth/login" className="text-[#ff1f1f] hover:text-[#ff4444] text-[14px] font-semibold transition-colors">
@@ -64,19 +64,19 @@ export default function EsqueceuSenhaPage() {
               <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[36px] leading-none mb-2">
                 Recuperar senha
               </h2>
-              <p className="text-[#a1a1aa] text-[15px] mb-6">
+              <p className="text-[#7a9ab5] text-[15px] mb-6">
                 Informe o e-mail cadastrado para receber o link de redefinição
               </p>
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[#a1a1aa] text-[13px] font-medium">E-mail cadastrado</label>
+                  <label className="text-[#7a9ab5] text-[13px] font-medium">E-mail cadastrado</label>
                   <input
                     type="email"
                     name="email"
                     required
                     placeholder="seu@email.com"
-                    className="w-full bg-[#27272a] border border-[#3f3f46] text-white placeholder-[#52525b] rounded-[6px] h-[48px] px-4 text-[15px] focus:outline-none focus:border-[#ff1f1f] transition-colors"
+                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[48px] px-4 text-[15px] focus:outline-none focus:border-[#ff1f1f] transition-colors"
                   />
                 </div>
 
@@ -89,16 +89,16 @@ export default function EsqueceuSenhaPage() {
               </form>
 
               {/* Info box */}
-              <div className="mt-5 bg-[#27272a] border border-[#3f3f46] rounded-[8px] p-4 flex gap-3">
-                <span className="text-[#a1a1aa] text-[20px] shrink-0">ℹ</span>
-                <p className="text-[#a1a1aa] text-[13px] leading-[20px]">
+              <div className="mt-5 bg-[#141d2c] border border-[#1c2a3e] rounded-[8px] p-4 flex gap-3">
+                <span className="text-[#7a9ab5] text-[20px] shrink-0">ℹ</span>
+                <p className="text-[#7a9ab5] text-[13px] leading-[20px]">
                   Você receberá um e-mail com o link para redefinir sua senha. O link é válido por 24 horas.
                 </p>
               </div>
 
               <Link
                 href="/auth/login"
-                className="flex items-center gap-1 text-[#a1a1aa] hover:text-white text-[14px] mt-6 transition-colors"
+                className="flex items-center gap-1 text-[#7a9ab5] hover:text-white text-[14px] mt-6 transition-colors"
               >
                 ← Voltar para o login
               </Link>

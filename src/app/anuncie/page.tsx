@@ -28,7 +28,7 @@ const FORMATS = [
     desc: "Dentro do conteúdo dos artigos do blog.",
     size: "728 × 90 px",
     badge: "Econômico",
-    badgeColor: "bg-[#27272a] text-[#a1a1aa]",
+    badgeColor: "bg-[#141d2c] text-[#7a9ab5]",
   },
   {
     name: "Topo Edições",
@@ -67,7 +67,7 @@ const FAQS = [
 
 export default function AnunciePage() {
   return (
-    <div className="min-h-screen bg-[#09090b] flex flex-col">
+    <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
 
       <main className="flex-1 pt-16">
@@ -82,7 +82,7 @@ export default function AnunciePage() {
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[56px] lg:text-[72px] leading-[1] mb-6 max-w-[800px]">
             Anuncie para o maior público especializado do Brasil
           </h1>
-          <p className="text-[#a1a1aa] text-[18px] lg:text-[20px] leading-[30px] max-w-[620px] mb-8">
+          <p className="text-[#7a9ab5] text-[18px] lg:text-[20px] leading-[30px] max-w-[620px] mb-8">
             Conecte sua marca a mais de 50 mil leitores qualificados: atiradores,
             colecionadores, CAC e profissionais de segurança.
           </p>
@@ -95,7 +95,7 @@ export default function AnunciePage() {
             </a>
             <a
               href="mailto:publicidade@revistamagnum.com.br"
-              className="bg-[#18181b] border border-[#27272a] hover:border-zinc-600 text-[#d4d4da] text-[15px] font-medium h-[52px] px-8 flex items-center justify-center rounded-[6px] transition-colors"
+              className="bg-[#0e1520] border border-[#141d2c] hover:border-zinc-600 text-[#d4d4da] text-[15px] font-medium h-[52px] px-8 flex items-center justify-center rounded-[6px] transition-colors"
             >
               publicidade@revistamagnum.com.br
             </a>
@@ -104,7 +104,7 @@ export default function AnunciePage() {
 
         {/* Audience stats */}
         <div className="px-5 lg:px-20 pb-16">
-          <div className="bg-[#27272a] h-px mb-10" />
+          <div className="bg-[#141d2c] h-px mb-10" />
           <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase mb-3">
             Nosso público
           </p>
@@ -115,17 +115,17 @@ export default function AnunciePage() {
             {AUDIENCE.map((item) => (
               <div
                 key={item.label}
-                className="bg-[#18181b] border border-[#27272a] rounded-[10px] p-6 text-center"
+                className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-6 text-center"
               >
                 <p className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[40px] leading-none mb-2">
                   {item.value}
                 </p>
-                <p className="text-[#a1a1aa] text-[14px]">{item.label}</p>
+                <p className="text-[#7a9ab5] text-[14px]">{item.label}</p>
               </div>
             ))}
           </div>
 
-          <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-6 lg:p-8">
+          <div className="bg-[#0e1520] border border-[#141d2c] rounded-xl p-6 lg:p-8">
             <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase mb-3">
               Perfil do leitor
             </p>
@@ -148,7 +148,7 @@ export default function AnunciePage() {
                   <div className="w-[4px] bg-[#ff1f1f] rounded shrink-0 mt-1" />
                   <div>
                     <p className="text-white text-[15px] font-semibold mb-1">{seg.title}</p>
-                    <p className="text-[#a1a1aa] text-[13px] leading-[20px]">{seg.desc}</p>
+                    <p className="text-[#7a9ab5] text-[13px] leading-[20px]">{seg.desc}</p>
                   </div>
                 </div>
               ))}
@@ -158,7 +158,7 @@ export default function AnunciePage() {
 
         {/* Ad formats */}
         <div className="px-5 lg:px-20 pb-16">
-          <div className="bg-[#27272a] h-px mb-10" />
+          <div className="bg-[#141d2c] h-px mb-10" />
           <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase mb-2">
             Formatos disponíveis
           </p>
@@ -169,9 +169,9 @@ export default function AnunciePage() {
             {FORMATS.map((fmt) => (
               <div
                 key={fmt.name}
-                className="bg-[#18181b] border border-[#27272a] rounded-[10px] p-6 flex gap-5"
+                className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-6 flex gap-5"
               >
-                <div className="w-[48px] h-[48px] bg-[#27272a] rounded-[6px] flex items-center justify-center shrink-0">
+                <div className="w-[48px] h-[48px] bg-[#141d2c] rounded-[6px] flex items-center justify-center shrink-0">
                   <div className="w-[28px] h-[20px] bg-[#ff1f1f] rounded-[2px]" />
                 </div>
                 <div className="flex-1">
@@ -181,8 +181,8 @@ export default function AnunciePage() {
                       {fmt.badge}
                     </span>
                   </div>
-                  <p className="text-[#a1a1aa] text-[14px] mb-2">{fmt.desc}</p>
-                  <p className="text-[#52525b] text-[12px] font-mono">{fmt.size}</p>
+                  <p className="text-[#7a9ab5] text-[14px] mb-2">{fmt.desc}</p>
+                  <p className="text-[#253750] text-[12px] font-mono">{fmt.size}</p>
                 </div>
               </div>
             ))}
@@ -191,7 +191,7 @@ export default function AnunciePage() {
 
         {/* FAQ */}
         <div className="px-5 lg:px-20 pb-16">
-          <div className="bg-[#27272a] h-px mb-10" />
+          <div className="bg-[#141d2c] h-px mb-10" />
           <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[40px] leading-none mb-8">
             Dúvidas frequentes
           </h2>
@@ -199,10 +199,10 @@ export default function AnunciePage() {
             {FAQS.map((faq) => (
               <div
                 key={faq.q}
-                className="bg-[#18181b] border border-[#27272a] rounded-[10px] p-5"
+                className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5"
               >
                 <p className="text-white text-[15px] font-semibold mb-2">{faq.q}</p>
-                <p className="text-[#a1a1aa] text-[14px] leading-[22px]">{faq.a}</p>
+                <p className="text-[#7a9ab5] text-[14px] leading-[22px]">{faq.a}</p>
               </div>
             ))}
           </div>
@@ -210,7 +210,7 @@ export default function AnunciePage() {
 
         {/* Contact CTA */}
         <div className="px-5 lg:px-20 pb-16">
-          <div className="bg-[#18181b] border-2 border-[#ff1f1f] rounded-xl p-8 lg:p-12 flex flex-col lg:flex-row items-center gap-8">
+          <div className="bg-[#0e1520] border-2 border-[#ff1f1f] rounded-xl p-8 lg:p-12 flex flex-col lg:flex-row items-center gap-8">
             <div className="flex-1">
               <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[44px] leading-none mb-3">
                 Pronto para anunciar?
@@ -229,11 +229,11 @@ export default function AnunciePage() {
               </a>
               <a
                 href="https://wa.me/5511999999999"
-                className="bg-[#09090b] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[52px] px-10 flex items-center justify-center rounded-[6px] transition-colors whitespace-nowrap"
+                className="bg-[#070a12] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[52px] px-10 flex items-center justify-center rounded-[6px] transition-colors whitespace-nowrap"
               >
                 WhatsApp comercial
               </a>
-              <p className="text-[#52525b] text-[12px] text-center">
+              <p className="text-[#253750] text-[12px] text-center">
                 Seg–Sex, 9h às 18h
               </p>
             </div>

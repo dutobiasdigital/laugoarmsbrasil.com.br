@@ -59,13 +59,13 @@ export default async function BlogArtigoPage({
   ];
 
   return (
-    <div className="min-h-screen bg-[#09090b] flex flex-col">
+    <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
 
       <main className="flex-1 pt-16">
         {/* Breadcrumb */}
         <div className="px-5 lg:px-20 pt-7 pb-2">
-          <Link href="/blog" className="text-[#a1a1aa] hover:text-white text-[14px] transition-colors">
+          <Link href="/blog" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">
             ← Blog
           </Link>
         </div>
@@ -73,7 +73,7 @@ export default async function BlogArtigoPage({
         {/* Article Header */}
         <div className="px-5 lg:px-20 pt-4 pb-8">
           <div className="flex items-center gap-2 mb-4">
-            <span className="bg-[#27272a] border border-[#3f3f46] text-[#a1a1aa] text-[11px] px-2.5 py-[3px] rounded-full">
+            <span className="bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] text-[11px] px-2.5 py-[3px] rounded-full">
               {post.category.name}
             </span>
             {post.isExclusive && (
@@ -93,12 +93,12 @@ export default async function BlogArtigoPage({
             </p>
           )}
 
-          <div className="bg-[#27272a] h-px max-w-[860px] mb-4" />
+          <div className="bg-[#141d2c] h-px max-w-[860px] mb-4" />
           <p className="text-[#d4d4da] text-[14px] font-medium mb-1">{post.authorName}</p>
-          <p className="text-[#52525b] text-[13px] mb-4">
+          <p className="text-[#253750] text-[13px] mb-4">
             {post.publishedAt?.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}
           </p>
-          <div className="bg-[#27272a] h-px max-w-[860px]" />
+          <div className="bg-[#141d2c] h-px max-w-[860px]" />
         </div>
 
         {/* Content + Sidebar */}
@@ -106,12 +106,12 @@ export default async function BlogArtigoPage({
           {/* Article Body */}
           <div className="flex-1 min-w-0 max-w-[860px]">
             {/* Featured Image */}
-            <div className="bg-[#27272a] rounded-[8px] h-[260px] lg:h-[420px] flex items-center justify-center mb-8 overflow-hidden">
+            <div className="bg-[#141d2c] rounded-[8px] h-[260px] lg:h-[420px] flex items-center justify-center mb-8 overflow-hidden">
               {post.featureImageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={post.featureImageUrl} alt={post.title} className="w-full h-full object-cover rounded-[8px]" />
               ) : (
-                <p className="text-[#3f3f46] text-[13px] font-mono">Imagem do artigo</p>
+                <p className="text-[#1c2a3e] text-[13px] font-mono">Imagem do artigo</p>
               )}
             </div>
 
@@ -126,8 +126,8 @@ export default async function BlogArtigoPage({
                 <p className="text-[#d4d4da] text-[17px] leading-[28px] mb-4">
                   {post.excerpt ?? "Leia o artigo completo com uma assinatura Magnum."}
                 </p>
-                <div className="h-[160px] bg-gradient-to-b from-transparent to-[#09090b] -mt-20 relative z-10" />
-                <div className="bg-[#18181b] border-2 border-[#ff1f1f] rounded-xl p-6 lg:p-8 flex flex-col gap-4 mt-4">
+                <div className="h-[160px] bg-gradient-to-b from-transparent to-[#070a12] -mt-20 relative z-10" />
+                <div className="bg-[#0e1520] border-2 border-[#ff1f1f] rounded-xl p-6 lg:p-8 flex flex-col gap-4 mt-4">
                   <div className="text-[32px]">🔒</div>
                   <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] lg:text-[36px] leading-none">
                     Conteúdo exclusivo para assinantes
@@ -139,11 +139,11 @@ export default async function BlogArtigoPage({
                     <Link href="/assine" className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[16px] font-semibold h-[52px] px-6 flex items-center justify-center rounded-[8px] transition-colors">
                       Assinar agora →
                     </Link>
-                    <Link href="/auth/login" className="bg-[#09090b] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] text-[14px] font-medium h-[52px] px-6 flex items-center justify-center rounded-[8px] transition-colors">
+                    <Link href="/auth/login" className="bg-[#070a12] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] font-medium h-[52px] px-6 flex items-center justify-center rounded-[8px] transition-colors">
                       Já sou assinante
                     </Link>
                   </div>
-                  <p className="text-[#52525b] text-[13px]">R$ 29,90/trimestre · Cancele quando quiser</p>
+                  <p className="text-[#253750] text-[13px]">R$ 29,90/trimestre · Cancele quando quiser</p>
                 </div>
               </>
             )}
@@ -152,12 +152,12 @@ export default async function BlogArtigoPage({
           {/* Sidebar */}
           <aside className="hidden lg:flex flex-col gap-5 w-[360px] shrink-0 sticky top-20">
             {/* TOC */}
-            <div className="bg-[#18181b] border border-[#27272a] rounded-[10px] p-5">
-              <p className="text-[#52525b] text-[11px] font-semibold tracking-[1px] uppercase mb-3">Neste Artigo</p>
-              <div className="bg-[#27272a] h-px mb-3" />
+            <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5">
+              <p className="text-[#253750] text-[11px] font-semibold tracking-[1px] uppercase mb-3">Neste Artigo</p>
+              <div className="bg-[#141d2c] h-px mb-3" />
               <ul className="flex flex-col gap-2">
                 {tocItems.map((item, i) => (
-                  <li key={i} className={`text-[13px] ${i === 0 ? "text-[#ff1f1f] font-medium" : "text-[#a1a1aa]"}`}>
+                  <li key={i} className={`text-[13px] ${i === 0 ? "text-[#ff1f1f] font-medium" : "text-[#7a9ab5]"}`}>
                     {i + 1}. {item}
                   </li>
                 ))}
@@ -165,11 +165,11 @@ export default async function BlogArtigoPage({
             </div>
 
             {/* Share */}
-            <div className="bg-[#18181b] border border-[#27272a] rounded-[10px] p-5">
-              <p className="text-[#a1a1aa] text-[13px] font-semibold mb-3">Compartilhar</p>
+            <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5">
+              <p className="text-[#7a9ab5] text-[13px] font-semibold mb-3">Compartilhar</p>
               <div className="flex gap-2">
                 {["Twitter/X", "WhatsApp", "Copiar link"].map((s) => (
-                  <button key={s} className="flex-1 bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#a1a1aa] hover:text-white text-[11px] h-[36px] rounded-[6px] transition-colors">
+                  <button key={s} className="flex-1 bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#7a9ab5] hover:text-white text-[11px] h-[36px] rounded-[6px] transition-colors">
                     {s}
                   </button>
                 ))}

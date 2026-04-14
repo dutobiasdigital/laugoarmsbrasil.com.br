@@ -10,8 +10,8 @@ interface Admin {
 }
 
 const inputCls =
-  "bg-[#09090b] border border-[#3f3f46] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#52525b] focus:outline-none focus:border-[#ff1f1f] w-full";
-const labelCls = "block text-[#a1a1aa] text-[12px] font-semibold mb-1.5";
+  "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full";
+const labelCls = "block text-[#7a9ab5] text-[12px] font-semibold mb-1.5";
 
 export default function ConfiguracoesClient({ admins }: { admins: Admin[] }) {
   const [email, setEmail] = useState("");
@@ -49,22 +49,22 @@ export default function ConfiguracoesClient({ admins }: { admins: Admin[] }) {
         <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[22px] leading-none mb-4">
           Administradores
         </h2>
-        <div className="bg-[#18181b] border border-[#27272a] rounded-[10px] overflow-hidden">
-          <div className="bg-[#27272a] px-5 py-3 grid grid-cols-3 gap-3">
+        <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
+          <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-3 gap-3">
             {["Nome", "E-mail", "Desde"].map((h) => (
-              <p key={h} className="text-[#52525b] text-[11px] font-semibold tracking-[0.5px]">
+              <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">
                 {h}
               </p>
             ))}
           </div>
           {admins.length === 0 ? (
-            <p className="text-[#52525b] text-[13px] p-6 text-center">
+            <p className="text-[#253750] text-[13px] p-6 text-center">
               Nenhum administrador cadastrado.
             </p>
           ) : (
             admins.map((admin, i) => (
               <div key={admin.id}>
-                {i > 0 && <div className="bg-[#27272a] h-px" />}
+                {i > 0 && <div className="bg-[#141d2c] h-px" />}
                 <div className="px-5 py-3.5 grid grid-cols-3 gap-3 items-center">
                   <div className="flex items-center gap-2">
                     <div className="w-[28px] h-[28px] rounded-full bg-[#ff1f1f] flex items-center justify-center text-[11px] font-bold text-white shrink-0">
@@ -72,8 +72,8 @@ export default function ConfiguracoesClient({ admins }: { admins: Admin[] }) {
                     </div>
                     <p className="text-[#d4d4da] text-[14px]">{admin.name}</p>
                   </div>
-                  <p className="text-[#a1a1aa] text-[13px]">{admin.email}</p>
-                  <p className="text-[#52525b] text-[13px]">{admin.createdAt}</p>
+                  <p className="text-[#7a9ab5] text-[13px]">{admin.email}</p>
+                  <p className="text-[#253750] text-[13px]">{admin.createdAt}</p>
                 </div>
               </div>
             ))
@@ -86,7 +86,7 @@ export default function ConfiguracoesClient({ admins }: { admins: Admin[] }) {
         <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[22px] leading-none mb-2">
           Adicionar Administrador
         </h2>
-        <p className="text-[#a1a1aa] text-[13px] mb-4">
+        <p className="text-[#7a9ab5] text-[13px] mb-4">
           Digite o e-mail de um usuário cadastrado para conceder acesso de administrador.
         </p>
 
@@ -138,8 +138,8 @@ export default function ConfiguracoesClient({ admins }: { admins: Admin[] }) {
             { label: "Banco de dados", value: "PostgreSQL (Supabase)" },
             { label: "Hospedagem", value: "Hostinger" },
           ].map((item) => (
-            <div key={item.label} className="bg-[#18181b] border border-[#27272a] rounded-[8px] p-4">
-              <p className="text-[#52525b] text-[11px] font-semibold tracking-[0.5px] mb-1">
+            <div key={item.label} className="bg-[#0e1520] border border-[#141d2c] rounded-[8px] p-4">
+              <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] mb-1">
                 {item.label.toUpperCase()}
               </p>
               <p className="text-[#d4d4da] text-[14px]">{item.value}</p>

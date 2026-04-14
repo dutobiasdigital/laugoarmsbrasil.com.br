@@ -43,10 +43,10 @@ export default async function AdminPlanosPage() {
       <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">
         Planos
       </h1>
-      <p className="text-[#a1a1aa] text-[14px] mb-6">
+      <p className="text-[#7a9ab5] text-[14px] mb-6">
         Gerencie os planos de assinatura disponíveis.
       </p>
-      <div className="bg-[#27272a] h-px mb-6" />
+      <div className="bg-[#141d2c] h-px mb-6" />
 
       <PlanosClient plans={serialized} />
     </>

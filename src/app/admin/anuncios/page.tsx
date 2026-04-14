@@ -78,7 +78,7 @@ export default async function AdminAnunciosPage({
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">
             Anúncios
           </h1>
-          <p className="text-[#a1a1aa] text-[14px]">
+          <p className="text-[#7a9ab5] text-[14px]">
             {total.toLocaleString("pt-BR")} banners cadastrados
           </p>
         </div>
@@ -90,7 +90,7 @@ export default async function AdminAnunciosPage({
         </Link>
       </div>
 
-      <div className="bg-[#27272a] h-px mb-6" />
+      <div className="bg-[#141d2c] h-px mb-6" />
 
       {/* Filters */}
       <form method="GET" className="flex flex-wrap gap-2 mb-5">
@@ -98,18 +98,18 @@ export default async function AdminAnunciosPage({
           name="q"
           defaultValue={q}
           placeholder="🔍 Buscar por nome ou anunciante..."
-          className="bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#52525b] focus:outline-none focus:border-[#ff1f1f] w-[300px]"
+          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-[300px]"
         />
         <button
           type="submit"
-          className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[38px] px-4 rounded-[6px] transition-colors"
+          className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[38px] px-4 rounded-[6px] transition-colors"
         >
           Filtrar
         </button>
         {q && (
           <Link
             href="/admin/anuncios"
-            className="text-[#a1a1aa] hover:text-white text-[13px] h-[38px] flex items-center px-2 transition-colors"
+            className="text-[#7a9ab5] hover:text-white text-[13px] h-[38px] flex items-center px-2 transition-colors"
           >
             Limpar
           </Link>
@@ -118,8 +118,8 @@ export default async function AdminAnunciosPage({
 
       {/* Grid */}
       {ads.length === 0 ? (
-        <div className="bg-[#18181b] border border-[#27272a] rounded-[10px] p-12 text-center">
-          <p className="text-[#52525b] text-[13px]">Nenhum anúncio cadastrado.</p>
+        <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-12 text-center">
+          <p className="text-[#253750] text-[13px]">Nenhum anúncio cadastrado.</p>
           <Link
             href="/admin/anuncios/novo"
             className="inline-flex mt-4 bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[13px] font-semibold h-[38px] px-5 items-center rounded-[6px] transition-colors"
@@ -136,9 +136,9 @@ export default async function AdminAnunciosPage({
             return (
               <div
                 key={ad.id}
-                className="bg-[#18181b] border border-[#27272a] rounded-[10px] overflow-hidden"
+                className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden"
               >
-                <div className="h-[120px] bg-[#27272a] flex items-center justify-center overflow-hidden">
+                <div className="h-[120px] bg-[#141d2c] flex items-center justify-center overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={ad.imageUrl}
@@ -151,29 +151,29 @@ export default async function AdminAnunciosPage({
                     <span
                       className={`text-[10px] font-bold px-2 py-[2px] rounded-[2px] ${
                         expired
-                          ? "bg-[#27272a] text-[#52525b]"
+                          ? "bg-[#141d2c] text-[#253750]"
                           : isActive
                           ? "bg-[#0f381f] text-[#22c55e]"
-                          : "bg-[#27272a] text-[#52525b]"
+                          : "bg-[#141d2c] text-[#253750]"
                       }`}
                     >
                       {expired ? "EXPIRADO" : isActive ? "ATIVO" : "INATIVO"}
                     </span>
-                    <span className="bg-[#27272a] text-[#a1a1aa] text-[10px] px-2 py-[2px] rounded-[2px]">
+                    <span className="bg-[#141d2c] text-[#7a9ab5] text-[10px] px-2 py-[2px] rounded-[2px]">
                       {POSITION_LABELS[ad.position] ?? ad.position}
                     </span>
                   </div>
                   <p className="text-[#d4d4da] text-[14px] font-semibold mb-0.5 truncate">
                     {ad.name}
                   </p>
-                  <p className="text-[#a1a1aa] text-[12px] mb-3">{ad.advertiser}</p>
+                  <p className="text-[#7a9ab5] text-[12px] mb-3">{ad.advertiser}</p>
                   <div className="flex items-center justify-between">
-                    <p className="text-[#52525b] text-[11px]">
+                    <p className="text-[#253750] text-[11px]">
                       {ad._count.impressions.toLocaleString("pt-BR")} impressões
                     </p>
                     <Link
                       href={`/admin/anuncios/${ad.id}`}
-                      className="text-[#a1a1aa] hover:text-white text-[13px] transition-colors"
+                      className="text-[#7a9ab5] hover:text-white text-[13px] transition-colors"
                     >
                       Editar →
                     </Link>
@@ -194,7 +194,7 @@ export default async function AdminAnunciosPage({
               className={`w-[30px] h-[30px] flex items-center justify-center rounded-[4px] text-[13px] font-semibold transition-colors ${
                 p === page
                   ? "bg-[#ff1f1f] text-white"
-                  : "bg-[#27272a] border border-[#3f3f46] text-[#a1a1aa] hover:text-white"
+                  : "bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
               }`}
             >
               {p}

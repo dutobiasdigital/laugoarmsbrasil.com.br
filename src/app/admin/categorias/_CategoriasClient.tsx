@@ -10,7 +10,7 @@ interface Category {
   _count: { articles: number };
 }
 
-const inputCls = "bg-[#09090b] border border-[#3f3f46] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#52525b] focus:outline-none focus:border-[#ff1f1f] w-full";
+const inputCls = "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full";
 
 export default function CategoriasClient({ categories: initial }: { categories: Category[] }) {
   const router = useRouter();
@@ -73,8 +73,8 @@ export default function CategoriasClient({ categories: initial }: { categories: 
       )}
 
       {/* New category */}
-      <div className="bg-[#18181b] border border-[#27272a] rounded-[10px] p-5 mb-6">
-        <p className="text-[#a1a1aa] text-[12px] font-semibold uppercase tracking-[1px] mb-3">Nova Categoria</p>
+      <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5 mb-6">
+        <p className="text-[#7a9ab5] text-[12px] font-semibold uppercase tracking-[1px] mb-3">Nova Categoria</p>
         <div className="flex gap-2">
           <input
             className={inputCls}
@@ -94,20 +94,20 @@ export default function CategoriasClient({ categories: initial }: { categories: 
       </div>
 
       {/* Categories list */}
-      <div className="bg-[#18181b] border border-[#27272a] rounded-[10px] overflow-hidden">
-        <div className="bg-[#27272a] px-4 py-2.5 grid grid-cols-[1fr_80px_80px] gap-4">
-          <p className="text-[#52525b] text-[11px] font-semibold tracking-[0.5px] uppercase">Nome</p>
-          <p className="text-[#52525b] text-[11px] font-semibold tracking-[0.5px] uppercase">Artigos</p>
-          <p className="text-[#52525b] text-[11px] font-semibold tracking-[0.5px] uppercase">Ações</p>
+      <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
+        <div className="bg-[#141d2c] px-4 py-2.5 grid grid-cols-[1fr_80px_80px] gap-4">
+          <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] uppercase">Nome</p>
+          <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] uppercase">Artigos</p>
+          <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] uppercase">Ações</p>
         </div>
 
         {categories.length === 0 && (
-          <p className="text-[#52525b] text-[13px] px-4 py-8 text-center">Nenhuma categoria cadastrada.</p>
+          <p className="text-[#253750] text-[13px] px-4 py-8 text-center">Nenhuma categoria cadastrada.</p>
         )}
 
         {categories.map((cat, i) => (
           <div key={cat.id}>
-            {i > 0 && <div className="bg-[#27272a] h-px" />}
+            {i > 0 && <div className="bg-[#141d2c] h-px" />}
             <div className="px-4 py-3 grid grid-cols-[1fr_80px_80px] gap-4 items-center">
               {editingId === cat.id ? (
                 <>
@@ -129,7 +129,7 @@ export default function CategoriasClient({ categories: initial }: { categories: 
                     </button>
                     <button
                       onClick={() => setEditingId(null)}
-                      className="bg-[#27272a] border border-[#3f3f46] text-[#a1a1aa] text-[11px] h-[28px] px-2 rounded transition-colors"
+                      className="bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] text-[11px] h-[28px] px-2 rounded transition-colors"
                     >
                       ✕
                     </button>
@@ -139,19 +139,19 @@ export default function CategoriasClient({ categories: initial }: { categories: 
                 <>
                   <div>
                     <p className="text-[#d4d4da] text-[14px]">{cat.name}</p>
-                    <p className="text-[#52525b] text-[11px]">{cat.slug}</p>
+                    <p className="text-[#253750] text-[11px]">{cat.slug}</p>
                   </div>
-                  <p className="text-[#a1a1aa] text-[13px]">{cat._count.articles}</p>
+                  <p className="text-[#7a9ab5] text-[13px]">{cat._count.articles}</p>
                   <div className="flex gap-1">
                     <button
                       onClick={() => { setEditingId(cat.id); setEditName(cat.name); }}
-                      className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#a1a1aa] hover:text-white text-[11px] h-[28px] px-2 rounded transition-colors"
+                      className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#7a9ab5] hover:text-white text-[11px] h-[28px] px-2 rounded transition-colors"
                     >
                       Editar
                     </button>
                     <button
                       onClick={() => handleDelete(cat.id, cat.name)}
-                      className="bg-[#27272a] border border-[#3f3f46] hover:border-red-800 text-[#52525b] hover:text-red-400 text-[11px] h-[28px] px-2 rounded transition-colors"
+                      className="bg-[#141d2c] border border-[#1c2a3e] hover:border-red-800 text-[#253750] hover:text-red-400 text-[11px] h-[28px] px-2 rounded transition-colors"
                     >
                       ✕
                     </button>

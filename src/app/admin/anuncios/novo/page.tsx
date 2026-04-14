@@ -6,10 +6,10 @@ import Link from "next/link";
 import ImageUpload, { slugify } from "@/components/admin/ImageUpload";
 
 const inputCls =
-  "bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#52525b] focus:outline-none focus:border-[#ff1f1f] w-full";
-const labelCls = "block text-[#a1a1aa] text-[12px] font-semibold mb-1.5";
+  "bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full";
+const labelCls = "block text-[#7a9ab5] text-[12px] font-semibold mb-1.5";
 const selectCls =
-  "bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full";
+  "bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full";
 
 export default function NovoAnuncioPage() {
   const router = useRouter();
@@ -41,18 +41,18 @@ export default function NovoAnuncioPage() {
   return (
     <>
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/anuncios" className="text-[#a1a1aa] hover:text-white text-[14px] transition-colors">
+        <Link href="/admin/anuncios" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">
           ← Anúncios
         </Link>
-        <span className="text-[#27272a]">/</span>
+        <span className="text-[#141d2c]">/</span>
         <span className="text-[#d4d4da] text-[14px]">Novo Anúncio</span>
       </div>
 
       <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">
         Novo Anúncio
       </h1>
-      <p className="text-[#a1a1aa] text-[14px] mb-6">Cadastre um novo banner publicitário.</p>
-      <div className="bg-[#27272a] h-px mb-6" />
+      <p className="text-[#7a9ab5] text-[14px] mb-6">Cadastre um novo banner publicitário.</p>
+      <div className="bg-[#141d2c] h-px mb-6" />
 
       {error && (
         <div className="bg-[#2d0a0a] border border-[#ff1f1f] rounded-[8px] px-4 py-3 mb-5 text-[#ff6b6b] text-[13px]">
@@ -136,7 +136,7 @@ export default function NovoAnuncioPage() {
           </button>
           <Link
             href="/admin/anuncios"
-            className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[44px] px-6 flex items-center rounded-[6px] transition-colors"
+            className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[44px] px-6 flex items-center rounded-[6px] transition-colors"
           >
             Cancelar
           </Link>

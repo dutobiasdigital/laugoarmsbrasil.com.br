@@ -4,8 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 const inputCls =
-  "bg-[#09090b] border border-[#3f3f46] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#52525b] focus:outline-none focus:border-[#ff1f1f] w-full";
-const labelCls = "block text-[#a1a1aa] text-[11px] font-semibold mb-1";
+  "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full";
+const labelCls = "block text-[#7a9ab5] text-[11px] font-semibold mb-1";
 
 interface Plan {
   id: string;
@@ -114,12 +114,12 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
         {initialPlans.map((plan) => (
           <div
             key={plan.id}
-            className="bg-[#18181b] border border-[#27272a] rounded-[10px] p-5"
+            className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5"
           >
             {editingId === plan.id ? (
               /* Edit inline form */
               <div>
-                <p className="text-[#a1a1aa] text-[12px] font-semibold mb-4">
+                <p className="text-[#7a9ab5] text-[12px] font-semibold mb-4">
                   Editando plano
                 </p>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
@@ -145,7 +145,7 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
                   <div>
                     <label className={labelCls}>Intervalo (meses)</label>
                     <select
-                      className="bg-[#09090b] border border-[#3f3f46] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full"
+                      className="bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full"
                       value={form.intervalMonths}
                       onChange={(e) => setForm({ ...form, intervalMonths: e.target.value })}
                     >
@@ -186,7 +186,7 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
                   </button>
                   <button
                     onClick={() => setEditingId(null)}
-                    className="bg-[#27272a] border border-[#3f3f46] text-[#d4d4da] text-[13px] h-[36px] px-4 rounded-[6px] hover:border-zinc-500 transition-colors"
+                    className="bg-[#141d2c] border border-[#1c2a3e] text-[#d4d4da] text-[13px] h-[36px] px-4 rounded-[6px] hover:border-zinc-500 transition-colors"
                   >
                     Cancelar
                   </button>
@@ -202,24 +202,24 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
                       className={`text-[10px] font-bold px-2 py-[2px] rounded-[2px] ${
                         plan.active
                           ? "bg-[#0f381f] text-[#22c55e]"
-                          : "bg-[#27272a] text-[#52525b]"
+                          : "bg-[#141d2c] text-[#253750]"
                       }`}
                     >
                       {plan.active ? "ATIVO" : "INATIVO"}
                     </span>
                   </div>
-                  <p className="text-[#a1a1aa] text-[13px]">
+                  <p className="text-[#7a9ab5] text-[13px]">
                     {formatPrice(plan.priceInCents)} /{" "}
                     {intervalLabel(plan.intervalMonths).toLowerCase()} ·{" "}
                     {plan.subscriberCount.toLocaleString("pt-BR")} assinantes
                   </p>
                   {plan.description && (
-                    <p className="text-[#52525b] text-[12px] mt-1">{plan.description}</p>
+                    <p className="text-[#253750] text-[12px] mt-1">{plan.description}</p>
                   )}
                 </div>
                 <button
                   onClick={() => startEditing(plan)}
-                  className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] text-[13px] h-[36px] px-4 rounded-[6px] transition-colors whitespace-nowrap"
+                  className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[13px] h-[36px] px-4 rounded-[6px] transition-colors whitespace-nowrap"
                 >
                   Editar
                 </button>
@@ -231,7 +231,7 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
 
       {/* New plan form */}
       {showNew ? (
-        <div className="bg-[#18181b] border border-[#ff1f1f] rounded-[10px] p-5">
+        <div className="bg-[#0e1520] border border-[#ff1f1f] rounded-[10px] p-5">
           <p className="text-[#ff1f1f] text-[12px] font-semibold mb-4 uppercase tracking-[1px]">
             Novo Plano
           </p>
@@ -259,7 +259,7 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
             <div>
               <label className={labelCls}>Intervalo (meses)</label>
               <select
-                className="bg-[#09090b] border border-[#3f3f46] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full"
+                className="bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full"
                 value={form.intervalMonths}
                 onChange={(e) => setForm({ ...form, intervalMonths: e.target.value })}
               >
@@ -289,7 +289,7 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
             </button>
             <button
               onClick={() => setShowNew(false)}
-              className="bg-[#27272a] border border-[#3f3f46] text-[#d4d4da] text-[13px] h-[36px] px-4 rounded-[6px] hover:border-zinc-500 transition-colors"
+              className="bg-[#141d2c] border border-[#1c2a3e] text-[#d4d4da] text-[13px] h-[36px] px-4 rounded-[6px] hover:border-zinc-500 transition-colors"
             >
               Cancelar
             </button>
@@ -298,7 +298,7 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
       ) : (
         <button
           onClick={startNew}
-          className="bg-[#27272a] border border-dashed border-[#3f3f46] hover:border-zinc-500 text-[#a1a1aa] hover:text-white text-[14px] h-[48px] w-full rounded-[10px] transition-colors"
+          className="bg-[#141d2c] border border-dashed border-[#1c2a3e] hover:border-zinc-500 text-[#7a9ab5] hover:text-white text-[14px] h-[48px] w-full rounded-[10px] transition-colors"
         >
           + Adicionar novo plano
         </button>

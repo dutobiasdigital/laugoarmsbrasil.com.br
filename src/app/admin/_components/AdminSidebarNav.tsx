@@ -31,7 +31,7 @@ export default function AdminSidebarNav() {
             className={`flex items-center gap-3 px-3 py-2.5 rounded-[8px] text-[14px] mb-0.5 transition-colors ${
               isActive
                 ? "bg-[#260a0a] border border-[#ff1f1f] text-white font-semibold"
-                : "text-[#a1a1aa] hover:text-white hover:bg-[#27272a]"
+                : "text-[#7a9ab5] hover:text-white hover:bg-[#141d2c]"
             }`}
           >
             <span className={`text-[15px] ${isActive ? "text-[#ff1f1f]" : ""}`}>

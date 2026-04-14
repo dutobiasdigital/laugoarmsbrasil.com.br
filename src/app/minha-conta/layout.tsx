@@ -46,7 +46,7 @@ export default async function MinhaConta({
   if (!profile) redirect("/auth/login");
 
   return (
-    <div className="min-h-screen bg-[#09090b] flex">
+    <div className="min-h-screen bg-[#070a12] flex">
       <SidebarNav user={profile} />
       <main className="flex-1 lg:ml-[240px] pt-14 lg:pt-0 pb-20 lg:pb-0 px-5 lg:px-8 py-7">
         {children}

@@ -9,7 +9,7 @@ export default async function Header() {
   } = await supabase.auth.getUser();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[#09090b] border-b border-[#27272a] h-16 flex items-center px-5 lg:px-20">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#070a12] border-b border-[#141d2c] h-16 flex items-center px-5 lg:px-20">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2 shrink-0">
         <Image
@@ -37,10 +37,10 @@ export default async function Header() {
           <Link
             key={item.href}
             href={item.href}
-            className="flex items-center gap-1 text-[#a1a1aa] hover:text-white text-[13px] font-semibold transition-colors"
+            className="flex items-center gap-1 text-[#7a9ab5] hover:text-white text-[13px] font-semibold transition-colors"
           >
             {item.label}
-            {item.arrow && <span className="text-[#52525b] text-[11px]">▾</span>}
+            {item.arrow && <span className="text-[#253750] text-[11px]">▾</span>}
           </Link>
         ))}
       </nav>
@@ -49,12 +49,12 @@ export default async function Header() {
 
       {/* Actions */}
       <div className="flex items-center gap-2.5">
-        <span className="text-[#a1a1aa] text-base hidden lg:block">☀</span>
+        <span className="text-[#7a9ab5] text-base hidden lg:block">☀</span>
 
         {user ? (
           <Link
             href="/minha-conta"
-            className="border border-[#3f3f46] text-[#a1a1aa] hover:text-white hover:border-zinc-500 text-[13px] font-semibold px-4 py-2 rounded transition-colors"
+            className="border border-[#1c2a3e] text-[#7a9ab5] hover:text-white hover:border-zinc-500 text-[13px] font-semibold px-4 py-2 rounded transition-colors"
           >
             Minha conta
           </Link>
@@ -62,7 +62,7 @@ export default async function Header() {
           <>
             <Link
               href="/auth/login"
-              className="border border-[#3f3f46] text-[#a1a1aa] hover:text-white hover:border-zinc-500 text-[13px] font-semibold px-4 py-2 rounded transition-colors hidden sm:flex"
+              className="border border-[#1c2a3e] text-[#7a9ab5] hover:text-white hover:border-zinc-500 text-[13px] font-semibold px-4 py-2 rounded transition-colors hidden sm:flex"
             >
               Entrar
             </Link>

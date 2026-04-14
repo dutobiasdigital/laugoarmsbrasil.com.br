@@ -112,7 +112,7 @@ export default async function AssinePage() {
     : FALLBACK_PLANS;
 
   return (
-    <div className="min-h-screen bg-[#09090b] flex flex-col">
+    <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
 
       <main className="flex-1 pt-16">
@@ -120,8 +120,8 @@ export default async function AssinePage() {
         <div className="h-[4px] bg-[#ff1f1f] w-full" />
 
         {/* Hero */}
-        <div className="bg-[#18181b] py-16 flex flex-col items-center px-5">
-          <div className="flex items-center gap-2 bg-[#27272a] border border-[#ff1f1f]/40 px-3.5 py-1.5 rounded-full mb-6">
+        <div className="bg-[#0e1520] py-16 flex flex-col items-center px-5">
+          <div className="flex items-center gap-2 bg-[#141d2c] border border-[#ff1f1f]/40 px-3.5 py-1.5 rounded-full mb-6">
             <span className="text-[#ff1f1f] text-[10px] font-semibold tracking-[1px] uppercase">
               ⭐ Mais de 20 anos
             </span>
@@ -135,7 +135,7 @@ export default async function AssinePage() {
         </div>
 
         {/* Trust bar */}
-        <div className="bg-[#27272a] border-y border-[#27272a]">
+        <div className="bg-[#141d2c] border-y border-[#141d2c]">
           <div className="flex flex-wrap items-center justify-center gap-6 lg:gap-10 px-5 py-4">
             {[
               "✓  Cancele quando quiser",
@@ -155,7 +155,7 @@ export default async function AssinePage() {
               <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[40px] lg:text-[44px] leading-none mb-2">
                 Escolha seu plano
               </h2>
-              <p className="text-[#a1a1aa] text-[16px]">
+              <p className="text-[#7a9ab5] text-[16px]">
                 Todos os planos incluem acesso ao acervo completo
               </p>
             </div>
@@ -168,13 +168,13 @@ export default async function AssinePage() {
                 className={`relative flex flex-col rounded-xl p-7 ${
                   plan.highlight
                     ? "bg-[#1f0a0a] border-2 border-[#ff1f1f]"
-                    : "bg-[#18181b] border border-[#27272a]"
+                    : "bg-[#0e1520] border border-[#141d2c]"
                 }`}
               >
                 {plan.badge && (
                   <div className="absolute -top-3 left-6">
                     <span className={`text-[10px] font-semibold px-3 py-1 rounded-full uppercase tracking-[0.5px] ${
-                      plan.highlight ? "bg-[#ff1f1f] text-white" : "bg-[#27272a] text-[#a1a1aa]"
+                      plan.highlight ? "bg-[#ff1f1f] text-white" : "bg-[#141d2c] text-[#7a9ab5]"
                     }`}>
                       {plan.badge}
                     </span>
@@ -185,7 +185,7 @@ export default async function AssinePage() {
                   <h3 className={`text-[20px] font-semibold mb-0.5 ${plan.highlight ? "text-white" : "text-[#d4d4da]"}`}>
                     {plan.name}
                   </h3>
-                  <p className="text-[#52525b] text-[12px]">{plan.description}</p>
+                  <p className="text-[#253750] text-[12px]">{plan.description}</p>
                 </div>
 
                 <div className="mb-5">
@@ -193,7 +193,7 @@ export default async function AssinePage() {
                     <span className={`font-['Barlow_Condensed'] font-bold text-[52px] leading-none ${plan.highlight ? "text-[#ff1f1f]" : "text-white"}`}>
                       {formatCurrency(plan.priceInCents)}
                     </span>
-                    <span className="text-[#a1a1aa] text-[15px] mb-1.5">
+                    <span className="text-[#7a9ab5] text-[15px] mb-1.5">
                       /{plan.intervalMonths === 1 ? "mês" : plan.intervalMonths === 3 ? "trimestre" : plan.intervalMonths === 6 ? "semestre" : "ano"}
                     </span>
                   </div>
@@ -218,7 +218,7 @@ export default async function AssinePage() {
                   className={`w-full h-[48px] flex items-center justify-center rounded-[8px] text-[15px] font-semibold transition-colors ${
                     plan.highlight
                       ? "bg-[#ff1f1f] hover:bg-[#cc0000] text-white"
-                      : "bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da]"
+                      : "bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da]"
                   }`}
                 >
                   {plan.highlight ? "Assinar agora →" : "Escolher plano"}
@@ -235,12 +235,12 @@ export default async function AssinePage() {
           </h2>
           <div className="flex flex-col gap-3 max-w-[1040px] mx-auto">
             {FAQS.map((faq) => (
-              <div key={faq.q} className="bg-[#18181b] border border-[#27272a] rounded-[8px] px-6 py-5 flex items-start justify-between gap-4">
+              <div key={faq.q} className="bg-[#0e1520] border border-[#141d2c] rounded-[8px] px-6 py-5 flex items-start justify-between gap-4">
                 <div>
                   <p className="text-white text-[16px] font-semibold mb-1.5">{faq.q}</p>
-                  <p className="text-[#a1a1aa] text-[14px] leading-[20px]">{faq.a}</p>
+                  <p className="text-[#7a9ab5] text-[14px] leading-[20px]">{faq.a}</p>
                 </div>
-                <span className="text-[#52525b] text-[18px] shrink-0">∨</span>
+                <span className="text-[#253750] text-[18px] shrink-0">∨</span>
               </div>
             ))}
           </div>
@@ -253,10 +253,10 @@ export default async function AssinePage() {
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             {TESTIMONIALS.map((t) => (
-              <div key={t.author} className="bg-[#18181b] border border-[#27272a] rounded-[10px] p-5">
+              <div key={t.author} className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5">
                 <p className="text-[#ff1f1f] text-[14px] mb-3">★★★★★</p>
                 <p className="text-[#d4d4da] text-[14px] leading-[22px] mb-3">"{t.quote}"</p>
-                <p className="text-[#52525b] text-[13px] font-medium">— {t.author}</p>
+                <p className="text-[#253750] text-[13px] font-medium">— {t.author}</p>
               </div>
             ))}
           </div>

@@ -28,9 +28,9 @@ export default function CadastroPage() {
   const panel = LEFT_PANEL[step] ?? LEFT_PANEL[1];
 
   return (
-    <div className="min-h-screen bg-[#09090b] flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-[#070a12] flex flex-col lg:flex-row">
       {/* Left panel */}
-      <div className="hidden lg:flex relative w-[720px] shrink-0 bg-[#18181b] flex-col p-20 justify-between">
+      <div className="hidden lg:flex relative w-[720px] shrink-0 bg-[#0e1520] flex-col p-20 justify-between">
         <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-[#ff1f1f]" />
 
         {/* Logo */}
@@ -46,9 +46,9 @@ export default function CadastroPage() {
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[64px] leading-[68px] whitespace-pre-line">
             {panel.headline}
           </h1>
-          <p className="text-[#a1a1aa] text-[18px] leading-[28px]">{panel.sub}</p>
+          <p className="text-[#7a9ab5] text-[18px] leading-[28px]">{panel.sub}</p>
           {step === 1 && (
-            <p className="text-[#52525b] text-[14px]">Planos a partir de R$ 29,90/trimestre</p>
+            <p className="text-[#253750] text-[14px]">Planos a partir de R$ 29,90/trimestre</p>
           )}
         </div>
       </div>
@@ -71,15 +71,15 @@ export default function CadastroPage() {
               return (
                 <div key={label} className="flex items-center gap-3">
                   {i > 0 && (
-                    <div className={`h-px flex-1 w-[80px] ${s <= step ? "bg-[#22c55e]" : "bg-[#3f3f46]"}`} />
+                    <div className={`h-px flex-1 w-[80px] ${s <= step ? "bg-[#22c55e]" : "bg-[#1c2a3e]"}`} />
                   )}
                   <div className="flex flex-col items-center gap-1">
                     <div className={`w-[32px] h-[32px] rounded-full flex items-center justify-center text-[12px] font-bold ${
-                      completed ? "bg-[#22c55e] text-white" : active ? "bg-[#ff1f1f] text-white" : "bg-[#27272a] border border-[#3f3f46] text-[#52525b]"
+                      completed ? "bg-[#22c55e] text-white" : active ? "bg-[#ff1f1f] text-white" : "bg-[#141d2c] border border-[#1c2a3e] text-[#253750]"
                     }`}>
                       {completed ? "✓" : s}
                     </div>
-                    <span className={`text-[11px] ${active ? "text-[#d4d4da]" : "text-[#52525b]"}`}>{label}</span>
+                    <span className={`text-[11px] ${active ? "text-[#d4d4da]" : "text-[#253750]"}`}>{label}</span>
                   </div>
                 </div>
               );
@@ -92,7 +92,7 @@ export default function CadastroPage() {
               <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[36px] leading-none mb-2">
                 Criar sua conta
               </h2>
-              <p className="text-[#a1a1aa] text-[15px] mb-6">Preencha seus dados para começar</p>
+              <p className="text-[#7a9ab5] text-[15px] mb-6">Preencha seus dados para começar</p>
 
               {state?.error && (
                 <div className="bg-red-950/50 border border-red-800 text-red-300 text-[13px] px-4 py-3 rounded-[6px] mb-5">
@@ -108,29 +108,29 @@ export default function CadastroPage() {
                 className="flex flex-col gap-4"
               >
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[#a1a1aa] text-[13px] font-medium">Nome completo</label>
+                  <label className="text-[#7a9ab5] text-[13px] font-medium">Nome completo</label>
                   <input type="text" name="name" required placeholder="João da Silva"
-                    className="w-full bg-[#27272a] border border-[#3f3f46] text-white placeholder-[#52525b] rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
+                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[#a1a1aa] text-[13px] font-medium">E-mail</label>
+                  <label className="text-[#7a9ab5] text-[13px] font-medium">E-mail</label>
                   <input type="email" name="email" required placeholder="seu@email.com"
-                    className="w-full bg-[#27272a] border border-[#3f3f46] text-white placeholder-[#52525b] rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
+                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[#a1a1aa] text-[13px] font-medium">Telefone <span className="text-[#52525b]">(opcional)</span></label>
+                  <label className="text-[#7a9ab5] text-[13px] font-medium">Telefone <span className="text-[#253750]">(opcional)</span></label>
                   <input type="tel" name="phone" placeholder="(11) 99999-9999"
-                    className="w-full bg-[#27272a] border border-[#3f3f46] text-white placeholder-[#52525b] rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
+                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[#a1a1aa] text-[13px] font-medium">Senha</label>
+                  <label className="text-[#7a9ab5] text-[13px] font-medium">Senha</label>
                   <input type="password" name="password" required minLength={8} placeholder="Mínimo 8 caracteres"
-                    className="w-full bg-[#27272a] border border-[#3f3f46] text-white placeholder-[#52525b] rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
+                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[#a1a1aa] text-[13px] font-medium">Confirmar senha</label>
+                  <label className="text-[#7a9ab5] text-[13px] font-medium">Confirmar senha</label>
                   <input type="password" name="confirmPassword" required minLength={8} placeholder="Repita a senha"
-                    className="w-full bg-[#27272a] border border-[#3f3f46] text-white placeholder-[#52525b] rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
+                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
                 </div>
                 <div className="flex items-start gap-2">
                   <input type="checkbox" id="terms" required className="mt-1 accent-[#ff1f1f] shrink-0" />
@@ -148,7 +148,7 @@ export default function CadastroPage() {
               </form>
 
               <div className="flex items-center justify-center gap-1 mt-5">
-                <span className="text-[#a1a1aa] text-[14px]">Já tem conta?</span>
+                <span className="text-[#7a9ab5] text-[14px]">Já tem conta?</span>
                 <Link href="/auth/login" className="text-[#ff1f1f] hover:text-[#ff4444] text-[14px] font-semibold transition-colors">
                   {" "}Entrar →
                 </Link>
@@ -162,7 +162,7 @@ export default function CadastroPage() {
               <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[36px] leading-none mb-2">
                 Escolha seu plano
               </h2>
-              <p className="text-[#a1a1aa] text-[15px] mb-6">Todos os planos incluem acesso ao acervo completo</p>
+              <p className="text-[#7a9ab5] text-[15px] mb-6">Todos os planos incluem acesso ao acervo completo</p>
 
               <div className="flex flex-col gap-3 mb-7">
                 {PLANS.map((plan) => {
@@ -172,7 +172,7 @@ export default function CadastroPage() {
                       key={plan.slug}
                       onClick={() => setSelectedPlan(plan.slug)}
                       className={`relative flex items-center gap-4 p-4 rounded-[10px] border text-left transition-all ${
-                        active ? "bg-[#260d0d] border-2 border-[#ff1f1f]" : "bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500"
+                        active ? "bg-[#260d0d] border-2 border-[#ff1f1f]" : "bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500"
                       }`}
                     >
                       {plan.popular && (
@@ -181,7 +181,7 @@ export default function CadastroPage() {
                         </span>
                       )}
                       {/* Radio */}
-                      <div className={`w-[20px] h-[20px] rounded-full border-2 flex items-center justify-center shrink-0 ${active ? "border-[#ff1f1f] bg-[#ff1f1f]" : "border-[#3f3f46] bg-[#27272a]"}`}>
+                      <div className={`w-[20px] h-[20px] rounded-full border-2 flex items-center justify-center shrink-0 ${active ? "border-[#ff1f1f] bg-[#ff1f1f]" : "border-[#1c2a3e] bg-[#141d2c]"}`}>
                         {active && <div className="w-[8px] h-[8px] bg-white rounded-full" />}
                       </div>
                       <div className="flex-1">
@@ -194,7 +194,7 @@ export default function CadastroPage() {
                         <span className={`font-['Barlow_Condensed'] font-bold text-[40px] leading-none ${active ? "text-[#ff1f1f]" : "text-white"}`}>
                           {plan.price}
                         </span>
-                        <span className="text-[#a1a1aa] text-[14px]">{plan.period}</span>
+                        <span className="text-[#7a9ab5] text-[14px]">{plan.period}</span>
                       </div>
                     </button>
                   );
@@ -207,7 +207,7 @@ export default function CadastroPage() {
               >
                 Confirmar plano →
               </button>
-              <button onClick={() => setStep(1)} className="w-full text-[#a1a1aa] hover:text-white text-[14px] mt-3 transition-colors">
+              <button onClick={() => setStep(1)} className="w-full text-[#7a9ab5] hover:text-white text-[14px] mt-3 transition-colors">
                 ← Voltar
               </button>
             </>
@@ -225,22 +225,22 @@ export default function CadastroPage() {
                   <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[36px] leading-none mb-2">
                     Conta criada com sucesso!
                   </h2>
-                  <p className="text-[#a1a1aa] text-[15px]">
+                  <p className="text-[#7a9ab5] text-[15px]">
                     Confirme seu e-mail para ativar sua conta.
                   </p>
                 </div>
 
                 {/* Summary */}
-                <div className="w-full bg-[#18181b] border border-[#27272a] rounded-[10px] p-5 text-left">
-                  <p className="text-[#a1a1aa] text-[14px] font-semibold mb-3">Resumo da assinatura</p>
-                  <div className="bg-[#27272a] h-px mb-3" />
+                <div className="w-full bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5 text-left">
+                  <p className="text-[#7a9ab5] text-[14px] font-semibold mb-3">Resumo da assinatura</p>
+                  <div className="bg-[#141d2c] h-px mb-3" />
                   {[
                     ["Plano", PLANS.find((p) => p.slug === selectedPlan)?.name ?? "Semestral"],
                     ["Valor", PLANS.find((p) => p.slug === selectedPlan)?.price ?? "R$ 54,90"],
                     ["Status", "ATIVO"],
                   ].map(([label, value]) => (
                     <div key={label} className="flex justify-between items-center py-2">
-                      <span className="text-[#52525b] text-[14px]">{label}</span>
+                      <span className="text-[#253750] text-[14px]">{label}</span>
                       {label === "Status" ? (
                         <span className="bg-[#22c55e] text-white text-[10px] font-bold px-2.5 py-[3px] rounded-full uppercase">
                           {value}

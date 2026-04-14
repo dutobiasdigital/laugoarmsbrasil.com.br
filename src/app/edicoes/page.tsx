@@ -74,28 +74,28 @@ export default async function EdicoesPage({
     t ? `/edicoes?tipo=${t}` : "/edicoes";
 
   return (
-    <div className="min-h-screen bg-[#09090b] flex flex-col">
+    <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
 
       {/* Page hero */}
-      <div className="bg-[#18181b] border-b border-[#27272a] h-[100px] flex items-center px-5 lg:px-20 mt-16">
+      <div className="bg-[#0e1520] border-b border-[#141d2c] h-[100px] flex items-center px-5 lg:px-20 mt-16">
         <div className="flex flex-col gap-1">
-          <h1 className="font-['Barlow_Condensed'] font-extrabold text-[#fafafa] text-[36px] leading-none">
+          <h1 className="font-['Barlow_Condensed'] font-extrabold text-[#dce8ff] text-[36px] leading-none">
             Edições
           </h1>
-          <p className="text-[#71717a] text-[13px]">
+          <p className="text-[#526888] text-[13px]">
             {totalRegular} edições regulares · {totalSpecial} edições especiais · {totalAll || totalRegular + totalSpecial} no total
           </p>
         </div>
         <div className="flex-1" />
-        <div className="bg-[#27272a] border border-[#3f3f46] flex items-center gap-2 px-3.5 py-2.5 rounded-md text-[#52525b] text-[14px]">
+        <div className="bg-[#141d2c] border border-[#1c2a3e] flex items-center gap-2 px-3.5 py-2.5 rounded-md text-[#253750] text-[14px]">
           <span>🔍</span>
           <span>Buscar edição...</span>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-[#09090b] border-b border-[#27272a] h-[52px] flex items-center px-5 lg:px-20">
+      <div className="bg-[#070a12] border-b border-[#141d2c] h-[52px] flex items-center px-5 lg:px-20">
         <div className="flex items-center">
           {[
             { label: "Todas", count: totalAll, href: tabHref(), active: !tipo },
@@ -108,7 +108,7 @@ export default async function EdicoesPage({
               className={`flex items-center gap-1.5 px-5 h-[52px] border-b-2 transition-colors ${
                 tab.active
                   ? "border-[#ff1f1f] text-[#ff1f1f]"
-                  : "border-transparent text-[#71717a] hover:text-[#a1a1aa]"
+                  : "border-transparent text-[#526888] hover:text-[#7a9ab5]"
               }`}
             >
               <span className="text-[14px] font-semibold">{tab.label}</span>
@@ -116,7 +116,7 @@ export default async function EdicoesPage({
                 className={`text-[11px] font-semibold px-1.5 py-[2px] rounded-full ${
                   tab.active
                     ? "bg-[#cc0000] text-white"
-                    : "bg-[#27272a] text-[#71717a]"
+                    : "bg-[#141d2c] text-[#526888]"
                 }`}
               >
                 {tab.count}
@@ -127,12 +127,12 @@ export default async function EdicoesPage({
       </div>
 
       {/* Ad leaderboard */}
-      <div className="bg-[#09090b] flex flex-col items-center justify-center h-[110px]">
-        <p className="text-[9px] font-semibold text-[#52525b] tracking-[1.5px] uppercase mb-2">
+      <div className="bg-[#070a12] flex flex-col items-center justify-center h-[110px]">
+        <p className="text-[9px] font-semibold text-[#253750] tracking-[1.5px] uppercase mb-2">
           Publicidade
         </p>
-        <div className="bg-[#27272a] border border-[#3f3f46] rounded h-[90px] w-full max-w-[728px] flex items-center justify-center">
-          <p className="font-mono text-[#52525b] text-[11px]">728 × 90 — Leaderboard</p>
+        <div className="bg-[#141d2c] border border-[#1c2a3e] rounded h-[90px] w-full max-w-[728px] flex items-center justify-center">
+          <p className="font-mono text-[#253750] text-[11px]">728 × 90 — Leaderboard</p>
         </div>
       </div>
 
@@ -142,12 +142,12 @@ export default async function EdicoesPage({
         {/* Main */}
         <div className="flex flex-col gap-8 flex-1 min-w-0">
           {years.length === 0 ? (
-            <p className="text-[#52525b] text-sm py-12 text-center">Nenhuma edição encontrada.</p>
+            <p className="text-[#253750] text-sm py-12 text-center">Nenhuma edição encontrada.</p>
           ) : (
             years.map((year) => (
               <div key={year} className="flex flex-col gap-4">
-                <p className="text-[#52525b] text-[13px] font-semibold tracking-[1px]">{year}</p>
-                <div className="bg-[#27272a] h-px w-full" />
+                <p className="text-[#253750] text-[13px] font-semibold tracking-[1px]">{year}</p>
+                <div className="bg-[#141d2c] h-px w-full" />
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                   {byYear[year].map((edition) => {
                     const isSpecial = edition.type === "SPECIAL";
@@ -243,14 +243,14 @@ export default async function EdicoesPage({
               {page > 1 && (
                 <Link
                   href={`/edicoes?${tipo ? `tipo=${tipo}&` : ""}pagina=${page - 1}`}
-                  className="border border-[#3f3f46] text-[#a1a1aa] hover:text-white text-[13px] font-semibold px-3 py-2 rounded transition-colors"
+                  className="border border-[#1c2a3e] text-[#7a9ab5] hover:text-white text-[13px] font-semibold px-3 py-2 rounded transition-colors"
                 >
                   ‹
                 </Link>
               )}
               {Array.from({ length: Math.min(totalPages, 12) }, (_, i) => i + 1).map((p) => {
                 if (p > 3 && p < totalPages - 1 && Math.abs(p - page) > 1) {
-                  if (p === 4) return <span key={p} className="text-[#3f3f46] px-1">...</span>;
+                  if (p === 4) return <span key={p} className="text-[#1c2a3e] px-1">...</span>;
                   return null;
                 }
                 return (
@@ -260,7 +260,7 @@ export default async function EdicoesPage({
                     className={`text-[13px] font-semibold px-3 py-2 rounded transition-colors ${
                       p === page
                         ? "bg-[#ff1f1f] text-white"
-                        : "border border-[#3f3f46] text-[#a1a1aa] hover:text-white"
+                        : "border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
                     }`}
                   >
                     {p}
@@ -270,7 +270,7 @@ export default async function EdicoesPage({
               {page < totalPages && (
                 <Link
                   href={`/edicoes?${tipo ? `tipo=${tipo}&` : ""}pagina=${page + 1}`}
-                  className="border border-[#3f3f46] text-[#a1a1aa] hover:text-white text-[13px] font-semibold px-3 py-2 rounded transition-colors"
+                  className="border border-[#1c2a3e] text-[#7a9ab5] hover:text-white text-[13px] font-semibold px-3 py-2 rounded transition-colors"
                 >
                   ›
                 </Link>
@@ -283,23 +283,23 @@ export default async function EdicoesPage({
         <aside className="hidden lg:flex flex-col gap-8 w-[300px] shrink-0">
           {/* Ad 300×250 */}
           <div className="flex flex-col items-center gap-1.5">
-            <p className="text-[9px] font-semibold text-[#52525b] tracking-[1.5px] uppercase">Publicidade</p>
-            <div className="bg-[#27272a] border border-[#3f3f46] rounded w-[300px] h-[250px] flex items-center justify-center">
-              <p className="font-mono text-[#52525b] text-[11px]">300×250</p>
+            <p className="text-[9px] font-semibold text-[#253750] tracking-[1.5px] uppercase">Publicidade</p>
+            <div className="bg-[#141d2c] border border-[#1c2a3e] rounded w-[300px] h-[250px] flex items-center justify-center">
+              <p className="font-mono text-[#253750] text-[11px]">300×250</p>
             </div>
           </div>
 
           {/* Edições Especiais widget */}
-          <div className="bg-[#18181b] border border-[#27272a] rounded-lg p-5 flex flex-col gap-3">
-            <p className="font-['Barlow_Condensed'] font-bold text-[#fafafa] text-[18px]">
+          <div className="bg-[#0e1520] border border-[#141d2c] rounded-lg p-5 flex flex-col gap-3">
+            <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[18px]">
               Edições Especiais
             </p>
-            <p className="text-[#71717a] text-[12px] leading-relaxed">
+            <p className="text-[#526888] text-[12px] leading-relaxed">
               62 edições temáticas sobre armas, munições, caça e legislação.
             </p>
             <Link
               href="/edicoes?tipo=especiais"
-              className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4d8] hover:text-white text-[13px] font-semibold h-[36px] flex items-center justify-center rounded transition-colors"
+              className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#b0c4d8] hover:text-white text-[13px] font-semibold h-[36px] flex items-center justify-center rounded transition-colors"
             >
               Ver Edições Especiais →
             </Link>
@@ -307,9 +307,9 @@ export default async function EdicoesPage({
 
           {/* Ad 300×600 */}
           <div className="flex flex-col items-center gap-1.5">
-            <p className="text-[9px] font-semibold text-[#52525b] tracking-[1.5px] uppercase">Publicidade</p>
-            <div className="bg-[#27272a] border border-[#3f3f46] rounded w-[300px] h-[600px] flex items-center justify-center">
-              <p className="font-mono text-[#52525b] text-[11px]">300×600</p>
+            <p className="text-[9px] font-semibold text-[#253750] tracking-[1.5px] uppercase">Publicidade</p>
+            <div className="bg-[#141d2c] border border-[#1c2a3e] rounded w-[300px] h-[600px] flex items-center justify-center">
+              <p className="font-mono text-[#253750] text-[11px]">300×600</p>
             </div>
           </div>
         </aside>

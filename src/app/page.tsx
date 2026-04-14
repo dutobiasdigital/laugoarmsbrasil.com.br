@@ -63,21 +63,21 @@ export default async function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#09090b] flex flex-col">
+    <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
 
       {/* Ad — HOME_TOP */}
-      <div className="bg-[#18181b] flex flex-col items-center justify-center h-[110px] mt-16 shrink-0">
-        <p className="text-[9px] font-semibold text-[#52525b] tracking-[1.5px] uppercase mb-2">
+      <div className="bg-[#0e1520] flex flex-col items-center justify-center h-[110px] mt-16 shrink-0">
+        <p className="text-[9px] font-semibold text-[#253750] tracking-[1.5px] uppercase mb-2">
           Publicidade
         </p>
-        <div className="bg-[#27272a] border border-[#27272a] rounded h-[90px] w-full max-w-[728px] flex items-center justify-center">
-          <p className="font-mono text-[#52525b] text-[12px]">728 × 90 — Leaderboard</p>
+        <div className="bg-[#141d2c] border border-[#141d2c] rounded h-[90px] w-full max-w-[728px] flex items-center justify-center">
+          <p className="font-mono text-[#253750] text-[12px]">728 × 90 — Leaderboard</p>
         </div>
       </div>
 
       {/* Hero */}
-      <section className="bg-[#09090b] flex items-center px-5 lg:px-20 py-16 lg:py-0 lg:h-[580px] gap-6">
+      <section className="bg-[#070a12] flex items-center px-5 lg:px-20 py-16 lg:py-0 lg:h-[580px] gap-6">
         {/* Red stripe */}
         <div className="hidden lg:block w-[3px] h-[520px] bg-[#ff1f1f] rounded-[2px] shrink-0" />
         <div className="hidden lg:block w-6 shrink-0" />
@@ -90,18 +90,18 @@ export default async function HomePage() {
             </span>
           </div>
 
-          <div className="font-['Barlow_Condensed'] font-extrabold text-[#fafafa] text-5xl lg:text-[64px] leading-tight">
+          <div className="font-['Barlow_Condensed'] font-extrabold text-[#dce8ff] text-5xl lg:text-[64px] leading-tight">
             <p>{featuredEdition ? `Revista Magnum` : "Revista Magnum"}</p>
             <p>{featuredEdition?.number ? `Edição ${featuredEdition.number}` : "Acervo Digital"}</p>
           </div>
 
-          <p className="text-[#52525b] text-[14px]">
+          <p className="text-[#253750] text-[14px]">
             {featuredEdition?.publishedAt
               ? `${featuredEdition.publishedAt.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}  ·  ${featuredEdition.pageCount ? `${featuredEdition.pageCount} páginas` : ""}  ·  ${featuredEdition.type === "SPECIAL" ? "Edição Especial" : "Edição Regular"}`
               : "O maior acervo especializado do Brasil"}
           </p>
 
-          <p className="text-[#a1a1aa] text-[16px] max-w-2xl leading-relaxed">
+          <p className="text-[#7a9ab5] text-[16px] max-w-2xl leading-relaxed">
             Nesta edição: teste completo da Beretta APX-A1, guia de recarga para .308 Win, legislação CAC 2026 e cobertura dos principais lançamentos do mercado nacional e internacional.
           </p>
 
@@ -114,7 +114,7 @@ export default async function HomePage() {
             </Link>
             <Link
               href="/edicoes"
-              className="border border-[#3f3f46] hover:border-zinc-500 text-[#a1a1aa] hover:text-white text-[15px] font-semibold px-6 py-3 rounded transition-colors"
+              className="border border-[#1c2a3e] hover:border-zinc-500 text-[#7a9ab5] hover:text-white text-[15px] font-semibold px-6 py-3 rounded transition-colors"
             >
               Ver Todas as Edições
             </Link>
@@ -124,7 +124,7 @@ export default async function HomePage() {
         <div className="flex-1 hidden lg:block" />
 
         {/* Cover */}
-        <div className="hidden lg:flex w-[340px] h-[480px] bg-[#27272a] rounded-lg items-center justify-center shrink-0">
+        <div className="hidden lg:flex w-[340px] h-[480px] bg-[#141d2c] rounded-lg items-center justify-center shrink-0">
           {featuredEdition?.coverImageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -133,7 +133,7 @@ export default async function HomePage() {
               className="w-full h-full object-cover rounded-lg"
             />
           ) : (
-            <div className="font-['Barlow_Condensed'] font-bold text-[#3f3f46] text-[18px] text-center leading-snug">
+            <div className="font-['Barlow_Condensed'] font-bold text-[#1c2a3e] text-[18px] text-center leading-snug">
               <p>CAPA</p>
               <p>{featuredEdition?.number ? `EDIÇÃO ${featuredEdition.number}` : "MAGNUM"}</p>
             </div>
@@ -142,7 +142,7 @@ export default async function HomePage() {
       </section>
 
       {/* Content row */}
-      <div className="bg-[#09090b] flex gap-10 px-5 lg:px-20 py-16 items-start">
+      <div className="bg-[#070a12] flex gap-10 px-5 lg:px-20 py-16 items-start">
 
         {/* Main column */}
         <div className="flex flex-col gap-14 flex-1 min-w-0">
@@ -150,7 +150,7 @@ export default async function HomePage() {
           {/* Últimas Edições */}
           <section>
             <div className="flex items-center mb-6">
-              <h2 className="font-['Barlow_Condensed'] font-bold text-[#fafafa] text-[30px]">
+              <h2 className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[30px]">
                 Últimas Edições
               </h2>
               <div className="flex-1" />
@@ -163,10 +163,10 @@ export default async function HomePage() {
               {(latestEditions.length > 0 ? latestEditions : Array(3).fill(null)).map((edition, i) => (
                 <div
                   key={edition?.id ?? i}
-                  className="bg-[#18181b] border border-[#27272a] rounded-lg overflow-hidden flex flex-col"
+                  className="bg-[#0e1520] border border-[#141d2c] rounded-lg overflow-hidden flex flex-col"
                 >
                   {/* Cover */}
-                  <div className="bg-[#27272a] h-[370px] flex items-center justify-center rounded-t-lg">
+                  <div className="bg-[#141d2c] h-[370px] flex items-center justify-center rounded-t-lg">
                     {edition?.coverImageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -175,7 +175,7 @@ export default async function HomePage() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <p className="font-['Barlow_Condensed'] font-bold text-[#52525b] text-[13px]">
+                      <p className="font-['Barlow_Condensed'] font-bold text-[#253750] text-[13px]">
                         {edition?.number ? `CAPA ${edition.number}` : "CAPA"}
                       </p>
                     )}
@@ -184,7 +184,7 @@ export default async function HomePage() {
                   {/* Info */}
                   <div className="flex flex-col gap-2 px-4 pt-3.5 pb-4">
                     <div className="flex items-center gap-1.5">
-                      <span className="bg-[#27272a] text-[#a1a1aa] text-[9px] font-semibold tracking-[0.5px] px-2 py-[3px] rounded-[2px]">
+                      <span className="bg-[#141d2c] text-[#7a9ab5] text-[9px] font-semibold tracking-[0.5px] px-2 py-[3px] rounded-[2px]">
                         {edition?.type === "SPECIAL" ? "ESPECIAL" : "REGULAR"}
                       </span>
                       {edition?.number && (
@@ -194,11 +194,11 @@ export default async function HomePage() {
                       )}
                     </div>
 
-                    <p className="font-['Barlow_Condensed'] font-bold text-[#fafafa] text-[17px] leading-snug">
+                    <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[17px] leading-snug">
                       {edition?.title ?? "Revista Magnum"}
                     </p>
 
-                    <p className="text-[#52525b] text-[12px]">
+                    <p className="text-[#253750] text-[12px]">
                       {edition?.publishedAt
                         ? `${edition.publishedAt.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}  ·  ${edition.pageCount ? `${edition.pageCount} págs` : ""}`
                         : "Em breve"}
@@ -214,7 +214,7 @@ export default async function HomePage() {
                     ) : (
                       <Link
                         href="/assine"
-                        className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#a1a1aa] hover:text-white text-[13px] font-semibold h-[38px] flex items-center justify-center rounded mt-1 transition-colors"
+                        className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#7a9ab5] hover:text-white text-[13px] font-semibold h-[38px] flex items-center justify-center rounded mt-1 transition-colors"
                       >
                         Assine para Ler
                       </Link>
@@ -228,7 +228,7 @@ export default async function HomePage() {
           {/* Artigos Recentes */}
           <section>
             <div className="flex items-center mb-6">
-              <h2 className="font-['Barlow_Condensed'] font-bold text-[#fafafa] text-[30px]">
+              <h2 className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[30px]">
                 Artigos Recentes
               </h2>
               <div className="flex-1" />
@@ -246,9 +246,9 @@ export default async function HomePage() {
                     { id: "3", title: "CAC 2026: Novas regras do SINARM", slug: "cac-2026", category: { name: "LEGISLAÇÃO", slug: "legislacao" }, featureImageUrl: null, publishedAt: new Date("2026-04-05"), isExclusive: false, categoryId: "3" },
                   ]
               ).map((article) => (
-                <Link key={article.id} href={`/blog/${article.slug}`} className="group block bg-[#18181b] border border-[#27272a] rounded-lg overflow-hidden hover:border-[#3f3f46] transition-colors">
+                <Link key={article.id} href={`/blog/${article.slug}`} className="group block bg-[#0e1520] border border-[#141d2c] rounded-lg overflow-hidden hover:border-[#1c2a3e] transition-colors">
                   {/* Image */}
-                  <div className="bg-[#27272a] h-[176px] relative rounded-t-lg overflow-hidden">
+                  <div className="bg-[#141d2c] h-[176px] relative rounded-t-lg overflow-hidden">
                     {article.featureImageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={article.featureImageUrl} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -267,10 +267,10 @@ export default async function HomePage() {
                     <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1px] uppercase">
                       {article.category.name}
                     </p>
-                    <p className="font-['Barlow_Condensed'] font-bold text-[#fafafa] text-[17px] leading-snug line-clamp-2">
+                    <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[17px] leading-snug line-clamp-2">
                       {article.title}
                     </p>
-                    <p className="text-[#52525b] text-[12px]">
+                    <p className="text-[#253750] text-[12px]">
                       {article.publishedAt
                         ? article.publishedAt.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })
                         : ""}
@@ -284,18 +284,18 @@ export default async function HomePage() {
           {/* CTA Banner */}
           <section className="bg-[#120000] border border-[#3d0000] rounded-lg px-12 h-[180px] flex items-center gap-8">
             <div className="flex flex-col gap-2.5 flex-1">
-              <p className="font-['Barlow_Condensed'] font-extrabold text-[#fafafa] text-[32px] leading-tight">
+              <p className="font-['Barlow_Condensed'] font-extrabold text-[#dce8ff] text-[32px] leading-tight">
                 Acervo completo nas suas mãos
               </p>
-              <p className="text-[#52525b] text-[15px]">
+              <p className="text-[#253750] text-[15px]">
                 145 edições regulares + 62 especiais. Escolha seu plano.
               </p>
             </div>
             <div className="flex items-center gap-3 shrink-0 flex-wrap">
-              <Link href="/assine" className="border border-[#3f3f46] hover:border-zinc-500 text-white text-[13px] font-semibold px-4 py-2.5 rounded transition-colors">
+              <Link href="/assine" className="border border-[#1c2a3e] hover:border-zinc-500 text-white text-[13px] font-semibold px-4 py-2.5 rounded transition-colors">
                 Trimestral
               </Link>
-              <Link href="/assine" className="border border-[#3f3f46] hover:border-zinc-500 text-white text-[13px] font-semibold px-4 py-2.5 rounded transition-colors">
+              <Link href="/assine" className="border border-[#1c2a3e] hover:border-zinc-500 text-white text-[13px] font-semibold px-4 py-2.5 rounded transition-colors">
                 Semestral
               </Link>
               <Link href="/assine" className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[13px] font-semibold px-4 py-2.5 rounded transition-colors">
@@ -309,36 +309,36 @@ export default async function HomePage() {
         <aside className="hidden lg:flex flex-col gap-8 w-[300px] shrink-0">
           {/* Ad 300×250 */}
           <div className="flex flex-col items-center gap-1.5">
-            <p className="text-[9px] font-semibold text-[#52525b] tracking-[1.5px] uppercase">
+            <p className="text-[9px] font-semibold text-[#253750] tracking-[1.5px] uppercase">
               Publicidade
             </p>
-            <div className="bg-[#18181b] border border-[#27272a] rounded w-[300px] h-[250px] flex items-center justify-center">
-              <p className="font-mono text-[#52525b] text-[12px]">300×250</p>
+            <div className="bg-[#0e1520] border border-[#141d2c] rounded w-[300px] h-[250px] flex items-center justify-center">
+              <p className="font-mono text-[#253750] text-[12px]">300×250</p>
             </div>
           </div>
 
           {/* Mais Lidos */}
-          <div className="bg-[#18181b] border border-[#27272a] rounded-lg p-5 flex flex-col gap-3">
-            <p className="font-['Barlow_Condensed'] font-bold text-[#fafafa] text-[18px]">
+          <div className="bg-[#0e1520] border border-[#141d2c] rounded-lg p-5 flex flex-col gap-3">
+            <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[18px]">
               Mais Lidos
             </p>
             {mostRead.map((title, i) => (
               <div key={i} className="flex items-start gap-2.5">
-                <span className="font-['Barlow_Condensed'] font-extrabold text-[#27272a] text-[20px] leading-none shrink-0 w-7">
+                <span className="font-['Barlow_Condensed'] font-extrabold text-[#141d2c] text-[20px] leading-none shrink-0 w-7">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <p className="text-[#a1a1aa] text-[13px] leading-snug">{title}</p>
+                <p className="text-[#7a9ab5] text-[13px] leading-snug">{title}</p>
               </div>
             ))}
           </div>
 
           {/* Ad 300×600 */}
           <div className="flex flex-col items-center gap-1.5">
-            <p className="text-[9px] font-semibold text-[#52525b] tracking-[1.5px] uppercase">
+            <p className="text-[9px] font-semibold text-[#253750] tracking-[1.5px] uppercase">
               Publicidade
             </p>
-            <div className="bg-[#18181b] border border-[#27272a] rounded w-[300px] h-[600px] flex items-center justify-center">
-              <p className="font-mono text-[#52525b] text-[12px]">300×600</p>
+            <div className="bg-[#0e1520] border border-[#141d2c] rounded w-[300px] h-[600px] flex items-center justify-center">
+              <p className="font-mono text-[#253750] text-[12px]">300×600</p>
             </div>
           </div>
         </aside>

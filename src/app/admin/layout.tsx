@@ -12,7 +12,7 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen bg-[#060608]">
       {/* Top bar */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#18181b] border-b border-[#27272a] h-[52px] flex items-center px-4 gap-3">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0e1520] border-b border-[#141d2c] h-[52px] flex items-center px-4 gap-3">
         <Link href="/admin" className="flex items-center gap-2.5 shrink-0">
           <div className="w-[26px] h-[26px] bg-[#ff1f1f] rounded-[2px]" />
           <span className="font-['Barlow_Condensed'] font-bold text-white text-[18px] tracking-[2px]">
@@ -27,16 +27,16 @@ export default async function AdminLayout({
         <div className="flex-1" />
         <Link
           href="/"
-          className="text-[#a1a1aa] hover:text-white text-[13px] transition-colors"
+          className="text-[#7a9ab5] hover:text-white text-[13px] transition-colors"
         >
           Ver site →
         </Link>
-        <div className="bg-[#27272a] w-px h-[28px]" />
+        <div className="bg-[#141d2c] w-px h-[28px]" />
         <div className="flex items-center gap-2">
           <div className="w-[28px] h-[28px] rounded-full bg-[#ff1f1f] flex items-center justify-center text-[11px] font-bold text-white shrink-0">
             {initials}
           </div>
-          <span className="text-[#a1a1aa] text-[12px] hidden sm:block">
+          <span className="text-[#7a9ab5] text-[12px] hidden sm:block">
             {firstName} ▾
           </span>
         </div>
@@ -44,7 +44,7 @@ export default async function AdminLayout({
 
       <div className="flex pt-[52px]">
         {/* Sidebar */}
-        <aside className="fixed left-0 top-[52px] bottom-0 w-[220px] bg-[#18181b] border-r border-[#27272a] flex flex-col pt-4 px-2.5 overflow-y-auto">
+        <aside className="fixed left-0 top-[52px] bottom-0 w-[220px] bg-[#0e1520] border-r border-[#141d2c] flex flex-col pt-4 px-2.5 overflow-y-auto">
           <AdminSidebarNav />
         </aside>
 

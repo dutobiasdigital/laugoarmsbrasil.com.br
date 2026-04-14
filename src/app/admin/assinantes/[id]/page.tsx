@@ -9,8 +9,8 @@ const PAYMENT_STYLE: Record<string, { bg: string; text: string; label: string }>
   APPROVED: { bg: "bg-[#0f381f]", text: "text-[#22c55e]", label: "APROVADO" },
   PENDING: { bg: "bg-[#382405]", text: "text-[#ef9f1b]", label: "PENDENTE" },
   REJECTED: { bg: "bg-[#2d0a0a]", text: "text-[#ff6b6b]", label: "REJEITADO" },
-  REFUNDED: { bg: "bg-[#27272a]", text: "text-[#a1a1aa]", label: "REEMBOLSADO" },
-  CANCELLED: { bg: "bg-[#27272a]", text: "text-[#52525b]", label: "CANCELADO" },
+  REFUNDED: { bg: "bg-[#141d2c]", text: "text-[#7a9ab5]", label: "REEMBOLSADO" },
+  CANCELLED: { bg: "bg-[#141d2c]", text: "text-[#253750]", label: "CANCELADO" },
 };
 
 export default async function AssinantePage({
@@ -74,10 +74,10 @@ export default async function AssinantePage({
   return (
     <>
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/assinantes" className="text-[#a1a1aa] hover:text-white text-[14px] transition-colors">
+        <Link href="/admin/assinantes" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">
           ← Assinantes
         </Link>
-        <span className="text-[#27272a]">/</span>
+        <span className="text-[#141d2c]">/</span>
         <span className="text-[#d4d4da] text-[14px]">{user.name}</span>
       </div>
 
@@ -86,12 +86,12 @@ export default async function AssinantePage({
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">
             {user.name}
           </h1>
-          <p className="text-[#a1a1aa] text-[14px]">
+          <p className="text-[#7a9ab5] text-[14px]">
             Cadastrado em {user.createdAt.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
           </p>
         </div>
       </div>
-      <div className="bg-[#27272a] h-px mb-6" />
+      <div className="bg-[#141d2c] h-px mb-6" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-[1100px]">
         {/* Dados + Assinatura (client) */}
@@ -134,20 +134,20 @@ export default async function AssinantePage({
 
         {/* Histórico de pagamentos */}
         <div>
-          <div className="bg-[#18181b] border border-[#27272a] rounded-[10px] overflow-hidden">
-            <div className="bg-[#27272a] px-4 py-2.5">
-              <p className="text-[#52525b] text-[11px] font-semibold tracking-[0.5px] uppercase">
+          <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
+            <div className="bg-[#141d2c] px-4 py-2.5">
+              <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] uppercase">
                 Últimos Pagamentos
               </p>
             </div>
             {user.payments.length === 0 ? (
-              <p className="text-[#52525b] text-[13px] p-5 text-center">Nenhum pagamento.</p>
+              <p className="text-[#253750] text-[13px] p-5 text-center">Nenhum pagamento.</p>
             ) : (
               user.payments.map((p, i) => {
                 const st = PAYMENT_STYLE[p.status] ?? PAYMENT_STYLE.PENDING;
                 return (
                   <div key={p.id}>
-                    {i > 0 && <div className="bg-[#27272a] h-px" />}
+                    {i > 0 && <div className="bg-[#141d2c] h-px" />}
                     <div className="px-4 py-3">
                       <div className="flex items-center justify-between mb-1">
                         <p className="text-[#d4d4da] text-[13px] font-semibold">
@@ -157,7 +157,7 @@ export default async function AssinantePage({
                           {st.label}
                         </span>
                       </div>
-                      <p className="text-[#52525b] text-[11px]">
+                      <p className="text-[#253750] text-[11px]">
                         {p.paidAt
                           ? p.paidAt.toLocaleDateString("pt-BR")
                           : p.createdAt.toLocaleDateString("pt-BR")}

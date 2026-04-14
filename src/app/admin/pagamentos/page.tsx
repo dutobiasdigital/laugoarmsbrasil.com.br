@@ -7,8 +7,8 @@ const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> 
   APPROVED: { bg: "bg-[#0f381f]", text: "text-[#22c55e]", label: "APROVADO" },
   PENDING: { bg: "bg-[#382405]", text: "text-[#ef9f1b]", label: "PENDENTE" },
   REJECTED: { bg: "bg-[#2d0a0a]", text: "text-[#ff6b6b]", label: "RECUSADO" },
-  REFUNDED: { bg: "bg-[#27272a]", text: "text-[#a1a1aa]", label: "REEMBOLSADO" },
-  CANCELLED: { bg: "bg-[#27272a]", text: "text-[#52525b]", label: "CANCELADO" },
+  REFUNDED: { bg: "bg-[#141d2c]", text: "text-[#7a9ab5]", label: "REEMBOLSADO" },
+  CANCELLED: { bg: "bg-[#141d2c]", text: "text-[#253750]", label: "CANCELADO" },
 };
 
 export default async function AdminPagamentosPage({
@@ -90,7 +90,7 @@ export default async function AdminPagamentosPage({
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">
             Pagamentos
           </h1>
-          <p className="text-[#a1a1aa] text-[14px]">
+          <p className="text-[#7a9ab5] text-[14px]">
             {total.toLocaleString("pt-BR")} transações · Total:{" "}
             <span className="text-[#22c55e] font-semibold">
               {formatCurrency(totalRevenue)}
@@ -99,7 +99,7 @@ export default async function AdminPagamentosPage({
         </div>
       </div>
 
-      <div className="bg-[#27272a] h-px mb-6" />
+      <div className="bg-[#141d2c] h-px mb-6" />
 
       {/* Filters */}
       <form method="GET" className="flex flex-wrap gap-2 mb-5">
@@ -107,12 +107,12 @@ export default async function AdminPagamentosPage({
           name="q"
           defaultValue={q}
           placeholder="🔍 Buscar por nome ou e-mail..."
-          className="bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#52525b] focus:outline-none focus:border-[#ff1f1f] w-[280px]"
+          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-[280px]"
         />
         <select
           name="status"
           defaultValue={status ?? "TODOS"}
-          className="bg-[#27272a] border border-[#3f3f46] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f]"
+          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f]"
         >
           <option value="TODOS">Todos os status</option>
           <option value="APPROVED">Aprovado</option>
@@ -123,14 +123,14 @@ export default async function AdminPagamentosPage({
         </select>
         <button
           type="submit"
-          className="bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[38px] px-4 rounded-[6px] transition-colors"
+          className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[38px] px-4 rounded-[6px] transition-colors"
         >
           Filtrar
         </button>
         {(q || status) && (
           <Link
             href="/admin/pagamentos"
-            className="text-[#a1a1aa] hover:text-white text-[13px] h-[38px] flex items-center px-2 transition-colors"
+            className="text-[#7a9ab5] hover:text-white text-[13px] h-[38px] flex items-center px-2 transition-colors"
           >
             Limpar
           </Link>
@@ -138,17 +138,17 @@ export default async function AdminPagamentosPage({
       </form>
 
       {/* Table */}
-      <div className="bg-[#18181b] border border-[#27272a] rounded-[10px] overflow-hidden">
-        <div className="bg-[#27272a] px-5 py-3 grid grid-cols-7 gap-3">
+      <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
+        <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-7 gap-3">
           {["Data", "Assinante", "Plano", "Valor", "Método", "Status", "Pago em"].map((h) => (
-            <p key={h} className="text-[#52525b] text-[11px] font-semibold tracking-[0.5px]">
+            <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">
               {h}
             </p>
           ))}
         </div>
 
         {payments.length === 0 ? (
-          <p className="text-[#52525b] text-[13px] p-8 text-center">
+          <p className="text-[#253750] text-[13px] p-8 text-center">
             Nenhum pagamento encontrado.
           </p>
         ) : (
@@ -156,9 +156,9 @@ export default async function AdminPagamentosPage({
             const st = STATUS_STYLE[pay.status] ?? STATUS_STYLE.CANCELLED;
             return (
               <div key={pay.id}>
-                {i > 0 && <div className="bg-[#27272a] h-px" />}
+                {i > 0 && <div className="bg-[#141d2c] h-px" />}
                 <div className="px-5 py-3.5 grid grid-cols-7 gap-3 items-center">
-                  <p className="text-[#a1a1aa] text-[13px]">
+                  <p className="text-[#7a9ab5] text-[13px]">
                     {pay.createdAt.toLocaleDateString("pt-BR", {
                       day: "2-digit",
                       month: "2-digit",
@@ -167,21 +167,21 @@ export default async function AdminPagamentosPage({
                   </p>
                   <div className="min-w-0">
                     <p className="text-[#d4d4da] text-[13px] truncate">{pay.user.name}</p>
-                    <p className="text-[#52525b] text-[11px] truncate">{pay.user.email}</p>
+                    <p className="text-[#253750] text-[11px] truncate">{pay.user.email}</p>
                   </div>
-                  <p className="text-[#a1a1aa] text-[13px]">
+                  <p className="text-[#7a9ab5] text-[13px]">
                     {pay.subscription?.plan.name ?? "—"}
                   </p>
                   <p className="text-white text-[14px] font-semibold">
                     {formatCurrency(pay.amountInCents)}
                   </p>
-                  <p className="text-[#a1a1aa] text-[13px]">{pay.paymentMethod ?? "—"}</p>
+                  <p className="text-[#7a9ab5] text-[13px]">{pay.paymentMethod ?? "—"}</p>
                   <span
                     className={`inline-flex items-center h-[20px] px-2.5 rounded-full text-[10px] font-bold ${st.bg} ${st.text}`}
                   >
                     {st.label}
                   </span>
-                  <p className="text-[#a1a1aa] text-[13px]">
+                  <p className="text-[#7a9ab5] text-[13px]">
                     {pay.paidAt
                       ? pay.paidAt.toLocaleDateString("pt-BR", {
                           day: "2-digit",
@@ -197,8 +197,8 @@ export default async function AdminPagamentosPage({
         )}
 
         {totalPages > 1 && (
-          <div className="px-5 py-3 flex items-center justify-between border-t border-[#27272a]">
-            <p className="text-[#52525b] text-[13px]">
+          <div className="px-5 py-3 flex items-center justify-between border-t border-[#141d2c]">
+            <p className="text-[#253750] text-[13px]">
               {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, total)} de{" "}
               {total.toLocaleString("pt-BR")}
             </p>
@@ -210,7 +210,7 @@ export default async function AdminPagamentosPage({
                   className={`w-[30px] h-[30px] flex items-center justify-center rounded-[4px] text-[13px] font-semibold transition-colors ${
                     p === page
                       ? "bg-[#ff1f1f] text-white"
-                      : "bg-[#27272a] border border-[#3f3f46] text-[#a1a1aa] hover:text-white"
+                      : "bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
                   }`}
                 >
                   {p}
