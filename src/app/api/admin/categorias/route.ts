@@ -5,6 +5,17 @@ function toSlug(str: string) {
   return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+export async function GET() {
+  try {
+    const categories = await prisma.articleCategory.findMany({
+      orderBy: { name: "asc" },
+    });
+    return NextResponse.json(categories);
+  } catch (e) {
+    return NextResponse.json({ error: String(e) }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { name } = await req.json();
