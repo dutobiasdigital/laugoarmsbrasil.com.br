@@ -152,11 +152,10 @@ export default async function EdicoesPage({
                   {byYear[year].map((edition) => {
                     const isSpecial = edition.type === "SPECIAL";
                     return (
+                      <div key={edition.id} className="card-metal-border hover:scale-[1.02] transition-transform duration-300">
                       <Link
-                        key={edition.id}
                         href={`/edicoes/${edition.slug}`}
-                        className="group relative rounded-xl overflow-hidden flex flex-col border border-white/5 hover:border-white/15 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/60"
-                        style={{ background: "linear-gradient(145deg, #1c1c1f 0%, #141416 100%)" }}
+                        className="group relative rounded-[13px] overflow-hidden flex flex-col bg-[#0a0f1a] h-full"
                       >
                         {/* Cover — aspect-ratio fixo de revista (3:4) */}
                         <div className="relative aspect-[3/4] overflow-hidden">
@@ -230,6 +229,7 @@ export default async function EdicoesPage({
                           />
                         )}
                       </Link>
+                      </div>
                     );
                   })}
                 </div>

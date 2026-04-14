@@ -62,6 +62,17 @@ export default async function HomePage() {
     "Balística terminal: fundamentos",
   ];
 
+  const CTA_VARIANTS = [
+    "Espie esta edição",
+    "Descubra o conteúdo",
+    "Relembre essa época",
+    "Mergulhe no acervo",
+    "Viaje no tempo",
+    "Folheie agora",
+    "Reviva a história",
+    "Acesse o arquivo",
+  ];
+
   return (
     <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
@@ -76,45 +87,62 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* Hero */}
-      <section className="bg-[#070a12] flex items-center px-5 lg:px-20 py-16 lg:py-0 lg:h-[580px] gap-6">
-        {/* Red stripe */}
-        <div className="hidden lg:block w-[3px] h-[520px] bg-[#ff1f1f] rounded-[2px] shrink-0" />
-        <div className="hidden lg:block w-6 shrink-0" />
+      {/* Hero — metal animado */}
+      <section className="hero-metal relative flex items-center px-5 lg:px-20 py-16 lg:py-0 lg:h-[600px] gap-6 overflow-hidden">
+        {/* Grade decorativa de fundo */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: "repeating-linear-gradient(0deg, #7a9ab5 0px, transparent 1px, transparent 60px), repeating-linear-gradient(90deg, #7a9ab5 0px, transparent 1px, transparent 60px)",
+        }} />
+        {/* Glow vermelho diagonal */}
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full opacity-[0.06]"
+          style={{ background: "radial-gradient(circle, #ff1f1f 0%, transparent 70%)" }} />
+        {/* Glow azul-aço */}
+        <div className="absolute -bottom-20 left-[30%] w-[500px] h-[400px] rounded-full opacity-[0.04]"
+          style={{ background: "radial-gradient(circle, #7a9ab5 0%, transparent 70%)" }} />
 
-        {/* Text */}
-        <div className="flex flex-col gap-5 flex-1 max-w-[760px]">
-          <div className="bg-[#ff1f1f] inline-flex px-2 py-1 rounded-[2px] self-start">
-            <span className="text-white text-[10px] font-semibold tracking-[0.5px]">
-              ÚLTIMA EDIÇÃO
+        {/* Stripe vermelha */}
+        <div className="hidden lg:block w-[3px] h-[500px] rounded-full shrink-0"
+          style={{ background: "linear-gradient(180deg, transparent, #ff1f1f 30%, #ff1f1f 70%, transparent)" }} />
+        <div className="hidden lg:block w-8 shrink-0" />
+
+        {/* Texto */}
+        <div className="flex flex-col gap-5 flex-1 max-w-[680px] relative z-10">
+          <div className="inline-flex items-center gap-2 self-start">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#ff1f1f] animate-pulse" />
+            <span className="text-[#ff1f1f] text-[10px] font-bold tracking-[2px] uppercase">
+              Última Edição
             </span>
           </div>
 
-          <div className="font-['Barlow_Condensed'] font-extrabold text-[#dce8ff] text-5xl lg:text-[64px] leading-tight">
-            <p>{featuredEdition ? `Revista Magnum` : "Revista Magnum"}</p>
-            <p>{featuredEdition?.number ? `Edição ${featuredEdition.number}` : "Acervo Digital"}</p>
+          <div className="font-['Barlow_Condensed'] font-extrabold leading-[1.0]">
+            <p className="text-[#dce8ff] text-5xl lg:text-[68px]">
+              {featuredEdition ? "Revista Magnum" : "Revista Magnum"}
+            </p>
+            <p className="text-[#ff1f1f] text-5xl lg:text-[68px]">
+              {featuredEdition?.number ? `Edição ${featuredEdition.number}` : "Acervo Digital"}
+            </p>
           </div>
 
-          <p className="text-[#253750] text-[14px]">
+          <p className="text-[#526888] text-[12px] font-mono tracking-wide">
             {featuredEdition?.publishedAt
-              ? `${featuredEdition.publishedAt.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}  ·  ${featuredEdition.pageCount ? `${featuredEdition.pageCount} páginas` : ""}  ·  ${featuredEdition.type === "SPECIAL" ? "Edição Especial" : "Edição Regular"}`
+              ? `${featuredEdition.publishedAt.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })} · ${featuredEdition.pageCount ? `${featuredEdition.pageCount} páginas` : ""} · ${featuredEdition.type === "SPECIAL" ? "Edição Especial" : "Edição Regular"}`
               : "O maior acervo especializado do Brasil"}
           </p>
 
-          <p className="text-[#7a9ab5] text-[16px] max-w-2xl leading-relaxed">
+          <p className="text-[#7a9ab5] text-[15px] leading-relaxed max-w-xl">
             Nesta edição: teste completo da Beretta APX-A1, guia de recarga para .308 Win, legislação CAC 2026 e cobertura dos principais lançamentos do mercado nacional e internacional.
           </p>
 
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap pt-1">
             <Link
               href={featuredEdition ? `/minha-conta/edicoes` : "/assine"}
-              className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold px-7 py-3 rounded transition-colors"
+              className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold px-7 py-3 rounded transition-colors"
             >
               {featuredEdition?.number ? `Ler Edição ${featuredEdition.number}` : "Assinar agora"}
             </Link>
             <Link
               href="/edicoes"
-              className="border border-[#1c2a3e] hover:border-zinc-500 text-[#7a9ab5] hover:text-white text-[15px] font-semibold px-6 py-3 rounded transition-colors"
+              className="border border-[#1c2a3e] hover:border-[#7a9ab5]/50 text-[#7a9ab5] hover:text-white text-[14px] font-semibold px-6 py-3 rounded transition-colors"
             >
               Ver Todas as Edições
             </Link>
@@ -123,21 +151,30 @@ export default async function HomePage() {
 
         <div className="flex-1 hidden lg:block" />
 
-        {/* Cover */}
-        <div className="hidden lg:flex w-[340px] h-[480px] bg-[#141d2c] rounded-lg items-center justify-center shrink-0">
-          {featuredEdition?.coverImageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={featuredEdition.coverImageUrl}
-              alt={featuredEdition.title}
-              className="w-full h-full object-cover rounded-lg"
-            />
-          ) : (
-            <div className="font-['Barlow_Condensed'] font-bold text-[#1c2a3e] text-[18px] text-center leading-snug">
-              <p>CAPA</p>
-              <p>{featuredEdition?.number ? `EDIÇÃO ${featuredEdition.number}` : "MAGNUM"}</p>
+        {/* Cover com glow e sombra */}
+        <div className="hidden lg:block relative shrink-0 w-[260px] z-10">
+          {/* Glow atrás da capa */}
+          <div className="absolute inset-0 scale-[1.15] blur-2xl opacity-30 rounded-xl"
+            style={{ background: "linear-gradient(145deg, #ff1f1f20, #1c2a3e, #070a12)" }} />
+          {/* Borda gradiente na capa hero */}
+          <div className="card-metal-border relative">
+            <div className="bg-[#0e1520] rounded-[13px] overflow-hidden aspect-[3/4]">
+              {featuredEdition?.coverImageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={featuredEdition.coverImageUrl}
+                  alt={featuredEdition.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <p className="font-['Barlow_Condensed'] font-bold text-[#1c2a3e] text-[18px]">
+                    {featuredEdition?.number ? `EDIÇÃO ${featuredEdition.number}` : "MAGNUM"}
+                  </p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </section>
 
@@ -160,68 +197,76 @@ export default async function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(latestEditions.length > 0 ? latestEditions : Array(3).fill(null)).map((edition, i) => (
-                <div
-                  key={edition?.id ?? i}
-                  className="bg-[#0e1520] border border-[#141d2c] rounded-lg overflow-hidden flex flex-col"
-                >
-                  {/* Cover */}
-                  <div className="bg-[#141d2c] h-[370px] flex items-center justify-center rounded-t-lg">
-                    {edition?.coverImageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={edition.coverImageUrl}
-                        alt={edition.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <p className="font-['Barlow_Condensed'] font-bold text-[#253750] text-[13px]">
-                        {edition?.number ? `CAPA ${edition.number}` : "CAPA"}
-                      </p>
-                    )}
-                  </div>
+              {(latestEditions.length > 0 ? latestEditions : Array(3).fill(null)).map((edition, i) => {
+                const ctaLabel = CTA_VARIANTS[(edition?.number ?? i + 2) % CTA_VARIANTS.length];
+                const isSpecial = edition?.type === "SPECIAL";
+                return (
+                  <div key={edition?.id ?? i} className="card-metal-border">
+                    <div className="bg-[#0a0f1a] rounded-[13px] overflow-hidden flex flex-col h-full">
+                      {/* Cover — proporção correta de revista */}
+                      <div className="relative aspect-[3/4] overflow-hidden">
+                        {edition?.coverImageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={edition.coverImageUrl}
+                            alt={edition.title}
+                            className="absolute inset-0 w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center bg-[#141d2c]">
+                            <p className="font-['Barlow_Condensed'] font-bold text-[#1c2a3e] text-[13px]">
+                              {edition?.number ? `CAPA ${edition.number}` : "CAPA"}
+                            </p>
+                          </div>
+                        )}
+                        {/* Fade inferior */}
+                        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0a0f1a] to-transparent" />
+                      </div>
 
-                  {/* Info */}
-                  <div className="flex flex-col gap-2 px-4 pt-3.5 pb-4">
-                    <div className="flex items-center gap-1.5">
-                      <span className="bg-[#141d2c] text-[#7a9ab5] text-[9px] font-semibold tracking-[0.5px] px-2 py-[3px] rounded-[2px]">
-                        {edition?.type === "SPECIAL" ? "ESPECIAL" : "REGULAR"}
-                      </span>
-                      {edition?.number && (
-                        <span className="bg-[#ff1f1f] text-white text-[9px] font-semibold px-2 py-[3px] rounded-[2px]">
-                          Nº {edition.number}
-                        </span>
-                      )}
+                      {/* Info */}
+                      <div className="flex flex-col gap-2 px-4 pt-3 pb-4">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`text-[9px] font-bold tracking-[0.8px] uppercase px-1.5 py-[2px] rounded-[3px] ${
+                            isSpecial ? "bg-[#ff1f1f]/20 text-[#ff6b6b] border border-[#ff1f1f]/30" : "bg-white/5 text-[#7a9ab5] border border-white/10"
+                          }`}>
+                            {isSpecial ? "Especial" : "Regular"}
+                          </span>
+                          {edition?.number && (
+                            <span className="text-[9px] font-semibold text-[#526888]">#{edition.number}</span>
+                          )}
+                        </div>
+
+                        <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[17px] leading-snug line-clamp-2">
+                          {edition?.title ?? "Revista Magnum"}
+                        </p>
+
+                        <p className="text-[#526888] text-[11px] font-mono">
+                          {edition?.publishedAt
+                            ? `${edition.publishedAt.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })} · ${edition.pageCount ? `${edition.pageCount}p` : ""}`
+                            : "Em breve"}
+                        </p>
+
+                        {i === 0 ? (
+                          <Link
+                            href="/minha-conta/edicoes"
+                            className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[12px] font-semibold h-[36px] flex items-center justify-center rounded mt-1 transition-colors"
+                          >
+                            Ler Edição
+                          </Link>
+                        ) : (
+                          <Link
+                            href={edition ? `/edicoes/${edition.slug}` : "/assine"}
+                            className="text-[12px] font-semibold h-[36px] flex items-center justify-center rounded mt-1 transition-colors text-[#7a9ab5] hover:text-white border border-white/8 hover:border-white/20"
+                            style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))" }}
+                          >
+                            {ctaLabel}
+                          </Link>
+                        )}
+                      </div>
                     </div>
-
-                    <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[17px] leading-snug">
-                      {edition?.title ?? "Revista Magnum"}
-                    </p>
-
-                    <p className="text-[#253750] text-[12px]">
-                      {edition?.publishedAt
-                        ? `${edition.publishedAt.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}  ·  ${edition.pageCount ? `${edition.pageCount} págs` : ""}`
-                        : "Em breve"}
-                    </p>
-
-                    {i === 0 ? (
-                      <Link
-                        href="/minha-conta/edicoes"
-                        className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[13px] font-semibold h-[38px] flex items-center justify-center rounded mt-1 transition-colors"
-                      >
-                        Ler Edição
-                      </Link>
-                    ) : (
-                      <Link
-                        href="/assine"
-                        className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#7a9ab5] hover:text-white text-[13px] font-semibold h-[38px] flex items-center justify-center rounded mt-1 transition-colors"
-                      >
-                        Assine para Ler
-                      </Link>
-                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 
@@ -246,7 +291,8 @@ export default async function HomePage() {
                     { id: "3", title: "CAC 2026: Novas regras do SINARM", slug: "cac-2026", category: { name: "LEGISLAÇÃO", slug: "legislacao" }, featureImageUrl: null, publishedAt: new Date("2026-04-05"), isExclusive: false, categoryId: "3" },
                   ]
               ).map((article) => (
-                <Link key={article.id} href={`/blog/${article.slug}`} className="group block bg-[#0e1520] border border-[#141d2c] rounded-lg overflow-hidden hover:border-[#1c2a3e] transition-colors">
+                <div key={article.id} className="card-metal-border">
+                <Link href={`/blog/${article.slug}`} className="group block bg-[#0a0f1a] rounded-[13px] overflow-hidden h-full">
                   {/* Image */}
                   <div className="bg-[#141d2c] h-[176px] relative rounded-t-lg overflow-hidden">
                     {article.featureImageUrl ? (
@@ -277,6 +323,7 @@ export default async function HomePage() {
                     </p>
                   </div>
                 </Link>
+                </div>
               ))}
             </div>
           </section>
