@@ -83,17 +83,17 @@ export default async function EdicaoDetalhePage({
 
         {/* Hero */}
         <div className="px-5 lg:px-20 py-8 flex flex-col lg:flex-row gap-10">
-          {/* Cover */}
-          <div className="w-full max-w-[300px] mx-auto lg:mx-0 shrink-0 aspect-[3/4] relative rounded-[6px] overflow-hidden border border-[#1c2a3e] shadow-2xl shadow-black/60">
+          {/* Cover — exibe a capa inteira sem corte */}
+          <div className="w-full max-w-[280px] mx-auto lg:mx-0 shrink-0 rounded-[8px] overflow-hidden border border-[#1c2a3e] shadow-2xl shadow-black/70 bg-[#0a0e18]">
             {edition.coverImageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={edition.coverImageUrl}
                 alt={edition.title}
-                className="absolute inset-0 w-full h-full object-cover"
+                className="w-full h-auto block"
               />
             ) : (
-              <div className={`absolute inset-0 flex items-center justify-center ${isSpecial ? "bg-[#cc0000]/20" : "bg-[#141d2c]"}`}>
+              <div className={`aspect-[3/4] flex items-center justify-center ${isSpecial ? "bg-[#cc0000]/20" : "bg-[#141d2c]"}`}>
                 <p className={`font-['Barlow_Condensed'] font-bold text-[28px] ${isSpecial ? "text-[#ff1f1f]/40" : "text-[#1c2a3e]"}`}>
                   {edition.number ? `Nº ${edition.number}` : "—"}
                 </p>
@@ -133,10 +133,10 @@ export default async function EdicaoDetalhePage({
 
             {/* Editorial */}
             {edition.editorial && (
-              <div className="border-l-2 border-[#ff1f1f]/60 pl-4 py-1 rounded-r-sm" style={{ background: "linear-gradient(90deg, rgba(255,31,31,0.04) 0%, transparent 60%)" }}>
-                <p className="text-[#ff1f1f] text-[9px] font-bold tracking-[2px] uppercase mb-2">Editorial</p>
+              <div className="border-l-2 border-[#ff1f1f]/60 pl-5 py-2 rounded-r-sm" style={{ background: "linear-gradient(90deg, rgba(255,31,31,0.05) 0%, transparent 70%)" }}>
+                <p className="text-[#ff1f1f] text-[9px] font-bold tracking-[2px] uppercase mb-3">Editorial</p>
                 <div
-                  className="text-[#7a9ab5] text-[13px] leading-[21px] max-w-[540px] prose-sm prose-invert"
+                  className="text-[#8fb8d4] text-[15px] leading-[28px]"
                   dangerouslySetInnerHTML={{ __html: edition.editorial }}
                 />
               </div>

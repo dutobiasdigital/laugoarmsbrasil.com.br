@@ -41,6 +41,8 @@ export default function EditionEditForm({ edition }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [editionNumber, setEditionNumber] = useState(String(edition.number ?? ""));
   const [editionType, setEditionType] = useState(edition.type);
   const [editorial, setEditorial] = useState(edition.editorial ?? "");
@@ -89,6 +91,24 @@ export default function EditionEditForm({ edition }: Props) {
 
   function removeTocItem(i: number) {
     setTocItems((prev) => prev.filter((_, idx) => idx !== i));
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    setError(null);
+    const res = await fetch("/api/admin/edicoes", {
+      method: "DELETE",
+      body: JSON.stringify({ id: edition.id }),
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error || "Erro ao excluir edição.");
+      setDeleting(false);
+      setConfirmDelete(false);
+      return;
+    }
+    router.push("/admin/edicoes");
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -328,20 +348,59 @@ export default function EditionEditForm({ edition }: Props) {
           </div>
         </div>
 
-        <div className="flex gap-3 pt-2">
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[14px] font-semibold h-[44px] px-7 rounded-[6px] transition-colors"
-          >
-            {loading ? "Salvando..." : "Salvar Alterações"}
-          </button>
-          <Link
-            href="/admin/edicoes"
-            className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[44px] px-6 flex items-center rounded-[6px] transition-colors"
-          >
-            Cancelar
-          </Link>
+        <div className="flex items-center justify-between gap-3 pt-2">
+          {/* Salvar + Cancelar */}
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              disabled={loading || deleting}
+              className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[14px] font-semibold h-[44px] px-7 rounded-[6px] transition-colors"
+            >
+              {loading ? "Salvando..." : "Salvar Alterações"}
+            </button>
+            <Link
+              href="/admin/edicoes"
+              className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[44px] px-6 flex items-center rounded-[6px] transition-colors"
+            >
+              Cancelar
+            </Link>
+          </div>
+
+          {/* Excluir */}
+          <div className="flex items-center gap-2">
+            {confirmDelete ? (
+              <>
+                <span className="text-[#ff6b6b] text-[13px] font-medium">
+                  Confirma exclusão?
+                </span>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[13px] font-semibold h-[38px] px-4 rounded-[6px] transition-colors"
+                >
+                  {deleting ? "Excluindo..." : "Sim, excluir"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(false)}
+                  disabled={deleting}
+                  className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[13px] h-[38px] px-4 rounded-[6px] transition-colors"
+                >
+                  Não
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                disabled={loading}
+                className="border border-[#3a1010] hover:border-[#ff1f1f]/50 text-[#526888] hover:text-[#ff6b6b] text-[13px] h-[38px] px-4 rounded-[6px] transition-colors bg-transparent"
+              >
+                🗑 Excluir edição
+              </button>
+            )}
+          </div>
         </div>
       </form>
     </>
