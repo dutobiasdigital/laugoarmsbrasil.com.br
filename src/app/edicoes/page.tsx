@@ -149,79 +149,87 @@ export default async function EdicoesPage({
                 <p className="text-[#52525b] text-[13px] font-semibold tracking-[1px]">{year}</p>
                 <div className="bg-[#27272a] h-px w-full" />
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {byYear[year].map((edition, i) => {
+                  {byYear[year].map((edition) => {
                     const isSpecial = edition.type === "SPECIAL";
-                    const isFirst = !tipo && page === 1 && years[0] === year && i === 0;
                     return (
-                      <div
+                      <Link
                         key={edition.id}
-                        className="bg-[#18181b] border border-[#27272a] rounded-lg overflow-hidden flex flex-col"
+                        href={`/edicoes/${edition.slug}`}
+                        className="group relative rounded-xl overflow-hidden flex flex-col border border-white/5 hover:border-white/15 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/60"
+                        style={{ background: "linear-gradient(145deg, #1c1c1f 0%, #141416 100%)" }}
                       >
                         {/* Cover */}
-                        <div
-                          className={`h-[285px] flex items-center justify-center rounded-t-lg ${
-                            isSpecial ? "bg-[#cc0000]" : "bg-[#27272a]"
-                          }`}
-                        >
+                        <div className="relative h-[285px] overflow-hidden">
                           {edition.coverImageUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={edition.coverImageUrl}
                               alt={edition.title}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             />
                           ) : (
-                            <p
-                              className={`font-['Barlow_Condensed'] font-extrabold text-[24px] ${
-                                isSpecial ? "text-[#7a0000]" : "text-[#3f3f46]"
+                            <div
+                              className={`w-full h-full flex items-center justify-center ${
+                                isSpecial ? "bg-[#cc0000]/20" : "bg-white/5"
                               }`}
                             >
-                              {isSpecial ? `ESP ${edition.slug?.toUpperCase().slice(0, 6)}` : edition.number ? `Nº ${edition.number}` : "—"}
-                            </p>
+                              <p
+                                className={`font-['Barlow_Condensed'] font-extrabold text-[24px] ${
+                                  isSpecial ? "text-[#ff1f1f]/40" : "text-white/10"
+                                }`}
+                              >
+                                {isSpecial ? `ESP` : edition.number ? `Nº ${edition.number}` : "—"}
+                              </p>
+                            </div>
                           )}
+                          {/* Gradient overlay at bottom of cover */}
+                          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#141416] to-transparent" />
                         </div>
 
-                        {/* Info */}
-                        <div className="flex flex-col gap-1.5 px-3 pt-2.5 pb-3.5">
+                        {/* Info — glass panel */}
+                        <div
+                          className="flex flex-col gap-1 px-3.5 pt-2 pb-4"
+                          style={{
+                            background: "linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%)",
+                            backdropFilter: "blur(0px)",
+                          }}
+                        >
                           <div className="flex items-center gap-1.5">
                             <span
-                              className={`text-[9px] font-semibold tracking-[0.5px] px-1.5 py-[2px] rounded-[2px] ${
+                              className={`text-[9px] font-bold tracking-[0.8px] uppercase px-1.5 py-[2px] rounded-[3px] ${
                                 isSpecial
-                                  ? "bg-[#ff1f1f] text-white"
-                                  : "bg-[#27272a] text-[#a1a1aa]"
+                                  ? "bg-[#ff1f1f]/20 text-[#ff6b6b] border border-[#ff1f1f]/30"
+                                  : "bg-white/5 text-white/40 border border-white/10"
                               }`}
                             >
-                              {isSpecial ? "ESPECIAL" : "REGULAR"}
+                              {isSpecial ? "Especial" : "Regular"}
                             </span>
                             {edition.number && !isSpecial && (
-                              <span className="text-[9px] font-semibold text-[#a1a1aa] border border-[#3f3f46] px-1.5 py-[2px] rounded-[2px] bg-[#27272a]">
-                                Nº {edition.number}
+                              <span className="text-[9px] font-semibold text-white/30">
+                                #{edition.number}
                               </span>
                             )}
                           </div>
 
-                          <p className="font-['Barlow_Condensed'] font-bold text-[#fafafa] text-[15px] leading-snug">
+                          <p className="font-['Barlow_Condensed'] font-bold text-white text-[15px] leading-snug line-clamp-2 group-hover:text-white/90 transition-colors">
                             {edition.number ? `Edição ${edition.number}` : edition.title}
                           </p>
 
-                          <p className="text-[#71717a] text-[11px]">
-                            {edition.publishedAt
-                              ? `${edition.publishedAt.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}  ·  ${edition.pageCount ? `${edition.pageCount}p` : ""}`
-                              : "Em breve"}
-                          </p>
-
-                          <Link
-                            href={`/edicoes/${edition.slug}`}
-                            className={`text-[12px] font-semibold h-[34px] flex items-center justify-center rounded mt-1 transition-colors ${
-                              isFirst
-                                ? "bg-[#ff1f1f] hover:bg-[#cc0000] text-white"
-                                : "bg-[#27272a] border border-[#3f3f46] hover:border-zinc-500 text-[#a1a1aa] hover:text-white"
-                            }`}
-                          >
-                            {isFirst ? "Ler Edição" : "Ver Detalhes"}
-                          </Link>
+                          {edition.publishedAt && (
+                            <p className="text-white/25 text-[10px]">
+                              {edition.publishedAt.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}
+                              {edition.pageCount ? ` · ${edition.pageCount}p` : ""}
+                            </p>
+                          )}
                         </div>
-                      </div>
+
+                        {/* Hover glow */}
+                        {isSpecial && (
+                          <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                            style={{ boxShadow: "inset 0 0 30px rgba(255,31,31,0.06)" }}
+                          />
+                        )}
+                      </Link>
                     );
                   })}
                 </div>
