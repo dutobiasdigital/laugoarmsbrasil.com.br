@@ -54,7 +54,7 @@ export default async function EdicaoDetalhePage({
       related = await prisma.edition.findMany({
         where: { isPublished: true, id: { not: edition.id } },
         orderBy: { publishedAt: "desc" },
-        take: 4,
+        take: 5,
         select: { id: true, title: true, number: true, slug: true, coverImageUrl: true, type: true },
       });
     }
@@ -84,22 +84,20 @@ export default async function EdicaoDetalhePage({
         {/* Hero */}
         <div className="px-5 lg:px-20 py-8 flex flex-col lg:flex-row gap-10">
           {/* Cover */}
-          <div
-            className={`w-full max-w-[320px] mx-auto lg:mx-0 h-[428px] flex items-center justify-center rounded-[4px] shrink-0 ${
-              isSpecial ? "bg-[#cc0000]" : "bg-[#141d2c]"
-            } border border-[#1c2a3e]`}
-          >
+          <div className="w-full max-w-[300px] mx-auto lg:mx-0 shrink-0 aspect-[3/4] relative rounded-[6px] overflow-hidden border border-[#1c2a3e] shadow-2xl shadow-black/60">
             {edition.coverImageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={edition.coverImageUrl}
                 alt={edition.title}
-                className="w-full h-full object-cover rounded-[4px]"
+                className="absolute inset-0 w-full h-full object-cover"
               />
             ) : (
-              <p className={`font-['Barlow_Condensed'] font-bold text-[28px] ${isSpecial ? "text-[#7a0000]" : "text-[#1c2a3e]"}`}>
-                {edition.number ? `Nº ${edition.number}` : "—"}
-              </p>
+              <div className={`absolute inset-0 flex items-center justify-center ${isSpecial ? "bg-[#cc0000]/20" : "bg-[#141d2c]"}`}>
+                <p className={`font-['Barlow_Condensed'] font-bold text-[28px] ${isSpecial ? "text-[#ff1f1f]/40" : "text-[#1c2a3e]"}`}>
+                  {edition.number ? `Nº ${edition.number}` : "—"}
+                </p>
+              </div>
             )}
           </div>
 
@@ -135,13 +133,13 @@ export default async function EdicaoDetalhePage({
 
             {/* Editorial */}
             {edition.editorial && (
-              <>
-                <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase">Editorial</p>
+              <div className="border-l-2 border-[#ff1f1f]/60 pl-4 py-1 rounded-r-sm" style={{ background: "linear-gradient(90deg, rgba(255,31,31,0.04) 0%, transparent 60%)" }}>
+                <p className="text-[#ff1f1f] text-[9px] font-bold tracking-[2px] uppercase mb-2">Editorial</p>
                 <div
-                  className="text-[#d4d4da] text-[14px] leading-[22px] max-w-[560px] prose-sm prose-invert"
+                  className="text-[#7a9ab5] text-[13px] leading-[21px] max-w-[540px] prose-sm prose-invert"
                   dangerouslySetInnerHTML={{ __html: edition.editorial }}
                 />
-              </>
+              </div>
             )}
 
             {/* CTAs */}
@@ -179,34 +177,35 @@ export default async function EdicaoDetalhePage({
 
         {/* Table of Contents */}
         <div className="px-5 lg:px-20 pb-12">
-          <div className="bg-[#141d2c] h-px w-full mb-8" />
-          <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase mb-4">
-            Índice da Edição
-          </p>
-          <div className="bg-[#0e1520] border border-[#141d2c] rounded-lg p-6 lg:p-8">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="h-px flex-1 bg-[#1c2a3e]/50" />
+            <span className="text-[#ff1f1f] text-[9px] font-bold tracking-[2.5px] uppercase shrink-0">Índice da Edição</span>
+            <div className="h-px flex-1 bg-[#1c2a3e]/50" />
+          </div>
+          <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(160deg, #0d1422 0%, #080c14 100%)", border: "1px solid rgba(255,255,255,0.04)" }}>
             {(() => {
               let toc: { page: string; title: string; category: string }[] = [];
               try { toc = JSON.parse(edition.tableOfContents ?? "[]"); } catch { toc = []; }
               if (toc.length === 0) {
                 return (
-                  <p className="text-[#253750] text-[13px] text-center py-4">
+                  <p className="text-[#253750] text-[13px] text-center py-8">
                     Índice não disponível para esta edição.
                   </p>
                 );
               }
               return (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-0">
+                <div className="grid grid-cols-1 lg:grid-cols-2 divide-y divide-[#1c2a3e]/30 lg:divide-y-0">
                   {toc.map((item, i) => (
-                    <div key={i} className="flex items-start gap-3 py-3 border-b border-[#141d2c] last:border-0">
-                      <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[22px] w-[40px] shrink-0 leading-none pt-0.5">
+                    <div key={i} className={`flex items-start gap-4 px-6 py-3.5 ${i % 2 === 0 ? "lg:border-r border-[#1c2a3e]/30" : ""} border-b border-[#1c2a3e]/20`}>
+                      <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f]/70 text-[18px] w-[32px] shrink-0 leading-none pt-0.5 text-right tabular-nums">
                         {item.page}
                       </span>
-                      <div className="flex flex-col gap-1 min-w-0">
-                        <span className="text-[#d4d4da] text-[13px] font-medium leading-snug">
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span className="text-[#b0c4d8] text-[13px] font-medium leading-snug">
                           {item.title}
                         </span>
                         {item.category && (
-                          <span className="inline-block text-[#6f6f77] text-[10px] bg-[#141d2c] px-1.5 py-[2px] rounded-[2px] self-start">
+                          <span className="text-[#526888] text-[10px] tracking-wide">
                             {item.category}
                           </span>
                         )}
@@ -254,39 +253,57 @@ export default async function EdicaoDetalhePage({
         {/* Related Editions */}
         {related.length > 0 && (
           <div className="px-5 lg:px-20 pb-16">
-            <p className="text-[#7a9ab5] text-[11px] font-semibold tracking-[1.5px] uppercase mb-2">
+            <p className="text-[#526888] text-[9px] font-bold tracking-[2.5px] uppercase mb-1">
               Outras Edições
             </p>
-            <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] mb-6">
+            <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[30px] mb-6">
               Continue explorando o acervo
             </h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {related.map((rel) => {
                 const relSpecial = rel.type === "SPECIAL";
                 return (
                   <Link
                     key={rel.id}
                     href={`/edicoes/${rel.slug}`}
-                    className="bg-[#0e1520] border border-[#141d2c] rounded-[6px] overflow-hidden hover:border-zinc-600 transition-colors"
+                    className="group relative rounded-xl overflow-hidden flex flex-col border border-white/5 hover:border-white/15 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/60"
+                    style={{ background: "linear-gradient(145deg, #0f1420 0%, #0a0e18 100%)" }}
                   >
-                    <div className={`h-[160px] flex items-center justify-center ${relSpecial ? "bg-[#cc0000]" : "bg-[#141d2c]"}`}>
+                    {/* Cover com aspect-ratio correto */}
+                    <div className="relative aspect-[3/4] overflow-hidden">
                       {rel.coverImageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={rel.coverImageUrl} alt={rel.title} className="w-full h-full object-cover" />
+                        <img
+                          src={rel.coverImageUrl}
+                          alt={rel.title}
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
                       ) : (
-                        <p className={`font-['Barlow_Condensed'] font-semibold text-[18px] ${relSpecial ? "text-[#7a0000]" : "text-[#1c2a3e]"}`}>
-                          {rel.number ? `Nº ${rel.number}` : "—"}
-                        </p>
+                        <div className={`absolute inset-0 flex items-center justify-center ${relSpecial ? "bg-[#cc0000]/20" : "bg-white/5"}`}>
+                          <p className={`font-['Barlow_Condensed'] font-extrabold text-[18px] ${relSpecial ? "text-[#ff1f1f]/40" : "text-white/10"}`}>
+                            {rel.number ? `Nº ${rel.number}` : "—"}
+                          </p>
+                        </div>
+                      )}
+                      <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#0a0e18] to-transparent" />
+                      {relSpecial && (
+                        <div className="absolute top-2 left-2">
+                          <span className="text-[8px] font-bold uppercase px-1.5 py-[2px] rounded-[3px] bg-[#ff1f1f]/20 text-[#ff6b6b] border border-[#ff1f1f]/30">
+                            Especial
+                          </span>
+                        </div>
                       )}
                     </div>
-                    <div className="p-3">
-                      <p className="text-[#d4d4da] text-[14px] font-semibold leading-snug mb-2">
+                    {/* Info */}
+                    <div className="px-3 py-2.5">
+                      <p className="text-white/75 text-[11px] font-semibold leading-snug line-clamp-2 group-hover:text-white transition-colors">
                         {rel.number ? `Edição ${rel.number}` : rel.title}
                       </p>
-                      <div className="bg-[#070a12] border border-[#1c2a3e] h-[36px] flex items-center justify-center rounded-[4px] text-[#7a9ab5] text-[13px]">
-                        Assine para Ler
-                      </div>
                     </div>
+                    {relSpecial && (
+                      <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                        style={{ boxShadow: "inset 0 0 25px rgba(255,31,31,0.06)" }} />
+                    )}
                   </Link>
                 );
               })}

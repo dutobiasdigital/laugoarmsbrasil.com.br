@@ -15,9 +15,9 @@ export default async function Header() {
         <Image
           src="/logo.png"
           alt="Revista Magnum"
-          width={52}
-          height={52}
-          className="w-[52px] h-auto"
+          width={120}
+          height={60}
+          className="h-[56px] w-auto"
         />
       </Link>
 

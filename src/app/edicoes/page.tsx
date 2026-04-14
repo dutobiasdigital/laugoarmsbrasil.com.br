@@ -158,18 +158,18 @@ export default async function EdicoesPage({
                         className="group relative rounded-xl overflow-hidden flex flex-col border border-white/5 hover:border-white/15 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/60"
                         style={{ background: "linear-gradient(145deg, #1c1c1f 0%, #141416 100%)" }}
                       >
-                        {/* Cover */}
-                        <div className="relative h-[285px] overflow-hidden">
+                        {/* Cover — aspect-ratio fixo de revista (3:4) */}
+                        <div className="relative aspect-[3/4] overflow-hidden">
                           {edition.coverImageUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={edition.coverImageUrl}
                               alt={edition.title}
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             />
                           ) : (
                             <div
-                              className={`w-full h-full flex items-center justify-center ${
+                              className={`absolute inset-0 flex items-center justify-center ${
                                 isSpecial ? "bg-[#cc0000]/20" : "bg-white/5"
                               }`}
                             >
