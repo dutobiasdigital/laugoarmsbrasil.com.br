@@ -54,7 +54,7 @@ export default async function GuiaPage() {
       <main className="flex-1 pt-16">
 
         {/* ── Hero + Busca ─────────────────────────────────── */}
-        <section className="px-5 lg:px-20 pt-14 pb-12 bg-[#0a0e18] border-b border-[#141d2c]">
+        <section className="hero-metal px-5 lg:px-20 pt-14 pb-12 border-b border-[#141d2c]">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-[6px] h-[6px] bg-[#ff1f1f] rounded-full" />
             <span className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase">
@@ -74,7 +74,7 @@ export default async function GuiaPage() {
             <input
               name="q"
               placeholder="Buscar empresa, cidade ou serviço..."
-              className="flex-1 bg-[#141d2c] border border-[#1c2a3e] rounded-[8px] h-[52px] px-4 text-[15px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] transition-colors"
+              className="flex-1 bg-[#141d2c] border border-[#1c2a3e] rounded-[8px] h-[52px] px-4 text-[15px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] transition-colors"
             />
             <button type="submit"
               className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[52px] px-7 rounded-[8px] transition-colors whitespace-nowrap">
@@ -82,7 +82,7 @@ export default async function GuiaPage() {
             </button>
           </form>
 
-          <p className="text-[#253750] text-[13px] mt-4">
+          <p className="text-white text-[13px] mt-4">
             {total > 0 ? `${total} empresa${total !== 1 ? "s" : ""} cadastrada${total !== 1 ? "s" : ""}` : "Seja o primeiro a cadastrar sua empresa"}
             {" "}·{" "}
             <Link href="/guia/cadastrar" className="text-[#ff1f1f] hover:text-white transition-colors">
@@ -105,7 +105,7 @@ export default async function GuiaPage() {
                 <p className="text-[#d4d4da] text-[14px] font-semibold leading-snug group-hover:text-white transition-colors">
                   {cat.label}
                 </p>
-                <p className="text-[#253750] text-[11px] leading-[16px]">{cat.desc}</p>
+                <p className="text-white text-[11px] leading-[16px]">{cat.desc}</p>
               </Link>
             ))}
           </div>
@@ -193,7 +193,7 @@ export default async function GuiaPage() {
                   </div>
                 );
               })}
-              <p className="text-[#253750] text-[12px] text-center">
+              <p className="text-white text-[12px] text-center">
                 Entre em contato: <a href="mailto:publicidade@revistamagnum.com.br" className="text-[#7a9ab5] hover:text-white transition-colors">publicidade@revistamagnum.com.br</a>
               </p>
             </div>

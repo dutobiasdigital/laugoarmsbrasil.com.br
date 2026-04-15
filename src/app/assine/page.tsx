@@ -124,7 +124,7 @@ export default async function AssinePage() {
         <div className="h-[4px] bg-[#ff1f1f] w-full" />
 
         {/* Hero */}
-        <div className="bg-[#0e1520] py-16 flex flex-col items-center px-5">
+        <div className="hero-metal py-16 flex flex-col items-center px-5">
           <div className="flex items-center gap-2 bg-[#141d2c] border border-[#ff1f1f]/40 px-3.5 py-1.5 rounded-full mb-6">
             <span className="text-[#ff1f1f] text-[10px] font-semibold tracking-[1px] uppercase">
               ⭐ Mais de 20 anos
@@ -189,7 +189,7 @@ export default async function AssinePage() {
                   <h3 className={`text-[20px] font-semibold mb-0.5 ${plan.highlight ? "text-white" : "text-[#d4d4da]"}`}>
                     {plan.name}
                   </h3>
-                  <p className="text-[#253750] text-[12px]">{plan.description}</p>
+                  <p className="text-white text-[12px]">{plan.description}</p>
                 </div>
 
                 <div className="mb-5">
@@ -244,7 +244,7 @@ export default async function AssinePage() {
                   <p className="text-white text-[16px] font-semibold mb-1.5">{faq.q}</p>
                   <p className="text-[#7a9ab5] text-[14px] leading-[20px]">{faq.a}</p>
                 </div>
-                <span className="text-[#253750] text-[18px] shrink-0">∨</span>
+                <span className="text-white text-[18px] shrink-0">∨</span>
               </div>
             ))}
           </div>
@@ -260,7 +260,7 @@ export default async function AssinePage() {
               <div key={t.author} className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5">
                 <p className="text-[#ff1f1f] text-[14px] mb-3">★★★★★</p>
                 <p className="text-[#d4d4da] text-[14px] leading-[22px] mb-3">"{t.quote}"</p>
-                <p className="text-[#253750] text-[13px] font-medium">— {t.author}</p>
+                <p className="text-white text-[13px] font-medium">— {t.author}</p>
               </div>
             ))}
           </div>

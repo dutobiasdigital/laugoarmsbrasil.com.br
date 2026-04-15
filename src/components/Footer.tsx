@@ -9,7 +9,6 @@ function IconInstagram() {
     </svg>
   );
 }
-
 function IconFacebook() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
@@ -17,7 +16,6 @@ function IconFacebook() {
     </svg>
   );
 }
-
 function IconYoutube() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
@@ -25,7 +23,6 @@ function IconYoutube() {
     </svg>
   );
 }
-
 function IconX() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
@@ -33,7 +30,6 @@ function IconX() {
     </svg>
   );
 }
-
 function IconTiktok() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
@@ -41,16 +37,54 @@ function IconTiktok() {
     </svg>
   );
 }
+function IconLinkedin() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+    </svg>
+  );
+}
 
-const SOCIAL = [
-  { href: "https://instagram.com/revistamagnum",  label: "Instagram", Icon: IconInstagram },
-  { href: "https://facebook.com/revistamagnum",   label: "Facebook",  Icon: IconFacebook  },
-  { href: "https://youtube.com/@revistamagnum",   label: "YouTube",   Icon: IconYoutube   },
-  { href: "https://x.com/revistamagnum",          label: "X (Twitter)", Icon: IconX       },
-  { href: "https://tiktok.com/@revistamagnum",    label: "TikTok",    Icon: IconTiktok    },
+/* ── Social key → icon mapping ───────────────────────────────── */
+const SOCIAL_META = [
+  { key: "social.instagram", label: "Instagram",   Icon: IconInstagram },
+  { key: "social.facebook",  label: "Facebook",    Icon: IconFacebook  },
+  { key: "social.youtube",   label: "YouTube",     Icon: IconYoutube   },
+  { key: "social.twitter",   label: "X (Twitter)", Icon: IconX         },
+  { key: "social.tiktok",    label: "TikTok",      Icon: IconTiktok    },
+  { key: "social.linkedin",  label: "LinkedIn",    Icon: IconLinkedin  },
 ];
 
-export default function Footer() {
+/* ── Fetch social links from site_settings ────────────────────── */
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+
+async function getSocialLinks(): Promise<Record<string, string>> {
+  if (!SERVICE) return {};
+  try {
+    const keys = SOCIAL_META.map((s) => s.key).join(",");
+    const res = await fetch(
+      `https://${PROJECT}.supabase.co/rest/v1/site_settings?key=in.(${keys})&select=key,value`,
+      {
+        headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` },
+        next: { revalidate: 60 },
+      }
+    );
+    const rows: { key: string; value: string | null }[] = await res.json();
+    if (!Array.isArray(rows)) return {};
+    const obj: Record<string, string> = {};
+    for (const r of rows) if (r.value?.trim()) obj[r.key] = r.value.trim();
+    return obj;
+  } catch { return {}; }
+}
+
+/* ── Footer component ─────────────────────────────────────────── */
+export default async function Footer() {
+  const socialLinks = await getSocialLinks();
+  const activeSocial = SOCIAL_META
+    .filter(({ key }) => !!socialLinks[key])
+    .map(({ key, label, Icon }) => ({ href: socialLinks[key], label, Icon }));
+
   return (
     <footer className="bg-[#070a12] border-t border-[#141d2c] mt-auto">
       <div className="max-w-[1440px] mx-auto px-5 lg:px-20 py-12">
@@ -71,22 +105,24 @@ export default function Footer() {
               O maior acervo especializado em armas, munições e legislação do Brasil. Desde 1985.
             </p>
 
-            {/* Social icons */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {SOCIAL.map(({ href, label, Icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  title={label}
-                  className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[#7a9ab5] hover:text-white hover:bg-[#ff1f1f] hover:border-[#ff1f1f] border border-[#1c2a3e] transition-all duration-200"
-                >
-                  <Icon />
-                </a>
-              ))}
-            </div>
+            {/* Social icons — only show if configured in admin */}
+            {activeSocial.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap">
+                {activeSocial.map(({ href, label, Icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    title={label}
+                    className="social-btn w-[34px] h-[34px] rounded-full flex items-center justify-center text-[#7a9ab5] hover:text-white hover:bg-[#ff1f1f] hover:border-[#ff1f1f] border border-[#1c2a3e] transition-all duration-200"
+                  >
+                    <Icon />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Revista */}
@@ -118,11 +154,11 @@ export default function Footer() {
             </p>
             <ul className="space-y-2">
               {[
-                { href: "/guia",                label: "Diretório"        },
-                { href: "/guia/cadastrar",      label: "Cadastrar empresa"},
-                { href: "/guia/busca",          label: "Busca"            },
-                { href: "/guia/armareiros",     label: "Armareiros"       },
-                { href: "/guia/clubes-de-tiro", label: "Clubes de Tiro"   },
+                { href: "/guia",                label: "Diretório"         },
+                { href: "/guia/cadastrar",      label: "Cadastrar empresa" },
+                { href: "/guia/busca",          label: "Busca"             },
+                { href: "/guia/armareiros",     label: "Armareiros"        },
+                { href: "/guia/clubes-de-tiro", label: "Clubes de Tiro"    },
               ].map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="text-xs text-white hover:text-[#7a9ab5] transition-colors">

@@ -21,7 +21,7 @@ const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> 
   APPROVED:  { bg: "bg-[#0f381f]",  text: "text-[#22c55e]", label: "APROVADO"  },
   PENDING:   { bg: "bg-[#2a1e05]",  text: "text-[#f59e0b]", label: "PENDENTE"  },
   REJECTED:  { bg: "bg-[#2d0a0a]",  text: "text-[#ff6b6b]", label: "RECUSADO"  },
-  CANCELLED: { bg: "bg-[#141d2c]",  text: "text-[#253750]", label: "CANCELADO" },
+  CANCELLED: { bg: "bg-[#141d2c]",  text: "text-white", label: "CANCELADO" },
 };
 
 const GATEWAY_ICON: Record<string, string> = {
@@ -154,7 +154,7 @@ export default async function AdminDashboardPage() {
 
           <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
             {recentIntents.length === 0 ? (
-              <p className="text-[#253750] text-[13px] p-8 text-center">
+              <p className="text-white text-[13px] p-8 text-center">
                 Nenhuma transação ainda.
               </p>
             ) : (
@@ -174,7 +174,7 @@ export default async function AdminDashboardPage() {
                       </div>
                       <div className="text-right shrink-0">
                         <p className="text-white text-[14px] font-bold">{fmtCurrency(intent.amount)}</p>
-                        <p className="text-[#253750] text-[11px]">
+                        <p className="text-white text-[11px]">
                           {GATEWAY_ICON[intent.gateway] ?? "💳"} {fmtDate(intent.createdAt)} {fmtTime(intent.createdAt)}
                         </p>
                       </div>
@@ -197,7 +197,7 @@ export default async function AdminDashboardPage() {
             <div className="flex items-start justify-between mb-4">
               <div>
                 <p className="text-white text-[14px] font-semibold mb-0.5">Receita mensal</p>
-                <p className="text-[#253750] text-[11px]">Últimos 6 meses</p>
+                <p className="text-white text-[11px]">Últimos 6 meses</p>
               </div>
               <p className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[22px] leading-none">
                 {fmtCurrency(monthRevenue)}
@@ -214,7 +214,7 @@ export default async function AdminDashboardPage() {
                         style={{ height: `${Math.max(h, b.rev > 0 ? 4 : 0)}px` }}
                       />
                     </div>
-                    <span className="text-[#253750] text-[10px]">{b.month}</span>
+                    <span className="text-white text-[10px]">{b.month}</span>
                   </div>
                 );
               })}
@@ -229,7 +229,7 @@ export default async function AdminDashboardPage() {
                 { label: "Ativos",   count: activeGuia,                          color: "bg-[#22c55e]" },
                 { label: "Pendentes", count: pendingGuia,                          color: "bg-[#f59e0b]" },
                 { label: "Pagos",    count: paidGuia,                             color: "bg-[#818cf8]" },
-                { label: "Total",    count: allGuia.length,                       color: "bg-[#253750]" },
+                { label: "Total",    count: allGuia.length,                       color: "bg-[#7a9ab5]" },
               ].map(item => (
                 <div key={item.label} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">

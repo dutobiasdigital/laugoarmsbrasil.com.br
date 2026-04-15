@@ -77,25 +77,28 @@ export default function AdBanner({ position, bannerSize, className = "" }: AdBan
     }
   }, [ad]);
 
-  /* ── Placeholder (carregando ou sem anúncio) ─────────────── */
-  if (!ready || !ad) {
+  /* ── Carregando: placeholder para evitar layout shift ───── */
+  if (!ready) {
     return (
-      <div className={`flex flex-col items-center gap-1.5 ${className}`}>
-        <p className="text-[9px] font-semibold text-[#253750] tracking-[1.5px] uppercase">
+      <div className={`flex flex-col items-center gap-1.5 ${className}`} aria-hidden="true">
+        <p className="text-[9px] font-semibold text-[#526888] tracking-[1.5px] uppercase">
           Publicidade
         </p>
         <div
-          className="bg-[#0e1520] border border-[#141d2c] rounded"
+          className="bg-[#0e1520]/40 border border-[#141d2c]/40 rounded animate-pulse"
           style={{ width: dims.w, height: dims.h, maxWidth: "100%" }}
         />
       </div>
     );
   }
 
+  /* ── Sem anúncio configurado: não renderiza nada ─────────── */
+  if (!ad) return null;
+
   /* ── Anúncio ativo ───────────────────────────────────────── */
   return (
     <div className={`flex flex-col items-center gap-1.5 ${className}`}>
-      <p className="text-[9px] font-semibold text-[#253750] tracking-[1.5px] uppercase">
+      <p className="text-[9px] font-semibold text-white tracking-[1.5px] uppercase">
         Publicidade
       </p>
       <a

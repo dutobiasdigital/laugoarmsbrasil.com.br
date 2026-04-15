@@ -10,17 +10,39 @@
  *   if (!ok) return { error: "Verificação falhou." };
  */
 
-const SECRET = process.env.RECAPTCHA_SECRET_KEY ?? "";
-
-// Minimum score threshold (reCAPTCHA v3 returns 0.0–1.0)
 const MIN_SCORE = 0.5;
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+
+/**
+ * Reads the reCAPTCHA secret key from env var first,
+ * then falls back to site_settings (saved via admin panel).
+ */
+async function getSecretKey(): Promise<string> {
+  if (process.env.RECAPTCHA_SECRET_KEY) return process.env.RECAPTCHA_SECRET_KEY;
+  if (!SERVICE) return "";
+  try {
+    const res = await fetch(
+      `https://${PROJECT}.supabase.co/rest/v1/site_settings?key=eq.integrations.recaptcha_secret_key&select=value&limit=1`,
+      {
+        headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` },
+        next: { revalidate: 300 }, // cache 5 min
+      }
+    );
+    const rows: { value: string | null }[] = await res.json();
+    return rows?.[0]?.value?.trim() ?? "";
+  } catch { return ""; }
+}
 
 export async function verifyRecaptcha(
   token: string,
   expectedAction?: string
 ): Promise<boolean> {
+  const secret = await getSecretKey();
+
   // Key not configured → graceful pass-through
-  if (!SECRET) return true;
+  if (!secret) return true;
 
   // Empty token with key configured → reject
   if (!token) return false;
@@ -31,7 +53,7 @@ export async function verifyRecaptcha(
       {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `secret=${encodeURIComponent(SECRET)}&response=${encodeURIComponent(token)}`,
+        body: `secret=${encodeURIComponent(secret)}&response=${encodeURIComponent(token)}`,
       }
     );
 
@@ -48,7 +70,6 @@ export async function verifyRecaptcha(
 
     return true;
   } catch {
-    // Network error verifying → fail open (don't block users for Google outage)
-    return true;
+    return true; // fail open — don't block users for Google outages
   }
 }

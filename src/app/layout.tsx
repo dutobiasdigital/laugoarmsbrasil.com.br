@@ -41,11 +41,12 @@ async function getSiteSettings(): Promise<Record<string, string>> {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cfg = await getSiteSettings();
 
-  const gtmId      = cfg["integrations.gtm_id"]      ?? "";
-  const ga4Id      = cfg["integrations.ga4_id"]       ?? "";
-  const pixelId    = cfg["integrations.meta_pixel_id"]?? "";
-  const hotjarId   = cfg["integrations.hotjar_id"]    ?? "";
-  const clarityId  = cfg["integrations.clarity_id"]   ?? "";
+  const gtmId           = cfg["integrations.gtm_id"]               ?? "";
+  const ga4Id           = cfg["integrations.ga4_id"]               ?? "";
+  const pixelId         = cfg["integrations.meta_pixel_id"]        ?? "";
+  const hotjarId        = cfg["integrations.hotjar_id"]            ?? "";
+  const clarityId       = cfg["integrations.clarity_id"]           ?? "";
+  const recaptchaSiteKey = cfg["integrations.recaptcha_site_key"]  ?? process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? "";
 
   return (
     <html
@@ -54,6 +55,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
     >
       <head>
+        {/* ── reCAPTCHA v3 site key (lido pelo useRecaptcha hook) ── */}
+        {recaptchaSiteKey && <meta name="rcsk" content={recaptchaSiteKey} />}
+
         {/* ── Google Tag Manager ── */}
         {gtmId && (
           <Script id="gtm-head" strategy="beforeInteractive">

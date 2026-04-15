@@ -123,12 +123,24 @@ html.light .hero-metal {
   background: linear-gradient(
     125deg,
     #dde3ec 0%,
-    #e8edf5 25%,
-    #edf1f8 45%,
-    #e4eaf3 60%,
+    #e8edf5 18%,
+    #edf1f8 32%,
+    #e4eaf3 48%,
+    #eaf0f8 62%,
+    #e8edf5 76%,
     #dde3ec 100%
   ) !important;
-  animation: none !important;
+  background-size: 350% 350% !important;
+  animation: metalShimmer 14s ease infinite !important;
+}
+
+/* ── Social icon buttons — dark & readable in light mode ── */
+html.light .social-btn {
+  color: #1e293b !important;
+  border-color: #94a3b8 !important;
+}
+html.light .social-btn:hover {
+  color: #ffffff !important;
 }
 
 /* ── Animated card border (light variant) ──────────────── */
@@ -142,3 +154,17 @@ html.light .card-metal-border {
     rgba(255, 31, 31, 0.2)  100%
   ) !important;
 }
+
+/* ── Additional backgrounds not in main override list ──── */
+html.light [class*="bg-[#0a0e18]"]  { background-color: #f1f5f9 !important; }
+
+/* ── Badge backgrounds (plan/status labels) ────────────── */
+html.light [class*="bg-[#260a0a]"]  { background-color: #fee2e2 !important; }
+html.light [class*="bg-[#1a1a40]"]  { background-color: #ede9fe !important; }
+html.light [class*="bg-[#1a1a40]"] [class*="text-[#818cf8]"] { color: #4f46e5 !important; }
+html.light [class*="bg-[#1a1a0a]"]  { background-color: #fefce8 !important; }
+
+/* ── Highlighted plan card — dark bg kept, restore text ── */
+html.light [class*="bg-[#1f0a0a]"] .text-white              { color: #ffffff !important; }
+html.light [class*="bg-[#1f0a0a]"] [class*="text-[#d4d4da]"] { color: #e2e8f0 !important; }
+html.light [class*="bg-[#1f0a0a]"] [class*="text-[#7a9ab5]"] { color: #94a3b8 !important; }

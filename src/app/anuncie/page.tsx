@@ -126,7 +126,7 @@ export default function AnunciePage() {
       <main className="flex-1 pt-16">
 
         {/* ── Hero ──────────────────────────────────────────── */}
-        <section className="px-5 lg:px-20 pt-16 pb-14">
+        <section className="hero-metal px-5 lg:px-20 pt-16 pb-14">
           <div className="flex items-center gap-2 mb-5">
             <div className="w-[6px] h-[6px] bg-[#ff1f1f] rounded-full" />
             <span className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase">
@@ -313,7 +313,7 @@ export default function AnunciePage() {
               </div>
             ))}
           </div>
-          <p className="text-[#253750] text-[13px] mt-4 text-center">
+          <p className="text-white text-[13px] mt-4 text-center">
             Valores para contratação direta. Agências têm comissão de 20%. Preços sem impostos.
           </p>
         </section>

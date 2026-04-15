@@ -1,42 +1,54 @@
 "use client";
 
 /**
- * useRecaptcha — loads reCAPTCHA v3 script and exposes executeRecaptcha(action).
+ * useRecaptcha — loads reCAPTCHA v3 and exposes executeRecaptcha(action).
  *
- * Graceful degradation: if NEXT_PUBLIC_RECAPTCHA_SITE_KEY is not set,
- * executeRecaptcha returns "" and `enabled` is false.
+ * Reads the site key from:
+ *   1. process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY  (build-time env var)
+ *   2. <meta name="rcsk"> injected by layout.tsx    (runtime, from site_settings)
  *
- * Usage:
- *   const { executeRecaptcha, enabled } = useRecaptcha();
- *   ...
- *   const token = await executeRecaptcha("login");
- *   // pass `token` as _recaptchaToken in your request body / formData
+ * Graceful degradation: if no key is found, executeRecaptcha returns ""
+ * and `enabled` is false — forms work normally without reCAPTCHA.
  */
 
-import { useCallback, useEffect } from "react";
-
-const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? "";
+import { useCallback, useEffect, useState } from "react";
 
 declare global {
   interface Window {
     grecaptcha: {
       ready: (cb: () => void) => void;
-      execute: (
-        siteKey: string,
-        options: { action: string }
-      ) => Promise<string>;
+      execute: (siteKey: string, options: { action: string }) => Promise<string>;
     };
   }
 }
 
+function resolveKey(): string {
+  // 1. Build-time env var
+  if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+    return process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+  }
+  // 2. Meta tag set by layout.tsx from site_settings (runtime)
+  if (typeof document !== "undefined") {
+    return (
+      document.querySelector('meta[name="rcsk"]')?.getAttribute("content") ?? ""
+    );
+  }
+  return "";
+}
+
 export function useRecaptcha() {
+  const [siteKey, setSiteKey] = useState("");
+
   useEffect(() => {
-    if (!SITE_KEY) return;
+    const key = resolveKey();
+    if (!key) return;
+    setSiteKey(key);
+
     // Already loaded
-    if (document.querySelector(`script[data-recaptcha]`)) return;
+    if (document.querySelector("script[data-recaptcha]")) return;
 
     const script = document.createElement("script");
-    script.src = `https://www.google.com/recaptcha/api.js?render=${SITE_KEY}`;
+    script.src = `https://www.google.com/recaptcha/api.js?render=${key}`;
     script.async = true;
     script.dataset.recaptcha = "1";
     document.head.appendChild(script);
@@ -44,7 +56,8 @@ export function useRecaptcha() {
 
   const executeRecaptcha = useCallback(
     async (action: string): Promise<string> => {
-      if (!SITE_KEY) return "";
+      const key = siteKey || resolveKey();
+      if (!key) return "";
       return new Promise<string>((resolve) => {
         if (typeof window === "undefined" || !window.grecaptcha) {
           resolve("");
@@ -52,9 +65,7 @@ export function useRecaptcha() {
         }
         window.grecaptcha.ready(async () => {
           try {
-            const token = await window.grecaptcha.execute(SITE_KEY, {
-              action,
-            });
+            const token = await window.grecaptcha.execute(key, { action });
             resolve(token);
           } catch {
             resolve("");
@@ -62,8 +73,8 @@ export function useRecaptcha() {
         });
       });
     },
-    []
+    [siteKey]
   );
 
-  return { executeRecaptcha, enabled: !!SITE_KEY };
+  return { executeRecaptcha, enabled: !!siteKey };
 }
