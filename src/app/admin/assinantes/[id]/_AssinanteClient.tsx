@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 const inputCls =
-  "bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full";
+  "bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full";
 const labelCls = "block text-[#7a9ab5] text-[12px] font-semibold mb-1.5";
 const selectCls =
   "bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full";
@@ -11,9 +11,9 @@ const selectCls =
 const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> = {
   ACTIVE: { bg: "bg-[#0f381f]", text: "text-[#22c55e]", label: "ATIVO" },
   PAST_DUE: { bg: "bg-[#382405]", text: "text-[#ef9f1b]", label: "ATRASADO" },
-  CANCELED: { bg: "bg-[#141d2c]", text: "text-[#253750]", label: "CANCELADO" },
+  CANCELED: { bg: "bg-[#141d2c]", text: "text-white", label: "CANCELADO" },
   PENDING: { bg: "bg-[#382405]", text: "text-[#ef9f1b]", label: "PENDENTE" },
-  EXPIRED: { bg: "bg-[#141d2c]", text: "text-[#253750]", label: "EXPIRADO" },
+  EXPIRED: { bg: "bg-[#141d2c]", text: "text-white", label: "EXPIRADO" },
 };
 
 interface Plan {
@@ -164,40 +164,40 @@ export default function AssinanteClient({ user, subscription, plans }: Props) {
         {!showSubForm && subscription && (
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
-              <p className="text-[#253750] text-[11px] mb-0.5">Plano</p>
+              <p className="text-white text-[11px] mb-0.5">Plano</p>
               <p className="text-[#d4d4da] text-[14px] font-semibold">{subscription.planName}</p>
             </div>
             <div>
-              <p className="text-[#253750] text-[11px] mb-0.5">Valor</p>
+              <p className="text-white text-[11px] mb-0.5">Valor</p>
               <p className="text-[#d4d4da] text-[14px]">{formatCurrency(subscription.planPriceInCents)}</p>
             </div>
             <div>
-              <p className="text-[#253750] text-[11px] mb-0.5">Status</p>
+              <p className="text-white text-[11px] mb-0.5">Status</p>
               {st ? (
                 <span className={`inline-flex items-center h-[20px] px-2.5 rounded-full text-[10px] font-bold ${st.bg} ${st.text}`}>
                   {st.label}
                 </span>
-              ) : <p className="text-[#253750] text-[13px]">—</p>}
+              ) : <p className="text-white text-[13px]">—</p>}
             </div>
             <div>
-              <p className="text-[#253750] text-[11px] mb-0.5">Início do período</p>
+              <p className="text-white text-[11px] mb-0.5">Início do período</p>
               <p className="text-[#d4d4da] text-[13px]">
                 {new Date(subscription.currentPeriodStart).toLocaleDateString("pt-BR")}
               </p>
             </div>
             <div>
-              <p className="text-[#253750] text-[11px] mb-0.5">Fim do período</p>
+              <p className="text-white text-[11px] mb-0.5">Fim do período</p>
               <p className="text-[#d4d4da] text-[13px]">
                 {new Date(subscription.currentPeriodEnd).toLocaleDateString("pt-BR")}
               </p>
             </div>
             <div>
-              <p className="text-[#253750] text-[11px] mb-0.5">Assinante desde</p>
+              <p className="text-white text-[11px] mb-0.5">Assinante desde</p>
               <p className="text-[#d4d4da] text-[13px]">{subscription.subscribedAt}</p>
             </div>
             {subscription.notes && (
               <div className="col-span-2 lg:col-span-3">
-                <p className="text-[#253750] text-[11px] mb-0.5">Observações</p>
+                <p className="text-white text-[11px] mb-0.5">Observações</p>
                 <p className="text-[#7a9ab5] text-[13px]">{subscription.notes}</p>
               </div>
             )}
@@ -205,7 +205,7 @@ export default function AssinanteClient({ user, subscription, plans }: Props) {
         )}
 
         {!showSubForm && !subscription && (
-          <p className="text-[#253750] text-[13px]">Nenhuma assinatura ativa. Clique em "Ativar assinatura" para configurar.</p>
+          <p className="text-white text-[13px]">Nenhuma assinatura ativa. Clique em "Ativar assinatura" para configurar.</p>
         )}
 
         {showSubForm && (

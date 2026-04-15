@@ -104,7 +104,7 @@ export default async function AdminEdicoesPage({
           name="q"
           defaultValue={q}
           placeholder="🔍 Buscar por título..."
-          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-[260px]"
+          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-[260px]"
         />
         <select
           name="tipo"
@@ -138,7 +138,7 @@ export default async function AdminEdicoesPage({
         <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-7 gap-3 items-center">
           {/* Nº com toggle */}
           <div className="flex items-center gap-1.5">
-            <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">Nº</p>
+            <p className="text-white text-[11px] font-semibold tracking-[0.5px]">Nº</p>
             <Link
               href={`/admin/edicoes${qs({ ...baseParams, ordem: nextDir, pagina: "1" })}`}
               title={sortDir === "desc" ? "Ordenar crescente" : "Ordenar decrescente"}
@@ -148,14 +148,14 @@ export default async function AdminEdicoesPage({
             </Link>
           </div>
           {["Capa", "Título", "Tipo", "Data", "Status", "Ações"].map((h) => (
-            <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">
+            <p key={h} className="text-white text-[11px] font-semibold tracking-[0.5px]">
               {h}
             </p>
           ))}
         </div>
 
         {editions.length === 0 ? (
-          <p className="text-[#253750] text-[13px] p-8 text-center">
+          <p className="text-white text-[13px] p-8 text-center">
             Nenhuma edição encontrada.
           </p>
         ) : (
@@ -175,7 +175,7 @@ export default async function AdminEdicoesPage({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-[#253750] text-[10px]">—</span>
+                    <span className="text-white text-[10px]">—</span>
                   )}
                 </div>
                 <p className="text-[#d4d4da] text-[14px] truncate">{ed.title}</p>
@@ -200,7 +200,7 @@ export default async function AdminEdicoesPage({
                   className={`inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold ${
                     ed.isPublished
                       ? "bg-[#0f381f] text-[#22c55e]"
-                      : "bg-[#141d2c] text-[#253750]"
+                      : "bg-[#141d2c] text-white"
                   }`}
                 >
                   {ed.isPublished ? "PUBLICADA" : "RASCUNHO"}
@@ -215,7 +215,7 @@ export default async function AdminEdicoesPage({
                   <Link
                     href={`/edicoes/${ed.slug}`}
                     target="_blank"
-                    className="text-[#253750] hover:text-[#7a9ab5] text-[13px] transition-colors"
+                    className="text-white hover:text-[#7a9ab5] text-[13px] transition-colors"
                   >
                     Ver
                   </Link>
@@ -228,7 +228,7 @@ export default async function AdminEdicoesPage({
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="px-5 py-3 flex items-center justify-between border-t border-[#141d2c]">
-            <p className="text-[#253750] text-[13px]">
+            <p className="text-white text-[13px]">
               {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, total)} de{" "}
               {total.toLocaleString("pt-BR")} edições
             </p>

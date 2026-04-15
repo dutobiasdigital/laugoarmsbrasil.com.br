@@ -58,7 +58,7 @@ export default function ContatoPage() {
                     {c.icon}
                   </div>
                   <div>
-                    <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] uppercase mb-0.5">
+                    <p className="text-white text-[11px] font-semibold tracking-[0.5px] uppercase mb-0.5">
                       {c.label}
                     </p>
                     <p className="text-[#d4d4da] text-[14px] group-hover:text-white transition-colors">
@@ -69,7 +69,7 @@ export default function ContatoPage() {
               ))}
 
               <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5 mt-2">
-                <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] uppercase mb-3">
+                <p className="text-white text-[11px] font-semibold tracking-[0.5px] uppercase mb-3">
                   Horário de atendimento
                 </p>
                 <div className="flex flex-col gap-1.5">
@@ -83,7 +83,7 @@ export default function ContatoPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#7a9ab5] text-[14px]">Domingo</span>
-                    <span className="text-[#253750] text-[14px]">Fechado</span>
+                    <span className="text-white text-[14px]">Fechado</span>
                   </div>
                 </div>
               </div>

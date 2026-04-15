@@ -336,7 +336,7 @@ export default async function HomePage() {
                     <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[17px] leading-snug line-clamp-2">
                       {article.title}
                     </p>
-                    <p className="text-[#253750] text-[12px]">
+                    <p className="text-white text-[12px]">
                       {article.publishedAt
                         ? new Date(article.publishedAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })
                         : ""}
@@ -354,7 +354,7 @@ export default async function HomePage() {
               <p className="font-['Barlow_Condensed'] font-extrabold text-[#dce8ff] text-[32px] leading-tight">
                 Acervo completo nas suas mãos
               </p>
-              <p className="text-[#253750] text-[15px]">
+              <p className="text-white text-[15px]">
                 145 edições regulares + 62 especiais. Escolha seu plano.
               </p>
             </div>

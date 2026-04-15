@@ -103,7 +103,7 @@ export default function TabSEO({ settings }: Props) {
           <label className={labelCls}>URL do Logotipo</label>
           <input value={values["site.logo_url"]} onChange={e => set("site.logo_url", e.target.value)}
             placeholder="https://..." type="url" className={inputCls} />
-          <p className="text-[#253750] text-[11px] mt-1">PNG transparente recomendado. Exibido no header.</p>
+          <p className="text-white text-[11px] mt-1">PNG transparente recomendado. Exibido no header.</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -111,13 +111,13 @@ export default function TabSEO({ settings }: Props) {
             <label className={labelCls}>URL do Favicon</label>
             <input value={values["site.favicon_url"]} onChange={e => set("site.favicon_url", e.target.value)}
               placeholder="https://.../favicon.ico" type="url" className={inputCls} />
-            <p className="text-[#253750] text-[11px] mt-1">ICO ou PNG 32×32px.</p>
+            <p className="text-white text-[11px] mt-1">ICO ou PNG 32×32px.</p>
           </div>
           <div>
             <label className={labelCls}>Imagem OG (compartilhamento social)</label>
             <input value={values["site.og_image_url"]} onChange={e => set("site.og_image_url", e.target.value)}
               placeholder="https://.../og-image.jpg" type="url" className={inputCls} />
-            <p className="text-[#253750] text-[11px] mt-1">1200×630px. JPG ou PNG.</p>
+            <p className="text-white text-[11px] mt-1">1200×630px. JPG ou PNG.</p>
           </div>
         </div>
 
@@ -130,7 +130,7 @@ export default function TabSEO({ settings }: Props) {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={values["site.logo_url"]} alt="Logo preview" className="max-w-full max-h-full object-contain" />
                 </div>
-                <p className="text-[#253750] text-[10px]">Logo</p>
+                <p className="text-white text-[10px]">Logo</p>
               </div>
             )}
             {values["site.og_image_url"] && (
@@ -139,7 +139,7 @@ export default function TabSEO({ settings }: Props) {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={values["site.og_image_url"]} alt="OG preview" className="w-full h-full object-cover" />
                 </div>
-                <p className="text-[#253750] text-[10px]">OG 1200×630</p>
+                <p className="text-white text-[10px]">OG 1200×630</p>
               </div>
             )}
           </div>
@@ -154,7 +154,7 @@ export default function TabSEO({ settings }: Props) {
           <label className={labelCls}>Domínio base (URL canônica)</label>
           <input value={values["site.domain"]} onChange={e => set("site.domain", e.target.value)}
             placeholder="https://www.revistamagnum.com.br" type="url" className={inputCls} />
-          <p className="text-[#253750] text-[11px] mt-1">Sem barra no final. Usado em canonical URLs e sitemaps.</p>
+          <p className="text-white text-[11px] mt-1">Sem barra no final. Usado em canonical URLs e sitemaps.</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

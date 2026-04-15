@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 const inputCls =
-  "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full";
+  "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full";
 const labelCls = "block text-[#7a9ab5] text-[11px] font-semibold mb-1";
 
 interface Plan {
@@ -202,7 +202,7 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
                       className={`text-[10px] font-bold px-2 py-[2px] rounded-[2px] ${
                         plan.active
                           ? "bg-[#0f381f] text-[#22c55e]"
-                          : "bg-[#141d2c] text-[#253750]"
+                          : "bg-[#141d2c] text-white"
                       }`}
                     >
                       {plan.active ? "ATIVO" : "INATIVO"}
@@ -214,7 +214,7 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
                     {plan.subscriberCount.toLocaleString("pt-BR")} assinantes
                   </p>
                   {plan.description && (
-                    <p className="text-[#253750] text-[12px] mt-1">{plan.description}</p>
+                    <p className="text-white text-[12px] mt-1">{plan.description}</p>
                   )}
                 </div>
                 <button

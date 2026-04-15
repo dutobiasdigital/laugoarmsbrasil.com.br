@@ -149,7 +149,7 @@ export default function AdminGuiaPage() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Buscar por nome, cidade ou estado..."
-          className="flex-1 bg-[#0e1520] border border-[#141d2c] focus:border-[#ff1f1f] rounded-[6px] h-[34px] px-3 text-[13px] text-[#d4d4da] placeholder-[#253750] focus:outline-none transition-colors"
+          className="flex-1 bg-[#0e1520] border border-[#141d2c] focus:border-[#ff1f1f] rounded-[6px] h-[34px] px-3 text-[13px] text-[#d4d4da] placeholder-white/30 focus:outline-none transition-colors"
         />
       </div>
 
@@ -159,15 +159,15 @@ export default function AdminGuiaPage() {
         <div className="bg-[#141d2c] px-5 py-3 grid gap-3"
           style={{ gridTemplateColumns: "1fr 110px 80px 90px 100px 180px" }}>
           {["Empresa", "Categoria", "Plano", "Status", "Local", "Ações"].map(h => (
-            <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] uppercase">{h}</p>
+            <p key={h} className="text-white text-[11px] font-semibold tracking-[0.5px] uppercase">{h}</p>
           ))}
         </div>
 
         {loading ? (
-          <div className="py-16 text-center text-[#253750] text-[14px]">Carregando...</div>
+          <div className="py-16 text-center text-white text-[14px]">Carregando...</div>
         ) : displayed.length === 0 ? (
           <div className="py-16 text-center">
-            <p className="text-[#253750] text-[14px]">
+            <p className="text-white text-[14px]">
               {search ? `Nenhum resultado para "${search}"` : "Nenhum cadastro encontrado."}
             </p>
           </div>
@@ -188,7 +188,7 @@ export default function AdminGuiaPage() {
                       {l.featured && <span className="text-[#facc15] text-[11px]">★</span>}
                       <p className="text-[#d4d4da] text-[14px] font-semibold truncate">{l.name}</p>
                     </div>
-                    <p className="text-[#253750] text-[11px]">
+                    <p className="text-white text-[11px]">
                       {l.viewsCount} views · {new Date(l.createdAt).toLocaleDateString("pt-BR")}
                     </p>
                   </div>
@@ -259,7 +259,7 @@ export default function AdminGuiaPage() {
       </div>
 
       {!loading && displayed.length > 0 && (
-        <p className="text-[#253750] text-[12px] mt-3 text-right">
+        <p className="text-white text-[12px] mt-3 text-right">
           {displayed.length} empresa{displayed.length !== 1 ? "s" : ""} exibida{displayed.length !== 1 ? "s" : ""}
         </p>
       )}

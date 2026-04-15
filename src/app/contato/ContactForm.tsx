@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRecaptcha } from "@/hooks/useRecaptcha";
 
 const inputCls =
-  "w-full bg-[#0e1520] border border-[#141d2c] rounded-[6px] h-[44px] px-4 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f]";
+  "w-full bg-[#0e1520] border border-[#141d2c] rounded-[6px] h-[44px] px-4 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f]";
 const labelCls = "block text-[#7a9ab5] text-[12px] font-semibold mb-1.5";
 
 export default function ContactForm() {
@@ -101,7 +101,7 @@ export default function ContactForm() {
           required
           rows={6}
           placeholder="Descreva sua mensagem com detalhes..."
-          className="w-full bg-[#0e1520] border border-[#141d2c] rounded-[6px] px-4 py-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] resize-none"
+          className="w-full bg-[#0e1520] border border-[#141d2c] rounded-[6px] px-4 py-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] resize-none"
         />
       </div>
 
@@ -113,7 +113,7 @@ export default function ContactForm() {
         {loading ? "Enviando..." : "Enviar mensagem →"}
       </button>
 
-      <p className="text-[#253750] text-[12px]">Respondemos em até 2 dias úteis.</p>
+      <p className="text-white text-[12px]">Respondemos em até 2 dias úteis.</p>
     </form>
   );
 }

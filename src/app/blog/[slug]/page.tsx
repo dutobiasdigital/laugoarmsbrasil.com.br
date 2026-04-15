@@ -101,7 +101,7 @@ export default async function BlogArtigoPage({
 
           <div className="bg-[#141d2c] h-px max-w-[860px] mb-4" />
           <p className="text-[#d4d4da] text-[14px] font-medium mb-1">{post.authorName}</p>
-          <p className="text-[#253750] text-[13px] mb-4">
+          <p className="text-white text-[13px] mb-4">
             {post.publishedAt
               ? new Date(post.publishedAt).toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })
               : ""}
@@ -151,7 +151,7 @@ export default async function BlogArtigoPage({
                       Já sou assinante
                     </Link>
                   </div>
-                  <p className="text-[#253750] text-[13px]">R$ 29,90/trimestre · Cancele quando quiser</p>
+                  <p className="text-white text-[13px]">R$ 29,90/trimestre · Cancele quando quiser</p>
                 </div>
               </>
             )}
@@ -161,7 +161,7 @@ export default async function BlogArtigoPage({
           <aside className="hidden lg:flex flex-col gap-5 w-[360px] shrink-0 sticky top-20">
             {/* TOC */}
             <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5">
-              <p className="text-[#253750] text-[11px] font-semibold tracking-[1px] uppercase mb-3">Neste Artigo</p>
+              <p className="text-white text-[11px] font-semibold tracking-[1px] uppercase mb-3">Neste Artigo</p>
               <div className="bg-[#141d2c] h-px mb-3" />
               <ul className="flex flex-col gap-2">
                 {tocItems.map((item, i) => (

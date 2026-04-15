@@ -96,11 +96,11 @@ export default async function EmpresaPage({
         {/* Breadcrumb */}
         <div className="px-5 lg:px-20 py-4 border-b border-[#141d2c] bg-[#0a0e18] flex items-center gap-2 text-[13px] flex-wrap">
           <Link href="/guia" className="text-[#526888] hover:text-white transition-colors">Guia Comercial</Link>
-          <span className="text-[#253750]">/</span>
+          <span className="text-white">/</span>
           {cat && (
             <>
               <Link href={`/guia/${cat.slug}`} className="text-[#526888] hover:text-white transition-colors">{cat.label}</Link>
-              <span className="text-[#253750]">/</span>
+              <span className="text-white">/</span>
             </>
           )}
           <span className="text-[#d4d4da] truncate max-w-[200px]">{listing.name}</span>
@@ -252,7 +252,7 @@ export default async function EmpresaPage({
                             <p className="text-[#7a9ab5] text-[14px] group-hover:text-white transition-colors font-semibold">
                               Ver no Google Maps →
                             </p>
-                            <p className="text-[#253750] text-[12px] mt-1">{mapQuery}</p>
+                            <p className="text-white text-[12px] mt-1">{mapQuery}</p>
                           </div>
                         </a>
                       )}
@@ -279,7 +279,7 @@ export default async function EmpresaPage({
                   <p className="text-[28px]">📍</p>
                   <p className="text-white text-[15px] font-semibold">{listing.city}, {listing.state}</p>
                   {!isPaid && (
-                    <p className="text-[#253750] text-[12px]">
+                    <p className="text-white text-[12px]">
                       Endereço completo e mapa disponíveis nos planos Premium e Destaque
                     </p>
                   )}

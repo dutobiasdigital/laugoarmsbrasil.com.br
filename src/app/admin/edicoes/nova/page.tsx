@@ -9,7 +9,7 @@ import ImageUpload from "@/components/admin/ImageUpload";
 const RichEditor = dynamic(() => import("@/components/admin/RichEditor"), { ssr: false });
 
 const inputCls =
-  "bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full";
+  "bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full";
 const labelCls = "block text-[#7a9ab5] text-[12px] font-semibold mb-1.5";
 
 interface TocItem { page: string; title: string; category: string; }
@@ -166,7 +166,7 @@ export default function NovaEdicaoPage() {
           <div className="flex items-center justify-between mb-3">
             <div>
               <p className="text-[#7a9ab5] text-[12px] font-semibold uppercase tracking-[1px]">Índice da Edição</p>
-              <p className="text-[#253750] text-[11px] mt-0.5">Cada linha vira uma entrada no índice da edição pública.</p>
+              <p className="text-white text-[11px] mt-0.5">Cada linha vira uma entrada no índice da edição pública.</p>
             </div>
             <div className="flex items-center gap-2">
               {addingCat ? (
@@ -182,7 +182,7 @@ export default function NovaEdicaoPage() {
                   <button type="button" onClick={addCategory} disabled={savingCat} className="bg-[#ff1f1f] text-white text-[12px] h-[32px] px-3 rounded-[6px] disabled:opacity-50">
                     {savingCat ? "..." : "Salvar"}
                   </button>
-                  <button type="button" onClick={() => { setAddingCat(false); setNewCatName(""); }} className="text-[#253750] hover:text-[#7a9ab5] text-[12px] h-[32px] px-2">✕</button>
+                  <button type="button" onClick={() => { setAddingCat(false); setNewCatName(""); }} className="text-white hover:text-[#7a9ab5] text-[12px] h-[32px] px-2">✕</button>
                 </div>
               ) : (
                 <button type="button" onClick={() => setAddingCat(true)} className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#7a9ab5] text-[12px] h-[32px] px-3 rounded-[6px] transition-colors">
@@ -197,11 +197,11 @@ export default function NovaEdicaoPage() {
           <div className="bg-[#0e1520] border border-[#141d2c] rounded-[8px] overflow-hidden">
             <div className="bg-[#141d2c] px-4 py-2 grid grid-cols-[100px_1fr_180px_36px] gap-3">
               {["Página", "Título da Matéria", "Categoria", ""].map((h) => (
-                <p key={h} className="text-[#253750] text-[10px] font-semibold tracking-[0.5px] uppercase">{h}</p>
+                <p key={h} className="text-white text-[10px] font-semibold tracking-[0.5px] uppercase">{h}</p>
               ))}
             </div>
             {tocItems.length === 0 ? (
-              <p className="text-[#253750] text-[13px] text-center py-6">Nenhum item. Clique em "+ Adicionar item" para começar.</p>
+              <p className="text-white text-[13px] text-center py-6">Nenhum item. Clique em "+ Adicionar item" para começar.</p>
             ) : (
               tocItems.map((item, i) => (
                 <div key={i} className={`px-4 py-2.5 grid grid-cols-[100px_1fr_180px_36px] gap-3 items-center ${i > 0 ? "border-t border-[#141d2c]" : ""}`}>
@@ -211,7 +211,7 @@ export default function NovaEdicaoPage() {
                     <option value="">Sem categoria</option>
                     {categories.map((cat) => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
                   </select>
-                  <button type="button" onClick={() => removeTocItem(i)} className="text-[#253750] hover:text-[#ff6b6b] text-[16px] h-[34px] flex items-center justify-center transition-colors">✕</button>
+                  <button type="button" onClick={() => removeTocItem(i)} className="text-white hover:text-[#ff6b6b] text-[16px] h-[34px] flex items-center justify-center transition-colors">✕</button>
                 </div>
               ))
             )}

@@ -65,7 +65,7 @@ export default function TabNotificacoes({ settings }: Props) {
             onChange={e => setValues(v => ({ ...v, "notify.emails_destino": e.target.value }))}
             placeholder="admin@revistamagnum.com.br, editorial@revistamagnum.com.br"
             className={inputCls} />
-          <p className="text-[#253750] text-[11px] mt-1">Separe múltiplos e-mails por vírgula.</p>
+          <p className="text-white text-[11px] mt-1">Separe múltiplos e-mails por vírgula.</p>
         </div>
       </section>
 
@@ -87,7 +87,7 @@ export default function TabNotificacoes({ settings }: Props) {
               </button>
               <div className="flex-1 min-w-0">
                 <p className={`text-[14px] font-semibold ${values[ev.key] === "true" ? "text-[#d4d4da]" : "text-[#526888]"}`}>{ev.label}</p>
-                <p className="text-[#253750] text-[12px]">{ev.desc}</p>
+                <p className="text-white text-[12px]">{ev.desc}</p>
               </div>
               {values[ev.key] === "true" && (
                 <span className="text-[10px] bg-[#0f381f] text-[#22c55e] px-2 py-[2px] rounded-[2px] font-bold shrink-0">ON</span>

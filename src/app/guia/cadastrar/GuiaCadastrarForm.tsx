@@ -4,10 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { CATEGORIES, STATES } from "@/lib/guia";
 
-const inputCls  = "bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] h-[44px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
+const inputCls  = "bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] h-[44px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
 const selectCls = "bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] h-[44px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
 const labelCls  = "block text-[#7a9ab5] text-[12px] font-semibold mb-1.5";
-const areaCls   = "bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] px-3 py-2.5 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors resize-none";
+const areaCls   = "bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] px-3 py-2.5 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full transition-colors resize-none";
 
 interface FormData {
   name: string; category: string;
@@ -128,7 +128,7 @@ export default function GuiaCadastrarForm() {
               placeholder="Descreva os serviços e diferenciais da sua empresa..."
               className={areaCls}
             />
-            <p className="text-[#253750] text-[11px] mt-1">{form.description.length}/500 caracteres recomendados</p>
+            <p className="text-white text-[11px] mt-1">{form.description.length}/500 caracteres recomendados</p>
           </div>
         </div>
       </section>

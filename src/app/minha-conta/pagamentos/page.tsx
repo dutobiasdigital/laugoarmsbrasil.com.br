@@ -16,7 +16,7 @@ const STATUS_STYLE: Record<string, string> = {
   PENDING:   "bg-[#2a1e05] text-[#f59e0b]",
   REJECTED:  "bg-[#2d0a0a] text-[#ff6b6b]",
   REFUNDED:  "bg-[#141d2c] text-[#7a9ab5]",
-  CANCELLED: "bg-[#141d2c] text-[#253750]",
+  CANCELLED: "bg-[#141d2c] text-white",
 };
 const STATUS_LABEL: Record<string, string> = {
   APPROVED: "Aprovado", PENDING: "Pendente",
@@ -77,7 +77,7 @@ export default async function PagamentosPage() {
           { label: "Último plano",  value: planName,                color: "text-[#d4d4da]" },
         ].map(s => (
           <div key={s.label} className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5">
-            <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] mb-1">{s.label.toUpperCase()}</p>
+            <p className="text-white text-[11px] font-semibold tracking-[0.5px] mb-1">{s.label.toUpperCase()}</p>
             <p className={`font-['Barlow_Condensed'] font-bold text-[28px] leading-none truncate ${s.color}`}>
               {s.value}
             </p>
@@ -89,14 +89,14 @@ export default async function PagamentosPage() {
       {payments.length === 0 ? (
         <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-12 text-center">
           <p className="text-[40px] mb-3">💳</p>
-          <p className="text-[#253750] text-[14px]">Nenhum pagamento registrado ainda.</p>
+          <p className="text-white text-[14px]">Nenhum pagamento registrado ainda.</p>
         </div>
       ) : (
         <div className="bg-[#0e1520] border border-[#141d2c] rounded-xl overflow-hidden">
           {/* Header desktop */}
           <div className="bg-[#141d2c] px-5 py-3 hidden sm:grid grid-cols-[1fr_1.4fr_90px_70px_100px] gap-3">
             {["Data", "Produto", "Valor", "Gateway", "Status"].map(h => (
-              <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">{h}</p>
+              <p key={h} className="text-white text-[11px] font-semibold tracking-[0.5px]">{h}</p>
             ))}
           </div>
 

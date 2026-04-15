@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRecaptcha } from "@/hooks/useRecaptcha";
 
 const inputCls =
-  "bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] h-[44px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
+  "bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] h-[44px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
 const labelCls = "block text-[#7a9ab5] text-[12px] font-semibold mb-1.5";
 const selectCls =
   "bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] h-[44px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
@@ -196,7 +196,7 @@ export default function AnuncieForm() {
           name="message"
           rows={3}
           placeholder="Conte sobre sua campanha, objetivos ou dúvidas..."
-          className="bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] px-3 py-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors resize-none"
+          className="bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] px-3 py-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full transition-colors resize-none"
         />
       </div>
 
@@ -208,7 +208,7 @@ export default function AnuncieForm() {
         {loading ? "Enviando..." : "Enviar solicitação →"}
       </button>
 
-      <p className="text-[#253750] text-[12px] text-center">
+      <p className="text-white text-[12px] text-center">
         Seus dados são usados apenas para fins comerciais e não são compartilhados com terceiros.
       </p>
     </form>

@@ -115,7 +115,7 @@ export default function LoginPage() {
                 name="email"
                 required
                 placeholder="seu@email.com"
-                className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[48px] px-4 text-[15px] focus:outline-none focus:border-[#ff1f1f] transition-colors"
+                className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-white/30 rounded-[6px] h-[48px] px-4 text-[15px] focus:outline-none focus:border-[#ff1f1f] transition-colors"
               />
             </div>
 
@@ -131,7 +131,7 @@ export default function LoginPage() {
                 name="password"
                 required
                 placeholder="••••••••"
-                className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[48px] px-4 text-[15px] focus:outline-none focus:border-[#ff1f1f] transition-colors"
+                className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-white/30 rounded-[6px] h-[48px] px-4 text-[15px] focus:outline-none focus:border-[#ff1f1f] transition-colors"
               />
             </div>
 
@@ -151,7 +151,7 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          <p className="text-[#253750] text-[12px] text-center mt-4">
+          <p className="text-white text-[12px] text-center mt-4">
             🔒 Conexão segura · Dados protegidos com criptografia
           </p>
         </div>

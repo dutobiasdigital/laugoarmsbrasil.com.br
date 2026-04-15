@@ -189,7 +189,7 @@ export default async function EdicaoDetalhePage({
                     <span>📖</span> Ler Edição
                   </a>
                 ) : (
-                  <span className="bg-[#141d2c] text-[#253750] text-[14px] h-[48px] px-8 flex items-center justify-center rounded-[4px] cursor-default">
+                  <span className="bg-[#141d2c] text-white text-[14px] h-[48px] px-8 flex items-center justify-center rounded-[4px] cursor-default">
                     Leitura em breve
                   </span>
                 )
@@ -212,7 +212,7 @@ export default async function EdicaoDetalhePage({
             </div>
 
             {!canRead && (
-              <p className="text-[#253750] text-[12px]">
+              <p className="text-white text-[12px]">
                 🔒 Assinatura ou acesso avulso por 30 dias
               </p>
             )}
@@ -232,7 +232,7 @@ export default async function EdicaoDetalhePage({
               try { toc = JSON.parse(edition.tableOfContents ?? "[]"); } catch { toc = []; }
               if (toc.length === 0) {
                 return (
-                  <p className="text-[#253750] text-[13px] text-center py-8">
+                  <p className="text-white text-[13px] text-center py-8">
                     Índice não disponível para esta edição.
                   </p>
                 );

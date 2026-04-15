@@ -95,9 +95,9 @@ export default async function UpgradePage({
         {/* Breadcrumb */}
         <div className="px-5 lg:px-20 py-4 border-b border-[#141d2c] bg-[#0a0e18] flex items-center gap-2 text-[13px] flex-wrap">
           <Link href="/guia" className="text-[#526888] hover:text-white transition-colors">Guia</Link>
-          <span className="text-[#253750]">/</span>
+          <span className="text-white">/</span>
           <Link href={`/guia/empresa/${slug}`} className="text-[#526888] hover:text-white transition-colors truncate max-w-[160px]">{listing.name}</Link>
-          <span className="text-[#253750]">/</span>
+          <span className="text-white">/</span>
           <span className="text-[#d4d4da]">Upgrade</span>
         </div>
 
@@ -154,9 +154,9 @@ export default async function UpgradePage({
                     <div key={row.feature}
                       className="grid grid-cols-[1fr_40px_40px_50px] gap-1 py-2 border-b border-[#0e1520] text-[11px]">
                       <span className="text-[#526888]">{row.feature}</span>
-                      <span className="text-center">{row.free     ? <span className="text-[#22c55e]">✓</span> : <span className="text-[#253750]">—</span>}</span>
-                      <span className="text-center">{row.premium  ? <span className="text-[#818cf8]">✓</span> : <span className="text-[#253750]">—</span>}</span>
-                      <span className="text-center">{row.destaque ? <span className="text-[#ff1f1f]">✓</span> : <span className="text-[#253750]">—</span>}</span>
+                      <span className="text-center">{row.free     ? <span className="text-[#22c55e]">✓</span> : <span className="text-white">—</span>}</span>
+                      <span className="text-center">{row.premium  ? <span className="text-[#818cf8]">✓</span> : <span className="text-white">—</span>}</span>
+                      <span className="text-center">{row.destaque ? <span className="text-[#ff1f1f]">✓</span> : <span className="text-white">—</span>}</span>
                     </div>
                   ))}
                   <div className="grid grid-cols-[1fr_40px_40px_50px] gap-1 pt-3 text-[11px] font-bold">

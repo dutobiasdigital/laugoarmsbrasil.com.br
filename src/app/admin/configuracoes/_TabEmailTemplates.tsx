@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { saveSettings } from "./_ConfiguracoesClient";
 
-const areaCls = "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] px-3 py-2.5 text-[13px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors resize-none font-mono leading-relaxed";
-const inputCls = "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
+const areaCls = "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] px-3 py-2.5 text-[13px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full transition-colors resize-none font-mono leading-relaxed";
+const inputCls = "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
 const labelCls = "block text-[#7a9ab5] text-[12px] font-semibold mb-1.5";
 
 /* ── Variáveis disponíveis por template ─────────────────────── */
@@ -208,7 +208,7 @@ export default function TabEmailTemplates({ settings }: Props) {
         {/* Editor */}
         <div className="flex-1 min-w-0 flex flex-col gap-4">
           <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-1.5">
-            <p className="text-[#253750] text-[12px] px-3 py-2">{current.desc}</p>
+            <p className="text-white text-[12px] px-3 py-2">{current.desc}</p>
           </div>
 
           {/* Assunto */}
@@ -249,7 +249,7 @@ export default function TabEmailTemplates({ settings }: Props) {
               onChange={e => updateForm("body", e.target.value)}
               placeholder="Corpo do e-mail em texto simples. Use {{variavel}} para dados dinâmicos..."
             />
-            <p className="text-[#253750] text-[11px] mt-1">
+            <p className="text-white text-[11px] mt-1">
               O e-mail será enviado em HTML com o layout padrão da Revista Magnum.
               Quebras de linha são preservadas.
             </p>
@@ -257,7 +257,7 @@ export default function TabEmailTemplates({ settings }: Props) {
 
           {/* Preview */}
           <div className="bg-[#070a12] border border-[#141d2c] rounded-[8px] p-4">
-            <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] mb-2">PRÉVIA DO CORPO</p>
+            <p className="text-white text-[11px] font-semibold tracking-[0.5px] mb-2">PRÉVIA DO CORPO</p>
             <pre className="text-[#7a9ab5] text-[12px] leading-[20px] whitespace-pre-wrap font-sans">
               {form.body}
             </pre>

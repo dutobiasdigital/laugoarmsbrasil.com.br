@@ -63,7 +63,7 @@ export default function SidebarNav({ user }: { user: User }) {
               </span>
             </div>
             {user.planName && (
-              <span className="text-[#253750] text-[12px]">{user.planName}</span>
+              <span className="text-white text-[12px]">{user.planName}</span>
             )}
           </div>
         </div>
@@ -114,7 +114,7 @@ export default function SidebarNav({ user }: { user: User }) {
           <form action={logout}>
             <button
               type="submit"
-              className="flex items-center gap-3.5 px-3 py-2.5 w-full rounded-[8px] text-[14px] text-[#253750] hover:text-white hover:bg-[#141d2c] transition-colors"
+              className="flex items-center gap-3.5 px-3 py-2.5 w-full rounded-[8px] text-[14px] text-white hover:text-white hover:bg-[#141d2c] transition-colors"
             >
               <span className="text-[16px]">🚪</span>
               Sair da conta
@@ -132,7 +132,7 @@ export default function SidebarNav({ user }: { user: User }) {
               key={item.href}
               href={item.href}
               className={`flex-1 flex flex-col items-center gap-1 py-3 text-[10px] transition-colors ${
-                isActive ? "text-[#ff1f1f]" : "text-[#253750]"
+                isActive ? "text-[#ff1f1f]" : "text-white"
               }`}
             >
               <span className="text-[18px]">{item.icon}</span>

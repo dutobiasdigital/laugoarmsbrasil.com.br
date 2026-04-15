@@ -18,7 +18,7 @@ export default function CadastrarPage() {
         {/* Breadcrumb */}
         <div className="px-5 lg:px-20 py-4 border-b border-[#141d2c] bg-[#0a0e18] flex items-center gap-2 text-[13px]">
           <Link href="/guia" className="text-[#526888] hover:text-white transition-colors">Guia Comercial</Link>
-          <span className="text-[#253750]">/</span>
+          <span className="text-white">/</span>
           <span className="text-[#d4d4da]">Cadastrar empresa</span>
         </div>
 

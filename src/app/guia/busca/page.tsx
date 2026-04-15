@@ -56,7 +56,7 @@ export default async function BuscaPage({
         <section className="px-5 lg:px-20 py-10 bg-[#0a0e18] border-b border-[#141d2c]">
           <div className="flex items-center gap-2 mb-2 text-[13px]">
             <Link href="/guia" className="text-[#526888] hover:text-white transition-colors">Guia Comercial</Link>
-            <span className="text-[#253750]">/</span>
+            <span className="text-white">/</span>
             <span className="text-[#d4d4da]">Busca</span>
           </div>
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[36px] leading-none mb-6">
@@ -67,7 +67,7 @@ export default async function BuscaPage({
               name="q"
               defaultValue={query}
               placeholder="Buscar empresa, cidade ou serviço..."
-              className="flex-1 bg-[#141d2c] border border-[#1c2a3e] rounded-[8px] h-[52px] px-4 text-[15px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] transition-colors"
+              className="flex-1 bg-[#141d2c] border border-[#1c2a3e] rounded-[8px] h-[52px] px-4 text-[15px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] transition-colors"
             />
             <button type="submit"
               className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[52px] px-7 rounded-[8px] transition-colors whitespace-nowrap">

@@ -94,7 +94,7 @@ export default async function AdminAnunciosPage({
           name="q"
           defaultValue={q}
           placeholder="🔍 Buscar por nome ou anunciante..."
-          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-[320px]"
+          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-[320px]"
         />
         <button
           type="submit"
@@ -115,7 +115,7 @@ export default async function AdminAnunciosPage({
       {/* Grid */}
       {ads.length === 0 ? (
         <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-12 text-center">
-          <p className="text-[#253750] text-[13px] mb-4">Nenhum anúncio cadastrado.</p>
+          <p className="text-white text-[13px] mb-4">Nenhum anúncio cadastrado.</p>
           <Link
             href="/admin/anuncios/novo"
             className="inline-flex bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[13px] font-semibold h-[38px] px-5 items-center rounded-[6px] transition-colors"

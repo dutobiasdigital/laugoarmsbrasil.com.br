@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-const inputCls = "bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] h-[44px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
+const inputCls = "bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] h-[44px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
 const labelCls = "block text-[#7a9ab5] text-[12px] font-semibold mb-1.5";
 
 const GATEWAY_LABELS: Record<string, { icon: string; name: string }> = {
@@ -206,7 +206,7 @@ export default function UpgradeForm({
         <div>
           <p className="text-[#526888] text-[12px] mb-0.5">Resumo do pedido</p>
           <p className="text-white text-[15px] font-bold">Guia {plan} · {priceLabel}</p>
-          <p className="text-[#253750] text-[12px]">Renovação mensal · cancele quando quiser</p>
+          <p className="text-white text-[12px]">Renovação mensal · cancele quando quiser</p>
         </div>
         {activeGateways.length === 1 && (
           <div className="flex items-center gap-1.5 text-[#7a9ab5] text-[13px] shrink-0">
@@ -233,7 +233,7 @@ export default function UpgradeForm({
         </Link>
       </div>
 
-      <p className="text-[#253750] text-[12px]">
+      <p className="text-white text-[12px]">
         Você será redirecionado para a página segura de pagamento. O plano é ativado automaticamente após a confirmação.
       </p>
     </form>

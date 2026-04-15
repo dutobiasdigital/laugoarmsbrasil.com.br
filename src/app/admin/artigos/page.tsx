@@ -10,7 +10,7 @@ const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content
 const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> = {
   PUBLISHED: { bg: "bg-[#0f381f]", text: "text-[#22c55e]", label: "PUBLICADO" },
   DRAFT: { bg: "bg-[#141d2c]", text: "text-[#7a9ab5]", label: "RASCUNHO" },
-  ARCHIVED: { bg: "bg-[#141d2c]", text: "text-[#253750]", label: "ARQUIVADO" },
+  ARCHIVED: { bg: "bg-[#141d2c]", text: "text-white", label: "ARQUIVADO" },
 };
 
 export default async function AdminArtigosPage({
@@ -87,7 +87,7 @@ export default async function AdminArtigosPage({
           name="q"
           defaultValue={q}
           placeholder="🔍 Buscar por título..."
-          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-[260px]"
+          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-[260px]"
         />
         <select
           name="status"
@@ -119,14 +119,14 @@ export default async function AdminArtigosPage({
       <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
         <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-6 gap-3">
           {["Imagem", "Título", "Categoria", "Autor", "Status", "Ações"].map((h) => (
-            <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">
+            <p key={h} className="text-white text-[11px] font-semibold tracking-[0.5px]">
               {h}
             </p>
           ))}
         </div>
 
         {articles.length === 0 ? (
-          <p className="text-[#253750] text-[13px] p-8 text-center">
+          <p className="text-white text-[13px] p-8 text-center">
             Nenhum artigo encontrado.
           </p>
         ) : (
@@ -145,7 +145,7 @@ export default async function AdminArtigosPage({
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span className="text-[#253750] text-[10px]">—</span>
+                      <span className="text-white text-[10px]">—</span>
                     )}
                   </div>
                   <div className="min-w-0">
@@ -174,7 +174,7 @@ export default async function AdminArtigosPage({
                       <Link
                         href={`/blog/${art.slug}`}
                         target="_blank"
-                        className="text-[#253750] hover:text-[#7a9ab5] text-[13px] transition-colors"
+                        className="text-white hover:text-[#7a9ab5] text-[13px] transition-colors"
                       >
                         Ver
                       </Link>
@@ -188,7 +188,7 @@ export default async function AdminArtigosPage({
 
         {totalPages > 1 && (
           <div className="px-5 py-3 flex items-center justify-between border-t border-[#141d2c]">
-            <p className="text-[#253750] text-[13px]">
+            <p className="text-white text-[13px]">
               {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, total)} de{" "}
               {total.toLocaleString("pt-BR")} artigos
             </p>

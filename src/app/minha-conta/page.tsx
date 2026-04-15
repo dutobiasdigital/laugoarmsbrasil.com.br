@@ -24,7 +24,7 @@ const STATUS_STYLE: Record<string, string> = {
   PENDING:   "bg-[#2a1e05] text-[#f59e0b]",
   REJECTED:  "bg-[#2d0a0a] text-[#ff6b6b]",
   REFUNDED:  "bg-[#141d2c] text-[#7a9ab5]",
-  CANCELLED: "bg-[#141d2c] text-[#253750]",
+  CANCELLED: "bg-[#141d2c] text-white",
 };
 const STATUS_LABEL: Record<string, string> = {
   APPROVED: "Aprovado", PENDING: "Pendente",
@@ -121,32 +121,32 @@ export default async function MinhaContaPage() {
               <div className="flex items-center gap-3 mb-4">
                 <p className="text-white text-[16px] font-semibold">Minha Assinatura</p>
                 <span className={`text-[10px] font-bold px-2.5 py-[3px] rounded-full ${
-                  isActive ? "bg-[#22c55e] text-white" : "bg-[#141d2c] text-[#253750]"
+                  isActive ? "bg-[#22c55e] text-white" : "bg-[#141d2c] text-white"
                 }`}>
                   {isActive ? "ATIVA" : subscription.status}
                 </span>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
-                  <p className="text-[#253750] text-[12px] mb-1">Plano</p>
+                  <p className="text-white text-[12px] mb-1">Plano</p>
                   <p className="text-[#d4d4da] text-[15px] font-semibold">
                     {subscription.subscription_plans?.name ?? "—"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[#253750] text-[12px] mb-1">Valor</p>
+                  <p className="text-white text-[12px] mb-1">Valor</p>
                   <p className="text-[#d4d4da] text-[15px] font-semibold">
                     {fmtCurrency(subscription.planPriceInCents)}/{INTERVAL_LABEL[subscription.intervalMonths] ?? "período"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[#253750] text-[12px] mb-1">Válido até</p>
+                  <p className="text-white text-[12px] mb-1">Válido até</p>
                   <p className="text-[#d4d4da] text-[15px] font-semibold">
                     {subscription.currentPeriodEnd ? fmtDate(subscription.currentPeriodEnd) : "—"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[#253750] text-[12px] mb-1">Assinante desde</p>
+                  <p className="text-white text-[12px] mb-1">Assinante desde</p>
                   <p className="text-[#d4d4da] text-[15px] font-semibold">
                     {fmtDate(subscription.subscribedAt)}
                   </p>
@@ -225,7 +225,7 @@ export default async function MinhaContaPage() {
           <div className="bg-[#0e1520] border border-[#141d2c] rounded-xl overflow-hidden">
             <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-[1fr_1.2fr_90px_70px_100px] gap-3 hidden sm:grid">
               {["Data", "Produto", "Valor", "Gateway", "Status"].map(h => (
-                <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">{h}</p>
+                <p key={h} className="text-white text-[11px] font-semibold tracking-[0.5px]">{h}</p>
               ))}
             </div>
             {payments.map((p, i) => (
@@ -264,7 +264,7 @@ export default async function MinhaContaPage() {
 
       {payments.length === 0 && subscription === null && (
         <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-6 text-center">
-          <p className="text-[#253750] text-[14px]">Nenhum pagamento registrado ainda.</p>
+          <p className="text-white text-[14px]">Nenhum pagamento registrado ainda.</p>
         </div>
       )}
     </div>

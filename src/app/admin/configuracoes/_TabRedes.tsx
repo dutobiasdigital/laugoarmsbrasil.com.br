@@ -67,7 +67,7 @@ export default function TabRedes({ settings }: Props) {
 
       <div className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] overflow-hidden">
         <div className="bg-[#141d2c] px-5 py-3 flex items-center justify-between">
-          <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] uppercase">Redes disponíveis</p>
+          <p className="text-white text-[11px] font-semibold tracking-[0.5px] uppercase">Redes disponíveis</p>
           <p className="text-[#526888] text-[12px]">{activeCount} ativada{activeCount !== 1 ? "s" : ""}</p>
         </div>
 
@@ -96,7 +96,7 @@ export default function TabRedes({ settings }: Props) {
                     placeholder={rede.placeholder}
                     className={inputCls}
                   />
-                  {rede.hint && <p className="text-[#253750] text-[11px] mt-1">{rede.hint}</p>}
+                  {rede.hint && <p className="text-white text-[11px] mt-1">{rede.hint}</p>}
                 </div>
               )}
             </div>

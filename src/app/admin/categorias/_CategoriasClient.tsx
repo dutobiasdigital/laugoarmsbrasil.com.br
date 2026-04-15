@@ -10,7 +10,7 @@ interface Category {
   _count: { articles: number };
 }
 
-const inputCls = "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full";
+const inputCls = "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full";
 
 export default function CategoriasClient({ categories: initial }: { categories: Category[] }) {
   const router = useRouter();
@@ -96,13 +96,13 @@ export default function CategoriasClient({ categories: initial }: { categories: 
       {/* Categories list */}
       <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
         <div className="bg-[#141d2c] px-4 py-2.5 grid grid-cols-[1fr_80px_80px] gap-4">
-          <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] uppercase">Nome</p>
-          <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] uppercase">Artigos</p>
-          <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] uppercase">Ações</p>
+          <p className="text-white text-[11px] font-semibold tracking-[0.5px] uppercase">Nome</p>
+          <p className="text-white text-[11px] font-semibold tracking-[0.5px] uppercase">Artigos</p>
+          <p className="text-white text-[11px] font-semibold tracking-[0.5px] uppercase">Ações</p>
         </div>
 
         {categories.length === 0 && (
-          <p className="text-[#253750] text-[13px] px-4 py-8 text-center">Nenhuma categoria cadastrada.</p>
+          <p className="text-white text-[13px] px-4 py-8 text-center">Nenhuma categoria cadastrada.</p>
         )}
 
         {categories.map((cat, i) => (
@@ -139,7 +139,7 @@ export default function CategoriasClient({ categories: initial }: { categories: 
                 <>
                   <div>
                     <p className="text-[#d4d4da] text-[14px]">{cat.name}</p>
-                    <p className="text-[#253750] text-[11px]">{cat.slug}</p>
+                    <p className="text-white text-[11px]">{cat.slug}</p>
                   </div>
                   <p className="text-[#7a9ab5] text-[13px]">{cat._count.articles}</p>
                   <div className="flex gap-1">
@@ -151,7 +151,7 @@ export default function CategoriasClient({ categories: initial }: { categories: 
                     </button>
                     <button
                       onClick={() => handleDelete(cat.id, cat.name)}
-                      className="bg-[#141d2c] border border-[#1c2a3e] hover:border-red-800 text-[#253750] hover:text-red-400 text-[11px] h-[28px] px-2 rounded transition-colors"
+                      className="bg-[#141d2c] border border-[#1c2a3e] hover:border-red-800 text-white hover:text-red-400 text-[11px] h-[28px] px-2 rounded transition-colors"
                     >
                       ✕
                     </button>

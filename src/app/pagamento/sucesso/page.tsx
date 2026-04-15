@@ -50,7 +50,7 @@ export default async function PagamentoSucessoPage({
           </p>
 
           {isPending && (
-            <p className="text-[#253750] text-[13px] mb-6">
+            <p className="text-white text-[13px] mb-6">
               Se o status ainda não aparecer atualizado, aguarde alguns minutos e atualize a página.
             </p>
           )}
@@ -79,8 +79,8 @@ export default async function PagamentoSucessoPage({
               </div>
               {ref && (
                 <div className="flex justify-between text-[12px] pt-1 border-t border-[#141d2c]">
-                  <span className="text-[#253750]">Referência</span>
-                  <span className="text-[#253750] font-mono text-[10px]">{ref.slice(0, 8)}...</span>
+                  <span className="text-white">Referência</span>
+                  <span className="text-white font-mono text-[10px]">{ref.slice(0, 8)}...</span>
                 </div>
               )}
             </div>

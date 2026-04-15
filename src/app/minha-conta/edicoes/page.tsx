@@ -90,7 +90,7 @@ export default async function EdicoesPage() {
 
       {editions.length === 0 ? (
         <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-12 text-center">
-          <p className="text-[#253750] text-[14px]">Nenhuma edição publicada ainda.</p>
+          <p className="text-white text-[14px]">Nenhuma edição publicada ainda.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -111,7 +111,7 @@ export default async function EdicoesPage() {
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center p-4">
                       <div className="w-px h-8 bg-[#ff1f1f] mb-3" />
-                      <div className="text-[9px] font-bold tracking-widest text-[#253750] text-center mb-2">
+                      <div className="text-[9px] font-bold tracking-widest text-white text-center mb-2">
                         REVISTA MAGNUM
                       </div>
                       {edition.number && (
@@ -140,7 +140,7 @@ export default async function EdicoesPage() {
                     </div>
                   ) : (
                     <div className="absolute inset-0 bg-[#070a12]/60 flex flex-col items-center justify-center gap-2">
-                      <p className="text-[#253750] text-[20px]">🔒</p>
+                      <p className="text-white text-[20px]">🔒</p>
                       <Link href={`/edicoes/${edition.slug}`}
                         className="text-[#ff1f1f] text-[10px] font-semibold hover:text-white transition-colors">
                         Comprar
@@ -159,7 +159,7 @@ export default async function EdicoesPage() {
                     {edition.number ? `Nº ${edition.number} · ` : ""}{edition.title}
                   </p>
                   {edition.publishedAt && (
-                    <p className="text-[11px] text-[#253750] mt-0.5">
+                    <p className="text-[11px] text-white mt-0.5">
                       {new Date(edition.publishedAt).toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
                     </p>
                   )}

@@ -29,7 +29,7 @@ const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> 
   PENDING:   { bg: "bg-[#2a1e05]",  text: "text-[#f59e0b]", label: "PENDENTE"     },
   REJECTED:  { bg: "bg-[#2d0a0a]",  text: "text-[#ff6b6b]", label: "RECUSADO"     },
   REFUNDED:  { bg: "bg-[#141d2c]",  text: "text-[#7a9ab5]", label: "REEMBOLSADO"  },
-  CANCELLED: { bg: "bg-[#141d2c]",  text: "text-[#253750]", label: "CANCELADO"    },
+  CANCELLED: { bg: "bg-[#141d2c]",  text: "text-white", label: "CANCELADO"    },
 };
 
 const GATEWAY_ICON: Record<string, string> = {
@@ -126,7 +126,7 @@ export default function AdminPagamentosPage() {
           <div key={s.label} className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-4">
             <p className="text-[#526888] text-[11px] font-semibold tracking-[1px] uppercase mb-1">{s.label}</p>
             <p className={`font-['Barlow_Condensed'] font-bold text-[28px] leading-none ${s.color}`}>{s.value}</p>
-            <p className="text-[#253750] text-[11px] mt-0.5">{s.sub}</p>
+            <p className="text-white text-[11px] mt-0.5">{s.sub}</p>
           </div>
         ))}
       </div>
@@ -148,7 +148,7 @@ export default function AdminPagamentosPage() {
           value={q}
           onChange={e => setQ(e.target.value)}
           placeholder="🔍 Buscar pagador, produto ou ref..."
-          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-[280px] transition-colors"
+          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-[280px] transition-colors"
         />
         <select
           value={statusFilter}
@@ -182,7 +182,7 @@ export default function AdminPagamentosPage() {
             Limpar
           </button>
         )}
-        <span className="ml-auto text-[#253750] text-[13px] flex items-center">
+        <span className="ml-auto text-white text-[13px] flex items-center">
           {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
         </span>
       </div>
@@ -199,7 +199,7 @@ export default function AdminPagamentosPage() {
         {/* Header */}
         <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-[1fr_1.4fr_1.2fr_90px_90px_100px_80px] gap-3 hidden md:grid">
           {["Data", "Pagador", "Produto", "Valor", "Gateway", "Status", "Ref"].map(h => (
-            <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">{h}</p>
+            <p key={h} className="text-white text-[11px] font-semibold tracking-[0.5px]">{h}</p>
           ))}
         </div>
 
@@ -209,7 +209,7 @@ export default function AdminPagamentosPage() {
             <span className="text-[#526888] text-[14px]">Carregando...</span>
           </div>
         ) : filtered.length === 0 ? (
-          <p className="text-[#253750] text-[13px] p-8 text-center">
+          <p className="text-white text-[13px] p-8 text-center">
             Nenhuma transação encontrada.
           </p>
         ) : (
@@ -227,7 +227,7 @@ export default function AdminPagamentosPage() {
                   {/* Data */}
                   <div>
                     <p className="text-[#7a9ab5] text-[12px]">{fmtDate(intent.createdAt)}</p>
-                    <p className="text-[#253750] text-[11px]">{fmtTime(intent.createdAt)}</p>
+                    <p className="text-white text-[11px]">{fmtTime(intent.createdAt)}</p>
                   </div>
 
                   {/* Pagador */}
@@ -249,7 +249,7 @@ export default function AdminPagamentosPage() {
                     ) : (
                       <p className="text-[#7a9ab5] text-[12px] truncate">{intent.product_label ?? "—"}</p>
                     )}
-                    <p className="text-[#253750] text-[10px]">{intent.product_type}</p>
+                    <p className="text-white text-[10px]">{intent.product_type}</p>
                   </div>
 
                   {/* Valor */}
@@ -266,7 +266,7 @@ export default function AdminPagamentosPage() {
                   </span>
 
                   {/* Ref */}
-                  <p className="text-[#253750] text-[10px] font-mono truncate" title={intent.external_reference ?? ""}>
+                  <p className="text-white text-[10px] font-mono truncate" title={intent.external_reference ?? ""}>
                     {intent.external_reference ? intent.external_reference.slice(0, 8) + "…" : "—"}
                   </p>
                 </div>
@@ -280,7 +280,7 @@ export default function AdminPagamentosPage() {
                     </div>
                     <p className="text-[#d4d4da] text-[13px] truncate">{intent.payer_name ?? "—"}</p>
                     <p className="text-[#526888] text-[11px] truncate">{intent.product_label ?? "—"}</p>
-                    <p className="text-[#253750] text-[11px]">{fmtDate(intent.createdAt)}</p>
+                    <p className="text-white text-[11px]">{fmtDate(intent.createdAt)}</p>
                   </div>
                   <p className="text-white text-[15px] font-bold shrink-0">{fmt(intent.amount)}</p>
                 </div>
@@ -291,7 +291,7 @@ export default function AdminPagamentosPage() {
       </div>
 
       {filtered.length > 0 && (
-        <p className="text-[#253750] text-[12px] mt-3 text-right">
+        <p className="text-white text-[12px] mt-3 text-right">
           {filtered.length} transaç{filtered.length !== 1 ? "ões" : "ão"} · Total filtrado:{" "}
           <span className="text-[#d4d4da]">
             {fmt(filtered.filter(i => i.status === "APPROVED").reduce((s, i) => s + i.amount, 0))}

@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function FooterMinimal() {
   return (
     <footer className="bg-[#0e1520] border-t border-[#141d2c] h-[56px] flex items-center px-5 lg:px-20 mt-auto">
-      <p className="text-[#253750] text-[11px]">
+      <p className="text-white text-[11px]">
         © {new Date().getFullYear()} Revista Magnum. Todos os direitos reservados.
       </p>
       <div className="flex-1" />

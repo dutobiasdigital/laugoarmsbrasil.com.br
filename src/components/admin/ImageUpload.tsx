@@ -59,7 +59,7 @@ export default function ImageUpload({ folder, filename, defaultUrl, inputName, a
           </div>
         ) : (
           <div className="w-[100px] h-[100px] bg-[#141d2c] rounded-[6px] border border-dashed border-[#1c2a3e] flex items-center justify-center shrink-0">
-            <span className="text-[#253750] text-[24px]">🖼</span>
+            <span className="text-white text-[24px]">🖼</span>
           </div>
         )}
         <div className="flex-1 min-w-0">
@@ -83,11 +83,11 @@ export default function ImageUpload({ folder, filename, defaultUrl, inputName, a
             {loading ? "Enviando..." : url ? "Trocar imagem" : "Fazer upload"}
           </button>
           {aspectHint && (
-            <p className="text-[#253750] text-[11px] mt-1.5">{aspectHint}</p>
+            <p className="text-white text-[11px] mt-1.5">{aspectHint}</p>
           )}
           {error && <p className="text-[#ff6b6b] text-[12px] mt-1">{error}</p>}
           {url && (
-            <p className="text-[#253750] text-[11px] mt-1 truncate max-w-[280px]">
+            <p className="text-white text-[11px] mt-1 truncate max-w-[280px]">
               {url.split("/").pop()}
             </p>
           )}

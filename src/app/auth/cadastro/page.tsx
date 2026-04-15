@@ -50,7 +50,7 @@ export default function CadastroPage() {
           </h1>
           <p className="text-[#7a9ab5] text-[18px] leading-[28px]">{panel.sub}</p>
           {step === 1 && (
-            <p className="text-[#253750] text-[14px]">Planos a partir de R$ 29,90/trimestre</p>
+            <p className="text-white text-[14px]">Planos a partir de R$ 29,90/trimestre</p>
           )}
         </div>
       </div>
@@ -77,11 +77,11 @@ export default function CadastroPage() {
                   )}
                   <div className="flex flex-col items-center gap-1">
                     <div className={`w-[32px] h-[32px] rounded-full flex items-center justify-center text-[12px] font-bold ${
-                      completed ? "bg-[#22c55e] text-white" : active ? "bg-[#ff1f1f] text-white" : "bg-[#141d2c] border border-[#1c2a3e] text-[#253750]"
+                      completed ? "bg-[#22c55e] text-white" : active ? "bg-[#ff1f1f] text-white" : "bg-[#141d2c] border border-[#1c2a3e] text-white"
                     }`}>
                       {completed ? "✓" : s}
                     </div>
-                    <span className={`text-[11px] ${active ? "text-[#d4d4da]" : "text-[#253750]"}`}>{label}</span>
+                    <span className={`text-[11px] ${active ? "text-[#d4d4da]" : "text-white"}`}>{label}</span>
                   </div>
                 </div>
               );
@@ -117,27 +117,27 @@ export default function CadastroPage() {
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[#7a9ab5] text-[13px] font-medium">Nome completo</label>
                   <input type="text" name="name" required placeholder="João da Silva"
-                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
+                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-white/30 rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[#7a9ab5] text-[13px] font-medium">E-mail</label>
                   <input type="email" name="email" required placeholder="seu@email.com"
-                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
+                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-white/30 rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[#7a9ab5] text-[13px] font-medium">Telefone <span className="text-[#253750]">(opcional)</span></label>
+                  <label className="text-[#7a9ab5] text-[13px] font-medium">Telefone <span className="text-white">(opcional)</span></label>
                   <input type="tel" name="phone" placeholder="(11) 99999-9999"
-                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
+                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-white/30 rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[#7a9ab5] text-[13px] font-medium">Senha</label>
                   <input type="password" name="password" required minLength={8} placeholder="Mínimo 8 caracteres"
-                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
+                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-white/30 rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[#7a9ab5] text-[13px] font-medium">Confirmar senha</label>
                   <input type="password" name="confirmPassword" required minLength={8} placeholder="Repita a senha"
-                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
+                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-white/30 rounded-[6px] h-[44px] px-4 text-[14px] focus:outline-none focus:border-[#ff1f1f] transition-colors" />
                 </div>
                 <div className="flex items-start gap-2">
                   <input type="checkbox" id="terms" required className="mt-1 accent-[#ff1f1f] shrink-0" />
@@ -247,7 +247,7 @@ export default function CadastroPage() {
                     ["Status", "ATIVO"],
                   ].map(([label, value]) => (
                     <div key={label} className="flex justify-between items-center py-2">
-                      <span className="text-[#253750] text-[14px]">{label}</span>
+                      <span className="text-white text-[14px]">{label}</span>
                       {label === "Status" ? (
                         <span className="bg-[#22c55e] text-white text-[10px] font-bold px-2.5 py-[3px] rounded-full uppercase">
                           {value}

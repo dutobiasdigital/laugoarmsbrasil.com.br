@@ -96,7 +96,7 @@ export default async function CheckoutPage({
         <Header />
         <main className="flex-1 pt-16 flex items-center justify-center px-5 py-16">
           <div className="w-full max-w-[500px]">
-            <p className="text-[#253750] text-[13px] mb-6">
+            <p className="text-white text-[13px] mb-6">
               <a href="/assine" className="hover:text-white transition-colors">Planos</a>
               {" "}<span className="text-[#141d2c] mx-1.5">/</span>
               <span className="text-[#7a9ab5]">Checkout</span>
@@ -119,7 +119,7 @@ export default async function CheckoutPage({
                   <p className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[30px] leading-none">
                     {priceStr}
                   </p>
-                  <p className="text-[#253750] text-[11px]">/{periodLabel}</p>
+                  <p className="text-white text-[11px]">/{periodLabel}</p>
                   {plan.intervalMonths > 1 && (
                     <p className="text-[#22c55e] text-[11px] mt-0.5">= {perMonthStr}/mês</p>
                   )}
@@ -155,7 +155,7 @@ export default async function CheckoutPage({
       <Header />
       <main className="flex-1 pt-16 flex items-center justify-center px-5 py-16">
         <div className="w-full max-w-[500px]">
-          <p className="text-[#253750] text-[13px] mb-6">
+          <p className="text-white text-[13px] mb-6">
             <a href={`/edicoes/${edition.slug}`} className="hover:text-white transition-colors">
               {edition.number ? `Edição ${edition.number}` : edition.title}
             </a>
@@ -183,7 +183,7 @@ export default async function CheckoutPage({
                   <p className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[28px] leading-none">
                     {priceStr}
                   </p>
-                  <p className="text-[#253750] text-[12px] mb-0.5">pagamento único</p>
+                  <p className="text-white text-[12px] mb-0.5">pagamento único</p>
                 </div>
               </div>
             </div>

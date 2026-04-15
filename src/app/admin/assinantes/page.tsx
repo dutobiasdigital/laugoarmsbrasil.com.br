@@ -14,9 +14,9 @@ const HEADERS  = {
 const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> = {
   ACTIVE:   { bg: "bg-[#0f381f]",  text: "text-[#22c55e]",  label: "ATIVO"      },
   PAST_DUE: { bg: "bg-[#382405]",  text: "text-[#ef9f1b]",  label: "ATRASADO"   },
-  CANCELED: { bg: "bg-[#141d2c]",  text: "text-[#253750]",  label: "CANCELADO"  },
+  CANCELED: { bg: "bg-[#141d2c]",  text: "text-white",  label: "CANCELADO"  },
   PENDING:  { bg: "bg-[#382405]",  text: "text-[#ef9f1b]",  label: "PENDENTE"   },
-  EXPIRED:  { bg: "bg-[#141d2c]",  text: "text-[#253750]",  label: "EXPIRADO"   },
+  EXPIRED:  { bg: "bg-[#141d2c]",  text: "text-white",  label: "EXPIRADO"   },
 };
 
 function fmtDate(iso: string) {
@@ -122,7 +122,7 @@ export default async function AdminAssinantesPage({
           name="q"
           defaultValue={q}
           placeholder="🔍 Buscar por nome ou e-mail..."
-          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-[300px]"
+          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-[300px]"
         />
         <select
           name="status"
@@ -156,12 +156,12 @@ export default async function AdminAssinantesPage({
       <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
         <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-8 gap-3 hidden sm:grid">
           {["Nome", "E-mail", "Plano", "Valor", "Status", "Próx. cobrança", "Desde", "Ações"].map(h => (
-            <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">{h}</p>
+            <p key={h} className="text-white text-[11px] font-semibold tracking-[0.5px]">{h}</p>
           ))}
         </div>
 
         {users.length === 0 ? (
-          <p className="text-[#253750] text-[13px] p-8 text-center">
+          <p className="text-white text-[13px] p-8 text-center">
             Nenhum usuário encontrado.
           </p>
         ) : (
@@ -192,7 +192,7 @@ export default async function AdminAssinantesPage({
                       {st.label}
                     </span>
                   ) : (
-                    <span className="text-[#253750] text-[13px]">—</span>
+                    <span className="text-white text-[13px]">—</span>
                   )}
                   <p className="text-[#7a9ab5] text-[13px]">
                     {sub?.currentPeriodEnd ? fmtDate(sub.currentPeriodEnd) : "—"}
@@ -215,7 +215,7 @@ export default async function AdminAssinantesPage({
                   <div className="min-w-0">
                     <p className="text-[#d4d4da] text-[13px] font-medium truncate">{u.name}</p>
                     <p className="text-[#526888] text-[11px] truncate">{u.email}</p>
-                    <p className="text-[#253750] text-[11px] mt-0.5">
+                    <p className="text-white text-[11px] mt-0.5">
                       {(sub?.subscription_plans as SubPlan | null)?.name ?? "Sem assinatura"}
                     </p>
                   </div>
@@ -238,7 +238,7 @@ export default async function AdminAssinantesPage({
         {/* Paginação */}
         {totalPages > 1 && (
           <div className="px-5 py-3 flex items-center justify-between border-t border-[#141d2c]">
-            <p className="text-[#253750] text-[13px]">
+            <p className="text-white text-[13px]">
               {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, total)} de {total.toLocaleString("pt-BR")}
             </p>
             <div className="flex items-center gap-1.5">

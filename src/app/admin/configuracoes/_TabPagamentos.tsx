@@ -183,7 +183,7 @@ export default function TabPagamentos({ settings }: Props) {
                           <button
                             type="button"
                             onClick={() => setShown(s => ({ ...s, [k.key]: !s[k.key] }))}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-[#253750] hover:text-[#7a9ab5] text-[11px] transition-colors"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-[#7a9ab5] text-[11px] transition-colors"
                           >
                             {shown[k.key] ? "Ocultar" : "Mostrar"}
                           </button>
@@ -196,7 +196,7 @@ export default function TabPagamentos({ settings }: Props) {
                 {/* Webhook URL */}
                 <div className="bg-[#070a12] border border-[#141d2c] rounded-[8px] p-3 flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-[#253750] text-[10px] font-semibold uppercase tracking-wide mb-0.5">URL do Webhook</p>
+                    <p className="text-white text-[10px] font-semibold uppercase tracking-wide mb-0.5">URL do Webhook</p>
                     <p className="text-[#526888] text-[12px] font-mono truncate">
                       {APP_URL}{gw.webhookPath}
                     </p>
@@ -247,7 +247,7 @@ export default function TabPagamentos({ settings }: Props) {
       {/* Preços */}
       <section className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] p-5">
         <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase mb-1">Preços do Guia Comercial</p>
-        <p className="text-[#253750] text-[12px] mb-4">Valores em centavos (ex: R$ 79,00 = 7900)</p>
+        <p className="text-white text-[12px] mb-4">Valores em centavos (ex: R$ 79,00 = 7900)</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {PRICE_KEYS.map(p => (
             <div key={p.key}>
@@ -260,7 +260,7 @@ export default function TabPagamentos({ settings }: Props) {
                   placeholder={p.ph}
                   className={inputCls}
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#253750] text-[12px]">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-white text-[12px]">
                   {values[p.key] ? `= R$ ${(parseInt(values[p.key]) / 100).toFixed(2)}` : ""}
                 </span>
               </div>

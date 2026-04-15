@@ -93,7 +93,7 @@ export default async function SolicitacoesPage() {
 
       {requests.length === 0 ? (
         <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-12 text-center">
-          <p className="text-[#253750] text-[13px]">Nenhuma solicitação ainda.</p>
+          <p className="text-white text-[13px]">Nenhuma solicitação ainda.</p>
           <p className="text-[#1c2a3e] text-[12px] mt-1">As solicitações aparecem aqui quando alguém preencher o formulário em /anuncie.</p>
         </div>
       ) : (
@@ -101,7 +101,7 @@ export default async function SolicitacoesPage() {
           {/* Header */}
           <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-[2fr_1fr_1fr_1fr_1fr_100px] gap-3">
             {["Empresa", "Contato", "Segmento", "Interesse", "Data", "Status"].map(h => (
-              <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] uppercase">{h}</p>
+              <p key={h} className="text-white text-[11px] font-semibold tracking-[0.5px] uppercase">{h}</p>
             ))}
           </div>
 
@@ -121,7 +121,7 @@ export default async function SolicitacoesPage() {
                     )}
                   </div>
                   {req.message && (
-                    <p className="text-[#253750] text-[11px] mt-1.5 leading-[16px] line-clamp-2">{req.message}</p>
+                    <p className="text-white text-[11px] mt-1.5 leading-[16px] line-clamp-2">{req.message}</p>
                   )}
                 </div>
 

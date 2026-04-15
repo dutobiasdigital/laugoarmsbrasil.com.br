@@ -13,10 +13,10 @@ import TabNotificacoes from "./_TabNotificacoes";
 import TabEmailTemplates from "./_TabEmailTemplates";
 
 /* ── helpers de estilo ──────────────────────────────────────── */
-export const inputCls  = "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
+export const inputCls  = "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
 export const labelCls  = "block text-[#7a9ab5] text-[12px] font-semibold mb-1.5";
 export const selectCls = "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
-export const areaCls   = "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] px-3 py-2.5 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors resize-none";
+export const areaCls   = "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] px-3 py-2.5 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full transition-colors resize-none";
 
 interface Admin { id: string; name: string; email: string; createdAt: string; }
 
@@ -144,11 +144,11 @@ function TabAcesso({ admins }: { admins: { id: string; name: string; email: stri
         <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
           <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-3 gap-3">
             {["Nome","E-mail","Desde"].map(h => (
-              <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">{h}</p>
+              <p key={h} className="text-white text-[11px] font-semibold tracking-[0.5px]">{h}</p>
             ))}
           </div>
           {admins.length === 0
-            ? <p className="text-[#253750] text-[13px] p-6 text-center">Nenhum administrador.</p>
+            ? <p className="text-white text-[13px] p-6 text-center">Nenhum administrador.</p>
             : admins.map((a, i) => (
               <div key={a.id}>
                 {i > 0 && <div className="bg-[#141d2c] h-px" />}
@@ -160,7 +160,7 @@ function TabAcesso({ admins }: { admins: { id: string; name: string; email: stri
                     <p className="text-[#d4d4da] text-[14px]">{a.name}</p>
                   </div>
                   <p className="text-[#7a9ab5] text-[13px]">{a.email}</p>
-                  <p className="text-[#253750] text-[13px]">{a.createdAt}</p>
+                  <p className="text-white text-[13px]">{a.createdAt}</p>
                 </div>
               </div>
             ))
@@ -207,7 +207,7 @@ function TabSistema() {
           { label: "CDN de imagens", value: "Supabase Storage" },
         ].map(item => (
           <div key={item.label} className="bg-[#0e1520] border border-[#141d2c] rounded-[8px] p-4">
-            <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] mb-1">{item.label.toUpperCase()}</p>
+            <p className="text-white text-[11px] font-semibold tracking-[0.5px] mb-1">{item.label.toUpperCase()}</p>
             <p className="text-[#d4d4da] text-[14px]">{item.value}</p>
           </div>
         ))}

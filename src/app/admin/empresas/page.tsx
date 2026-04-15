@@ -76,7 +76,7 @@ export default async function AdminEmpresasPage({
           name="q"
           defaultValue={q}
           placeholder="🔍 Buscar empresa..."
-          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-[280px]"
+          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-[280px]"
         />
         <button type="submit" className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[38px] px-4 rounded-[6px] transition-colors">
           Filtrar
@@ -92,13 +92,13 @@ export default async function AdminEmpresasPage({
       <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
         <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-[2fr_2fr_1fr_1fr_1fr_80px] gap-3">
           {["Empresa", "Contato", "Segmento", "Email", "Telefone", ""].map((h) => (
-            <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] uppercase">{h}</p>
+            <p key={h} className="text-white text-[11px] font-semibold tracking-[0.5px] uppercase">{h}</p>
           ))}
         </div>
 
         {empresas.length === 0 ? (
           <div className="p-10 text-center">
-            <p className="text-[#253750] text-[13px] mb-4">Nenhuma empresa cadastrada.</p>
+            <p className="text-white text-[13px] mb-4">Nenhuma empresa cadastrada.</p>
             <Link href="/admin/empresas/nova" className="inline-flex bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[13px] font-semibold h-[38px] px-5 items-center rounded-[6px] transition-colors">
               Cadastrar primeira empresa
             </Link>
@@ -114,7 +114,7 @@ export default async function AdminEmpresasPage({
                     <img src={em.logoUrl} alt={em.tradeName} className="w-[32px] h-[32px] object-contain rounded-[4px] bg-[#141d2c] shrink-0" />
                   ) : (
                     <div className="w-[32px] h-[32px] bg-[#141d2c] rounded-[4px] flex items-center justify-center shrink-0">
-                      <span className="text-[#253750] text-[14px]">🏢</span>
+                      <span className="text-white text-[14px]">🏢</span>
                     </div>
                   )}
                   <div className="min-w-0">

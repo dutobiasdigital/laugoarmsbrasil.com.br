@@ -112,7 +112,7 @@ export default function TabEmail({ settings }: Props) {
               {showPass ? "Ocultar" : "Mostrar"}
             </button>
           </div>
-          <p className="text-[#253750] text-[11px] mt-1">Armazenada de forma segura no banco de dados.</p>
+          <p className="text-white text-[11px] mt-1">Armazenada de forma segura no banco de dados.</p>
         </div>
       </section>
 

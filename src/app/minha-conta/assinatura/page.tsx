@@ -96,13 +96,13 @@ export default async function MinhaAssinaturaPage() {
 
               <div className="grid grid-cols-2 gap-5 mb-5">
                 <div>
-                  <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] mb-1">VALOR</p>
+                  <p className="text-white text-[11px] font-semibold tracking-[0.5px] mb-1">VALOR</p>
                   <p className="text-[#d4d4da] text-[18px] font-bold">
                     {fmtCurrency(subscription.planPriceInCents)}/{INTERVAL_LABEL[subscription.intervalMonths] ?? "período"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] mb-1">
+                  <p className="text-white text-[11px] font-semibold tracking-[0.5px] mb-1">
                     {isActive ? "EXPIRA EM" : "EXPIROU EM"}
                   </p>
                   <p className="text-[#d4d4da] text-[16px] font-semibold">
@@ -110,11 +110,11 @@ export default async function MinhaAssinaturaPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] mb-1">ASSINANTE DESDE</p>
+                  <p className="text-white text-[11px] font-semibold tracking-[0.5px] mb-1">ASSINANTE DESDE</p>
                   <p className="text-[#d4d4da] text-[16px] font-semibold">{fmtDate(subscription.subscribedAt)}</p>
                 </div>
                 <div>
-                  <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] mb-1">
+                  <p className="text-white text-[11px] font-semibold tracking-[0.5px] mb-1">
                     {isActive ? "DIAS RESTANTES" : "STATUS"}
                   </p>
                   <p className={`text-[16px] font-bold ${isActive && days <= 7 ? "text-[#f59e0b]" : "text-[#d4d4da]"}`}>
@@ -135,7 +135,7 @@ export default async function MinhaAssinaturaPage() {
               {/* Período atual */}
               {subscription.currentPeriodStart && subscription.currentPeriodEnd && (
                 <div className="bg-[#070a12] border border-[#141d2c] rounded-[8px] px-4 py-3 mb-5">
-                  <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] mb-1">PERÍODO ATUAL</p>
+                  <p className="text-white text-[11px] font-semibold tracking-[0.5px] mb-1">PERÍODO ATUAL</p>
                   <p className="text-[#7a9ab5] text-[13px]">
                     {fmtDate(subscription.currentPeriodStart)} → {fmtDate(subscription.currentPeriodEnd)}
                   </p>
@@ -159,7 +159,7 @@ export default async function MinhaAssinaturaPage() {
           {/* Info cancelamento */}
           <div className="mt-8 p-5 bg-[#070a12] border border-[#141d2c] rounded-[10px]">
             <p className="text-[#526888] text-[13px] font-semibold mb-2">Sobre cancelamentos</p>
-            <p className="text-[#253750] text-[12px] leading-[20px]">
+            <p className="text-white text-[12px] leading-[20px]">
               Você pode cancelar sua assinatura a qualquer momento. O acesso ao acervo permanece ativo
               até o final do período já pago. Para solicitar o cancelamento, entre em contato pelo e-mail{" "}
               <a href="mailto:publicidade@revistamagnum.com.br"

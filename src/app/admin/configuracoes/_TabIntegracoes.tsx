@@ -97,7 +97,7 @@ export default function TabIntegracoes({ settings }: Props) {
                 className={inputCls}
                 autoComplete="off"
               />
-              {item.hint && <p className="text-[#253750] text-[11px] mt-1">{item.hint}</p>}
+              {item.hint && <p className="text-white text-[11px] mt-1">{item.hint}</p>}
             </div>
           ))}
         </section>

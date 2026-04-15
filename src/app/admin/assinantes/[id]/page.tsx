@@ -14,7 +14,7 @@ const PAYMENT_STYLE: Record<string, { bg: string; text: string; label: string }>
   PENDING: { bg: "bg-[#382405]", text: "text-[#ef9f1b]", label: "PENDENTE" },
   REJECTED: { bg: "bg-[#2d0a0a]", text: "text-[#ff6b6b]", label: "REJEITADO" },
   REFUNDED: { bg: "bg-[#141d2c]", text: "text-[#7a9ab5]", label: "REEMBOLSADO" },
-  CANCELLED: { bg: "bg-[#141d2c]", text: "text-[#253750]", label: "CANCELADO" },
+  CANCELLED: { bg: "bg-[#141d2c]", text: "text-white", label: "CANCELADO" },
 };
 
 interface Subscription {
@@ -145,12 +145,12 @@ export default async function AssinantePage({
         <div>
           <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
             <div className="bg-[#141d2c] px-4 py-2.5">
-              <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] uppercase">
+              <p className="text-white text-[11px] font-semibold tracking-[0.5px] uppercase">
                 Últimos Pagamentos
               </p>
             </div>
             {payments.length === 0 ? (
-              <p className="text-[#253750] text-[13px] p-5 text-center">Nenhum pagamento.</p>
+              <p className="text-white text-[13px] p-5 text-center">Nenhum pagamento.</p>
             ) : (
               payments.map((p, i) => {
                 const st = PAYMENT_STYLE[p.status] ?? PAYMENT_STYLE.PENDING;
@@ -166,7 +166,7 @@ export default async function AssinantePage({
                           {st.label}
                         </span>
                       </div>
-                      <p className="text-[#253750] text-[11px]">
+                      <p className="text-white text-[11px]">
                         {new Date(p.createdAt).toLocaleDateString("pt-BR")}
                         {p.gateway ? ` · ${p.gateway}` : ""}
                       </p>

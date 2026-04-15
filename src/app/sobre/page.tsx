@@ -131,7 +131,7 @@ export default function SobrePage() {
                   {member.initials}
                 </div>
                 <p className="text-white text-[15px] font-semibold mb-0.5">{member.name}</p>
-                <p className="text-[#253750] text-[13px]">{member.role}</p>
+                <p className="text-white text-[13px]">{member.role}</p>
               </div>
             ))}
           </div>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const inputCls = "bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] h-[44px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
+const inputCls = "bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] h-[44px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
 const labelCls = "block text-[#7a9ab5] text-[12px] font-semibold mb-1.5";
 
 const GATEWAY_LABELS: Record<string, { icon: string; name: string }> = {
@@ -172,7 +172,7 @@ export default function CheckoutForm({
               : `Revista Magnum ${planName} · ${priceStr}/${periodLabel}`
             }
           </p>
-          <p className="text-[#253750] text-[11px]">
+          <p className="text-white text-[11px]">
             {mode === "edition"
               ? "Pagamento único · acesso por 30 dias corridos"
               : "Renova automaticamente · cancele quando quiser"
@@ -195,7 +195,7 @@ export default function CheckoutForm({
         {loading ? "Processando..." : "Finalizar assinatura →"}
       </button>
 
-      <p className="text-[#253750] text-[12px] text-center">
+      <p className="text-white text-[12px] text-center">
         Você será redirecionado para o pagamento seguro.
       </p>
 

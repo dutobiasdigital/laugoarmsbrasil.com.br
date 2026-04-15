@@ -102,7 +102,7 @@ export default function EsqueceuSenhaPage() {
                     name="email"
                     required
                     placeholder="seu@email.com"
-                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-[#253750] rounded-[6px] h-[48px] px-4 text-[15px] focus:outline-none focus:border-[#ff1f1f] transition-colors"
+                    className="w-full bg-[#141d2c] border border-[#1c2a3e] text-white placeholder-white/30 rounded-[6px] h-[48px] px-4 text-[15px] focus:outline-none focus:border-[#ff1f1f] transition-colors"
                   />
                 </div>
 

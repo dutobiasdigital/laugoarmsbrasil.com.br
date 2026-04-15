@@ -185,7 +185,7 @@ export default async function BlogPage({
                     {featured.excerpt}
                   </p>
                 )}
-                <p className="text-[#253750] text-[13px]">
+                <p className="text-white text-[13px]">
                   {featured.authorName}
                   {featured.publishedAt && ` · ${new Date(featured.publishedAt).toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" })}`}
                 </p>
@@ -194,7 +194,7 @@ export default async function BlogPage({
                     Ler artigo →
                   </span>
                   {featured.isExclusive && (
-                    <span className="text-[#253750] text-[12px]">🔒 Para assinantes</span>
+                    <span className="text-white text-[12px]">🔒 Para assinantes</span>
                   )}
                 </div>
               </div>
@@ -242,7 +242,7 @@ export default async function BlogPage({
                             {art.excerpt}
                           </p>
                         )}
-                        <p className="text-[#253750] text-[12px] mt-auto pt-1">
+                        <p className="text-white text-[12px] mt-auto pt-1">
                           {art.publishedAt
                             ? new Date(art.publishedAt).toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" })
                             : ""}
@@ -256,7 +256,7 @@ export default async function BlogPage({
           )}
 
           {articles.length === 0 && !featured && (
-            <p className="text-[#253750] text-sm py-12 text-center">Nenhum artigo encontrado.</p>
+            <p className="text-white text-sm py-12 text-center">Nenhum artigo encontrado.</p>
           )}
 
           {/* Pagination */}
