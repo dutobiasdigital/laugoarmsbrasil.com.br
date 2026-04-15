@@ -236,7 +236,7 @@ export default function EditarGuiaPage() {
             ] as const).map(f => (
               <div key={f.key}>
                 <label className={labelCls}>{f.label}</label>
-                <input value={(form as Record<string, string | null>)[f.key] ?? ""}
+                <input value={(form as unknown as Record<string, string | null>)[f.key] ?? ""}
                   onChange={e => set(f.key as keyof Listing, e.target.value || null as never)}
                   placeholder={f.ph} className={inputCls} />
               </div>
