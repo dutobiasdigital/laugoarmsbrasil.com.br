@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Barlow_Condensed } from "next/font/google";
 import Script from "next/script";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -50,6 +51,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html
       lang={cfg["site.language"] ?? "pt-BR"}
       className={`${geistSans.variable} ${geistMono.variable} ${barlowCondensed.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         {/* ── Google Tag Manager ── */}
@@ -103,7 +105,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </noscript>
         )}
 
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

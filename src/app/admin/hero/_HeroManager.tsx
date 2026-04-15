@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export interface HeroSlide {
   id: string;
@@ -24,12 +24,65 @@ export interface HeroSlide {
 }
 
 const inputCls =
-  "bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[13px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] transition-colors";
+  "bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[13px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] transition-colors";
 
 function generateId() {
   return Math.random().toString(36).slice(2);
 }
 
+/* ── Upload helper ─────────────────────────────────────── */
+function ImageUploadButton({
+  folder = "hero",
+  onUploaded,
+}: {
+  folder?: string;
+  onUploaded: (url: string) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("folder", folder);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.url) onUploaded(data.url);
+    } catch {
+      // silent — user can retry
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  return (
+    <>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFile}
+      />
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        title="Enviar imagem do computador"
+        className="shrink-0 h-[38px] px-3 rounded-[6px] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white hover:border-zinc-500 text-[12px] font-semibold transition-colors disabled:opacity-40 whitespace-nowrap"
+      >
+        {uploading ? "Enviando…" : "↑ Upload"}
+      </button>
+    </>
+  );
+}
+
+/* ── Main component ────────────────────────────────────── */
 export default function HeroManager({ initialSlides }: { initialSlides: HeroSlide[] }) {
   const [slides, setSlides] = useState<HeroSlide[]>(initialSlides);
   const [saving, setSaving] = useState(false);
@@ -216,7 +269,7 @@ export default function HeroManager({ initialSlides }: { initialSlides: HeroSlid
             {/* Delete */}
             <button
               onClick={() => removeSlide(slide.id)}
-              className="text-[#253750] hover:text-[#ff6b6b] text-[18px] transition-colors px-1"
+              className="text-white hover:text-[#ff6b6b] text-[18px] transition-colors px-1"
               aria-label="Remover slide"
             >
               ×
@@ -226,8 +279,10 @@ export default function HeroManager({ initialSlides }: { initialSlides: HeroSlid
           {/* Expanded editor */}
           {editingId === slide.id && (
             <div className="border-t border-[#141d2c] p-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
+
               {/* Column 1: Background + Buttons */}
               <div className="flex flex-col gap-4">
+
                 {/* Background type */}
                 <div>
                   <label className="block text-[#7a9ab5] text-[12px] font-semibold mb-1.5">
@@ -274,29 +329,48 @@ export default function HeroManager({ initialSlides }: { initialSlides: HeroSlid
                       {/* Preview swatch */}
                       <div
                         className="mt-2 h-[40px] rounded-[6px]"
-                        style={{
-                          background: slide.background.gradient ?? "#070a12",
-                        }}
+                        style={{ background: slide.background.gradient ?? "#070a12" }}
                       />
                     </div>
                   ) : (
                     <div>
                       <label className="block text-[#526888] text-[11px] mb-1">
-                        URL da imagem de fundo
+                        Imagem de fundo — cole a URL ou faça upload
                       </label>
-                      <input
-                        value={slide.background.imageUrl ?? ""}
-                        onChange={(e) =>
-                          updateSlide(slide.id, {
-                            background: {
-                              ...slide.background,
-                              imageUrl: e.target.value,
-                            },
-                          })
-                        }
-                        placeholder="https://..."
-                        className={"w-full " + inputCls}
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          value={slide.background.imageUrl ?? ""}
+                          onChange={(e) =>
+                            updateSlide(slide.id, {
+                              background: {
+                                ...slide.background,
+                                imageUrl: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="https://..."
+                          className={"flex-1 " + inputCls}
+                        />
+                        <ImageUploadButton
+                          folder="hero/backgrounds"
+                          onUploaded={(url) =>
+                            updateSlide(slide.id, {
+                              background: { ...slide.background, imageUrl: url },
+                            })
+                          }
+                        />
+                      </div>
+                      {/* Preview */}
+                      {slide.background.imageUrl && (
+                        <div className="mt-2 h-[80px] rounded-[6px] overflow-hidden border border-[#1c2a3e]">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={slide.background.imageUrl}
+                            alt="preview fundo"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -378,7 +452,7 @@ export default function HeroManager({ initialSlides }: { initialSlides: HeroSlid
                           button2: { label: "Ver Edições", href: "/edicoes" },
                         })
                       }
-                      className="text-[#526888] hover:text-white text-[13px] border border-dashed border-[#253750] hover:border-[#526888] rounded-[6px] h-[36px] px-4 transition-colors"
+                      className="text-[#526888] hover:text-white text-[13px] border border-dashed border-[#1c2a3e] hover:border-[#526888] rounded-[6px] h-[36px] px-4 transition-colors"
                     >
                       + Adicionar botão 2
                     </button>
@@ -388,6 +462,7 @@ export default function HeroManager({ initialSlides }: { initialSlides: HeroSlid
 
               {/* Column 2: Text + Photo */}
               <div className="flex flex-col gap-4">
+
                 {/* Subtitle */}
                 <div>
                   <label className="block text-[#7a9ab5] text-[12px] font-semibold mb-1.5">
@@ -445,14 +520,14 @@ export default function HeroManager({ initialSlides }: { initialSlides: HeroSlid
                     }
                     rows={3}
                     placeholder="Texto sobre esta edição..."
-                    className="w-full bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] px-3 py-2 text-[13px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] resize-none"
+                    className="w-full bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] px-3 py-2 text-[13px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] resize-none"
                   />
                 </div>
 
                 {/* Photo */}
                 <div>
                   <label className="block text-[#7a9ab5] text-[12px] font-semibold mb-1.5">
-                    Foto (opcional)
+                    Foto lateral (opcional)
                   </label>
                   {slide.photo ? (
                     <div className="flex flex-col gap-2">
@@ -470,6 +545,17 @@ export default function HeroManager({ initialSlides }: { initialSlides: HeroSlid
                           placeholder="URL da foto"
                           className={inputCls + " flex-1"}
                         />
+                        <ImageUploadButton
+                          folder="hero/photos"
+                          onUploaded={(url) =>
+                            updateSlide(slide.id, {
+                              photo: {
+                                ...(slide.photo as { url: string; layout: "right" | "left" | "overlay" }),
+                                url,
+                              },
+                            })
+                          }
+                        />
                         <button
                           onClick={() => updateSlide(slide.id, { photo: null })}
                           className="text-[#526888] hover:text-[#ff6b6b] text-[18px] px-2"
@@ -478,6 +564,20 @@ export default function HeroManager({ initialSlides }: { initialSlides: HeroSlid
                           ×
                         </button>
                       </div>
+
+                      {/* Photo preview */}
+                      {slide.photo.url && (
+                        <div className="h-[80px] w-[60px] rounded-[6px] overflow-hidden border border-[#1c2a3e]">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={slide.photo.url}
+                            alt="preview foto"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+
+                      {/* Layout selector */}
                       <div className="flex gap-1.5">
                         {(["right", "left", "overlay"] as const).map((l) => (
                           <button
@@ -508,7 +608,7 @@ export default function HeroManager({ initialSlides }: { initialSlides: HeroSlid
                           photo: { url: "", layout: "right" },
                         })
                       }
-                      className="text-[#526888] hover:text-white text-[13px] border border-dashed border-[#253750] hover:border-[#526888] rounded-[6px] h-[36px] px-4 transition-colors w-full"
+                      className="text-[#526888] hover:text-white text-[13px] border border-dashed border-[#1c2a3e] hover:border-[#526888] rounded-[6px] h-[36px] px-4 transition-colors w-full"
                     >
                       + Adicionar foto
                     </button>

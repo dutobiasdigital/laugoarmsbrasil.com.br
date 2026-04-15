@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { ThemeToggle } from "./ThemeToggle";
 
 export default async function Header() {
   const supabase = await createClient();
@@ -42,7 +43,7 @@ export default async function Header() {
             className="flex items-center gap-1 text-[#7a9ab5] hover:text-white text-[13px] font-semibold transition-colors"
           >
             {item.label}
-            {item.arrow && <span className="text-[#253750] text-[11px]">▾</span>}
+            {item.arrow && <span className="text-white text-[11px]">▾</span>}
           </Link>
         ))}
       </nav>
@@ -50,8 +51,9 @@ export default async function Header() {
       <div className="flex-1" />
 
       {/* Actions */}
-      <div className="flex items-center gap-2.5">
-        <span className="text-[#7a9ab5] text-base hidden lg:block">☀</span>
+      <div className="flex items-center gap-2">
+        {/* Tema claro/escuro */}
+        <ThemeToggle />
 
         {user ? (
           <Link

@@ -75,3 +75,70 @@ body {
 .card-metal-border:hover {
   animation-duration: 3s;
 }
+
+/* ═══════════════════════════════════════════════════════
+   LIGHT MODE — Override dark navy/zinc palette
+   ═══════════════════════════════════════════════════════ */
+
+html.light { color-scheme: light; }
+html.light body { background-color: #f1f5f9; }
+
+/* ── Backgrounds ───────────────────────────────────────── */
+html.light [class*="bg-[#070a12]"]  { background-color: #f1f5f9 !important; }
+html.light [class*="bg-[#0a0f1a]"]  { background-color: #f8fafc !important; }
+html.light [class*="bg-[#0e1520]"]  { background-color: #ffffff !important; }
+html.light [class*="bg-[#141d2c]"]  { background-color: #e2e8f0 !important; }
+html.light [class*="bg-[#1c2a3e]"]  { background-color: #cbd5e1 !important; }
+html.light [class*="bg-[#120000]"]  { background-color: #fff1f1 !important; }
+
+/* ── Borders ───────────────────────────────────────────── */
+html.light [class*="border-[#141d2c]"] { border-color: #cbd5e1 !important; }
+html.light [class*="border-[#1c2a3e]"] { border-color: #94a3b8 !important; }
+html.light [class*="border-[#0e1520]"] { border-color: #e2e8f0 !important; }
+html.light [class*="border-[#3d0000]"] { border-color: #fca5a5 !important; }
+
+/* ── Text ──────────────────────────────────────────────── */
+html.light [class*="text-[#dce8ff]"] { color: #1e293b !important; }
+html.light [class*="text-[#7a9ab5]"] { color: #475569 !important; }
+html.light [class*="text-[#526888]"] { color: #64748b !important; }
+html.light [class*="text-[#d4d4da]"] { color: #334155 !important; }
+html.light [class*="text-[#1c2a3e]"] { color: #475569 !important; }
+
+/* text-white → dark in light mode */
+html.light .text-white { color: #0f172a !important; }
+
+/* Restore white text on red/colored buttons & badges */
+html.light a[class*="bg-[#ff1f1f]"]     { color: #ffffff !important; }
+html.light button[class*="bg-[#ff1f1f]"] { color: #ffffff !important; }
+html.light a[class*="bg-[#cc0000]"]     { color: #ffffff !important; }
+html.light button[class*="bg-[#cc0000]"] { color: #ffffff !important; }
+html.light [class*="bg-[#0f381f]"]      { color: #22c55e !important; }
+html.light [class*="bg-[#ff6b6b]"]      { color: #ffffff !important; }
+
+/* ── Placeholder ───────────────────────────────────────── */
+html.light [class*="placeholder-white"]::placeholder { color: #94a3b8 !important; }
+
+/* ── Hero gradient ─────────────────────────────────────── */
+html.light .hero-metal {
+  background: linear-gradient(
+    125deg,
+    #dde3ec 0%,
+    #e8edf5 25%,
+    #edf1f8 45%,
+    #e4eaf3 60%,
+    #dde3ec 100%
+  ) !important;
+  animation: none !important;
+}
+
+/* ── Animated card border (light variant) ──────────────── */
+html.light .card-metal-border {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 31, 31, 0.35) 0%,
+    rgba(148, 163, 184, 1)  22%,
+    rgba(71, 85, 105, 0.3)  50%,
+    rgba(148, 163, 184, 1)  78%,
+    rgba(255, 31, 31, 0.2)  100%
+  ) !important;
+}
