@@ -307,6 +307,27 @@ export default async function EmpresaPage({
           </div>
         </section>
 
+        {/* Upgrade CTA — só para plano FREE */}
+        {listing.plan === "FREE" && (
+          <section className="px-5 lg:px-20 pb-6">
+            <div className="bg-[#0e1520] border border-[#ff1f1f]/20 rounded-[12px] p-6 flex flex-col sm:flex-row items-center justify-between gap-5">
+              <div>
+                <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase mb-1">Esta empresa está no plano gratuito</p>
+                <p className="text-white text-[16px] font-bold mb-1">É o proprietário? Aumente sua visibilidade</p>
+                <p className="text-[#526888] text-[13px]">
+                  Com Premium ou Destaque: logo, mapa, WhatsApp e topo da categoria por R$ 79/mês.
+                </p>
+              </div>
+              <Link
+                href={`/guia/upgrade?slug=${listing.slug}&plano=PREMIUM`}
+                className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[44px] px-6 flex items-center rounded-[6px] transition-colors whitespace-nowrap shrink-0"
+              >
+                Fazer upgrade →
+              </Link>
+            </div>
+          </section>
+        )}
+
         {/* CTA */}
         <section className="px-5 lg:px-20 pb-14">
           <div className="bg-[#0a0e18] border border-[#141d2c] rounded-[12px] p-8 flex flex-col sm:flex-row items-center justify-between gap-6">

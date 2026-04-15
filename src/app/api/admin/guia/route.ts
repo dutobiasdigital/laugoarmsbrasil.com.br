@@ -13,10 +13,17 @@ const HEADERS  = {
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
-  const id = searchParams.get("id");
-  const url = id
-    ? `${BASE}/guide_listings?id=eq.${id}&limit=1`
-    : `${BASE}/guide_listings?select=*&order=createdAt.desc`;
+  const id     = searchParams.get("id");
+  const status = searchParams.get("status");
+
+  let url: string;
+  if (id) {
+    url = `${BASE}/guide_listings?id=eq.${id}&select=*&limit=1`;
+  } else {
+    url = `${BASE}/guide_listings?select=*&order=createdAt.desc`;
+    if (status) url += `&status=eq.${status}`;
+  }
+
   const res  = await fetch(url, { headers: HEADERS, cache: "no-store" });
   const data = await res.json();
   if (id) return NextResponse.json(Array.isArray(data) && data.length > 0 ? data[0] : null);

@@ -179,8 +179,16 @@ export default function EditarGuiaPage() {
             </div>
             <div>
               <label className={labelCls}>URL do logo</label>
-              <input value={form.logoUrl ?? ""} onChange={e => set("logoUrl", e.target.value || null)}
-                placeholder="https://..." className={inputCls} />
+              <div className="flex gap-3 items-start">
+                <input value={form.logoUrl ?? ""} onChange={e => set("logoUrl", e.target.value || null)}
+                  placeholder="https://..." className={inputCls} />
+                {form.logoUrl && (
+                  <div className="w-[40px] h-[40px] shrink-0 bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] overflow-hidden flex items-center justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={form.logoUrl} alt="preview" className="w-full h-full object-contain p-0.5" />
+                  </div>
+                )}
+              </div>
             </div>
             <div>
               <label className={labelCls}>Horário de funcionamento</label>
