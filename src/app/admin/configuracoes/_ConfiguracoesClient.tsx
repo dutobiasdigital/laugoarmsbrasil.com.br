@@ -77,7 +77,6 @@ export default function ConfiguracoesClient({ initialTab, settings, admins }: Pr
           >
             <span className="text-[15px]">{t.icon}</span>
             <span className="flex-1">{t.label}</span>
-            {t.soon && <span className="text-[9px] bg-[#141d2c] text-[#253750] px-1.5 py-[2px] rounded">SOON</span>}
           </button>
         ))}
       </nav>
