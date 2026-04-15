@@ -119,6 +119,67 @@ export async function onPaymentApproved(intent: PaymentIntent): Promise<void> {
     });
   }
 
+  // ── Assinatura de revista ──────────────────────────────────────
+  if (intent.product_type === "magazine_subscription") {
+    const meta = intent.metadata as { plan?: string } | null;
+    if (meta?.plan && intent.payer_email) {
+      // Busca plano pelo slug
+      const planRes = await fetch(
+        `${BASE}/subscription_plans?slug=eq.${meta.plan}&limit=1`,
+        { headers: HEADERS, cache: "no-store" }
+      );
+      const plans = await planRes.json();
+      const plan = Array.isArray(plans) ? plans[0] : null;
+
+      if (plan) {
+        const now      = new Date();
+        const expiresAt = new Date();
+        expiresAt.setMonth(expiresAt.getMonth() + plan.intervalMonths);
+
+        // Busca usuário pelo e-mail
+        const userRes = await fetch(
+          `${BASE}/users?email=eq.${encodeURIComponent(intent.payer_email)}&limit=1`,
+          { headers: HEADERS, cache: "no-store" }
+        );
+        const users  = await userRes.json();
+        const userId = Array.isArray(users) && users[0] ? users[0].id : null;
+
+        if (userId) {
+          // Verifica se já tem assinatura
+          const subRes  = await fetch(
+            `${BASE}/subscriptions?userId=eq.${userId}&limit=1`,
+            { headers: HEADERS, cache: "no-store" }
+          );
+          const existing = await subRes.json();
+          const subData  = {
+            planId:              plan.id,
+            status:              "ACTIVE",
+            currentPeriodStart:  now.toISOString(),
+            currentPeriodEnd:    expiresAt.toISOString(),
+            planPriceInCents:    plan.priceInCents,
+            intervalMonths:      plan.intervalMonths,
+            lastRenewedAt:       now.toISOString(),
+            updatedAt:           now.toISOString(),
+          };
+
+          if (Array.isArray(existing) && existing.length > 0) {
+            await fetch(`${BASE}/subscriptions?userId=eq.${userId}`, {
+              method: "PATCH",
+              headers: { ...HEADERS, Prefer: "return=minimal" },
+              body: JSON.stringify(subData),
+            });
+          } else {
+            await fetch(`${BASE}/subscriptions`, {
+              method: "POST",
+              headers: { ...HEADERS, Prefer: "return=minimal" },
+              body: JSON.stringify({ userId, ...subData, subscribedAt: now.toISOString() }),
+            });
+          }
+        }
+      }
+    }
+  }
+
   // E-mail de confirmação (ignora erro para não bloquear webhook)
   if (intent.payer_email) {
     try {

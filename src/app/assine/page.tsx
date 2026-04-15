@@ -1,9 +1,11 @@
 import Link from "next/link";
-import prisma from "@/lib/prisma";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
 export const metadata = {
   title: "Assine — Revista Magnum",
@@ -87,12 +89,14 @@ export default async function AssinePage() {
   let dbPlans: { id: string; name: string; slug: string; description: string | null; priceInCents: number; intervalMonths: number }[] = [];
 
   try {
-    dbPlans = await prisma.subscriptionPlan.findMany({
-      where: { active: true },
-      orderBy: { priceInCents: "asc" },
-    });
+    const res = await fetch(
+      `https://${PROJECT}.supabase.co/rest/v1/subscription_plans?active=eq.true&order=priceInCents.asc`,
+      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, cache: "no-store" }
+    );
+    const data = await res.json();
+    if (Array.isArray(data)) dbPlans = data;
   } catch {
-    // DB unavailable
+    // usa fallback
   }
 
   const plans = dbPlans.length > 0

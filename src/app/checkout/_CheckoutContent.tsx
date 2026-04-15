@@ -1,234 +1,189 @@
 "use client";
 
-import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-const PLANS: Record<string, { name: string; price: string; interval: string; nextCharge: string }> = {
-  trimestral: { name: "Trimestral", price: "R$ 29,90", interval: "3 meses", nextCharge: "Jul / 2026" },
-  semestral: { name: "Semestral", price: "R$ 54,90", interval: "6 meses", nextCharge: "Out / 2026" },
-  anual: { name: "Anual", price: "R$ 99,90", interval: "12 meses", nextCharge: "Abr / 2027" },
+const inputCls = "bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] h-[44px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
+const labelCls = "block text-[#7a9ab5] text-[12px] font-semibold mb-1.5";
+
+const GATEWAY_LABELS: Record<string, { icon: string; name: string }> = {
+  mercadopago: { icon: "🟡", name: "Mercado Pago" },
+  stripe:      { icon: "🟣", name: "Stripe"        },
+  pagseguro:   { icon: "🟢", name: "PagSeguro"     },
+  paypal:      { icon: "🔵", name: "PayPal"         },
 };
 
-const STEPS = ["Dados pessoais", "Escolha do plano", "Pagamento"];
+const PERIOD_LABEL: Record<number, string> = { 1: "mês", 3: "trimestre", 6: "semestre", 12: "ano" };
 
-export default function CheckoutContent() {
-  const [payMethod, setPayMethod] = useState<"cartao" | "pix" | "boleto">("cartao");
-  const [planSlug, setPlanSlug] = useState("semestral");
+interface Props {
+  slug:           string;
+  planName:       string;
+  amountCents:    number;
+  intervalMonths: number;
+  activeGateways: string[];
+  defaultName:    string;
+  defaultEmail:   string;
+}
 
-  useEffect(() => {
-    const slug = new URLSearchParams(window.location.search).get("plano") ?? "semestral";
-    setPlanSlug(slug);
-  }, []);
+export default function CheckoutForm({
+  slug, planName, amountCents, intervalMonths,
+  activeGateways, defaultName, defaultEmail,
+}: Props) {
+  const [name, setName]       = useState(defaultName);
+  const [email, setEmail]     = useState(defaultEmail);
+  const [gateway, setGateway] = useState(activeGateways[0] ?? "");
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState<string | null>(null);
 
-  const plan = PLANS[planSlug] ?? PLANS["semestral"];
+  const periodLabel = PERIOD_LABEL[intervalMonths] ?? "período";
+  const priceStr    = (amountCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const hasGateways = activeGateways.length > 0;
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!hasGateways || !gateway) return;
+    setLoading(true); setError(null);
+    try {
+      const res = await fetch("/api/checkout", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          gateway,
+          product_type:  "magazine_subscription",
+          product_id:    slug,
+          product_label: `Assinatura ${planName} — Revista Magnum`,
+          amount_cents:  amountCents,
+          payer_name:    name,
+          payer_email:   email,
+          metadata:      { plan: slug },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Erro ao iniciar pagamento.");
+      if (!data.checkout_url) throw new Error("URL de pagamento não recebida.");
+      window.location.href = data.checkout_url;
+    } catch (err: unknown) {
+      setError((err as Error).message);
+      setLoading(false);
+    }
+  }
+
+  /* ── Sem gateway configurado ─────────────────────────────── */
+  if (!hasGateways) {
+    return (
+      <div className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] p-8 text-center">
+        <p className="text-[36px] mb-3">🔧</p>
+        <p className="text-white text-[18px] font-bold mb-2">Pagamentos em configuração</p>
+        <p className="text-[#526888] text-[14px] leading-[22px] mb-5">
+          O sistema de pagamento ainda está sendo configurado. Fale conosco para assinar.
+        </p>
+        <a href="mailto:publicidade@revistamagnum.com.br"
+          className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[44px] px-6 flex items-center justify-center rounded-[6px] transition-colors">
+          Falar com nossa equipe →
+        </a>
+      </div>
+    );
+  }
 
   return (
-    <main className="flex-1 pt-16">
-      {/* Checkout nav bar */}
-      <div className="bg-[#0e1520] border-b border-[#141d2c] h-[64px] flex items-center px-5 lg:px-20 gap-4">
-        <Link href="/" className="flex items-center gap-1 shrink-0">
-          <div className="w-[26px] h-[26px] bg-[#ff1f1f] rounded-[2px]" />
-          <span className="font-['Barlow_Condensed'] font-extrabold text-[20px] text-[#ff1f1f] leading-none tracking-wide">
-            MAGNUM
-          </span>
-        </Link>
-        <span className="text-[#7a9ab5] text-[13px] hidden sm:block">🔒 Checkout seguro</span>
-        <div className="flex-1" />
-        {/* Progress steps */}
-        <div className="hidden md:flex items-center gap-2">
-          {STEPS.map((step, i) => (
-            <div key={step} className="flex items-center gap-2">
-              {i > 0 && (
-                <div className={`w-[80px] h-px ${i <= 2 ? "bg-[#22c55e]" : "bg-[#1c2a3e]"}`} />
-              )}
-              <div className="flex flex-col items-center gap-1">
-                <div
-                  className={`w-[24px] h-[24px] rounded-full flex items-center justify-center text-[11px] font-bold ${
-                    i < 2 ? "bg-[#22c55e] text-white" : "bg-[#ff1f1f] text-white"
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+
+      {/* Dados pessoais */}
+      <div className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] p-5 flex flex-col gap-4">
+        <p className="text-[#ff1f1f] text-[10px] font-semibold tracking-[1.5px] uppercase">
+          Seus dados
+        </p>
+        <div>
+          <label className={labelCls}>Nome completo *</label>
+          <input
+            required
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="João da Silva"
+            className={inputCls}
+          />
+        </div>
+        <div>
+          <label className={labelCls}>E-mail *</label>
+          <input
+            required
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="joao@email.com"
+            className={inputCls}
+          />
+        </div>
+      </div>
+
+      {/* Forma de pagamento (só se > 1 gateway) */}
+      {activeGateways.length > 1 && (
+        <div className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] p-5">
+          <p className="text-[#ff1f1f] text-[10px] font-semibold tracking-[1.5px] uppercase mb-3">
+            Forma de pagamento
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {activeGateways.map(gw => {
+              const meta = GATEWAY_LABELS[gw] ?? { icon: "💳", name: gw };
+              return (
+                <button
+                  key={gw}
+                  type="button"
+                  onClick={() => setGateway(gw)}
+                  className={`flex items-center gap-2.5 h-[44px] px-3 rounded-[8px] border transition-all text-[14px] ${
+                    gateway === gw
+                      ? "border-[#ff1f1f] bg-[#260a0a] text-white"
+                      : "border-[#1c2a3e] bg-[#070a12] text-[#7a9ab5] hover:border-[#526888]"
                   }`}
                 >
-                  {i < 2 ? "✓" : i + 1}
-                </div>
-                <span className={`text-[11px] ${i < 2 ? "text-[#d4d4da]" : "text-[#253750]"}`}>
-                  {step}
-                </span>
-              </div>
-            </div>
-          ))}
+                  <span className="text-[16px]">{meta.icon}</span>
+                  <span className="font-medium">{meta.name}</span>
+                  {gateway === gw && <span className="ml-auto text-[#ff1f1f] text-[12px]">✓</span>}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="px-5 lg:px-20 py-10 flex flex-col lg:flex-row gap-8 items-start max-w-[1440px]">
-        {/* Left — Payment Form */}
-        <div className="flex-1 min-w-0">
-          <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[36px] leading-none mb-2">
-            Pagamento
-          </h1>
-          <p className="text-[#7a9ab5] text-[15px] mb-6">
-            Plano {plan.name} — {plan.price}
+      {/* Erro */}
+      {error && (
+        <div className="bg-[#2d0a0a] border border-[#ff1f1f]/30 rounded-[8px] px-4 py-3 text-[#ff6b6b] text-[13px]">
+          {error}
+        </div>
+      )}
+
+      {/* Resumo */}
+      <div className="bg-[#070a12] border border-[#141d2c] rounded-[10px] p-4 flex items-center justify-between gap-3">
+        <div>
+          <p className="text-[#526888] text-[12px] mb-0.5">Você está assinando</p>
+          <p className="text-white text-[14px] font-bold">
+            Revista Magnum {planName} · {priceStr}/{periodLabel}
           </p>
-          <div className="bg-[#141d2c] h-px mb-6" />
-
-          {/* Payment method tabs */}
-          <div className="flex gap-2 mb-7">
-            {[
-              { key: "cartao" as const, label: "Cartão de Crédito" },
-              { key: "pix" as const, label: "PIX" },
-              { key: "boleto" as const, label: "Boleto" },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setPayMethod(tab.key)}
-                className={`h-[40px] px-4 rounded-[6px] text-[13px] font-semibold transition-colors ${
-                  payMethod === tab.key
-                    ? "bg-[#141d2c] border border-[#ff1f1f] text-white"
-                    : "bg-[#070a12] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {payMethod === "cartao" && (
-            <div className="flex flex-col gap-5">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[#7a9ab5] text-[13px] font-medium">Número do cartão</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="0000 0000 0000 0000"
-                    maxLength={19}
-                    className="w-full bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[48px] px-4 text-[#253750] text-[15px] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f]"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#253750]">💳</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[#7a9ab5] text-[13px] font-medium">Nome no cartão</label>
-                <input
-                  type="text"
-                  placeholder="JOAO DA SILVA"
-                  className="w-full bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[48px] px-4 text-[#253750] text-[15px] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] uppercase"
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <div className="flex flex-col gap-1.5 flex-1">
-                  <label className="text-[#7a9ab5] text-[13px] font-medium">Validade</label>
-                  <input
-                    type="text"
-                    placeholder="MM / AA"
-                    maxLength={7}
-                    className="w-full bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[48px] px-4 text-[#253750] text-[15px] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f]"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5 flex-1">
-                  <label className="text-[#7a9ab5] text-[13px] font-medium">CVV</label>
-                  <input
-                    type="password"
-                    placeholder="•••"
-                    maxLength={4}
-                    className="w-full bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[48px] px-4 text-[#253750] text-[15px] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f]"
-                  />
-                </div>
-              </div>
-
-              <button className="w-full bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[16px] font-semibold h-[56px] rounded-[8px] transition-colors mt-2">
-                Confirmar pagamento — {plan.price}
-              </button>
-
-              <p className="text-[#253750] text-[12px] text-center">
-                🔒 Pagamento 100% seguro · Mercado Pago · SSL 256-bit
-              </p>
-            </div>
-          )}
-
-          {payMethod === "pix" && (
-            <div className="flex flex-col items-center gap-5 py-8">
-              <div className="bg-[#141d2c] border border-[#1c2a3e] rounded-xl w-[180px] h-[180px] flex items-center justify-center">
-                <p className="text-[#253750] text-[11px] font-mono text-center">
-                  QR Code
-                  <br />
-                  PIX
-                </p>
-              </div>
-              <p className="text-[#7a9ab5] text-[14px] text-center max-w-[400px]">
-                Abra o app do seu banco, escolha PIX e escaneie o QR Code acima.
-              </p>
-              <button className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] font-medium h-[44px] px-6 rounded-[6px] transition-colors">
-                Copiar código PIX
-              </button>
-            </div>
-          )}
-
-          {payMethod === "boleto" && (
-            <div className="flex flex-col gap-5 py-4">
-              <p className="text-[#7a9ab5] text-[14px] leading-[22px]">
-                O boleto será gerado após confirmar. O pagamento pode levar até 3 dias úteis
-                para ser processado.
-              </p>
-              <button className="w-full bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[16px] font-semibold h-[56px] rounded-[8px] transition-colors">
-                Gerar boleto — {plan.price}
-              </button>
-            </div>
-          )}
+          <p className="text-[#253750] text-[11px]">Renova automaticamente · cancele quando quiser</p>
         </div>
-
-        {/* Right — Order Summary */}
-        <div className="w-full lg:w-[400px] bg-[#0e1520] border border-[#141d2c] rounded-xl p-6 shrink-0">
-          <p className="text-white text-[16px] font-semibold mb-4">Resumo do pedido</p>
-          <div className="bg-[#141d2c] h-px mb-4" />
-
-          <div className="flex flex-col gap-3 mb-4">
-            <div className="flex justify-between">
-              <span className="text-[#7a9ab5] text-[14px]">Plano {plan.name}</span>
-              <span className="text-[#d4d4da] text-[14px] font-medium">{plan.price}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[#7a9ab5] text-[14px]">Cobrança recorrente</span>
-              <span className="text-[#d4d4da] text-[14px] font-medium">a cada {plan.interval}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[#7a9ab5] text-[14px]">Próxima cobrança</span>
-              <span className="text-[#d4d4da] text-[14px] font-medium">{plan.nextCharge}</span>
-            </div>
-          </div>
-
-          <div className="bg-[#141d2c] h-px mb-4" />
-
-          <div className="flex justify-between items-end mb-4">
-            <span className="text-white text-[16px] font-semibold">Total hoje</span>
-            <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[32px] leading-none">
-              {plan.price}
-            </span>
-          </div>
-
-          <div className="bg-[#141d2c] h-px mb-4" />
-
-          <p className="text-[#7a9ab5] text-[13px] font-semibold mb-3">O que está incluído:</p>
-          <ul className="flex flex-col gap-2">
-            {[
-              "Acesso ao acervo completo (207 edições)",
-              "Novas edições mensais",
-              "Leitura no app e navegador",
-              "Cancele quando quiser",
-            ].map((item) => (
-              <li key={item} className="flex items-center gap-2 text-[#d4d4da] text-[13px]">
-                <span className="text-[#22c55e]">✓</span> {item}
-              </li>
-            ))}
-          </ul>
-
-          <Link
-            href="/assine"
-            className="flex items-center gap-1 text-[#7a9ab5] hover:text-white text-[14px] mt-6 transition-colors"
-          >
-            ← Voltar para planos
-          </Link>
-        </div>
+        {activeGateways.length === 1 && (
+          <span className="text-[20px] shrink-0">
+            {GATEWAY_LABELS[activeGateways[0]]?.icon ?? "💳"}
+          </span>
+        )}
       </div>
-    </main>
+
+      {/* CTA */}
+      <button
+        type="submit"
+        disabled={loading || !gateway}
+        className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[15px] font-semibold h-[50px] rounded-[8px] transition-colors"
+      >
+        {loading ? "Processando..." : "Finalizar assinatura →"}
+      </button>
+
+      <p className="text-[#253750] text-[12px] text-center">
+        Você será redirecionado para o pagamento seguro.
+      </p>
+
+      <a href="/assine" className="text-[#526888] hover:text-white text-[13px] text-center transition-colors">
+        ← Voltar aos planos
+      </a>
+    </form>
   );
 }
