@@ -40,6 +40,13 @@ const INTEGRATIONS = [
       { key: "integrations.clarity_id",  label: "Microsoft Clarity — Project ID", placeholder: "xxxxxxxxxx", hint: "Heatmaps gratuitos da Microsoft." },
     ],
   },
+  {
+    group: "Guia Comercial",
+    icon: "🗺️",
+    items: [
+      { key: "googleMapsApiKey", label: "Google Maps Embed API Key", placeholder: "AIzaSy...", hint: "Necessária para exibir o mapa nas páginas de empresa (planos Premium e Destaque). Obtenha em console.cloud.google.com → Maps Embed API. Restrinja a chave ao domínio do site." },
+    ],
+  },
 ];
 
 export default function TabIntegracoes({ settings }: Props) {
