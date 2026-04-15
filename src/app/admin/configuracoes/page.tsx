@@ -1,25 +1,42 @@
-import prisma from "@/lib/prisma";
 import ConfiguracoesClient from "./_ConfiguracoesClient";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminConfiguracoesPage() {
-  let admins: { id: string; name: string; email: string; createdAt: Date }[] = [];
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
+async function getSettings(): Promise<Record<string, string>> {
   try {
-    admins = await prisma.user.findMany({
+    const res = await fetch(
+      `https://${PROJECT}.supabase.co/rest/v1/site_settings?select=key,value`,
+      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, cache: "no-store" }
+    );
+    const rows: { key: string; value: string | null }[] = await res.json();
+    if (!Array.isArray(rows)) return {};
+    const obj: Record<string, string> = {};
+    for (const r of rows) obj[r.key] = r.value ?? "";
+    return obj;
+  } catch { return {}; }
+}
+
+export default async function AdminConfiguracoesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ aba?: string }>;
+}) {
+  const { aba } = await searchParams;
+  const settings = await getSettings();
+
+  let admins: { id: string; name: string; email: string; createdAt: string }[] = [];
+  try {
+    const raw = await prisma.user.findMany({
       where: { role: "ADMIN" },
       select: { id: true, name: true, email: true, createdAt: true },
       orderBy: { createdAt: "asc" },
     });
-  } catch {
-    // DB unavailable
-  }
-
-  const serialized = admins.map((a) => ({
-    ...a,
-    createdAt: a.createdAt.toLocaleDateString("pt-BR"),
-  }));
+    admins = raw.map(a => ({ ...a, createdAt: a.createdAt.toLocaleDateString("pt-BR") }));
+  } catch { /* DB unavailable */ }
 
   return (
     <>
@@ -27,11 +44,10 @@ export default async function AdminConfiguracoesPage() {
         Configurações
       </h1>
       <p className="text-[#7a9ab5] text-[14px] mb-6">
-        Gerenciamento de administradores e configurações do sistema.
+        Gerencie o site, integrações, e-mail e acesso administrativo.
       </p>
       <div className="bg-[#141d2c] h-px mb-6" />
-
-      <ConfiguracoesClient admins={serialized} />
+      <ConfiguracoesClient initialTab={aba ?? "integracoes"} settings={settings} admins={admins} />
     </>
   );
 }
