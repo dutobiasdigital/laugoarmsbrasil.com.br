@@ -2,6 +2,7 @@ import Link from "next/link";
 import prisma from "@/lib/prisma";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AdBanner from "@/components/AdBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -78,13 +79,8 @@ export default async function HomePage() {
       <Header />
 
       {/* Ad — HOME_TOP */}
-      <div className="bg-[#0e1520] flex flex-col items-center justify-center h-[110px] mt-16 shrink-0">
-        <p className="text-[9px] font-semibold text-[#253750] tracking-[1.5px] uppercase mb-2">
-          Publicidade
-        </p>
-        <div className="bg-[#141d2c] border border-[#141d2c] rounded h-[90px] w-full max-w-[728px] flex items-center justify-center">
-          <p className="font-mono text-[#253750] text-[12px]">728 × 90 — Leaderboard</p>
-        </div>
+      <div className="bg-[#0e1520] flex items-center justify-center py-3 mt-16 shrink-0">
+        <AdBanner position="HOME_TOP" bannerSize="LEADERBOARD" />
       </div>
 
       {/* Hero — metal animado */}
@@ -355,14 +351,7 @@ export default async function HomePage() {
         {/* Sidebar */}
         <aside className="hidden lg:flex flex-col gap-8 w-[300px] shrink-0">
           {/* Ad 300×250 */}
-          <div className="flex flex-col items-center gap-1.5">
-            <p className="text-[9px] font-semibold text-[#253750] tracking-[1.5px] uppercase">
-              Publicidade
-            </p>
-            <div className="bg-[#0e1520] border border-[#141d2c] rounded w-[300px] h-[250px] flex items-center justify-center">
-              <p className="font-mono text-[#253750] text-[12px]">300×250</p>
-            </div>
-          </div>
+          <AdBanner position="HOME_SIDEBAR" bannerSize="MED_RECT" />
 
           {/* Mais Lidos */}
           <div className="bg-[#0e1520] border border-[#141d2c] rounded-lg p-5 flex flex-col gap-3">
@@ -380,14 +369,7 @@ export default async function HomePage() {
           </div>
 
           {/* Ad 300×600 */}
-          <div className="flex flex-col items-center gap-1.5">
-            <p className="text-[9px] font-semibold text-[#253750] tracking-[1.5px] uppercase">
-              Publicidade
-            </p>
-            <div className="bg-[#0e1520] border border-[#141d2c] rounded w-[300px] h-[600px] flex items-center justify-center">
-              <p className="font-mono text-[#253750] text-[12px]">300×600</p>
-            </div>
-          </div>
+          <AdBanner position="HOME_SIDEBAR" bannerSize="HALF_PAGE" />
         </aside>
       </div>
 
