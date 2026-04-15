@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#070a12] border-t border-[#141d2c] mt-auto">
       <div className="max-w-[1440px] mx-auto px-5 lg:px-20 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-10 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-5 gap-10 mb-10">
           {/* Brand */}
           <div className="sm:col-span-1">
             <div className="flex items-center gap-2 mb-3">
@@ -34,6 +34,28 @@ export default function Footer() {
                 { href: "/sobre", label: "Sobre" },
                 { href: "/anuncie", label: "Anuncie" },
                 { href: "/contato", label: "Contato" },
+              ].map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-xs text-[#253750] hover:text-[#7a9ab5] transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Guia */}
+          <div>
+            <p className="text-[10px] font-semibold text-[#1c2a3e] uppercase tracking-[2px] mb-3">
+              Guia Comercial
+            </p>
+            <ul className="space-y-2">
+              {[
+                { href: "/guia",            label: "Diretório" },
+                { href: "/guia/cadastrar",  label: "Cadastrar empresa" },
+                { href: "/guia/busca",      label: "Busca" },
+                { href: "/guia/armareiros", label: "Armareiros" },
+                { href: "/guia/clubes-de-tiro", label: "Clubes de Tiro" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="text-xs text-[#253750] hover:text-[#7a9ab5] transition-colors">

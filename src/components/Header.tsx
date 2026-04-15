@@ -28,6 +28,7 @@ export default async function Header() {
         {[
           { href: "/", label: "HOME" },
           { href: "/edicoes", label: "EDIÇÕES", arrow: true },
+          { href: "/guia", label: "GUIA" },
           { href: "/assine", label: "ASSINE" },
           { href: "/anuncie", label: "ANUNCIE" },
           { href: "/blog", label: "BLOG" },
