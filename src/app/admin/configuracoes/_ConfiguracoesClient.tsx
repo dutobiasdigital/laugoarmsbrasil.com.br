@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import TabIntegracoes from "./_TabIntegracoes";
+import TabPagamentos from "./_TabPagamentos";
 import TabSEO from "./_TabSEO";
 import TabEmpresa from "./_TabEmpresa";
 import TabRedes from "./_TabRedes";
@@ -27,6 +28,7 @@ interface Props {
 /* ── Tabs ───────────────────────────────────────────────────── */
 const TABS = [
   { id: "integracoes", icon: "🔌", label: "Integrações" },
+  { id: "pagamentos",  icon: "💳", label: "Pagamentos"  },
   { id: "seo",         icon: "🌐", label: "Site & SEO" },
   { id: "empresa",     icon: "🏢", label: "Empresa" },
   { id: "redes",       icon: "📱", label: "Redes Sociais" },
@@ -84,6 +86,7 @@ export default function ConfiguracoesClient({ initialTab, settings, admins }: Pr
       {/* Conteúdo */}
       <div className="flex-1 min-w-0">
         {tab === "integracoes" && <TabIntegracoes settings={settings} />}
+        {tab === "pagamentos"  && <TabPagamentos settings={settings} />}
         {tab === "seo"         && <TabSEO settings={settings} />}
         {tab === "empresa"     && <TabEmpresa settings={settings} />}
         {tab === "redes"       && <TabRedes settings={settings} />}

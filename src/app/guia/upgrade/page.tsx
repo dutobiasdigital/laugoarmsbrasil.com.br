@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { PLAN_LABELS, categoryByValue } from "@/lib/guia";
+import { getSettings, getActiveGateways } from "@/lib/payment/shared";
 import UpgradeForm from "./UpgradeForm";
 
 export const dynamic = "force-dynamic";
@@ -80,6 +81,12 @@ export default async function UpgradePage({
   const defaultPlan = plano === "DESTAQUE" ? "DESTAQUE" : "PREMIUM";
   const cat = categoryByValue(listing.category);
 
+  // Busca gateways ativos e preços configurados
+  const settings       = await getSettings();
+  const activeGateways = getActiveGateways(settings);
+  const premiumPrice   = parseInt(settings["payment.guia.premium_price"]  ?? "7900");
+  const destaquePrice  = parseInt(settings["payment.guia.destaque_price"] ?? "14900");
+
   return (
     <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
@@ -120,6 +127,9 @@ export default async function UpgradePage({
                 slug={listing.slug}
                 listingName={listing.name}
                 defaultPlan={defaultPlan}
+                activeGateways={activeGateways}
+                premiumPrice={premiumPrice}
+                destaquePrice={destaquePrice}
               />
             </div>
 
@@ -152,8 +162,8 @@ export default async function UpgradePage({
                   <div className="grid grid-cols-[1fr_40px_40px_50px] gap-1 pt-3 text-[11px] font-bold">
                     <span className="text-[#526888]">Preço</span>
                     <span className="text-center text-[#526888]">Free</span>
-                    <span className="text-center text-[#818cf8]">79/mês</span>
-                    <span className="text-center text-[#ff1f1f]">149/mês</span>
+                    <span className="text-center text-[#818cf8]">{premiumPrice / 100}/mês</span>
+                    <span className="text-center text-[#ff1f1f]">{destaquePrice / 100}/mês</span>
                   </div>
                 </div>
               </div>
