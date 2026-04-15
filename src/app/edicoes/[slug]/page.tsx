@@ -1,11 +1,26 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import prisma from "@/lib/prisma";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
+
+interface Edition {
+  id: string; title: string; number: number | null; slug: string;
+  coverImageUrl: string | null; publishedAt: string | null;
+  type: string; pageCount: number | null; editorial: string | null;
+  pageFlipUrl: string | null; tableOfContents: string | null;
+}
+interface RelatedEdition {
+  id: string; title: string; number: number | null; slug: string;
+  coverImageUrl: string | null; type: string;
+}
 
 export default async function EdicaoDetalhePage({
   params,
@@ -14,49 +29,61 @@ export default async function EdicaoDetalhePage({
 }) {
   const { slug } = await params;
 
-  let edition: {
-    id: string; title: string; number: number | null; slug: string;
-    coverImageUrl: string | null; publishedAt: Date | null;
-    type: string; pageCount: number | null; editorial: string | null;
-    pageFlipUrl: string | null; tableOfContents: string | null;
-  } | null = null;
-
-  let related: {
-    id: string; title: string; number: number | null; slug: string;
-    coverImageUrl: string | null; type: string;
-  }[] = [];
-
+  let edition: Edition | null = null;
+  let related: RelatedEdition[] = [];
   let isSubscriber = false;
+  let hasSingleAccess = false;
+  let userEmail: string | null = null;
 
   try {
+    // Busca edição e auth em paralelo
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const [editionRes, { data: { user } }] = await Promise.all([
+      fetch(`${BASE}/editions?slug=eq.${slug}&isPublished=eq.true&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount,editorial,pageFlipUrl,tableOfContents&limit=1`,
+        { headers: HEADERS, cache: "no-store" }),
+      supabase.auth.getUser(),
+    ]);
 
+    const editionsData = await editionRes.json();
+    edition = Array.isArray(editionsData) && editionsData.length > 0 ? editionsData[0] : null;
+
+    // Verifica acesso do usuário
     if (user) {
-      const profile = await prisma.user.findUnique({
-        where: { authId: user.id },
-        select: { role: true, subscription: { select: { status: true } } },
-      });
-      isSubscriber = profile?.role === "ADMIN" || profile?.subscription?.status === "ACTIVE";
+      userEmail = user.email ?? null;
+
+      const userRes = await fetch(
+        `${BASE}/users?authId=eq.${user.id}&select=role,subscriptions(status)&limit=1`,
+        { headers: HEADERS, cache: "no-store" }
+      );
+      const users  = await userRes.json();
+      const dbUser = Array.isArray(users) ? users[0] : null;
+
+      const isAdmin    = dbUser?.role === "ADMIN";
+      const activeSub  = Array.isArray(dbUser?.subscriptions) && dbUser.subscriptions.some((s: { status: string }) => s.status === "ACTIVE");
+      isSubscriber = isAdmin || activeSub;
+
+      // Verifica compra avulsa desta edição (últimos 30 dias)
+      if (!isSubscriber && edition && userEmail) {
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 86_400_000).toISOString();
+        const purchasedRes  = await fetch(
+          `${BASE}/payment_intents?payer_email=eq.${encodeURIComponent(userEmail)}&product_type=eq.edition_purchase&status=eq.APPROVED&createdAt=gte.${thirtyDaysAgo}&select=metadata`,
+          { headers: HEADERS, cache: "no-store" }
+        );
+        const purchased = await purchasedRes.json();
+        hasSingleAccess = Array.isArray(purchased) && purchased.some(
+          (p: { metadata?: { edition_slug?: string } }) => p.metadata?.edition_slug === slug
+        );
+      }
     }
 
-    edition = await prisma.edition.findUnique({
-      where: { slug, isPublished: true },
-      select: {
-        id: true, title: true, number: true, slug: true,
-        coverImageUrl: true, publishedAt: true, type: true,
-        pageCount: true, editorial: true, pageFlipUrl: true,
-        tableOfContents: true,
-      },
-    });
-
+    // Edições relacionadas
     if (edition) {
-      related = await prisma.edition.findMany({
-        where: { isPublished: true, id: { not: edition.id } },
-        orderBy: { publishedAt: "desc" },
-        take: 5,
-        select: { id: true, title: true, number: true, slug: true, coverImageUrl: true, type: true },
-      });
+      const relRes = await fetch(
+        `${BASE}/editions?isPublished=eq.true&id=neq.${edition.id}&order=publishedAt.desc&select=id,title,number,slug,coverImageUrl,type&limit=5`,
+        { headers: HEADERS, cache: "no-store" }
+      );
+      const relData = await relRes.json();
+      related = Array.isArray(relData) ? relData : [];
     }
   } catch {
     // DB unavailable
@@ -64,9 +91,10 @@ export default async function EdicaoDetalhePage({
 
   if (!edition) notFound();
 
+  const canRead  = isSubscriber || hasSingleAccess;
   const isSpecial = edition.type === "SPECIAL";
   const publishMeta = edition.publishedAt
-    ? edition.publishedAt.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })
+    ? new Date(edition.publishedAt).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })
     : null;
 
   return (
@@ -83,7 +111,7 @@ export default async function EdicaoDetalhePage({
 
         {/* Hero */}
         <div className="px-5 lg:px-20 py-8 flex flex-col lg:flex-row gap-10">
-          {/* Cover — exibe a capa inteira sem corte */}
+          {/* Cover */}
           <div className="w-full max-w-[280px] mx-auto lg:mx-0 shrink-0 rounded-[8px] overflow-hidden border border-[#1c2a3e] shadow-2xl shadow-black/70 bg-[#0a0e18]">
             {edition.coverImageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -115,6 +143,11 @@ export default async function EdicaoDetalhePage({
                   Nº {edition.number}
                 </span>
               )}
+              {hasSingleAccess && !isSubscriber && (
+                <span className="text-[10px] font-bold bg-[#0f381f] text-[#22c55e] px-2 py-[3px] rounded-[2px]">
+                  ACESSO ATIVO 30 DIAS
+                </span>
+              )}
             </div>
 
             {/* Title */}
@@ -133,7 +166,8 @@ export default async function EdicaoDetalhePage({
 
             {/* Editorial */}
             {edition.editorial && (
-              <div className="border-l-2 border-[#ff1f1f]/60 pl-5 py-2 rounded-r-sm" style={{ background: "linear-gradient(90deg, rgba(255,31,31,0.05) 0%, transparent 70%)" }}>
+              <div className="border-l-2 border-[#ff1f1f]/60 pl-5 py-2 rounded-r-sm"
+                style={{ background: "linear-gradient(90deg, rgba(255,31,31,0.05) 0%, transparent 70%)" }}>
                 <p className="text-[#ff1f1f] text-[9px] font-bold tracking-[2px] uppercase mb-3">Editorial</p>
                 <div
                   className="text-[#8fb8d4] text-[15px] leading-[28px]"
@@ -144,7 +178,7 @@ export default async function EdicaoDetalhePage({
 
             {/* CTAs */}
             <div className="flex flex-wrap items-center gap-3 mt-2">
-              {isSubscriber ? (
+              {canRead ? (
                 edition.pageFlipUrl ? (
                   <a
                     href={edition.pageFlipUrl}
@@ -160,18 +194,28 @@ export default async function EdicaoDetalhePage({
                   </span>
                 )
               ) : (
-                <Link
-                  href="/assine"
-                  className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[48px] px-8 flex items-center justify-center rounded-[4px] transition-colors"
-                >
-                  Assine para Ler
-                </Link>
+                <>
+                  <Link
+                    href="/assine"
+                    className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[48px] px-8 flex items-center justify-center rounded-[4px] transition-colors"
+                  >
+                    Assine para Ler
+                  </Link>
+                  <Link
+                    href={`/checkout?edicao=${slug}`}
+                    className="bg-[#0e1520] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] font-medium h-[48px] px-6 flex items-center justify-center rounded-[4px] transition-colors"
+                  >
+                    Comprar esta edição
+                  </Link>
+                </>
               )}
             </div>
 
-            <p className="text-[#253750] text-[12px]">
-              🔒 Acesso exclusivo para assinantes ativos
-            </p>
+            {!canRead && (
+              <p className="text-[#253750] text-[12px]">
+                🔒 Assinatura ou acesso avulso por 30 dias
+              </p>
+            )}
           </div>
         </div>
 
@@ -201,13 +245,9 @@ export default async function EdicaoDetalhePage({
                         {item.page}
                       </span>
                       <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="text-[#b0c4d8] text-[13px] font-medium leading-snug">
-                          {item.title}
-                        </span>
+                        <span className="text-[#b0c4d8] text-[13px] font-medium leading-snug">{item.title}</span>
                         {item.category && (
-                          <span className="text-[#526888] text-[10px] tracking-wide">
-                            {item.category}
-                          </span>
+                          <span className="text-[#526888] text-[10px] tracking-wide">{item.category}</span>
                         )}
                       </div>
                     </div>
@@ -218,18 +258,17 @@ export default async function EdicaoDetalhePage({
           </div>
         </div>
 
-        {/* CTA Banner */}
-        {!isSubscriber && (
+        {/* CTA Banner (para não assinantes) */}
+        {!isSubscriber && !hasSingleAccess && (
           <div className="px-5 lg:px-20 pb-12">
             <div className="bg-[#0e1520] border border-[#141d2c] rounded-xl p-6 lg:p-10 flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
               <div className="w-1 h-[80px] bg-[#ff1f1f] rounded shrink-0 hidden lg:block" />
               <div className="flex flex-col gap-2 flex-1">
                 <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[36px] leading-none">
-                  Não é assinante ainda?
+                  Acesse esta edição
                 </h2>
                 <p className="text-[#d4d4da] text-[15px] leading-[24px]">
-                  Acesse esta e outras 206 edições com uma assinatura Magnum.<br />
-                  Planos a partir de R$ 29,90/trimestre. Cancele quando quiser.
+                  Assine e acesse esta e outras 206 edições. Ou compre apenas esta edição por 30 dias.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 shrink-0">
@@ -240,10 +279,10 @@ export default async function EdicaoDetalhePage({
                   Ver Planos de Assinatura
                 </Link>
                 <Link
-                  href="/auth/login"
+                  href={`/checkout?edicao=${slug}`}
                   className="bg-[#070a12] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] font-medium h-[48px] px-6 flex items-center justify-center rounded-[4px] transition-colors whitespace-nowrap"
                 >
-                  Entrar na conta
+                  Comprar só esta edição
                 </Link>
               </div>
             </div>
@@ -253,9 +292,7 @@ export default async function EdicaoDetalhePage({
         {/* Related Editions */}
         {related.length > 0 && (
           <div className="px-5 lg:px-20 pb-16">
-            <p className="text-[#526888] text-[9px] font-bold tracking-[2.5px] uppercase mb-1">
-              Outras Edições
-            </p>
+            <p className="text-[#526888] text-[9px] font-bold tracking-[2.5px] uppercase mb-1">Outras Edições</p>
             <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[30px] mb-6">
               Continue explorando o acervo
             </h2>
@@ -269,15 +306,11 @@ export default async function EdicaoDetalhePage({
                     className="group relative rounded-xl overflow-hidden flex flex-col border border-white/5 hover:border-white/15 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/60"
                     style={{ background: "linear-gradient(145deg, #0f1420 0%, #0a0e18 100%)" }}
                   >
-                    {/* Cover com aspect-ratio correto */}
                     <div className="relative aspect-[3/4] overflow-hidden">
                       {rel.coverImageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={rel.coverImageUrl}
-                          alt={rel.title}
-                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
+                        <img src={rel.coverImageUrl} alt={rel.title}
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       ) : (
                         <div className={`absolute inset-0 flex items-center justify-center ${relSpecial ? "bg-[#cc0000]/20" : "bg-white/5"}`}>
                           <p className={`font-['Barlow_Condensed'] font-extrabold text-[18px] ${relSpecial ? "text-[#ff1f1f]/40" : "text-white/10"}`}>
@@ -286,24 +319,12 @@ export default async function EdicaoDetalhePage({
                         </div>
                       )}
                       <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#0a0e18] to-transparent" />
-                      {relSpecial && (
-                        <div className="absolute top-2 left-2">
-                          <span className="text-[8px] font-bold uppercase px-1.5 py-[2px] rounded-[3px] bg-[#ff1f1f]/20 text-[#ff6b6b] border border-[#ff1f1f]/30">
-                            Especial
-                          </span>
-                        </div>
-                      )}
                     </div>
-                    {/* Info */}
                     <div className="px-3 py-2.5">
                       <p className="text-white/75 text-[11px] font-semibold leading-snug line-clamp-2 group-hover:text-white transition-colors">
                         {rel.number ? `Edição ${rel.number}` : rel.title}
                       </p>
                     </div>
-                    {relSpecial && (
-                      <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                        style={{ boxShadow: "inset 0 0 25px rgba(255,31,31,0.06)" }} />
-                    )}
                   </Link>
                 );
               })}

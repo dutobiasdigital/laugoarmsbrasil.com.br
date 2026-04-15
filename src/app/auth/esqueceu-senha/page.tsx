@@ -1,15 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { forgotPassword } from "@/actions/auth";
+import { useRecaptcha } from "@/hooks/useRecaptcha";
 import Link from "next/link";
 
 export default function EsqueceuSenhaPage() {
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const { executeRecaptcha } = useRecaptcha();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // TODO: call Supabase resetPasswordForEmail
-    setSent(true);
+    setError(null);
+
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+
+    // Inject reCAPTCHA token (no-op if key not configured)
+    const token = await executeRecaptcha("forgot_password");
+    fd.set("_recaptchaToken", token);
+
+    startTransition(async () => {
+      const result = await forgotPassword({}, fd);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        setSent(true);
+      }
+    });
   }
 
   return (
@@ -68,6 +88,12 @@ export default function EsqueceuSenhaPage() {
                 Informe o e-mail cadastrado para receber o link de redefinição
               </p>
 
+              {error && (
+                <div className="bg-red-950/50 border border-red-800 text-red-300 text-[13px] px-4 py-3 rounded-[6px] mb-5">
+                  {error}
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[#7a9ab5] text-[13px] font-medium">E-mail cadastrado</label>
@@ -82,9 +108,10 @@ export default function EsqueceuSenhaPage() {
 
                 <button
                   type="submit"
-                  className="w-full bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[16px] font-semibold h-[52px] rounded-[6px] transition-colors"
+                  disabled={isPending}
+                  className="w-full bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[16px] font-semibold h-[52px] rounded-[6px] transition-colors"
                 >
-                  Enviar link de recuperação
+                  {isPending ? "Enviando..." : "Enviar link de recuperação"}
                 </button>
               </form>
 

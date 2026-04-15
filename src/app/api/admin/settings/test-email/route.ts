@@ -1,32 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { sendTestEmail } from "@/lib/email";
 
-const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
-const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
-
-async function getAdminEmail(): Promise<string | null> {
+export async function POST(req: NextRequest) {
   try {
-    const res = await fetch(
-      `${BASE}/site_settings?key=eq.smtp.from_email&select=value&limit=1`,
-      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, cache: "no-store" }
-    );
-    const rows = await res.json();
-    return rows?.[0]?.value ?? null;
-  } catch { return null; }
-}
+    const body = await req.json().catch(() => ({}));
+    const to   = body.to as string | undefined;
+    const tpl  = body.template as string | undefined;
 
-export async function POST() {
-  try {
-    const to = await getAdminEmail();
     if (!to) {
-      return NextResponse.json(
-        { error: "Configure o e-mail remetente (smtp.from_email) antes de testar." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Campo 'to' obrigatório." }, { status: 400 });
     }
-    await sendTestEmail(to);
-    return NextResponse.json({ ok: true, to });
+
+    await sendTestEmail(to, tpl);
+    return NextResponse.json({ ok: true, to, template: tpl ?? "smtp" });
   } catch (e: unknown) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }

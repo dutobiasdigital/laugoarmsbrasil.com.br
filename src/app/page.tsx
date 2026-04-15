@@ -1,8 +1,8 @@
 import Link from "next/link";
-import prisma from "@/lib/prisma";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AdBanner from "@/components/AdBanner";
+import HeroSlider from "@/components/HeroSlider";
 
 export const dynamic = "force-dynamic";
 
@@ -12,44 +12,62 @@ export const metadata = {
     "O maior acervo de publicações especializadas em armas, munições e legislação do Brasil. Assine e acesse todas as edições.",
 };
 
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
+
 export default async function HomePage() {
   let latestEditions: {
     id: string; title: string; number: number | null; slug: string;
-    coverImageUrl: string | null; publishedAt: Date | null; type: string;
+    coverImageUrl: string | null; publishedAt: string | null; type: string;
     pageCount: number | null;
   }[] = [];
 
   let latestArticles: {
     id: string; title: string; slug: string; categoryId: string;
-    featureImageUrl: string | null; publishedAt: Date | null;
-    isExclusive: boolean;
+    featureImageUrl: string | null; publishedAt: string | null;
+    isExclusive: boolean; authorName: string;
     category: { name: string; slug: string };
   }[] = [];
 
   let featuredEdition: typeof latestEditions[0] | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let heroSlides: any[] = [];
 
   try {
-    [latestEditions, latestArticles] = await Promise.all([
-      prisma.edition.findMany({
-        where: { isPublished: true },
-        orderBy: { publishedAt: "desc" },
-        take: 3,
-        select: {
-          id: true, title: true, number: true, slug: true,
-          coverImageUrl: true, publishedAt: true, type: true, pageCount: true,
-        },
-      }),
-      prisma.article.findMany({
-        where: { status: "PUBLISHED" },
-        orderBy: { publishedAt: "desc" },
-        take: 3,
-        select: {
-          id: true, title: true, slug: true, categoryId: true,
-          featureImageUrl: true, publishedAt: true, isExclusive: true,
-          category: { select: { name: true, slug: true } },
-        },
-      }),
+    const [editionsRes, articlesRes, settingsRes] = await Promise.all([
+      fetch(
+        `${BASE}/editions?isPublished=eq.true&order=publishedAt.desc&limit=3&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount`,
+        { headers: HEADERS, cache: "no-store" }
+      ),
+      fetch(
+        `${BASE}/articles?status=eq.PUBLISHED&order=publishedAt.desc&limit=3&select=id,title,slug,categoryId,featureImageUrl,publishedAt,isExclusive,authorName,category:article_categories(name,slug)`,
+        { headers: HEADERS, cache: "no-store" }
+      ),
+      fetch(
+        `${BASE}/site_settings?key=eq.hero.slides&select=value&limit=1`,
+        { headers: HEADERS, cache: "no-store" }
+      ),
     ]);
+
+    if (editionsRes.ok) {
+      latestEditions = await editionsRes.json();
+    }
+    if (articlesRes.ok) {
+      latestArticles = await articlesRes.json();
+    }
+    if (settingsRes.ok) {
+      const settingsData = await settingsRes.json();
+      const raw = settingsData?.[0]?.value;
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        heroSlides = Array.isArray(parsed)
+          ? parsed.filter((s: { active?: boolean }) => s.active).sort((a: { order?: number }, b: { order?: number }) => (a.order ?? 0) - (b.order ?? 0))
+          : [];
+      }
+    }
+
     featuredEdition = latestEditions[0] ?? null;
   } catch {
     // DB unavailable
@@ -78,12 +96,11 @@ export default async function HomePage() {
     <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
 
-      {/* Ad — HOME_TOP */}
-      <div className="bg-[#0e1520] flex items-center justify-center py-3 mt-16 shrink-0">
-        <AdBanner position="HOME_TOP" bannerSize="LEADERBOARD" />
-      </div>
-
-      {/* Hero — metal animado */}
+      {/* Hero — slider ou estático */}
+      <div className="mt-16">
+        {heroSlides.length > 0 ? (
+          <HeroSlider slides={heroSlides} />
+        ) : (
       <section className="hero-metal relative flex items-center px-5 lg:px-20 py-16 lg:py-0 lg:h-[600px] gap-6 overflow-hidden">
         {/* Grade decorativa de fundo */}
         <div className="absolute inset-0 opacity-[0.03]" style={{
@@ -121,7 +138,7 @@ export default async function HomePage() {
 
           <p className="text-[#526888] text-[12px] font-mono tracking-wide">
             {featuredEdition?.publishedAt
-              ? `${featuredEdition.publishedAt.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })} · ${featuredEdition.pageCount ? `${featuredEdition.pageCount} páginas` : ""} · ${featuredEdition.type === "SPECIAL" ? "Edição Especial" : "Edição Regular"}`
+              ? `${new Date(featuredEdition.publishedAt).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })} · ${featuredEdition.pageCount ? `${featuredEdition.pageCount} páginas` : ""} · ${featuredEdition.type === "SPECIAL" ? "Edição Especial" : "Edição Regular"}`
               : "O maior acervo especializado do Brasil"}
           </p>
 
@@ -173,6 +190,13 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+        )}
+      </div>
+
+      {/* Ad — HOME_TOP (abaixo do hero) */}
+      <div className="bg-[#0e1520] flex items-center justify-center py-3 shrink-0">
+        <AdBanner position="HOME_TOP" bannerSize="LEADERBOARD" />
+      </div>
 
       {/* Content row */}
       <div className="bg-[#070a12] flex gap-10 px-5 lg:px-20 py-16 items-start">
@@ -238,7 +262,7 @@ export default async function HomePage() {
 
                         <p className="text-[#526888] text-[11px] font-mono">
                           {edition?.publishedAt
-                            ? `${edition.publishedAt.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })} · ${edition.pageCount ? `${edition.pageCount}p` : ""}`
+                            ? `${new Date(edition.publishedAt).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })} · ${edition.pageCount ? `${edition.pageCount}p` : ""}`
                             : "Em breve"}
                         </p>
 
@@ -282,9 +306,9 @@ export default async function HomePage() {
               {(latestArticles.length > 0
                 ? latestArticles
                 : [
-                    { id: "1", title: "Glock 17 Gen 5: Análise Completa em Campo", slug: "glock-17", category: { name: "AVALIAÇÕES", slug: "avaliacoes" }, featureImageUrl: null, publishedAt: new Date("2026-04-15"), isExclusive: false, categoryId: "1" },
-                    { id: "2", title: "Guia de Recarga para .308 Winchester", slug: "recarga-308", category: { name: "MUNIÇÕES", slug: "municoes" }, featureImageUrl: null, publishedAt: new Date("2026-04-10"), isExclusive: true, categoryId: "2" },
-                    { id: "3", title: "CAC 2026: Novas regras do SINARM", slug: "cac-2026", category: { name: "LEGISLAÇÃO", slug: "legislacao" }, featureImageUrl: null, publishedAt: new Date("2026-04-05"), isExclusive: false, categoryId: "3" },
+                    { id: "1", title: "Glock 17 Gen 5: Análise Completa em Campo", slug: "glock-17", category: { name: "AVALIAÇÕES", slug: "avaliacoes" }, featureImageUrl: null, publishedAt: "2026-04-15", isExclusive: false, categoryId: "1", authorName: "" },
+                    { id: "2", title: "Guia de Recarga para .308 Winchester", slug: "recarga-308", category: { name: "MUNIÇÕES", slug: "municoes" }, featureImageUrl: null, publishedAt: "2026-04-10", isExclusive: true, categoryId: "2", authorName: "" },
+                    { id: "3", title: "CAC 2026: Novas regras do SINARM", slug: "cac-2026", category: { name: "LEGISLAÇÃO", slug: "legislacao" }, featureImageUrl: null, publishedAt: "2026-04-05", isExclusive: false, categoryId: "3", authorName: "" },
                   ]
               ).map((article) => (
                 <div key={article.id} className="card-metal-border">
@@ -314,7 +338,7 @@ export default async function HomePage() {
                     </p>
                     <p className="text-[#253750] text-[12px]">
                       {article.publishedAt
-                        ? article.publishedAt.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })
+                        ? new Date(article.publishedAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })
                         : ""}
                     </p>
                   </div>

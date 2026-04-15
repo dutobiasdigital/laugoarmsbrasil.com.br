@@ -10,14 +10,15 @@ export default async function Header() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#070a12] border-b border-[#141d2c] h-16 flex items-center px-5 lg:px-20">
-      {/* Logo */}
-      <Link href="/" className="flex items-center gap-2 shrink-0">
+      {/* Logo — substitua /logo.png pelo logotipo oficial */}
+      <Link href="/" className="flex items-center shrink-0">
         <Image
           src="/logo.png"
           alt="Revista Magnum"
-          width={120}
-          height={60}
-          className="h-[56px] w-auto"
+          width={200}
+          height={64}
+          className="h-[52px] w-auto object-contain"
+          priority
         />
       </Link>
 

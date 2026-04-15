@@ -1,16 +1,36 @@
-import prisma from "@/lib/prisma";
 import CategoriasClient from "./_CategoriasClient";
 
 export const dynamic = "force-dynamic";
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" };
 
 export default async function CategoriasPage() {
   let categories: { id: string; name: string; slug: string; _count: { articles: number } }[] = [];
 
   try {
-    categories = await prisma.articleCategory.findMany({
-      orderBy: { name: "asc" },
-      select: { id: true, name: true, slug: true, _count: { select: { articles: true } } },
-    });
+    const [catRes, artRes] = await Promise.all([
+      fetch(`${BASE}/article_categories?select=id,name,slug&order=name.asc`, { headers: HEADERS, cache: "no-store" }),
+      fetch(`${BASE}/articles?select=categoryId`, { headers: HEADERS, cache: "no-store" }),
+    ]);
+    const catData = await catRes.json();
+    const artData = await artRes.json();
+
+    const countMap: Record<string, number> = {};
+    if (Array.isArray(artData)) {
+      for (const a of artData) {
+        if (a.categoryId) countMap[a.categoryId] = (countMap[a.categoryId] ?? 0) + 1;
+      }
+    }
+
+    categories = Array.isArray(catData)
+      ? catData.map((c: { id: string; name: string; slug: string }) => ({
+          ...c,
+          _count: { articles: countMap[c.id] ?? 0 },
+        }))
+      : [];
   } catch {
     // DB unavailable
   }

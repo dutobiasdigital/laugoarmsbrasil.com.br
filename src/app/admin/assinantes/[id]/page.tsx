@@ -1,9 +1,13 @@
 import Link from "next/link";
-import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import AssinanteClient from "./_AssinanteClient";
 
 export const dynamic = "force-dynamic";
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" };
 
 const PAYMENT_STYLE: Record<string, { bg: string; text: string; label: string }> = {
   APPROVED: { bg: "bg-[#0f381f]", text: "text-[#22c55e]", label: "APROVADO" },
@@ -13,6 +17,25 @@ const PAYMENT_STYLE: Record<string, { bg: string; text: string; label: string }>
   CANCELLED: { bg: "bg-[#141d2c]", text: "text-[#253750]", label: "CANCELADO" },
 };
 
+interface Subscription {
+  id: string; status: string; planId: string;
+  planPriceInCents: number; intervalMonths: number;
+  currentPeriodStart: string; currentPeriodEnd: string;
+  subscribedAt: string; canceledAt: string | null; notes: string | null;
+  subscription_plans: { name: string } | null;
+}
+
+interface Payment {
+  id: string; amount_cents: number; status: string;
+  gateway: string | null; createdAt: string;
+}
+
+interface UserRow {
+  id: string; name: string; email: string; phone: string | null;
+  role: string; createdAt: string;
+  subscriptions: Subscription[];
+}
+
 export default async function AssinantePage({
   params,
 }: {
@@ -20,56 +43,42 @@ export default async function AssinantePage({
 }) {
   const { id } = await params;
 
-  const [user, plans] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        role: true,
-        createdAt: true,
-        subscription: {
-          select: {
-            id: true,
-            status: true,
-            planId: true,
-            planPriceInCents: true,
-            intervalMonths: true,
-            currentPeriodStart: true,
-            currentPeriodEnd: true,
-            subscribedAt: true,
-            canceledAt: true,
-            notes: true,
-            plan: { select: { name: true } },
-          },
-        },
-        payments: {
-          orderBy: { createdAt: "desc" },
-          take: 10,
-          select: {
-            id: true,
-            amountInCents: true,
-            status: true,
-            paidAt: true,
-            paymentMethod: true,
-            createdAt: true,
-          },
-        },
-      },
-    }),
-    prisma.subscriptionPlan.findMany({
-      where: { active: true },
-      orderBy: { priceInCents: "asc" },
-      select: { id: true, name: true, priceInCents: true, intervalMonths: true },
-    }),
-  ]);
+  let user: UserRow | null = null;
+  let plans: { id: string; name: string; priceInCents: number; intervalMonths: number }[] = [];
+  let payments: Payment[] = [];
+
+  try {
+    // Fetch user with embedded subscription
+    const userRes = await fetch(
+      `${BASE}/users?id=eq.${id}&select=id,name,email,phone,role,createdAt,subscriptions(id,status,planId,planPriceInCents,intervalMonths,currentPeriodStart,currentPeriodEnd,subscribedAt,canceledAt,notes,subscription_plans(name))&limit=1`,
+      { headers: HEADERS, cache: "no-store" }
+    );
+    const userData = await userRes.json();
+    user = Array.isArray(userData) && userData.length > 0 ? userData[0] : null;
+
+    if (!user) { notFound(); return; }
+
+    // Parallel: plans + payment history
+    const [plansRes, paymentsRes] = await Promise.all([
+      fetch(`${BASE}/subscription_plans?active=eq.true&select=id,name,priceInCents,intervalMonths&order=priceInCents.asc`, { headers: HEADERS, cache: "no-store" }),
+      fetch(`${BASE}/payment_intents?payer_email=eq.${encodeURIComponent(user.email)}&order=createdAt.desc&limit=10&select=id,amount_cents,status,gateway,createdAt`, { headers: HEADERS, cache: "no-store" }),
+    ]);
+
+    const plansData = await plansRes.json();
+    plans = Array.isArray(plansData) ? plansData : [];
+
+    const paymentsData = await paymentsRes.json();
+    payments = Array.isArray(paymentsData) ? paymentsData : [];
+  } catch {
+    // DB unavailable
+  }
 
   if (!user) notFound();
 
   const formatCurrency = (cents: number) =>
     (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  const subscription = user.subscriptions?.[0] ?? null;
 
   return (
     <>
@@ -87,7 +96,7 @@ export default async function AssinantePage({
             {user.name}
           </h1>
           <p className="text-[#7a9ab5] text-[14px]">
-            Cadastrado em {user.createdAt.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
+            Cadastrado em {new Date(user.createdAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
           </p>
         </div>
       </div>
@@ -105,21 +114,21 @@ export default async function AssinantePage({
               role: user.role,
             }}
             subscription={
-              user.subscription
+              subscription
                 ? {
-                    id: user.subscription.id,
-                    status: user.subscription.status,
-                    planId: user.subscription.planId,
-                    planName: user.subscription.plan.name,
-                    planPriceInCents: user.subscription.planPriceInCents,
-                    intervalMonths: user.subscription.intervalMonths,
-                    currentPeriodStart: user.subscription.currentPeriodStart.toISOString().split("T")[0],
-                    currentPeriodEnd: user.subscription.currentPeriodEnd.toISOString().split("T")[0],
-                    subscribedAt: user.subscription.subscribedAt.toLocaleDateString("pt-BR"),
-                    canceledAt: user.subscription.canceledAt
-                      ? user.subscription.canceledAt.toLocaleDateString("pt-BR")
+                    id: subscription.id,
+                    status: subscription.status,
+                    planId: subscription.planId,
+                    planName: subscription.subscription_plans?.name ?? "—",
+                    planPriceInCents: subscription.planPriceInCents,
+                    intervalMonths: subscription.intervalMonths,
+                    currentPeriodStart: subscription.currentPeriodStart.split("T")[0],
+                    currentPeriodEnd: subscription.currentPeriodEnd.split("T")[0],
+                    subscribedAt: new Date(subscription.subscribedAt).toLocaleDateString("pt-BR"),
+                    canceledAt: subscription.canceledAt
+                      ? new Date(subscription.canceledAt).toLocaleDateString("pt-BR")
                       : null,
-                    notes: user.subscription.notes ?? "",
+                    notes: subscription.notes ?? "",
                   }
                 : null
             }
@@ -140,10 +149,10 @@ export default async function AssinantePage({
                 Últimos Pagamentos
               </p>
             </div>
-            {user.payments.length === 0 ? (
+            {payments.length === 0 ? (
               <p className="text-[#253750] text-[13px] p-5 text-center">Nenhum pagamento.</p>
             ) : (
-              user.payments.map((p, i) => {
+              payments.map((p, i) => {
                 const st = PAYMENT_STYLE[p.status] ?? PAYMENT_STYLE.PENDING;
                 return (
                   <div key={p.id}>
@@ -151,17 +160,15 @@ export default async function AssinantePage({
                     <div className="px-4 py-3">
                       <div className="flex items-center justify-between mb-1">
                         <p className="text-[#d4d4da] text-[13px] font-semibold">
-                          {formatCurrency(p.amountInCents)}
+                          {formatCurrency(p.amount_cents)}
                         </p>
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${st.bg} ${st.text}`}>
                           {st.label}
                         </span>
                       </div>
                       <p className="text-[#253750] text-[11px]">
-                        {p.paidAt
-                          ? p.paidAt.toLocaleDateString("pt-BR")
-                          : p.createdAt.toLocaleDateString("pt-BR")}
-                        {p.paymentMethod ? ` · ${p.paymentMethod}` : ""}
+                        {new Date(p.createdAt).toLocaleDateString("pt-BR")}
+                        {p.gateway ? ` · ${p.gateway}` : ""}
                       </p>
                     </div>
                   </div>

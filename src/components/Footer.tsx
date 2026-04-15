@@ -5,19 +5,19 @@ export default function Footer() {
   return (
     <footer className="bg-[#070a12] border-t border-[#141d2c] mt-auto">
       <div className="max-w-[1440px] mx-auto px-5 lg:px-20 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-5 gap-10 mb-10">
-          {/* Brand */}
-          <div className="sm:col-span-1">
-            <div className="flex items-center gap-2 mb-3">
+        <div className="grid grid-cols-1 sm:grid-cols-6 gap-10 mb-10">
+          {/* Brand — substitua /logo.png pelo logotipo oficial */}
+          <div className="sm:col-span-2">
+            <div className="mb-4">
               <Image
                 src="/logo.png"
                 alt="Revista Magnum"
-                width={28}
-                height={28}
-                className="w-[28px] h-auto"
+                width={200}
+                height={80}
+                className="h-[64px] w-auto object-contain"
               />
             </div>
-            <p className="text-xs text-[#253750] leading-relaxed">
+            <p className="text-xs text-[#253750] leading-relaxed max-w-[280px]">
               O maior acervo especializado em armas, munições e legislação do Brasil. Desde 1985.
             </p>
           </div>

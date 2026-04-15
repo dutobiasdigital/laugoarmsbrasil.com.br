@@ -11,6 +11,7 @@ const ITEMS = [
   { href: "/admin/categorias", label: "Categorias", icon: "🏷" },
   { href: "/admin/guia", label: "Guia Comercial", icon: "📒" },
   { href: "/admin/empresas", label: "Empresas", icon: "🏢" },
+  { href: "/admin/hero", label: "Hero", icon: "🖼" },
   { href: "/admin/anuncios", label: "Anúncios", icon: "📢" },
   { href: "/admin/solicitacoes", label: "Solicitações", icon: "📨" },
   { href: "/admin/pagamentos", label: "Pagamentos", icon: "💳" },

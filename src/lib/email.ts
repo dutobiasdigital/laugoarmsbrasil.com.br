@@ -110,6 +110,7 @@ export async function sendPaymentConfirmationEmail({
   gateway,
   externalRef,
   guiaSlug,
+  editionSlug,
 }: {
   payerName:    string;
   payerEmail:   string;
@@ -118,6 +119,7 @@ export async function sendPaymentConfirmationEmail({
   gateway:      string;
   externalRef:  string;
   guiaSlug?:    string;
+  editionSlug?: string;
 }): Promise<void> {
   const amountStr = (amount / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   const gwLabels: Record<string, string> = {
@@ -128,14 +130,28 @@ export async function sendPaymentConfirmationEmail({
   };
   const gwLabel = gwLabels[gateway] ?? gateway;
 
-  const profileBtn = guiaSlug
+  const ctaBtn = guiaSlug
     ? `<tr><td style="padding-top:24px;text-align:center;">
         <a href="https://revistamagnum.com.br/guia/empresa/${guiaSlug}"
            style="background:#ff1f1f;color:#ffffff;text-decoration:none;font-weight:bold;font-size:15px;padding:14px 32px;border-radius:6px;display:inline-block;">
           Ver meu perfil no Guia →
         </a>
        </td></tr>`
-    : "";
+    : editionSlug
+    ? `<tr><td style="padding-top:24px;text-align:center;">
+        <a href="https://revistamagnum.com.br/edicoes/${editionSlug}"
+           style="background:#ff1f1f;color:#ffffff;text-decoration:none;font-weight:bold;font-size:15px;padding:14px 32px;border-radius:6px;display:inline-block;">
+          Ler a edição agora →
+        </a>
+       </td></tr>`
+    : `<tr><td style="padding-top:24px;text-align:center;">
+        <a href="https://revistamagnum.com.br/minha-conta"
+           style="background:#ff1f1f;color:#ffffff;text-decoration:none;font-weight:bold;font-size:15px;padding:14px 32px;border-radius:6px;display:inline-block;">
+          Acessar Minha Conta →
+        </a>
+       </td></tr>`;
+  // Legacy alias
+  const profileBtn = ctaBtn;
 
   const body = `
     <p style="margin:0 0 6px;font-size:13px;color:#526888;font-weight:bold;letter-spacing:1px;text-transform:uppercase;">Pagamento Confirmado</p>
@@ -195,8 +211,141 @@ export async function sendPaymentConfirmationEmail({
   });
 }
 
+/* ── Carrega template do banco (com fallback hardcoded) ───────── */
+async function getEmailTemplate(
+  templateId: string,
+  fallbackSubject: string,
+  fallbackBody: string
+): Promise<{ subject: string; body: string }> {
+  try {
+    const res = await fetch(
+      `${BASE}/site_settings?key=in.(email.template.${templateId}.subject,email.template.${templateId}.body)&select=key,value`,
+      { headers: HEADERS, cache: "no-store" }
+    );
+    const rows: { key: string; value: string }[] = await res.json();
+    if (!Array.isArray(rows) || rows.length === 0)
+      return { subject: fallbackSubject, body: fallbackBody };
+    const map = Object.fromEntries(rows.map(r => [r.key, r.value ?? ""]));
+    return {
+      subject: map[`email.template.${templateId}.subject`] || fallbackSubject,
+      body:    map[`email.template.${templateId}.body`]    || fallbackBody,
+    };
+  } catch {
+    return { subject: fallbackSubject, body: fallbackBody };
+  }
+}
+
+/* ── Substitui {{variavel}} no template ───────────────────────── */
+export function renderTemplate(template: string, vars: Record<string, string>): string {
+  return template.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] ?? `{{${k}}}`);
+}
+
+/* ── Converte texto simples em parágrafos HTML ────────────────── */
+function textToHtml(text: string): string {
+  return text
+    .split("\n\n")
+    .map(p =>
+      `<p style="margin:0 0 16px;font-size:15px;color:#7a9ab5;line-height:24px;">${
+        p.replace(/\n/g, "<br>")
+      }</p>`
+    )
+    .join("\n");
+}
+
+/* ── E-mail de boas-vindas ────────────────────────────────────── */
+export async function sendWelcomeEmail({
+  name, email,
+}: { name: string; email: string }): Promise<void> {
+  const fb = {
+    subject: "Bem-vindo à Revista Magnum, {{nome}}!",
+    body: `Olá, {{nome}}!\n\nSeja bem-vindo à Revista Magnum.\n\nSua conta foi criada com sucesso. Explore nossos planos de assinatura.\n\nEquipe Revista Magnum`,
+  };
+  const tpl  = await getEmailTemplate("boas_vindas", fb.subject, fb.body);
+  const vars = { nome: name, email, data: new Date().toLocaleDateString("pt-BR") };
+  await sendEmail({
+    to:      email,
+    subject: renderTemplate(tpl.subject, vars),
+    html:    wrapHtml("Boas-vindas — Revista Magnum", textToHtml(renderTemplate(tpl.body, vars))),
+    text:    renderTemplate(tpl.body, vars),
+  });
+}
+
+/* ── E-mail de plano expirando ────────────────────────────────── */
+export async function sendPlanExpiringEmail({
+  name, email, planName, priceInCents, expiresAt,
+}: {
+  name: string; email: string; planName: string; priceInCents: number; expiresAt: string;
+}): Promise<void> {
+  const days = Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 86_400_000));
+  const fb   = {
+    subject: "⚠ Sua assinatura expira em {{dias_restantes}} dias",
+    body:    `Olá, {{nome}}!\n\nSua assinatura {{plano}} expira em {{dias_restantes}} dias ({{data_expiracao}}).\n\nRenove agora: https://revistamagnum.com.br/assine\n\nEquipe Revista Magnum`,
+  };
+  const tpl  = await getEmailTemplate("plano_expirando", fb.subject, fb.body);
+  const vars = {
+    nome:            name,
+    email,
+    plano:           planName,
+    valor:           (priceInCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
+    data_expiracao:  new Date(expiresAt).toLocaleDateString("pt-BR"),
+    dias_restantes:  String(days),
+    link_renovacao:  "https://revistamagnum.com.br/assine",
+  };
+  await sendEmail({
+    to:      email,
+    subject: renderTemplate(tpl.subject, vars),
+    html:    wrapHtml("Assinatura expirando — Revista Magnum", textToHtml(renderTemplate(tpl.body, vars))),
+    text:    renderTemplate(tpl.body, vars),
+  });
+}
+
+/* ── E-mail de assinatura cancelada ──────────────────────────── */
+export async function sendSubscriptionCancelledEmail({
+  name, email, planName,
+}: { name: string; email: string; planName: string }): Promise<void> {
+  const fb = {
+    subject: "Sua assinatura foi cancelada",
+    body:    `Olá, {{nome}}!\n\nSua assinatura {{plano}} foi encerrada em {{data_cancelamento}}.\n\nPara reativar: https://revistamagnum.com.br/assine\n\nEquipe Revista Magnum`,
+  };
+  const tpl  = await getEmailTemplate("assinatura_cancelada", fb.subject, fb.body);
+  const vars = { nome: name, email, plano: planName, data_cancelamento: new Date().toLocaleDateString("pt-BR") };
+  await sendEmail({
+    to:      email,
+    subject: renderTemplate(tpl.subject, vars),
+    html:    wrapHtml("Assinatura cancelada — Revista Magnum", textToHtml(renderTemplate(tpl.body, vars))),
+    text:    renderTemplate(tpl.body, vars),
+  });
+}
+
 /* ── E-mail de teste ──────────────────────────────────────────── */
-export async function sendTestEmail(to: string): Promise<void> {
+export async function sendTestEmail(to: string, templateId?: string): Promise<void> {
+  if (templateId && templateId !== "smtp") {
+    const MOCK: Record<string, Record<string, string>> = {
+      boas_vindas:          { nome: "João Teste", email: to, data: new Date().toLocaleDateString("pt-BR") },
+      pagamento_confirmado: { nome: "João Teste", email: to, produto: "Assinatura Semestral", valor: "R$ 54,90", gateway: "Mercado Pago", referencia: "TEST-123456" },
+      plano_expirando:      { nome: "João Teste", email: to, plano: "Semestral", valor: "R$ 54,90", data_expiracao: new Date(Date.now() + 7 * 86400000).toLocaleDateString("pt-BR"), dias_restantes: "7", link_renovacao: "https://revistamagnum.com.br/assine" },
+      assinatura_cancelada: { nome: "João Teste", email: to, plano: "Semestral", data_cancelamento: new Date().toLocaleDateString("pt-BR") },
+    };
+    const FALLBACKS: Record<string, { subject: string; body: string }> = {
+      boas_vindas:          { subject: "Bem-vindo, {{nome}}!", body: "Olá, {{nome}}! Seja bem-vindo." },
+      pagamento_confirmado: { subject: "Pagamento confirmado — {{produto}}", body: "Pagamento aprovado: {{produto}} — {{valor}}." },
+      plano_expirando:      { subject: "Assinatura expira em {{dias_restantes}} dias", body: "Olá, {{nome}}! Expira em {{dias_restantes}} dias." },
+      assinatura_cancelada: { subject: "Assinatura cancelada", body: "Olá, {{nome}}! Cancelada em {{data_cancelamento}}." },
+    };
+    const fb  = FALLBACKS[templateId] ?? { subject: "Teste", body: "Teste." };
+    const tpl = await getEmailTemplate(templateId, fb.subject, fb.body);
+    const vars = MOCK[templateId] ?? {};
+    const rendered = renderTemplate(tpl.body, vars);
+    await sendEmail({
+      to,
+      subject: `[TESTE] ${renderTemplate(tpl.subject, vars)}`,
+      html:    wrapHtml(`Teste: ${templateId}`, textToHtml(rendered)),
+      text:    rendered,
+    });
+    return;
+  }
+
+  // Teste SMTP genérico
   const body = `
     <h2 style="margin:0 0 12px;font-size:24px;color:#ffffff;font-weight:bold;">E-mail de teste</h2>
     <p style="margin:0;font-size:15px;color:#7a9ab5;line-height:24px;">

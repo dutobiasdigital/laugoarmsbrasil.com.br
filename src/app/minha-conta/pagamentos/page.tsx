@@ -1,21 +1,46 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import prisma from "@/lib/prisma";
 
 export const metadata = {
   title: "Pagamentos — Minha Conta · Revista Magnum",
 };
+export const dynamic = "force-dynamic";
 
-const PAYMENT_STATUS: Record<string, { label: string; color: string }> = {
-  APPROVED: { label: "Aprovado", color: "text-green-400 bg-green-400/10 border-green-400/20" },
-  PENDING: { label: "Pendente", color: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20" },
-  REJECTED: { label: "Recusado", color: "text-red-400 bg-red-400/10 border-red-400/20" },
-  REFUNDED: { label: "Estornado", color: "text-blue-400 bg-blue-400/10 border-blue-400/20" },
-  CANCELLED: { label: "Cancelado", color: "text-zinc-400 bg-zinc-400/10 border-zinc-400/20" },
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
+
+const STATUS_STYLE: Record<string, string> = {
+  APPROVED:  "bg-[#0f381f] text-[#22c55e]",
+  PENDING:   "bg-[#2a1e05] text-[#f59e0b]",
+  REJECTED:  "bg-[#2d0a0a] text-[#ff6b6b]",
+  REFUNDED:  "bg-[#141d2c] text-[#7a9ab5]",
+  CANCELLED: "bg-[#141d2c] text-[#253750]",
+};
+const STATUS_LABEL: Record<string, string> = {
+  APPROVED: "Aprovado", PENDING: "Pendente",
+  REJECTED: "Recusado", REFUNDED: "Reembolsado", CANCELLED: "Cancelado",
+};
+const GATEWAY_ICON: Record<string, string> = {
+  mercadopago: "🟡", stripe: "🟣", pagseguro: "🟢", paypal: "🔵",
 };
 
-function formatCurrency(cents: number) {
+interface Payment {
+  id: string;
+  amount: number;
+  status: string;
+  gateway: string;
+  product_label: string | null;
+  product_type: string;
+  createdAt: string;
+}
+
+function fmtCurrency(cents: number) {
   return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
 export default async function PagamentosPage() {
@@ -23,144 +48,88 @@ export default async function PagamentosPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
-  const profile = await prisma.user.findUnique({
-    where: { authId: user.id },
-    select: {
-      id: true,
-      payments: {
-        orderBy: { createdAt: "desc" },
-        include: {
-          subscription: { select: { plan: { select: { name: true } } } },
-        },
-      },
-      subscription: {
-        select: {
-          status: true,
-          planPriceInCents: true,
-          intervalMonths: true,
-          currentPeriodEnd: true,
-          plan: { select: { name: true } },
-        },
-      },
-    },
-  });
+  const email = user.email ?? "";
 
-  if (!profile) redirect("/auth/login");
+  const res = await fetch(
+    `${BASE}/payment_intents?payer_email=eq.${encodeURIComponent(email)}&order=createdAt.desc`,
+    { headers: HEADERS, cache: "no-store" }
+  );
+  const payments: Payment[] = await res.json().then(d => Array.isArray(d) ? d : []);
 
-  const totalPaid = profile.payments
-    .filter((p) => p.status === "APPROVED")
-    .reduce((acc, p) => acc + p.amountInCents, 0);
+  const totalPaid = payments
+    .filter(p => p.status === "APPROVED")
+    .reduce((s, p) => s + p.amount, 0);
+
+  const planName = payments.find(p => p.product_type === "magazine_subscription" && p.status === "APPROVED")?.product_label ?? "—";
 
   return (
-    <div className="pt-14 lg:pt-0 pb-20 lg:pb-0 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Pagamentos</h1>
-        <p className="text-zinc-400 text-sm mt-1">
-          Histórico completo das suas transações
-        </p>
-      </div>
+    <div className="max-w-[1100px] py-7">
+      <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[36px] leading-none mb-1">
+        Pagamentos
+      </h1>
+      <p className="text-[#7a9ab5] text-[16px] mb-8">Histórico completo das suas transações</p>
 
       {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-          <p className="text-xs text-zinc-500 mb-1">Total pago</p>
-          <p className="text-xl font-semibold text-white">{formatCurrency(totalPaid)}</p>
-        </div>
-        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-          <p className="text-xs text-zinc-500 mb-1">Transações</p>
-          <p className="text-xl font-semibold text-white">{profile.payments.length}</p>
-        </div>
-        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-          <p className="text-xs text-zinc-500 mb-1">Plano atual</p>
-          <p className="text-xl font-semibold text-white">
-            {profile.subscription?.plan.name ?? "—"}
-          </p>
-        </div>
+        {[
+          { label: "Total pago",    value: fmtCurrency(totalPaid), color: "text-[#22c55e]" },
+          { label: "Transações",    value: String(payments.length), color: "text-white" },
+          { label: "Último plano",  value: planName,                color: "text-[#d4d4da]" },
+        ].map(s => (
+          <div key={s.label} className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5">
+            <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px] mb-1">{s.label.toUpperCase()}</p>
+            <p className={`font-['Barlow_Condensed'] font-bold text-[28px] leading-none truncate ${s.color}`}>
+              {s.value}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* Table */}
-      {profile.payments.length === 0 ? (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-12 text-center">
-          <svg className="w-10 h-10 text-zinc-700 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-          </svg>
-          <p className="text-zinc-500 text-sm">Nenhuma transação registrada ainda.</p>
+      {payments.length === 0 ? (
+        <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-12 text-center">
+          <p className="text-[40px] mb-3">💳</p>
+          <p className="text-[#253750] text-[14px]">Nenhum pagamento registrado ainda.</p>
         </div>
       ) : (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
-          {/* Desktop table */}
-          <table className="w-full hidden sm:table">
-            <thead>
-              <tr className="border-b border-zinc-800">
-                <th className="text-left text-[11px] font-semibold text-zinc-500 uppercase tracking-widest px-4 py-3">
-                  Data
-                </th>
-                <th className="text-left text-[11px] font-semibold text-zinc-500 uppercase tracking-widest px-4 py-3">
-                  Plano
-                </th>
-                <th className="text-left text-[11px] font-semibold text-zinc-500 uppercase tracking-widest px-4 py-3">
-                  Método
-                </th>
-                <th className="text-right text-[11px] font-semibold text-zinc-500 uppercase tracking-widest px-4 py-3">
-                  Valor
-                </th>
-                <th className="text-right text-[11px] font-semibold text-zinc-500 uppercase tracking-widest px-4 py-3">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800">
-              {profile.payments.map((payment) => {
-                const status = PAYMENT_STATUS[payment.status] ?? PAYMENT_STATUS.CANCELLED;
-                return (
-                  <tr key={payment.id} className="hover:bg-zinc-800/40 transition-colors">
-                    <td className="px-4 py-3.5 text-sm text-zinc-300">
-                      {payment.createdAt.toLocaleDateString("pt-BR")}
-                    </td>
-                    <td className="px-4 py-3.5 text-sm text-zinc-400">
-                      {payment.subscription.plan.name}
-                    </td>
-                    <td className="px-4 py-3.5 text-sm text-zinc-400">
-                      {payment.paymentMethod
-                        ? `${payment.paymentMethod}${payment.lastFourDigits ? ` ···· ${payment.lastFourDigits}` : ""}`
-                        : "—"}
-                    </td>
-                    <td className="px-4 py-3.5 text-sm text-white text-right font-medium">
-                      {formatCurrency(payment.amountInCents)}
-                    </td>
-                    <td className="px-4 py-3.5 text-right">
-                      <span className={`inline-block text-xs px-2 py-0.5 rounded border ${status.color}`}>
-                        {status.label}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="bg-[#0e1520] border border-[#141d2c] rounded-xl overflow-hidden">
+          {/* Header desktop */}
+          <div className="bg-[#141d2c] px-5 py-3 hidden sm:grid grid-cols-[1fr_1.4fr_90px_70px_100px] gap-3">
+            {["Data", "Produto", "Valor", "Gateway", "Status"].map(h => (
+              <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">{h}</p>
+            ))}
+          </div>
 
-          {/* Mobile list */}
-          <div className="sm:hidden divide-y divide-zinc-800">
-            {profile.payments.map((payment) => {
-              const status = PAYMENT_STATUS[payment.status] ?? PAYMENT_STATUS.CANCELLED;
-              return (
-                <div key={payment.id} className="px-4 py-4 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-medium text-white">
-                      {formatCurrency(payment.amountInCents)}
-                    </p>
-                    <p className="text-xs text-zinc-500 mt-0.5">
-                      {payment.createdAt.toLocaleDateString("pt-BR")}
-                      {payment.paymentMethod && ` · ${payment.paymentMethod}`}
-                    </p>
-                  </div>
-                  <span className={`text-xs px-2 py-0.5 rounded border flex-shrink-0 ${status.color}`}>
-                    {status.label}
+          {payments.map((p, i) => (
+            <div key={p.id}>
+              {i > 0 && <div className="bg-[#141d2c] h-px" />}
+
+              {/* Desktop */}
+              <div className="px-5 py-3.5 hidden sm:grid grid-cols-[1fr_1.4fr_90px_70px_100px] gap-3 items-center">
+                <p className="text-[#7a9ab5] text-[13px]">{fmtDate(p.createdAt)}</p>
+                <p className="text-[#d4d4da] text-[13px] truncate">{p.product_label ?? p.product_type}</p>
+                <p className="text-white text-[14px] font-semibold">{fmtCurrency(p.amount)}</p>
+                <p className="text-[#7a9ab5] text-[13px]">{GATEWAY_ICON[p.gateway] ?? "💳"}</p>
+                <span className={`inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold ${STATUS_STYLE[p.status] ?? STATUS_STYLE.CANCELLED}`}>
+                  {STATUS_LABEL[p.status] ?? p.status}
+                </span>
+              </div>
+
+              {/* Mobile */}
+              <div className="px-4 py-3.5 flex items-center justify-between gap-3 sm:hidden">
+                <div className="min-w-0">
+                  <p className="text-[#d4d4da] text-[13px] font-medium truncate">{p.product_label ?? p.product_type}</p>
+                  <p className="text-[#526888] text-[11px]">{fmtDate(p.createdAt)} · {GATEWAY_ICON[p.gateway] ?? p.gateway}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-white text-[14px] font-bold">{fmtCurrency(p.amount)}</p>
+                  <span className={`inline-flex items-center h-[18px] px-2 rounded-full text-[10px] font-bold ${STATUS_STYLE[p.status] ?? STATUS_STYLE.CANCELLED}`}>
+                    {STATUS_LABEL[p.status] ?? p.status}
                   </span>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

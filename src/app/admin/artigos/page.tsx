@@ -1,7 +1,11 @@
 import Link from "next/link";
-import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" };
 
 const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> = {
   PUBLISHED: { bg: "bg-[#0f381f]", text: "text-[#22c55e]", label: "PUBLICADO" },
@@ -24,7 +28,7 @@ export default async function AdminArtigosPage({
     slug: string;
     status: string;
     isExclusive: boolean;
-    publishedAt: Date | null;
+    publishedAt: string | null;
     authorName: string;
     featureImageUrl: string | null;
     category: { name: string };
@@ -32,33 +36,24 @@ export default async function AdminArtigosPage({
   let total = 0;
 
   try {
-    const where = {
-      ...(q ? { title: { contains: q, mode: "insensitive" as const } } : {}),
-      ...(status && status !== "TODOS"
-        ? { status: status as "DRAFT" | "PUBLISHED" | "ARCHIVED" }
-        : {}),
-    };
+    let url = `${BASE}/articles?select=id,title,slug,status,isExclusive,publishedAt,authorName,featureImageUrl,category:article_categories(name)&order=createdAt.desc&limit=${PER_PAGE}&offset=${(page - 1) * PER_PAGE}`;
 
-    [articles, total] = await Promise.all([
-      prisma.article.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip: (page - 1) * PER_PAGE,
-        take: PER_PAGE,
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          status: true,
-          isExclusive: true,
-          publishedAt: true,
-          authorName: true,
-          featureImageUrl: true,
-          category: { select: { name: true } },
-        },
-      }),
-      prisma.article.count({ where }),
-    ]);
+    if (q) url += `&title=ilike.*${encodeURIComponent(q)}*`;
+    if (status && status !== "TODOS") url += `&status=eq.${status}`;
+
+    const res = await fetch(url, {
+      headers: { ...HEADERS, Prefer: "count=exact" },
+      cache: "no-store",
+    });
+
+    const contentRange = res.headers.get("Content-Range");
+    if (contentRange) {
+      const match = contentRange.match(/\/(\d+)$/);
+      if (match) total = parseInt(match[1], 10);
+    }
+
+    const data = await res.json();
+    articles = Array.isArray(data) ? data : [];
   } catch {
     // DB unavailable
   }

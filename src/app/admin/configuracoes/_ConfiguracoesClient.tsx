@@ -10,6 +10,7 @@ import TabRedes from "./_TabRedes";
 import TabEmail from "./_TabEmail";
 import TabEditorial from "./_TabEditorial";
 import TabNotificacoes from "./_TabNotificacoes";
+import TabEmailTemplates from "./_TabEmailTemplates";
 
 /* ── helpers de estilo ──────────────────────────────────────── */
 export const inputCls  = "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
@@ -33,6 +34,7 @@ const TABS = [
   { id: "empresa",     icon: "🏢", label: "Empresa" },
   { id: "redes",       icon: "📱", label: "Redes Sociais" },
   { id: "email",        icon: "📧", label: "E-mail / SMTP" },
+  { id: "templates",   icon: "✉️", label: "Templates" },
   { id: "editorial",   icon: "📝", label: "Editorial" },
   { id: "notificacoes",icon: "🔔", label: "Notificações" },
   { id: "acesso",      icon: "🔐", label: "Acesso" },
@@ -91,6 +93,7 @@ export default function ConfiguracoesClient({ initialTab, settings, admins }: Pr
         {tab === "empresa"     && <TabEmpresa settings={settings} />}
         {tab === "redes"       && <TabRedes settings={settings} />}
         {tab === "email"        && <TabEmail settings={settings} />}
+        {tab === "templates"   && <TabEmailTemplates settings={settings} />}
         {tab === "editorial"   && <TabEditorial settings={settings} />}
         {tab === "notificacoes"&& <TabNotificacoes settings={settings} />}
         {tab === "acesso"      && <TabAcesso admins={admins} />}

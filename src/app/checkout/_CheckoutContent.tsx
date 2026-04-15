@@ -22,11 +22,14 @@ interface Props {
   activeGateways: string[];
   defaultName:    string;
   defaultEmail:   string;
+  mode?:          "subscription" | "edition";
+  editionSlug?:   string;
 }
 
 export default function CheckoutForm({
   slug, planName, amountCents, intervalMonths,
   activeGateways, defaultName, defaultEmail,
+  mode = "subscription", editionSlug,
 }: Props) {
   const [name, setName]       = useState(defaultName);
   const [email, setEmail]     = useState(defaultEmail);
@@ -43,18 +46,23 @@ export default function CheckoutForm({
     if (!hasGateways || !gateway) return;
     setLoading(true); setError(null);
     try {
+      const isEdition = mode === "edition";
       const res = await fetch("/api/checkout", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({
           gateway,
-          product_type:  "magazine_subscription",
+          product_type:  isEdition ? "edition_purchase" : "magazine_subscription",
           product_id:    slug,
-          product_label: `Assinatura ${planName} — Revista Magnum`,
+          product_label: isEdition
+            ? `Acesso avulso — ${planName} — Revista Magnum`
+            : `Assinatura ${planName} — Revista Magnum`,
           amount_cents:  amountCents,
           payer_name:    name,
           payer_email:   email,
-          metadata:      { plan: slug },
+          metadata:      isEdition
+            ? { edition_slug: editionSlug ?? slug }
+            : { plan: slug },
         }),
       });
       const data = await res.json();
@@ -155,11 +163,21 @@ export default function CheckoutForm({
       {/* Resumo */}
       <div className="bg-[#070a12] border border-[#141d2c] rounded-[10px] p-4 flex items-center justify-between gap-3">
         <div>
-          <p className="text-[#526888] text-[12px] mb-0.5">Você está assinando</p>
-          <p className="text-white text-[14px] font-bold">
-            Revista Magnum {planName} · {priceStr}/{periodLabel}
+          <p className="text-[#526888] text-[12px] mb-0.5">
+            {mode === "edition" ? "Você está comprando" : "Você está assinando"}
           </p>
-          <p className="text-[#253750] text-[11px]">Renova automaticamente · cancele quando quiser</p>
+          <p className="text-white text-[14px] font-bold">
+            {mode === "edition"
+              ? `${planName} — Acesso 30 dias`
+              : `Revista Magnum ${planName} · ${priceStr}/${periodLabel}`
+            }
+          </p>
+          <p className="text-[#253750] text-[11px]">
+            {mode === "edition"
+              ? "Pagamento único · acesso por 30 dias corridos"
+              : "Renova automaticamente · cancele quando quiser"
+            }
+          </p>
         </div>
         {activeGateways.length === 1 && (
           <span className="text-[20px] shrink-0">
@@ -181,8 +199,11 @@ export default function CheckoutForm({
         Você será redirecionado para o pagamento seguro.
       </p>
 
-      <a href="/assine" className="text-[#526888] hover:text-white text-[13px] text-center transition-colors">
-        ← Voltar aos planos
+      <a
+        href={mode === "edition" && editionSlug ? `/edicoes/${editionSlug}` : "/assine"}
+        className="text-[#526888] hover:text-white text-[13px] text-center transition-colors"
+      >
+        {mode === "edition" ? "← Voltar à edição" : "← Voltar aos planos"}
       </a>
     </form>
   );

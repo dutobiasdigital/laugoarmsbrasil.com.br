@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ContactForm from "./ContactForm";
 
 export const metadata = {
   title: "Contato — Revista Magnum",
@@ -42,74 +43,7 @@ export default function ContatoPage() {
               <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[28px] leading-none mb-6">
                 Envie uma mensagem
               </h2>
-
-              <form className="flex flex-col gap-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[#7a9ab5] text-[12px] font-semibold mb-1.5">
-                      Nome *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Seu nome"
-                      className="w-full bg-[#0e1520] border border-[#141d2c] rounded-[6px] h-[44px] px-4 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[#7a9ab5] text-[12px] font-semibold mb-1.5">
-                      E-mail *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="seu@email.com"
-                      className="w-full bg-[#0e1520] border border-[#141d2c] rounded-[6px] h-[44px] px-4 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f]"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[#7a9ab5] text-[12px] font-semibold mb-1.5">
-                    Assunto *
-                  </label>
-                  <select
-                    required
-                    defaultValue=""
-                    className="w-full bg-[#0e1520] border border-[#141d2c] rounded-[6px] h-[44px] px-4 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f]"
-                  >
-                    <option value="" disabled>Selecione um assunto</option>
-                    <option value="assinatura">Assinatura / Pagamento</option>
-                    <option value="conteudo">Conteúdo editorial</option>
-                    <option value="publicidade">Publicidade</option>
-                    <option value="tecnico">Problema técnico</option>
-                    <option value="outro">Outro</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[#7a9ab5] text-[12px] font-semibold mb-1.5">
-                    Mensagem *
-                  </label>
-                  <textarea
-                    required
-                    rows={6}
-                    placeholder="Descreva sua mensagem com detalhes..."
-                    className="w-full bg-[#0e1520] border border-[#141d2c] rounded-[6px] px-4 py-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] resize-none"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[50px] rounded-[6px] transition-colors"
-                >
-                  Enviar mensagem →
-                </button>
-
-                <p className="text-[#253750] text-[12px]">
-                  Respondemos em até 2 dias úteis.
-                </p>
-              </form>
+              <ContactForm />
             </div>
 
             {/* Right — info */}

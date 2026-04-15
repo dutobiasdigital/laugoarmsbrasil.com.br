@@ -1,17 +1,17 @@
 import ConfiguracoesClient from "./_ConfiguracoesClient";
-import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
 
 async function getSettings(): Promise<Record<string, string>> {
   try {
-    const res = await fetch(
-      `https://${PROJECT}.supabase.co/rest/v1/site_settings?select=key,value`,
-      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, cache: "no-store" }
-    );
+    const res = await fetch(`${BASE}/site_settings?select=key,value`, {
+      headers: HEADERS, cache: "no-store",
+    });
     const rows: { key: string; value: string | null }[] = await res.json();
     if (!Array.isArray(rows)) return {};
     const obj: Record<string, string> = {};
@@ -20,23 +20,28 @@ async function getSettings(): Promise<Record<string, string>> {
   } catch { return {}; }
 }
 
+async function getAdmins() {
+  try {
+    const res = await fetch(
+      `${BASE}/users?role=eq.ADMIN&select=id,name,email,createdAt&order=createdAt.asc`,
+      { headers: HEADERS, cache: "no-store" }
+    );
+    const rows: { id: string; name: string; email: string; createdAt: string }[] = await res.json();
+    if (!Array.isArray(rows)) return [];
+    return rows.map(a => ({
+      ...a,
+      createdAt: new Date(a.createdAt).toLocaleDateString("pt-BR"),
+    }));
+  } catch { return []; }
+}
+
 export default async function AdminConfiguracoesPage({
   searchParams,
 }: {
   searchParams: Promise<{ aba?: string }>;
 }) {
   const { aba } = await searchParams;
-  const settings = await getSettings();
-
-  let admins: { id: string; name: string; email: string; createdAt: string }[] = [];
-  try {
-    const raw = await prisma.user.findMany({
-      where: { role: "ADMIN" },
-      select: { id: true, name: true, email: true, createdAt: true },
-      orderBy: { createdAt: "asc" },
-    });
-    admins = raw.map(a => ({ ...a, createdAt: a.createdAt.toLocaleDateString("pt-BR") }));
-  } catch { /* DB unavailable */ }
+  const [settings, admins] = await Promise.all([getSettings(), getAdmins()]);
 
   return (
     <>

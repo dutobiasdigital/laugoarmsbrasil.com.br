@@ -16,6 +16,11 @@ export default async function PagamentoErroPage({
   const intent   = ref ? await getPaymentIntentByRef(ref) : null;
   const slug     = (intent?.metadata as { slug?: string } | null)?.slug;
   const plan     = (intent?.metadata as { plan?: string } | null)?.plan;
+  const editionSlug = (intent?.metadata as { edition_slug?: string } | null)?.edition_slug;
+
+  const isGuia         = intent?.product_type === "guia_plan";
+  const isSubscription = intent?.product_type === "magazine_subscription";
+  const isEdition      = intent?.product_type === "edition_purchase";
 
   return (
     <div className="min-h-screen bg-[#070a12] flex flex-col">
@@ -35,7 +40,28 @@ export default async function PagamentoErroPage({
           </p>
 
           <div className="flex flex-col gap-3">
-            {slug && plan && (
+            {/* Retry — Assinatura de revista */}
+            {isSubscription && plan && (
+              <Link
+                href={`/checkout?plano=${plan}`}
+                className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[48px] flex items-center justify-center rounded-[6px] transition-colors"
+              >
+                Tentar novamente →
+              </Link>
+            )}
+
+            {/* Retry — Edição avulsa */}
+            {isEdition && editionSlug && (
+              <Link
+                href={`/edicoes/${editionSlug}`}
+                className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[48px] flex items-center justify-center rounded-[6px] transition-colors"
+              >
+                Voltar à edição →
+              </Link>
+            )}
+
+            {/* Retry — Guia Comercial */}
+            {isGuia && slug && plan && (
               <Link
                 href={`/guia/upgrade?slug=${slug}&plano=${plan}`}
                 className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[48px] flex items-center justify-center rounded-[6px] transition-colors"
@@ -43,10 +69,30 @@ export default async function PagamentoErroPage({
                 Tentar novamente →
               </Link>
             )}
-            <Link href="/guia"
-              className="bg-[#0e1520] border border-[#141d2c] hover:border-zinc-600 text-[#d4d4da] text-[14px] h-[44px] flex items-center justify-center rounded-[6px] transition-colors">
-              Voltar ao Guia
-            </Link>
+
+            {/* Sem intent — botão genérico */}
+            {!intent && (
+              <Link
+                href="/assine"
+                className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[48px] flex items-center justify-center rounded-[6px] transition-colors"
+              >
+                Ver planos →
+              </Link>
+            )}
+
+            {/* Links secundários */}
+            {isSubscription ? (
+              <Link href="/assine"
+                className="bg-[#0e1520] border border-[#141d2c] hover:border-zinc-600 text-[#d4d4da] text-[14px] h-[44px] flex items-center justify-center rounded-[6px] transition-colors">
+                Ver planos de assinatura
+              </Link>
+            ) : (
+              <Link href="/guia"
+                className="bg-[#0e1520] border border-[#141d2c] hover:border-zinc-600 text-[#d4d4da] text-[14px] h-[44px] flex items-center justify-center rounded-[6px] transition-colors">
+                Voltar ao Guia
+              </Link>
+            )}
+
             <a href="mailto:publicidade@revistamagnum.com.br"
               className="text-[#526888] hover:text-white text-[13px] transition-colors">
               Precisa de ajuda? Entre em contato →

@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" };
 
 function toSlug(str: string) {
   return str
@@ -24,14 +28,16 @@ export async function POST(req: NextRequest) {
     const pdfStoragePath = (body.pdfStoragePath as string) || null;
     const pageFlipUrl = (body.pageFlipUrl as string) || null;
     const isPublished = body.isPublished === "on" || body.isPublished === true || body.isPublished === "true";
-    const publishedAt = body.publishedAt ? new Date(body.publishedAt as string) : null;
+    const publishedAt = body.publishedAt ? (body.publishedAt as string) : null;
 
-    await prisma.edition.create({
-      data: {
+    const res = await fetch(`${BASE}/editions`, {
+      method: "POST",
+      headers: { ...HEADERS, Prefer: "return=representation" },
+      body: JSON.stringify({
         title,
         slug,
         number,
-        type: type as "REGULAR" | "SPECIAL",
+        type,
         editorial,
         tableOfContents,
         pageCount,
@@ -40,8 +46,9 @@ export async function POST(req: NextRequest) {
         pageFlipUrl,
         isPublished,
         publishedAt,
-      },
+      }),
     });
+    if (!res.ok) throw new Error(await res.text());
 
     return NextResponse.json({ success: true });
   } catch (e: unknown) {
@@ -67,15 +74,16 @@ export async function PUT(req: NextRequest) {
     const pdfStoragePath = (body.pdfStoragePath as string) || null;
     const pageFlipUrl = (body.pageFlipUrl as string) || null;
     const isPublished = body.isPublished === "on" || body.isPublished === true || body.isPublished === "true";
-    const publishedAt = body.publishedAt ? new Date(body.publishedAt as string) : null;
+    const publishedAt = body.publishedAt ? (body.publishedAt as string) : null;
 
-    await prisma.edition.update({
-      where: { id },
-      data: {
+    const res = await fetch(`${BASE}/editions?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { ...HEADERS, Prefer: "return=representation" },
+      body: JSON.stringify({
         title,
         slug,
         number,
-        type: type as "REGULAR" | "SPECIAL",
+        type,
         editorial,
         tableOfContents,
         pageCount,
@@ -84,8 +92,9 @@ export async function PUT(req: NextRequest) {
         pageFlipUrl,
         isPublished,
         publishedAt,
-      },
+      }),
     });
+    if (!res.ok) throw new Error(await res.text());
 
     return NextResponse.json({ success: true });
   } catch (e: unknown) {
@@ -101,7 +110,11 @@ export async function DELETE(req: NextRequest) {
     const body = await req.json();
     const id = body.id as string;
 
-    await prisma.edition.delete({ where: { id } });
+    const res = await fetch(`${BASE}/editions?id=eq.${id}`, {
+      method: "DELETE",
+      headers: HEADERS,
+    });
+    if (!res.ok) throw new Error(await res.text());
 
     return NextResponse.json({ success: true });
   } catch (e: unknown) {

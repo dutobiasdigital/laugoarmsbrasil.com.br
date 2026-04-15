@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import prisma from "@/lib/prisma";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
 
 export default async function BlogArtigoPage({
   params,
@@ -17,7 +21,7 @@ export default async function BlogArtigoPage({
   let post: {
     id: string; title: string; slug: string; excerpt: string | null;
     content: string; featureImageUrl: string | null;
-    publishedAt: Date | null; isExclusive: boolean;
+    publishedAt: string | null; isExclusive: boolean;
     authorName: string; category: { name: string };
   } | null = null;
 
@@ -28,21 +32,23 @@ export default async function BlogArtigoPage({
     const { data: { user } } = await supabase.auth.getUser();
 
     if (user) {
-      const profile = await prisma.user.findUnique({
-        where: { authId: user.id },
-        select: { role: true, subscription: { select: { status: true } } },
-      });
-      isSubscriber = profile?.role === "ADMIN" || profile?.subscription?.status === "ACTIVE";
+      const userRes = await fetch(
+        `${BASE}/users?authId=eq.${user.id}&select=role,subscriptions(status)&limit=1`,
+        { headers: HEADERS, cache: "no-store" }
+      );
+      const rows = await userRes.json();
+      const u = rows?.[0];
+      isSubscriber =
+        u?.role === "ADMIN" ||
+        u?.subscriptions?.some((s: { status: string }) => s.status === "ACTIVE");
     }
 
-    post = await prisma.article.findUnique({
-      where: { slug, status: "PUBLISHED" },
-      select: {
-        id: true, title: true, slug: true, excerpt: true, content: true,
-        featureImageUrl: true, publishedAt: true, isExclusive: true,
-        authorName: true, category: { select: { name: true } },
-      },
-    });
+    const res = await fetch(
+      `${BASE}/articles?slug=eq.${encodeURIComponent(slug)}&status=eq.PUBLISHED&select=id,title,slug,excerpt,content,featureImageUrl,publishedAt,isExclusive,authorName,category:article_categories(name)&limit=1`,
+      { headers: HEADERS, cache: "no-store" }
+    );
+    const data = await res.json();
+    post = Array.isArray(data) && data.length > 0 ? data[0] : null;
   } catch {
     // DB unavailable
   }
@@ -96,7 +102,9 @@ export default async function BlogArtigoPage({
           <div className="bg-[#141d2c] h-px max-w-[860px] mb-4" />
           <p className="text-[#d4d4da] text-[14px] font-medium mb-1">{post.authorName}</p>
           <p className="text-[#253750] text-[13px] mb-4">
-            {post.publishedAt?.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}
+            {post.publishedAt
+              ? new Date(post.publishedAt).toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })
+              : ""}
           </p>
           <div className="bg-[#141d2c] h-px max-w-[860px]" />
         </div>

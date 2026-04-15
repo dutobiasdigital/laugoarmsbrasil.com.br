@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRecaptcha } from "@/hooks/useRecaptcha";
 
 const inputCls =
   "bg-[#0e1520] border border-[#1c2a3e] rounded-[6px] h-[44px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
@@ -21,6 +22,7 @@ export default function AnuncieForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError]     = useState<string | null>(null);
+  const { executeRecaptcha }  = useRecaptcha();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -28,7 +30,10 @@ export default function AnuncieForm() {
     setError(null);
 
     const fd   = new FormData(e.currentTarget);
-    const body = Object.fromEntries(fd);
+    const body = Object.fromEntries(fd) as Record<string, string>;
+
+    // Inject reCAPTCHA token (no-op when key not configured)
+    body._recaptchaToken = await executeRecaptcha("anuncie");
 
     const res = await fetch("/api/anuncie", {
       method: "POST",

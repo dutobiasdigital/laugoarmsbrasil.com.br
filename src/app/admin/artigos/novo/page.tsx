@@ -1,17 +1,23 @@
-import prisma from "@/lib/prisma";
 import ArticleForm from "./_ArticleForm";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" };
+
 export default async function NovoArtigoPage() {
   let categories: { id: string; name: string }[] = [];
 
   try {
-    categories = await prisma.articleCategory.findMany({
-      select: { id: true, name: true },
-      orderBy: { name: "asc" },
+    const res = await fetch(`${BASE}/article_categories?select=id,name&order=name.asc`, {
+      headers: HEADERS,
+      cache: "no-store",
     });
+    const data = await res.json();
+    categories = Array.isArray(data) ? data : [];
   } catch {
     // DB unavailable
   }

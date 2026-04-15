@@ -15,11 +15,14 @@ export default async function PagamentoSucessoPage({
   const { ref } = await searchParams;
   const intent  = ref ? await getPaymentIntentByRef(ref) : null;
 
-  const isGuia  = intent?.product_type === "guia_plan";
+  const isGuia         = intent?.product_type === "guia_plan";
+  const isSubscription = intent?.product_type === "magazine_subscription";
+  const isEdition      = intent?.product_type === "edition_purchase";
   const slug    = (intent?.metadata as { slug?: string } | null)?.slug;
   const plan    = (intent?.metadata as { plan?: string } | null)?.plan;
+  const editionSlug = (intent?.metadata as { edition_slug?: string } | null)?.edition_slug;
   const label   = intent?.product_label ?? "seu produto";
-  const isPending = intent?.status === "PENDING"; // webhook pode ainda não ter chegado
+  const isPending = intent?.status === "PENDING";
 
   return (
     <div className="min-h-screen bg-[#070a12] flex flex-col">
@@ -37,14 +40,18 @@ export default async function PagamentoSucessoPage({
 
           <p className="text-[#7a9ab5] text-[16px] leading-[26px] mb-2">
             {isPending
-              ? "Seu pagamento está sendo processado e o plano será ativado em instantes."
-              : `O plano ${plan ?? label} foi ativado com sucesso.`
+              ? "Seu pagamento está sendo processado e será ativado em instantes."
+              : isSubscription
+                ? `Sua assinatura ${plan ?? ""} foi ativada. Boas-vindas!`
+                : isEdition
+                  ? "Seu acesso à edição foi liberado por 30 dias."
+                  : `O plano ${plan ?? label} foi ativado com sucesso.`
             }
           </p>
 
           {isPending && (
             <p className="text-[#253750] text-[13px] mb-6">
-              Se o seu perfil ainda não mostrar o novo plano, aguarde alguns minutos e atualize a página.
+              Se o status ainda não aparecer atualizado, aguarde alguns minutos e atualize a página.
             </p>
           )}
 
@@ -80,17 +87,44 @@ export default async function PagamentoSucessoPage({
           )}
 
           <div className="flex flex-col gap-3">
+            {/* Assinatura de revista */}
+            {isSubscription && (
+              <Link href="/minha-conta"
+                className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[48px] px-8 flex items-center justify-center rounded-[6px] transition-colors">
+                Ir para Minha Conta →
+              </Link>
+            )}
+
+            {/* Compra de edição */}
+            {isEdition && editionSlug && (
+              <Link href={`/edicoes/${editionSlug}`}
+                className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[48px] px-8 flex items-center justify-center rounded-[6px] transition-colors">
+                Ler a edição agora →
+              </Link>
+            )}
+
+            {/* Guia Comercial */}
             {isGuia && slug && (
               <Link href={`/guia/empresa/${slug}`}
                 className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[48px] px-8 flex items-center justify-center rounded-[6px] transition-colors">
                 Ver meu perfil no Guia →
               </Link>
             )}
-            <Link href="/guia"
-              className="bg-[#0e1520] border border-[#141d2c] hover:border-zinc-600 text-[#d4d4da] text-[14px] h-[44px] flex items-center justify-center rounded-[6px] transition-colors">
-              Ir para o Guia Comercial
-            </Link>
+
+            {/* Link secundário */}
+            {isSubscription || isEdition ? (
+              <Link href="/edicoes"
+                className="bg-[#0e1520] border border-[#141d2c] hover:border-zinc-600 text-[#d4d4da] text-[14px] h-[44px] flex items-center justify-center rounded-[6px] transition-colors">
+                Ver edições
+              </Link>
+            ) : (
+              <Link href="/guia"
+                className="bg-[#0e1520] border border-[#141d2c] hover:border-zinc-600 text-[#d4d4da] text-[14px] h-[44px] flex items-center justify-center rounded-[6px] transition-colors">
+                Ir para o Guia Comercial
+              </Link>
+            )}
           </div>
+
         </div>
       </main>
       <Footer />

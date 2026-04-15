@@ -119,6 +119,11 @@ export async function onPaymentApproved(intent: PaymentIntent): Promise<void> {
     });
   }
 
+  // ── Compra avulsa de edição (30 dias de acesso) ───────────────
+  // Apenas registra o payment_intent (já feito antes). O acesso é verificado
+  // dinamicamente nas páginas de edição consultando payment_intents.
+  // Nenhuma ação adicional necessária aqui.
+
   // ── Assinatura de revista ──────────────────────────────────────
   if (intent.product_type === "magazine_subscription") {
     const meta = intent.metadata as { plan?: string } | null;
@@ -184,7 +189,7 @@ export async function onPaymentApproved(intent: PaymentIntent): Promise<void> {
   if (intent.payer_email) {
     try {
       const { sendPaymentConfirmationEmail } = await import("@/lib/email");
-      const meta = intent.metadata as { slug?: string } | null;
+      const meta = intent.metadata as { slug?: string; edition_slug?: string } | null;
       await sendPaymentConfirmationEmail({
         payerName:    intent.payer_name    ?? "Cliente",
         payerEmail:   intent.payer_email,
@@ -193,6 +198,7 @@ export async function onPaymentApproved(intent: PaymentIntent): Promise<void> {
         gateway:      intent.gateway,
         externalRef:  intent.external_reference ?? intent.id,
         guiaSlug:     meta?.slug,
+        editionSlug:  meta?.edition_slug,
       });
     } catch (e) {
       console.warn("[onPaymentApproved] falha ao enviar e-mail:", e);

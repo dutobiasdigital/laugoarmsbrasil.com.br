@@ -25,8 +25,42 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  // Refresh session tokens — routing/auth protection is handled at page level
-  await supabase.auth.getUser();
+  // Refresh session tokens
+  const { data: { user } } = await supabase.auth.getUser();
+  const path = request.nextUrl.pathname;
+
+  /* ── /minha-conta — requer login ────────────────────────────── */
+  if (path.startsWith("/minha-conta") && !user) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/login";
+    url.searchParams.set("redirect", path);
+    return NextResponse.redirect(url);
+  }
+
+  /* ── /admin — requer login + role ADMIN ─────────────────────── */
+  if (path.startsWith("/admin")) {
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth/login";
+      return NextResponse.redirect(url);
+    }
+
+    // Verifica role via REST (service role para bypass RLS)
+    const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "";
+    const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+    try {
+      const res = await fetch(
+        `https://${PROJECT}.supabase.co/rest/v1/users?authId=eq.${user.id}&select=role&limit=1`,
+        { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` } }
+      );
+      const rows = await res.json();
+      if (!Array.isArray(rows) || rows[0]?.role !== "ADMIN") {
+        return NextResponse.redirect(new URL("/minha-conta", request.url));
+      }
+    } catch {
+      return NextResponse.redirect(new URL("/minha-conta", request.url));
+    }
+  }
 
   return supabaseResponse;
 }

@@ -1,9 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import prisma from "@/lib/prisma";
 import EditionEditForm from "./_EditionEditForm";
 
 export const dynamic = "force-dynamic";
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" };
 
 export default async function EditarEdicaoPage({
   params,
@@ -25,38 +29,27 @@ export default async function EditarEdicaoPage({
     pdfStoragePath: string | null;
     pageFlipUrl: string | null;
     isPublished: boolean;
-    publishedAt: Date | null;
+    publishedAt: string | null;
   } | null = null;
 
   try {
-    edition = await prisma.edition.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        number: true,
-        type: true,
-        editorial: true,
-        tableOfContents: true,
-        pageCount: true,
-        coverImageUrl: true,
-        pdfStoragePath: true,
-        pageFlipUrl: true,
-        isPublished: true,
-        publishedAt: true,
-      },
-    });
+    const res = await fetch(
+      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,editorial,tableOfContents,pageCount,coverImageUrl,pdfStoragePath,pageFlipUrl,isPublished,publishedAt&limit=1`,
+      { headers: HEADERS, cache: "no-store" }
+    );
+    const data = await res.json();
+    edition = Array.isArray(data) && data.length > 0 ? data[0] : null;
   } catch {
     // DB unavailable
   }
 
   if (!edition) notFound();
+  const ed = edition!;
 
-  // Serialize dates for client component
+  // Serialize publishedAt to date-only string for client component
   const serialized = {
-    ...edition,
-    publishedAt: edition.publishedAt?.toISOString().slice(0, 10) ?? null,
+    ...ed,
+    publishedAt: ed.publishedAt ? ed.publishedAt.slice(0, 10) : null,
   };
 
   return (
@@ -70,7 +63,7 @@ export default async function EditarEdicaoPage({
         </Link>
         <span className="text-[#141d2c]">/</span>
         <span className="text-[#d4d4da] text-[14px] truncate max-w-[300px]">
-          {edition.title}
+          {ed.title}
         </span>
       </div>
 
@@ -78,7 +71,7 @@ export default async function EditarEdicaoPage({
         Editar Edição
       </h1>
       <p className="text-[#7a9ab5] text-[14px] mb-6">
-        {edition.number ? `Edição Nº ${edition.number}` : edition.title}
+        {ed.number ? `Edição Nº ${ed.number}` : ed.title}
       </p>
       <div className="bg-[#141d2c] h-px mb-6" />
 

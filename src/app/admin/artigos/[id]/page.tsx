@@ -1,9 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import prisma from "@/lib/prisma";
 import ArticleEditForm from "./_ArticleEditForm";
 
 export const dynamic = "force-dynamic";
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" };
 
 export default async function EditarArtigoPage({
   params,
@@ -23,42 +27,37 @@ export default async function EditarArtigoPage({
     categoryId: string;
     isExclusive: boolean;
     status: string;
-    publishedAt: Date | null;
+    publishedAt: string | null;
   } | null = null;
   let categories: { id: string; name: string }[] = [];
 
   try {
-    [article, categories] = await Promise.all([
-      prisma.article.findUnique({
-        where: { id },
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          excerpt: true,
-          content: true,
-          authorName: true,
-          featureImageUrl: true,
-          categoryId: true,
-          isExclusive: true,
-          status: true,
-          publishedAt: true,
-        },
-      }),
-      prisma.articleCategory.findMany({
-        select: { id: true, name: true },
-        orderBy: { name: "asc" },
-      }),
+    const [artRes, catRes] = await Promise.all([
+      fetch(
+        `${BASE}/articles?id=eq.${id}&select=id,title,slug,excerpt,content,authorName,featureImageUrl,categoryId,isExclusive,status,publishedAt&limit=1`,
+        { headers: HEADERS, cache: "no-store" }
+      ),
+      fetch(
+        `${BASE}/article_categories?select=id,name&order=name.asc`,
+        { headers: HEADERS, cache: "no-store" }
+      ),
     ]);
+
+    const artData = await artRes.json();
+    const catData = await catRes.json();
+
+    article = Array.isArray(artData) && artData.length > 0 ? artData[0] : null;
+    categories = Array.isArray(catData) ? catData : [];
   } catch {
     // DB unavailable
   }
 
   if (!article) notFound();
+  const art = article!;
 
   const serialized = {
-    ...article,
-    publishedAt: article.publishedAt?.toISOString().slice(0, 10) ?? null,
+    ...art,
+    publishedAt: art.publishedAt ? art.publishedAt.slice(0, 10) : null,
   };
 
   return (
@@ -72,14 +71,14 @@ export default async function EditarArtigoPage({
         </Link>
         <span className="text-[#141d2c]">/</span>
         <span className="text-[#d4d4da] text-[14px] truncate max-w-[300px]">
-          {article.title}
+          {art.title}
         </span>
       </div>
 
       <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">
         Editar Artigo
       </h1>
-      <p className="text-[#7a9ab5] text-[14px] mb-6">{article.title}</p>
+      <p className="text-[#7a9ab5] text-[14px] mb-6">{art.title}</p>
       <div className="bg-[#141d2c] h-px mb-6" />
 
       <ArticleEditForm article={serialized} categories={categories} />

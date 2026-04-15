@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { signup } from "@/actions/auth";
+import { useRecaptcha } from "@/hooks/useRecaptcha";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -23,6 +24,7 @@ export default function CadastroPage() {
   const [step, setStep] = useState(1);
   const [selectedPlan, setSelectedPlan] = useState("semestral");
   const [state, formAction, pending] = useActionState(signup, {});
+  const { executeRecaptcha } = useRecaptcha();
   const router = useRouter();
 
   const panel = LEFT_PANEL[step] ?? LEFT_PANEL[1];
@@ -101,7 +103,12 @@ export default function CadastroPage() {
               )}
 
               <form
-                action={async (fd: FormData) => {
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const fd = new FormData(e.currentTarget);
+                  // Inject reCAPTCHA token before server action
+                  const token = await executeRecaptcha("signup");
+                  fd.set("_recaptchaToken", token);
                   await formAction(fd);
                   if (!state?.error) setStep(2);
                 }}

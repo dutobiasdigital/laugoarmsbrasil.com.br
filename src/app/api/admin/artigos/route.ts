@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" };
 
 function toSlug(str: string) {
   return str
@@ -24,13 +28,15 @@ export async function POST(req: NextRequest) {
     const status = (body.status as string) || "DRAFT";
     const publishedAt =
       body.publishedAt && status === "PUBLISHED"
-        ? new Date(body.publishedAt as string)
+        ? (body.publishedAt as string)
         : status === "PUBLISHED"
-        ? new Date()
+        ? new Date().toISOString()
         : null;
 
-    await prisma.article.create({
-      data: {
+    const res = await fetch(`${BASE}/articles`, {
+      method: "POST",
+      headers: { ...HEADERS, Prefer: "return=representation" },
+      body: JSON.stringify({
         title,
         slug,
         excerpt,
@@ -39,10 +45,11 @@ export async function POST(req: NextRequest) {
         featureImageUrl,
         categoryId,
         isExclusive,
-        status: status as "DRAFT" | "PUBLISHED" | "ARCHIVED",
+        status,
         publishedAt,
-      },
+      }),
     });
+    if (!res.ok) throw new Error(await res.text());
 
     return NextResponse.json({ success: true });
   } catch (e: unknown) {
@@ -67,14 +74,15 @@ export async function PUT(req: NextRequest) {
     const isExclusive = body.isExclusive === "on" || body.isExclusive === true || body.isExclusive === "true";
     const status = (body.status as string) || "DRAFT";
     const publishedAt = body.publishedAt
-      ? new Date(body.publishedAt as string)
+      ? (body.publishedAt as string)
       : status === "PUBLISHED"
-      ? new Date()
+      ? new Date().toISOString()
       : null;
 
-    await prisma.article.update({
-      where: { id },
-      data: {
+    const res = await fetch(`${BASE}/articles?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { ...HEADERS, Prefer: "return=representation" },
+      body: JSON.stringify({
         title,
         slug,
         excerpt,
@@ -83,10 +91,11 @@ export async function PUT(req: NextRequest) {
         featureImageUrl,
         categoryId,
         isExclusive,
-        status: status as "DRAFT" | "PUBLISHED" | "ARCHIVED",
+        status,
         publishedAt,
-      },
+      }),
     });
+    if (!res.ok) throw new Error(await res.text());
 
     return NextResponse.json({ success: true });
   } catch (e: unknown) {
@@ -102,7 +111,11 @@ export async function DELETE(req: NextRequest) {
     const body = await req.json();
     const id = body.id as string;
 
-    await prisma.article.delete({ where: { id } });
+    const res = await fetch(`${BASE}/articles?id=eq.${id}`, {
+      method: "DELETE",
+      headers: HEADERS,
+    });
+    if (!res.ok) throw new Error(await res.text());
 
     return NextResponse.json({ success: true });
   } catch (e: unknown) {

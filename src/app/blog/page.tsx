@@ -1,5 +1,4 @@
 import Link from "next/link";
-import prisma from "@/lib/prisma";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -12,6 +11,11 @@ export const metadata = {
 
 const ITEMS_PER_PAGE = 6;
 
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
+
 export default async function BlogPage({
   searchParams,
 }: {
@@ -22,7 +26,7 @@ export default async function BlogPage({
 
   type ArticleItem = {
     id: string; title: string; slug: string; excerpt: string | null;
-    featureImageUrl: string | null; publishedAt: Date | null;
+    featureImageUrl: string | null; publishedAt: string | null;
     isExclusive: boolean; authorName: string;
     category: { name: string };
   };
@@ -33,38 +37,75 @@ export default async function BlogPage({
   let categories: string[] = [];
 
   try {
+    const showFeatured = page === 1 && !categoria;
+    const offset = showFeatured ? 1 : (page - 1) * ITEMS_PER_PAGE;
+
     const catFilter = categoria
-      ? { category: { name: categoria } }
-      : {};
+      ? `&article_categories.name=eq.${encodeURIComponent(categoria)}`
+      : "";
 
-    const whereFilter = { status: "PUBLISHED" as const, ...catFilter };
+    const articleSelect = "id,title,slug,excerpt,featureImageUrl,publishedAt,isExclusive,authorName,category:article_categories(name)";
+    const embedSuffix = categoria ? "!inner" : "";
 
-    [featured, articles, total, categories] = await Promise.all([
-      page === 1 && !categoria
-        ? prisma.article.findFirst({
-            where: { status: "PUBLISHED" },
-            orderBy: { publishedAt: "desc" },
-            select: {
-              id: true, title: true, slug: true, excerpt: true,
-              featureImageUrl: true, publishedAt: true, isExclusive: true,
-              authorName: true, category: { select: { name: true } },
-            },
-          })
-        : Promise.resolve(null),
-      prisma.article.findMany({
-        where: whereFilter,
-        orderBy: { publishedAt: "desc" },
-        skip: page === 1 && !categoria ? 1 : (page - 1) * ITEMS_PER_PAGE,
-        take: ITEMS_PER_PAGE,
-        select: {
-          id: true, title: true, slug: true, excerpt: true,
-          featureImageUrl: true, publishedAt: true, isExclusive: true,
-          authorName: true, category: { select: { name: true } },
-        },
+    const featuredUrl = showFeatured
+      ? `${BASE}/articles?status=eq.PUBLISHED&order=publishedAt.desc&limit=1&select=${articleSelect}`
+      : null;
+
+    const articlesUrl = categoria
+      ? `${BASE}/articles?status=eq.PUBLISHED${catFilter}&order=publishedAt.desc&limit=${ITEMS_PER_PAGE}&offset=${offset}&select=id,title,slug,excerpt,featureImageUrl,publishedAt,isExclusive,authorName,category:article_categories${embedSuffix}(name)`
+      : `${BASE}/articles?status=eq.PUBLISHED&order=publishedAt.desc&limit=${ITEMS_PER_PAGE}&offset=${offset}&select=${articleSelect}`;
+
+    const categoriesUrl = `${BASE}/article_categories?select=name&order=name.asc`;
+
+    const fetches: Promise<Response>[] = [
+      fetch(articlesUrl, {
+        headers: { ...HEADERS, Prefer: "count=exact" },
+        cache: "no-store",
       }),
-      prisma.article.count({ where: whereFilter }),
-      prisma.articleCategory.findMany({ select: { name: true } }).then((cs) => cs.map((c) => c.name)),
-    ]);
+      fetch(categoriesUrl, { headers: HEADERS, cache: "no-store" }),
+    ];
+
+    if (featuredUrl) {
+      fetches.unshift(
+        fetch(featuredUrl, { headers: HEADERS, cache: "no-store" })
+      );
+    }
+
+    if (featuredUrl) {
+      const [featuredRes, articlesRes, categoriesRes] = await Promise.all(fetches);
+
+      if (featuredRes.ok) {
+        const featuredData: ArticleItem[] = await featuredRes.json();
+        featured = featuredData[0] ?? null;
+      }
+      if (articlesRes.ok) {
+        articles = await articlesRes.json();
+        const contentRange = articlesRes.headers.get("Content-Range");
+        if (contentRange) {
+          const match = contentRange.match(/\/(\d+)$/);
+          if (match) total = parseInt(match[1], 10);
+        }
+      }
+      if (categoriesRes.ok) {
+        const catData: { name: string }[] = await categoriesRes.json();
+        categories = catData.map((c) => c.name);
+      }
+    } else {
+      const [articlesRes, categoriesRes] = await Promise.all(fetches);
+
+      if (articlesRes.ok) {
+        articles = await articlesRes.json();
+        const contentRange = articlesRes.headers.get("Content-Range");
+        if (contentRange) {
+          const match = contentRange.match(/\/(\d+)$/);
+          if (match) total = parseInt(match[1], 10);
+        }
+      }
+      if (categoriesRes.ok) {
+        const catData: { name: string }[] = await categoriesRes.json();
+        categories = catData.map((c) => c.name);
+      }
+    }
   } catch {
     // DB unavailable
   }
@@ -146,7 +187,7 @@ export default async function BlogPage({
                 )}
                 <p className="text-[#253750] text-[13px]">
                   {featured.authorName}
-                  {featured.publishedAt && ` · ${featured.publishedAt.toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" })}`}
+                  {featured.publishedAt && ` · ${new Date(featured.publishedAt).toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" })}`}
                 </p>
                 <div className="flex items-center gap-4 mt-2">
                   <span className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[44px] px-5 flex items-center rounded-[6px] transition-colors">
@@ -202,7 +243,9 @@ export default async function BlogPage({
                           </p>
                         )}
                         <p className="text-[#253750] text-[12px] mt-auto pt-1">
-                          {art.publishedAt?.toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" })}
+                          {art.publishedAt
+                            ? new Date(art.publishedAt).toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" })
+                            : ""}
                         </p>
                       </div>
                     </Link>

@@ -1,7 +1,11 @@
 import Link from "next/link";
-import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" };
 
 /** Monta query string preservando os params existentes */
 function qs(base: Record<string, string | undefined>, overrides: Record<string, string | undefined> = {}) {
@@ -35,36 +39,35 @@ export default async function AdminEdicoesPage({
     slug: string;
     type: string;
     isPublished: boolean;
-    publishedAt: Date | null;
+    publishedAt: string | null;
     coverImageUrl: string | null;
   }[] = [];
   let total = 0;
 
   try {
-    const where = {
-      ...(q ? { title: { contains: q, mode: "insensitive" as const } } : {}),
-      ...(tipo && tipo !== "TODOS" ? { type: tipo as "REGULAR" | "SPECIAL" } : {}),
-    };
+    // Build query params
+    const qParams: string[] = [];
+    qParams.push(`select=id,title,number,slug,type,isPublished,publishedAt,coverImageUrl`);
+    qParams.push(`order=number.${sortDir}.nullslast`);
+    qParams.push(`limit=${PER_PAGE}`);
+    qParams.push(`offset=${(page - 1) * PER_PAGE}`);
+    if (q) qParams.push(`title=ilike.*${encodeURIComponent(q)}*`);
+    if (tipo && tipo !== "TODOS") qParams.push(`type=eq.${tipo}`);
 
-    [editions, total] = await Promise.all([
-      prisma.edition.findMany({
-        where,
-        orderBy: { number: sortDir },
-        skip: (page - 1) * PER_PAGE,
-        take: PER_PAGE,
-        select: {
-          id: true,
-          title: true,
-          number: true,
-          slug: true,
-          type: true,
-          isPublished: true,
-          publishedAt: true,
-          coverImageUrl: true,
-        },
-      }),
-      prisma.edition.count({ where }),
-    ]);
+    const res = await fetch(`${BASE}/editions?${qParams.join("&")}`, {
+      headers: { ...HEADERS, Prefer: "count=exact" },
+      cache: "no-store",
+    });
+
+    if (res.ok) {
+      editions = await res.json();
+      // Parse total from Content-Range header: "0-11/42"
+      const contentRange = res.headers.get("Content-Range");
+      if (contentRange) {
+        const match = contentRange.match(/\/(\d+)$/);
+        if (match) total = parseInt(match[1], 10);
+      }
+    }
   } catch {
     // DB unavailable
   }
@@ -187,7 +190,7 @@ export default async function AdminEdicoesPage({
                 </span>
                 <p className="text-[#7a9ab5] text-[13px]">
                   {ed.publishedAt
-                    ? ed.publishedAt.toLocaleDateString("pt-BR", {
+                    ? new Date(ed.publishedAt).toLocaleDateString("pt-BR", {
                         month: "short",
                         year: "numeric",
                       })

@@ -2,12 +2,21 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 export type AuthState = {
   error?: string;
   success?: boolean;
   message?: string;
 };
+
+/**
+ * Called client-side (as a server action) before Supabase login
+ * to validate the reCAPTCHA token without exposing the secret key.
+ */
+export async function verifyLoginCaptcha(token: string): Promise<boolean> {
+  return verifyRecaptcha(token, "login");
+}
 
 export async function login(
   _prevState: AuthState,
@@ -36,6 +45,13 @@ export async function signup(
   _prevState: AuthState,
   formData: FormData
 ): Promise<AuthState> {
+  // reCAPTCHA verification (graceful: passes if key not configured)
+  const captchaToken = (formData.get("_recaptchaToken") as string) ?? "";
+  const captchaOk = await verifyRecaptcha(captchaToken, "signup");
+  if (!captchaOk) {
+    return { error: "Verificação de segurança falhou. Tente novamente." };
+  }
+
   const supabase = await createClient();
 
   const email = formData.get("email") as string;
@@ -68,6 +84,13 @@ export async function forgotPassword(
   _prevState: AuthState,
   formData: FormData
 ): Promise<AuthState> {
+  // reCAPTCHA verification (graceful: passes if key not configured)
+  const captchaToken = (formData.get("_recaptchaToken") as string) ?? "";
+  const captchaOk = await verifyRecaptcha(captchaToken, "forgot_password");
+  if (!captchaOk) {
+    return { error: "Verificação de segurança falhou. Tente novamente." };
+  }
+
   const supabase = await createClient();
 
   const email = formData.get("email") as string;

@@ -1,7 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import prisma from "@/lib/prisma";
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" };
 
 function toSlug(str: string) {
   return str
@@ -23,25 +27,15 @@ export async function createEdition(_: unknown, formData: FormData) {
   const coverImageUrl = (formData.get("coverImageUrl") as string) || null;
   const pdfStoragePath = (formData.get("pdfStoragePath") as string) || null;
   const isPublished = formData.get("isPublished") === "on";
-  const publishedAt = formData.get("publishedAt")
-    ? new Date(formData.get("publishedAt") as string)
-    : null;
+  const publishedAt = formData.get("publishedAt") ? (formData.get("publishedAt") as string) : null;
 
   try {
-    await prisma.edition.create({
-      data: {
-        title,
-        slug,
-        number,
-        type: type as "REGULAR" | "SPECIAL",
-        editorial,
-        pageCount,
-        coverImageUrl,
-        pdfStoragePath,
-        isPublished,
-        publishedAt,
-      },
+    const res = await fetch(`${BASE}/editions`, {
+      method: "POST",
+      headers: { ...HEADERS, Prefer: "return=representation" },
+      body: JSON.stringify({ title, slug, number, type, editorial, pageCount, coverImageUrl, pdfStoragePath, isPublished, publishedAt }),
     });
+    if (!res.ok) throw new Error(await res.text());
     revalidatePath("/admin/edicoes");
     return { success: true };
   } catch (e: unknown) {
@@ -60,26 +54,15 @@ export async function updateEdition(_: unknown, formData: FormData) {
   const coverImageUrl = (formData.get("coverImageUrl") as string) || null;
   const pdfStoragePath = (formData.get("pdfStoragePath") as string) || null;
   const isPublished = formData.get("isPublished") === "on";
-  const publishedAt = formData.get("publishedAt")
-    ? new Date(formData.get("publishedAt") as string)
-    : null;
+  const publishedAt = formData.get("publishedAt") ? (formData.get("publishedAt") as string) : null;
 
   try {
-    await prisma.edition.update({
-      where: { id },
-      data: {
-        title,
-        slug,
-        number,
-        type: type as "REGULAR" | "SPECIAL",
-        editorial,
-        pageCount,
-        coverImageUrl,
-        pdfStoragePath,
-        isPublished,
-        publishedAt,
-      },
+    const res = await fetch(`${BASE}/editions?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { ...HEADERS, Prefer: "return=representation" },
+      body: JSON.stringify({ title, slug, number, type, editorial, pageCount, coverImageUrl, pdfStoragePath, isPublished, publishedAt }),
     });
+    if (!res.ok) throw new Error(await res.text());
     revalidatePath("/admin/edicoes");
     return { success: true };
   } catch (e: unknown) {
@@ -89,7 +72,11 @@ export async function updateEdition(_: unknown, formData: FormData) {
 
 export async function deleteEdition(id: string) {
   try {
-    await prisma.edition.delete({ where: { id } });
+    const res = await fetch(`${BASE}/editions?id=eq.${id}`, {
+      method: "DELETE",
+      headers: HEADERS,
+    });
+    if (!res.ok) throw new Error(await res.text());
     revalidatePath("/admin/edicoes");
     return { success: true };
   } catch (e: unknown) {

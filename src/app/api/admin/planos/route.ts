@@ -1,20 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = {
+  "Content-Type":  "application/json",
+  "apikey":        SERVICE,
+  "Authorization": `Bearer ${SERVICE}`,
+  "Prefer":        "return=representation",
+};
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const plan = await prisma.subscriptionPlan.create({
-      data: {
-        name: body.name,
-        slug: body.slug,
-        description: body.description || null,
-        priceInCents: parseInt(body.priceInCents, 10),
-        intervalMonths: parseInt(body.intervalMonths, 10),
-        active: body.active === true || body.active === "true",
-      },
+
+    if (!body.name || !body.slug || !body.priceInCents || !body.intervalMonths) {
+      return NextResponse.json({ error: "Campos obrigatórios: name, slug, priceInCents, intervalMonths" }, { status: 400 });
+    }
+
+    const payload = {
+      name:           String(body.name),
+      slug:           String(body.slug),
+      description:    body.description ? String(body.description) : null,
+      priceInCents:   parseInt(String(body.priceInCents).replace(/\D/g, ""), 10),
+      intervalMonths: parseInt(String(body.intervalMonths), 10),
+      active:         body.active === true || body.active === "true",
+      createdAt:      new Date().toISOString(),
+      updatedAt:      new Date().toISOString(),
+    };
+
+    const res = await fetch(`${BASE}/subscription_plans`, {
+      method:  "POST",
+      headers: HEADERS,
+      body:    JSON.stringify(payload),
     });
-    return NextResponse.json(plan);
+    const data = await res.json();
+    if (!res.ok) return NextResponse.json({ error: data?.message ?? "Erro ao criar plano" }, { status: res.status });
+    return NextResponse.json(Array.isArray(data) ? data[0] : data);
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }

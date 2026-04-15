@@ -3,17 +3,31 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { verifyLoginCaptcha } from "@/actions/auth";
+import { useRecaptcha } from "@/hooks/useRecaptcha";
 import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const { executeRecaptcha, enabled: captchaEnabled } = useRecaptcha();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
     setError(null);
+
+    // reCAPTCHA verification (skipped gracefully when key not configured)
+    if (captchaEnabled) {
+      const token = await executeRecaptcha("login");
+      const ok = await verifyLoginCaptcha(token);
+      if (!ok) {
+        setError("Verificação de segurança falhou. Tente novamente.");
+        setPending(false);
+        return;
+      }
+    }
 
     const form = e.currentTarget;
     const email = (form.elements.namedItem("email") as HTMLInputElement).value;
