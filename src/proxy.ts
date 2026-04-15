@@ -46,7 +46,7 @@ export async function proxy(request: NextRequest) {
     }
 
     // Verifica role via REST (service role para bypass RLS)
-    const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "";
+    const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
     const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
     try {
       const res = await fetch(
