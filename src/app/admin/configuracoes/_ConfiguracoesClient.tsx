@@ -4,6 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import TabIntegracoes from "./_TabIntegracoes";
 import TabSEO from "./_TabSEO";
+import TabEmpresa from "./_TabEmpresa";
+import TabRedes from "./_TabRedes";
 
 /* ── helpers de estilo ──────────────────────────────────────── */
 export const inputCls  = "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-full transition-colors";
@@ -23,8 +25,8 @@ interface Props {
 const TABS = [
   { id: "integracoes", icon: "🔌", label: "Integrações" },
   { id: "seo",         icon: "🌐", label: "Site & SEO" },
-  { id: "empresa",     icon: "🏢", label: "Empresa",       soon: true },
-  { id: "redes",       icon: "📱", label: "Redes Sociais", soon: true },
+  { id: "empresa",     icon: "🏢", label: "Empresa" },
+  { id: "redes",       icon: "📱", label: "Redes Sociais" },
   { id: "email",       icon: "📧", label: "E-mail / SMTP", soon: true },
   { id: "editorial",   icon: "📝", label: "Editorial",     soon: true },
   { id: "notificacoes",icon: "🔔", label: "Notificações",  soon: true },
@@ -81,9 +83,11 @@ export default function ConfiguracoesClient({ initialTab, settings, admins }: Pr
       <div className="flex-1 min-w-0">
         {tab === "integracoes" && <TabIntegracoes settings={settings} />}
         {tab === "seo"         && <TabSEO settings={settings} />}
+        {tab === "empresa"     && <TabEmpresa settings={settings} />}
+        {tab === "redes"       && <TabRedes settings={settings} />}
         {tab === "acesso"      && <TabAcesso admins={admins} />}
         {tab === "sistema"     && <TabSistema />}
-        {["empresa","redes","email","editorial","notificacoes"].includes(tab) && <TabEmBreve label={TABS.find(t=>t.id===tab)?.label ?? tab} />}
+        {["email","editorial","notificacoes"].includes(tab) && <TabEmBreve label={TABS.find(t=>t.id===tab)?.label ?? tab} />}
       </div>
     </div>
   );
