@@ -3,14 +3,30 @@ import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+/** Monta query string preservando os params existentes */
+function qs(base: Record<string, string | undefined>, overrides: Record<string, string | undefined> = {}) {
+  const merged = { ...base, ...overrides };
+  const params = Object.entries(merged)
+    .filter(([, v]) => v !== undefined && v !== "" && v !== "TODOS")
+    .map(([k, v]) => `${k}=${encodeURIComponent(v!)}`)
+    .join("&");
+  return params ? `?${params}` : "";
+}
+
 export default async function AdminEdicoesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; tipo?: string; pagina?: string }>;
+  searchParams: Promise<{ q?: string; tipo?: string; pagina?: string; ordem?: string }>;
 }) {
-  const { q, tipo, pagina } = await searchParams;
-  const page = Math.max(1, parseInt(pagina ?? "1", 10));
-  const PER_PAGE = 12;
+  const { q, tipo, pagina, ordem } = await searchParams;
+
+  const page      = Math.max(1, parseInt(pagina ?? "1", 10));
+  const PER_PAGE  = 12;
+  const sortDir   = ordem === "asc" ? "asc" : "desc"; // padrão: decrescente
+  const nextDir   = sortDir === "desc" ? "asc" : "desc";
+
+  // Params compartilhados (sem pagina/ordem) para preservar nos links
+  const baseParams = { q, tipo };
 
   let editions: {
     id: string;
@@ -33,7 +49,7 @@ export default async function AdminEdicoesPage({
     [editions, total] = await Promise.all([
       prisma.edition.findMany({
         where,
-        orderBy: { number: "asc" },
+        orderBy: { number: sortDir },
         skip: (page - 1) * PER_PAGE,
         take: PER_PAGE,
         select: {
@@ -79,6 +95,8 @@ export default async function AdminEdicoesPage({
 
       {/* Filters */}
       <form method="GET" className="flex flex-wrap gap-2 mb-5">
+        {/* Preserva ordem atual ao filtrar */}
+        {ordem && <input type="hidden" name="ordem" value={ordem} />}
         <input
           name="q"
           defaultValue={q}
@@ -102,7 +120,7 @@ export default async function AdminEdicoesPage({
         </button>
         {(q || tipo) && (
           <Link
-            href="/admin/edicoes"
+            href={`/admin/edicoes${qs({ ordem })}`}
             className="text-[#7a9ab5] hover:text-white text-[13px] h-[38px] flex items-center px-2 transition-colors"
           >
             Limpar
@@ -112,8 +130,21 @@ export default async function AdminEdicoesPage({
 
       {/* Table */}
       <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
-        <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-7 gap-3">
-          {["Nº", "Capa", "Título", "Tipo", "Páginas", "Status", "Ações"].map((h) => (
+
+        {/* Table header — coluna Nº tem botão de toggle de ordem */}
+        <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-7 gap-3 items-center">
+          {/* Nº com toggle */}
+          <div className="flex items-center gap-1.5">
+            <p className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">Nº</p>
+            <Link
+              href={`/admin/edicoes${qs({ ...baseParams, ordem: nextDir, pagina: "1" })}`}
+              title={sortDir === "desc" ? "Ordenar crescente" : "Ordenar decrescente"}
+              className="flex items-center justify-center w-[20px] h-[20px] rounded-[3px] bg-[#0e1520] border border-[#1c2a3e] hover:border-[#ff1f1f]/50 hover:text-[#ff6b6b] text-[#526888] transition-colors text-[11px]"
+            >
+              {sortDir === "desc" ? "↓" : "↑"}
+            </Link>
+          </div>
+          {["Capa", "Título", "Tipo", "Data", "Status", "Ações"].map((h) => (
             <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">
               {h}
             </p>
@@ -202,7 +233,7 @@ export default async function AdminEdicoesPage({
               {Array.from({ length: Math.min(totalPages, 8) }, (_, i) => i + 1).map((p) => (
                 <Link
                   key={p}
-                  href={`/admin/edicoes?${q ? `q=${encodeURIComponent(q)}&` : ""}${tipo ? `tipo=${tipo}&` : ""}pagina=${p}`}
+                  href={`/admin/edicoes${qs({ ...baseParams, ordem, pagina: String(p) })}`}
                   className={`w-[30px] h-[30px] flex items-center justify-center rounded-[4px] text-[13px] font-semibold transition-colors ${
                     p === page
                       ? "bg-[#ff1f1f] text-white"
