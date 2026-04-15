@@ -180,7 +180,7 @@ export default function NovaGuiaPage() {
             ].map(f => (
               <div key={f.key}>
                 <label className={labelCls}>{f.label}</label>
-                <input value={(form as Record<string, string>)[f.key]}
+                <input value={(form as unknown as Record<string, string>)[f.key]}
                   onChange={e => set(f.key as keyof FormData, e.target.value)}
                   placeholder={f.ph} className={inputCls} />
               </div>
