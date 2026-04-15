@@ -1,118 +1,159 @@
+"use client";
+
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import prisma from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
+/* ── Types ─────────────────────────────────────────────────── */
+interface PaymentIntent {
+  id:                 string;
+  gateway:            string;
+  gateway_id:         string | null;
+  status:             string;
+  product_type:       string;
+  product_id:         string | null;
+  product_label:      string | null;
+  amount:             number;
+  currency:           string;
+  payer_name:         string | null;
+  payer_email:        string | null;
+  metadata:           Record<string, unknown> | null;
+  external_reference: string | null;
+  checkout_url:       string | null;
+  createdAt:          string;
+  updatedAt:          string;
+}
 
+/* ── Helpers ────────────────────────────────────────────────── */
 const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> = {
-  APPROVED: { bg: "bg-[#0f381f]", text: "text-[#22c55e]", label: "APROVADO" },
-  PENDING: { bg: "bg-[#382405]", text: "text-[#ef9f1b]", label: "PENDENTE" },
-  REJECTED: { bg: "bg-[#2d0a0a]", text: "text-[#ff6b6b]", label: "RECUSADO" },
-  REFUNDED: { bg: "bg-[#141d2c]", text: "text-[#7a9ab5]", label: "REEMBOLSADO" },
-  CANCELLED: { bg: "bg-[#141d2c]", text: "text-[#253750]", label: "CANCELADO" },
+  APPROVED:  { bg: "bg-[#0f381f]",  text: "text-[#22c55e]", label: "APROVADO"     },
+  PENDING:   { bg: "bg-[#2a1e05]",  text: "text-[#f59e0b]", label: "PENDENTE"     },
+  REJECTED:  { bg: "bg-[#2d0a0a]",  text: "text-[#ff6b6b]", label: "RECUSADO"     },
+  REFUNDED:  { bg: "bg-[#141d2c]",  text: "text-[#7a9ab5]", label: "REEMBOLSADO"  },
+  CANCELLED: { bg: "bg-[#141d2c]",  text: "text-[#253750]", label: "CANCELADO"    },
 };
 
-export default async function AdminPagamentosPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string; status?: string; pagina?: string }>;
-}) {
-  const { q, status, pagina } = await searchParams;
-  const page = Math.max(1, parseInt(pagina ?? "1", 10));
-  const PER_PAGE = 15;
+const GATEWAY_ICON: Record<string, string> = {
+  mercadopago: "🟡",
+  stripe:      "🟣",
+  pagseguro:   "🟢",
+  paypal:      "🔵",
+};
 
-  let payments: {
-    id: string;
-    amountInCents: number;
-    status: string;
-    paymentMethod: string | null;
-    createdAt: Date;
-    paidAt: Date | null;
-    user: { name: string; email: string };
-    subscription: { plan: { name: string } };
-  }[] = [];
-  let total = 0;
-  let totalRevenue = 0;
+function fmt(cents: number) {
+  return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+function fmtTime(iso: string) {
+  return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+}
 
-  try {
-    const where = {
-      ...(q
-        ? {
-            OR: [
-              { user: { name: { contains: q, mode: "insensitive" as const } } },
-              { user: { email: { contains: q, mode: "insensitive" as const } } },
-            ],
-          }
-        : {}),
-      ...(status && status !== "TODOS"
-        ? { status: status as "APPROVED" | "PENDING" | "REJECTED" | "REFUNDED" | "CANCELLED" }
-        : {}),
-    };
+/* ── Componente ─────────────────────────────────────────────── */
+export default function AdminPagamentosPage() {
+  const [intents, setIntents]   = useState<PaymentIntent[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState<string | null>(null);
 
-    const [paymentsData, count, revenue] = await Promise.all([
-      prisma.payment.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip: (page - 1) * PER_PAGE,
-        take: PER_PAGE,
-        select: {
-          id: true,
-          amountInCents: true,
-          status: true,
-          paymentMethod: true,
-          createdAt: true,
-          paidAt: true,
-          user: { select: { name: true, email: true } },
-          subscription: { select: { plan: { select: { name: true } } } },
-        },
-      }),
-      prisma.payment.count({ where }),
-      prisma.payment.aggregate({
-        where: { status: "APPROVED" },
-        _sum: { amountInCents: true },
-      }),
-    ]);
+  // Filtros client-side
+  const [q, setQ]               = useState("");
+  const [statusFilter, setStatus] = useState("TODOS");
+  const [gwFilter, setGw]       = useState("TODOS");
 
-    payments = paymentsData;
-    total = count;
-    totalRevenue = revenue._sum.amountInCents ?? 0;
-  } catch {
-    // DB unavailable
-  }
+  useEffect(() => {
+    setLoading(true); setError(null);
+    fetch("/api/admin/pagamentos")
+      .then(r => r.json())
+      .then(d => {
+        if (d.error) throw new Error(d.error);
+        setIntents(d.intents ?? []);
+      })
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
-  const formatCurrency = (cents: number) =>
-    (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  /* ── Estatísticas ─── */
+  const stats = useMemo(() => {
+    const approved = intents.filter(i => i.status === "APPROVED");
+    const pending  = intents.filter(i => i.status === "PENDING");
+    const today    = intents.filter(i => new Date(i.createdAt).toDateString() === new Date().toDateString());
+    const revenue  = approved.reduce((s, i) => s + i.amount, 0);
+    return { total: intents.length, approved: approved.length, pending: pending.length, today: today.length, revenue };
+  }, [intents]);
+
+  /* ── Gateways disponíveis ─── */
+  const gateways = useMemo(() =>
+    Array.from(new Set(intents.map(i => i.gateway))).filter(Boolean),
+  [intents]);
+
+  /* ── Filtro ─── */
+  const filtered = useMemo(() => {
+    const ql = q.toLowerCase();
+    return intents.filter(i => {
+      if (statusFilter !== "TODOS" && i.status  !== statusFilter) return false;
+      if (gwFilter     !== "TODOS" && i.gateway !== gwFilter)     return false;
+      if (ql && ![i.payer_name, i.payer_email, i.product_label, i.external_reference]
+        .some(v => v?.toLowerCase().includes(ql))) return false;
+      return true;
+    });
+  }, [intents, q, statusFilter, gwFilter]);
 
   return (
     <>
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">
             Pagamentos
           </h1>
           <p className="text-[#7a9ab5] text-[14px]">
-            {total.toLocaleString("pt-BR")} transações · Total:{" "}
-            <span className="text-[#22c55e] font-semibold">
-              {formatCurrency(totalRevenue)}
-            </span>
+            {stats.total} transações · Receita:{" "}
+            <span className="text-[#22c55e] font-semibold">{fmt(stats.revenue)}</span>
           </p>
         </div>
       </div>
 
       <div className="bg-[#141d2c] h-px mb-6" />
 
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        {[
+          { label: "Total",        value: stats.total,    color: "text-white",       sub: "transações"  },
+          { label: "Aprovadas",    value: stats.approved, color: "text-[#22c55e]",   sub: "confirmadas" },
+          { label: "Pendentes",    value: stats.pending,  color: "text-[#f59e0b]",   sub: "aguardando"  },
+          { label: "Hoje",         value: stats.today,    color: "text-[#818cf8]",   sub: "novas"       },
+        ].map(s => (
+          <div key={s.label} className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-4">
+            <p className="text-[#526888] text-[11px] font-semibold tracking-[1px] uppercase mb-1">{s.label}</p>
+            <p className={`font-['Barlow_Condensed'] font-bold text-[28px] leading-none ${s.color}`}>{s.value}</p>
+            <p className="text-[#253750] text-[11px] mt-0.5">{s.sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Receita card */}
+      <div className="bg-[#0f381f] border border-[#22c55e]/20 rounded-[10px] p-4 mb-6 flex items-center justify-between">
+        <div>
+          <p className="text-[#22c55e]/70 text-[11px] font-semibold tracking-[1px] uppercase mb-0.5">Receita total aprovada</p>
+          <p className="font-['Barlow_Condensed'] font-bold text-[#22c55e] text-[36px] leading-none">
+            {fmt(stats.revenue)}
+          </p>
+        </div>
+        <span className="text-[40px]">💰</span>
+      </div>
+
       {/* Filters */}
-      <form method="GET" className="flex flex-wrap gap-2 mb-5">
+      <div className="flex flex-wrap gap-2 mb-5">
         <input
-          name="q"
-          defaultValue={q}
-          placeholder="🔍 Buscar por nome ou e-mail..."
-          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-[280px]"
+          value={q}
+          onChange={e => setQ(e.target.value)}
+          placeholder="🔍 Buscar pagador, produto ou ref..."
+          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-[#253750] focus:outline-none focus:border-[#ff1f1f] w-[280px] transition-colors"
         />
         <select
-          name="status"
-          defaultValue={status ?? "TODOS"}
-          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f]"
+          value={statusFilter}
+          onChange={e => setStatus(e.target.value)}
+          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] transition-colors"
         >
           <option value="TODOS">Todos os status</option>
           <option value="APPROVED">Aprovado</option>
@@ -121,105 +162,143 @@ export default async function AdminPagamentosPage({
           <option value="REFUNDED">Reembolsado</option>
           <option value="CANCELLED">Cancelado</option>
         </select>
-        <button
-          type="submit"
-          className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[38px] px-4 rounded-[6px] transition-colors"
-        >
-          Filtrar
-        </button>
-        {(q || status) && (
-          <Link
-            href="/admin/pagamentos"
-            className="text-[#7a9ab5] hover:text-white text-[13px] h-[38px] flex items-center px-2 transition-colors"
+        {gateways.length > 1 && (
+          <select
+            value={gwFilter}
+            onChange={e => setGw(e.target.value)}
+            className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] transition-colors"
+          >
+            <option value="TODOS">Todos os gateways</option>
+            {gateways.map(g => (
+              <option key={g} value={g}>{GATEWAY_ICON[g] ?? "💳"} {g}</option>
+            ))}
+          </select>
+        )}
+        {(q || statusFilter !== "TODOS" || gwFilter !== "TODOS") && (
+          <button
+            onClick={() => { setQ(""); setStatus("TODOS"); setGw("TODOS"); }}
+            className="text-[#526888] hover:text-white text-[13px] h-[38px] px-3 transition-colors"
           >
             Limpar
-          </Link>
+          </button>
         )}
-      </form>
+        <span className="ml-auto text-[#253750] text-[13px] flex items-center">
+          {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+        </span>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="bg-[#2d0a0a] border border-[#ff1f1f]/30 rounded-[8px] px-4 py-3 text-[#ff6b6b] text-[13px] mb-4">
+          {error}
+        </div>
+      )}
 
       {/* Table */}
       <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
-        <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-7 gap-3">
-          {["Data", "Assinante", "Plano", "Valor", "Método", "Status", "Pago em"].map((h) => (
-            <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">
-              {h}
-            </p>
+        {/* Header */}
+        <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-[1fr_1.4fr_1.2fr_90px_90px_100px_80px] gap-3 hidden md:grid">
+          {["Data", "Pagador", "Produto", "Valor", "Gateway", "Status", "Ref"].map(h => (
+            <p key={h} className="text-[#253750] text-[11px] font-semibold tracking-[0.5px]">{h}</p>
           ))}
         </div>
 
-        {payments.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-16 gap-3">
+            <div className="w-[18px] h-[18px] border-2 border-[#ff1f1f] border-t-transparent rounded-full animate-spin" />
+            <span className="text-[#526888] text-[14px]">Carregando...</span>
+          </div>
+        ) : filtered.length === 0 ? (
           <p className="text-[#253750] text-[13px] p-8 text-center">
-            Nenhum pagamento encontrado.
+            Nenhuma transação encontrada.
           </p>
         ) : (
-          payments.map((pay, i) => {
-            const st = STATUS_STYLE[pay.status] ?? STATUS_STYLE.CANCELLED;
+          filtered.map((intent, i) => {
+            const st  = STATUS_STYLE[intent.status] ?? STATUS_STYLE.CANCELLED;
+            const gwIcon = GATEWAY_ICON[intent.gateway] ?? "💳";
+            const meta = intent.metadata as { slug?: string } | null;
+            const isGuia = intent.product_type === "guia_plan";
+
             return (
-              <div key={pay.id}>
+              <div key={intent.id}>
                 {i > 0 && <div className="bg-[#141d2c] h-px" />}
-                <div className="px-5 py-3.5 grid grid-cols-7 gap-3 items-center">
-                  <p className="text-[#7a9ab5] text-[13px]">
-                    {pay.createdAt.toLocaleDateString("pt-BR", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    })}
-                  </p>
-                  <div className="min-w-0">
-                    <p className="text-[#d4d4da] text-[13px] truncate">{pay.user.name}</p>
-                    <p className="text-[#253750] text-[11px] truncate">{pay.user.email}</p>
+                {/* Desktop */}
+                <div className="px-5 py-3.5 grid grid-cols-[1fr_1.4fr_1.2fr_90px_90px_100px_80px] gap-3 items-center hidden md:grid">
+                  {/* Data */}
+                  <div>
+                    <p className="text-[#7a9ab5] text-[12px]">{fmtDate(intent.createdAt)}</p>
+                    <p className="text-[#253750] text-[11px]">{fmtTime(intent.createdAt)}</p>
                   </div>
+
+                  {/* Pagador */}
+                  <div className="min-w-0">
+                    <p className="text-[#d4d4da] text-[13px] truncate">{intent.payer_name ?? "—"}</p>
+                    <p className="text-[#526888] text-[11px] truncate">{intent.payer_email ?? "—"}</p>
+                  </div>
+
+                  {/* Produto */}
+                  <div className="min-w-0">
+                    {isGuia && meta?.slug ? (
+                      <Link
+                        href={`/guia/empresa/${meta.slug}`}
+                        target="_blank"
+                        className="text-[#7a9ab5] hover:text-white text-[12px] truncate block transition-colors"
+                      >
+                        {intent.product_label ?? "—"} ↗
+                      </Link>
+                    ) : (
+                      <p className="text-[#7a9ab5] text-[12px] truncate">{intent.product_label ?? "—"}</p>
+                    )}
+                    <p className="text-[#253750] text-[10px]">{intent.product_type}</p>
+                  </div>
+
+                  {/* Valor */}
+                  <p className="text-white text-[14px] font-semibold">{fmt(intent.amount)}</p>
+
+                  {/* Gateway */}
                   <p className="text-[#7a9ab5] text-[13px]">
-                    {pay.subscription?.plan.name ?? "—"}
+                    {gwIcon} <span className="capitalize">{intent.gateway}</span>
                   </p>
-                  <p className="text-white text-[14px] font-semibold">
-                    {formatCurrency(pay.amountInCents)}
-                  </p>
-                  <p className="text-[#7a9ab5] text-[13px]">{pay.paymentMethod ?? "—"}</p>
-                  <span
-                    className={`inline-flex items-center h-[20px] px-2.5 rounded-full text-[10px] font-bold ${st.bg} ${st.text}`}
-                  >
+
+                  {/* Status */}
+                  <span className={`inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold ${st.bg} ${st.text}`}>
                     {st.label}
                   </span>
-                  <p className="text-[#7a9ab5] text-[13px]">
-                    {pay.paidAt
-                      ? pay.paidAt.toLocaleDateString("pt-BR", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        })
-                      : "—"}
+
+                  {/* Ref */}
+                  <p className="text-[#253750] text-[10px] font-mono truncate" title={intent.external_reference ?? ""}>
+                    {intent.external_reference ? intent.external_reference.slice(0, 8) + "…" : "—"}
                   </p>
+                </div>
+
+                {/* Mobile */}
+                <div className="px-4 py-3.5 flex items-center justify-between gap-3 md:hidden">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className={`inline-flex items-center h-[18px] px-2 rounded-full text-[10px] font-bold ${st.bg} ${st.text}`}>{st.label}</span>
+                      <span className="text-[#526888] text-[11px]">{gwIcon} {intent.gateway}</span>
+                    </div>
+                    <p className="text-[#d4d4da] text-[13px] truncate">{intent.payer_name ?? "—"}</p>
+                    <p className="text-[#526888] text-[11px] truncate">{intent.product_label ?? "—"}</p>
+                    <p className="text-[#253750] text-[11px]">{fmtDate(intent.createdAt)}</p>
+                  </div>
+                  <p className="text-white text-[15px] font-bold shrink-0">{fmt(intent.amount)}</p>
                 </div>
               </div>
             );
           })
         )}
-
-        {totalPages > 1 && (
-          <div className="px-5 py-3 flex items-center justify-between border-t border-[#141d2c]">
-            <p className="text-[#253750] text-[13px]">
-              {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, total)} de{" "}
-              {total.toLocaleString("pt-BR")}
-            </p>
-            <div className="flex items-center gap-1.5">
-              {Array.from({ length: Math.min(totalPages, 8) }, (_, i) => i + 1).map((p) => (
-                <Link
-                  key={p}
-                  href={`/admin/pagamentos?${q ? `q=${encodeURIComponent(q)}&` : ""}${status ? `status=${status}&` : ""}pagina=${p}`}
-                  className={`w-[30px] h-[30px] flex items-center justify-center rounded-[4px] text-[13px] font-semibold transition-colors ${
-                    p === page
-                      ? "bg-[#ff1f1f] text-white"
-                      : "bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
-                  }`}
-                >
-                  {p}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
+
+      {filtered.length > 0 && (
+        <p className="text-[#253750] text-[12px] mt-3 text-right">
+          {filtered.length} transaç{filtered.length !== 1 ? "ões" : "ão"} · Total filtrado:{" "}
+          <span className="text-[#d4d4da]">
+            {fmt(filtered.filter(i => i.status === "APPROVED").reduce((s, i) => s + i.amount, 0))}
+          </span>{" "}
+          aprovados
+        </p>
+      )}
     </>
   );
 }

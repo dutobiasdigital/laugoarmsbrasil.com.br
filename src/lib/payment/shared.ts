@@ -118,5 +118,23 @@ export async function onPaymentApproved(intent: PaymentIntent): Promise<void> {
       }),
     });
   }
-  // Outros product_types podem ser adicionados aqui
+
+  // E-mail de confirmação (ignora erro para não bloquear webhook)
+  if (intent.payer_email) {
+    try {
+      const { sendPaymentConfirmationEmail } = await import("@/lib/email");
+      const meta = intent.metadata as { slug?: string } | null;
+      await sendPaymentConfirmationEmail({
+        payerName:    intent.payer_name    ?? "Cliente",
+        payerEmail:   intent.payer_email,
+        productLabel: intent.product_label ?? intent.product_type,
+        amount:       intent.amount,
+        gateway:      intent.gateway,
+        externalRef:  intent.external_reference ?? intent.id,
+        guiaSlug:     meta?.slug,
+      });
+    } catch (e) {
+      console.warn("[onPaymentApproved] falha ao enviar e-mail:", e);
+    }
+  }
 }

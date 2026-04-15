@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createPaymentIntent, updatePaymentIntent, getSettings } from "@/lib/payment/shared";
 import { createMPPreference } from "@/lib/payment/mercadopago";
 import { createStripeSession } from "@/lib/payment/stripe";
+import { createPSOrder } from "@/lib/payment/pagseguro";
+import { createPayPalOrder } from "@/lib/payment/paypal";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://revistamagnum.com.br";
 
@@ -83,9 +85,46 @@ export async function POST(req: NextRequest) {
 
       checkoutUrl = session.url;
 
+    } else if (gateway === "pagseguro") {
+      const token = settings["payment.pagseguro.token"];
+      const email = settings["payment.pagseguro.email"];
+      if (!token || !email) throw new Error("PagSeguro não configurado.");
+
+      const order = await createPSOrder({
+        token,
+        email,
+        title:           product_label,
+        amountCents:     amount_cents,
+        externalRef,
+        payerEmail:      payer_email,
+        payerName:       payer_name,
+        successUrl,
+        notificationUrl: `${APP_URL}/api/webhooks/pagseguro`,
+      });
+
+      checkoutUrl = order.paymentUrl;
+
+    } else if (gateway === "paypal") {
+      const clientId     = settings["payment.paypal.client_id"];
+      const clientSecret = settings["payment.paypal.client_secret"];
+      if (!clientId || !clientSecret) throw new Error("PayPal não configurado.");
+
+      const order = await createPayPalOrder({
+        clientId,
+        clientSecret,
+        title:        product_label,
+        amountCents:  amount_cents,
+        currency:     "BRL",
+        externalRef,
+        returnUrl:    successUrl,
+        cancelUrl:    errorUrl,
+      });
+
+      checkoutUrl = order.approvalUrl;
+
     } else {
       return NextResponse.json(
-        { error: `Gateway "${gateway}" ainda não suportado.` },
+        { error: `Gateway "${gateway}" não reconhecido.` },
         { status: 400 }
       );
     }
