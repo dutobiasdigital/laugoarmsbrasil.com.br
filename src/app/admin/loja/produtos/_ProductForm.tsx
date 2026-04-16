@@ -307,6 +307,7 @@ export default function ProductForm({ mode, categories, initial }: Props) {
   /* PDFs */
   const [pdfs, setPdfs] = useState<PdfItem[]>(initial?.pdfs ?? []);
   const pdfRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [pdfDragging, setPdfDragging] = useState<Record<string, boolean>>({});
 
   /* Meta */
   const [metaTitle, setMetaTitle]             = useState(initial?.metaTitle ?? "");
@@ -724,15 +725,35 @@ export default function ProductForm({ mode, categories, initial }: Props) {
                         </button>
                       </div>
                     ) : (
-                      <button type="button" disabled={pdf.uploading}
-                        onClick={() => pdfRefs.current[pdf._key]?.click()}
-                        className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[13px] h-[40px] px-4 rounded-[6px] transition-colors disabled:opacity-50 w-full flex items-center gap-2">
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                          <path d="M7 1v8M4 6l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path d="M1 10v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                        </svg>
-                        {pdf.uploading ? "Enviando..." : "Fazer upload do PDF"}
-                      </button>
+                      <div
+                        onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setPdfDragging((d) => ({ ...d, [pdf._key]: true })); }}
+                        onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setPdfDragging((d) => ({ ...d, [pdf._key]: false })); }}
+                        onDrop={(e) => {
+                          e.preventDefault(); e.stopPropagation();
+                          setPdfDragging((d) => ({ ...d, [pdf._key]: false }));
+                          const file = e.dataTransfer.files?.[0];
+                          if (file) uploadPdf(pdf._key, file);
+                        }}
+                        className={`relative rounded-[6px] transition-colors ${pdfDragging[pdf._key] ? "ring-2 ring-[#ff1f1f]/60 bg-[#ff1f1f]/5" : ""}`}
+                      >
+                        {pdfDragging[pdf._key] && (
+                          <div className="absolute inset-0 rounded-[6px] flex items-center justify-center pointer-events-none z-10">
+                            <span className="text-[#ff6b6b] text-[12px] font-semibold bg-[#0e1520]/90 px-3 py-1 rounded-[4px]">
+                              Solte o PDF aqui
+                            </span>
+                          </div>
+                        )}
+                        <button type="button" disabled={pdf.uploading}
+                          onClick={() => pdfRefs.current[pdf._key]?.click()}
+                          className={`bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[13px] h-[40px] px-4 rounded-[6px] transition-colors disabled:opacity-50 w-full flex items-center gap-2 ${pdfDragging[pdf._key] ? "opacity-40" : ""}`}>
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M7 1v8M4 6l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M1 10v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                          </svg>
+                          {pdf.uploading ? "Enviando..." : "Fazer upload do PDF"}
+                        </button>
+                        <p className="text-[#526888] text-[11px] mt-1.5">ou arraste o arquivo aqui</p>
+                      </div>
                     )}
                     <input
                       ref={(el) => { pdfRefs.current[pdf._key] = el; }}

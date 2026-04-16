@@ -27,6 +27,7 @@ export default function ImageUpload({ folder, filename, defaultUrl, inputName, a
   const [url, setUrl] = useState(defaultUrl || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function handleFile(file: File) {
@@ -51,12 +52,49 @@ export default function ImageUpload({ folder, filename, defaultUrl, inputName, a
     setLoading(false);
   }
 
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) setIsDragging(true);
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    e.stopPropagation();
+    // only leave if exiting the component entirely
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragging(false);
+    }
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith("image/")) handleFile(file);
+  }
+
   return (
-    <div>
+    <div
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={`relative rounded-[8px] p-2 -m-2 transition-colors ${
+        isDragging ? "ring-2 ring-[#ff1f1f]/60 bg-[#ff1f1f]/5" : ""
+      }`}
+    >
       <input type="hidden" name={inputName} value={url} />
-      <div className="flex gap-4 items-start">
+      {isDragging && (
+        <div className="absolute inset-0 rounded-[8px] flex items-center justify-center pointer-events-none z-10">
+          <span className="text-[#ff6b6b] text-[12px] font-semibold bg-[#0e1520]/90 px-3 py-1.5 rounded-[4px] border border-[#ff1f1f]/30">
+            Solte para enviar
+          </span>
+        </div>
+      )}
+      <div className={`flex gap-4 items-start transition-opacity ${isDragging ? "opacity-40" : ""}`}>
         {url ? (
           <div className="w-[100px] h-[100px] bg-[#141d2c] rounded-[6px] overflow-hidden border border-[#1c2a3e] shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={url} alt="Preview" className="w-full h-full object-cover" />
           </div>
         ) : (
@@ -84,12 +122,14 @@ export default function ImageUpload({ folder, filename, defaultUrl, inputName, a
           >
             {loading ? "Enviando..." : url ? "Trocar imagem" : "Fazer upload"}
           </button>
-          {aspectHint && (
-            <p className="text-white text-[11px] mt-1.5">{aspectHint}</p>
+          {aspectHint ? (
+            <p className="text-[#526888] text-[11px] mt-1.5">{aspectHint}</p>
+          ) : (
+            <p className="text-[#526888] text-[11px] mt-1.5">ou arraste a imagem aqui</p>
           )}
           {error && <p className="text-[#ff6b6b] text-[12px] mt-1">{error}</p>}
           {url && (
-            <p className="text-white text-[11px] mt-1 truncate max-w-[280px]">
+            <p className="text-[#7a9ab5] text-[11px] mt-1 truncate max-w-[280px]">
               {url.split("/").pop()}
             </p>
           )}

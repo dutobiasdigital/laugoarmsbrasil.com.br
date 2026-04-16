@@ -1,4 +1,5 @@
 import Link from "next/link";
+import EditionThumb from "./_EditionThumb";
 
 export const dynamic = "force-dynamic";
 
@@ -168,12 +169,7 @@ export default async function AdminEdicoesPage({
                 </p>
                 <div className="w-[36px] h-[48px] bg-[#141d2c] rounded-[2px] overflow-hidden flex items-center justify-center">
                   {ed.coverImageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={ed.coverImageUrl}
-                      alt={ed.title}
-                      className="w-full h-full object-cover"
-                    />
+                    <EditionThumb src={ed.coverImageUrl} alt={ed.title} />
                   ) : (
                     <span className="text-white text-[10px]">—</span>
                   )}

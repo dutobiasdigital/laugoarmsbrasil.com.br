@@ -39,11 +39,10 @@ function ImageUploadButton({
   onUploaded: (url: string) => void;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const uploadFile = async (file: File) => {
     setUploading(true);
     try {
       const fd = new FormData();
@@ -60,8 +59,28 @@ function ImageUploadButton({
     }
   };
 
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) uploadFile(file);
+  };
+
   return (
-    <>
+    <div
+      onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); }}
+      onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragging(false); }}
+      onDrop={(e) => {
+        e.preventDefault(); e.stopPropagation();
+        setIsDragging(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file && file.type.startsWith("image/")) uploadFile(file);
+      }}
+      className={`relative shrink-0 rounded-[6px] transition-colors ${isDragging ? "ring-2 ring-[#ff1f1f]/60" : ""}`}
+    >
+      {isDragging && (
+        <div className="absolute inset-0 rounded-[6px] flex items-center justify-center pointer-events-none z-10 bg-[#0e1520]/80">
+          <span className="text-[#ff6b6b] text-[11px] font-semibold">Solte aqui</span>
+        </div>
+      )}
       <input
         ref={inputRef}
         type="file"
@@ -73,12 +92,12 @@ function ImageUploadButton({
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={uploading}
-        title="Enviar imagem do computador"
-        className="shrink-0 h-[38px] px-3 rounded-[6px] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white hover:border-zinc-500 text-[12px] font-semibold transition-colors disabled:opacity-40 whitespace-nowrap"
+        title="Enviar imagem do computador ou arrastar"
+        className={`h-[38px] px-3 rounded-[6px] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white hover:border-zinc-500 text-[12px] font-semibold transition-colors disabled:opacity-40 whitespace-nowrap ${isDragging ? "opacity-40" : ""}`}
       >
         {uploading ? "Enviando…" : "↑ Upload"}
       </button>
-    </>
+    </div>
   );
 }
 
