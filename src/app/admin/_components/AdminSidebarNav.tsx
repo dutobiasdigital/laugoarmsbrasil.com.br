@@ -16,6 +16,10 @@ const ITEMS = [
   { href: "/admin/solicitacoes", label: "Solicitações", icon: "📨" },
   { href: "/admin/pagamentos", label: "Pagamentos", icon: "💳" },
   { href: "/admin/planos", label: "Planos", icon: "⭐" },
+  { href: "/admin/loja", label: "Loja", icon: "🛍", exact: true },
+  { href: "/admin/loja/categorias", label: "Categorias", icon: "🏷" },
+  { href: "/admin/loja/produtos", label: "Produtos", icon: "📦" },
+  { href: "/admin/loja/pedidos", label: "Pedidos", icon: "🛒" },
   { href: "/admin/design", label: "Design System", icon: "🎨" },
   { href: "/admin/configuracoes", label: "Configurações", icon: "⚙" },
 ];
