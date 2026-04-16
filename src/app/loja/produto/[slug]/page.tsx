@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductGallery from "@/components/loja/ProductGallery";
 import AddToCartButton from "@/components/loja/AddToCartButton";
+import ProductContentTabs from "@/components/loja/ProductContentTabs";
 
 export const dynamic = "force-dynamic";
 
@@ -23,15 +24,18 @@ interface ProductImage {
   id: string; imageUrl: string; imageAlt: string | null; sortOrder: number; isMain: boolean;
 }
 
+interface ContentTab { id: string; title: string; content: string }
+interface ProductPdf { id: string; title: string; fileUrl: string; sortOrder: number }
+
 interface ShopProduct {
   id: string; name: string; slug: string; basePrice: number;
   mainImageUrl: string | null; mainImageAlt: string | null;
   description: string | null; technicalSpecs: string | null;
+  contentTabs: ContentTab[];
   isFeatured: boolean; hasVariations: boolean;
   stock: number | null; sku: string | null;
   weight: number | null;
   dimensionWidth: number | null; dimensionHeight: number | null; dimensionLength: number | null;
-  pdfFileUrl: string | null;
   metaTitle: string | null; metaDescription: string | null;
   categoryId: string | null;
   category: { id: string; title: string; slug: string } | null;
@@ -52,11 +56,12 @@ export default async function ProdutoPage({ params }: { params: Promise<{ slug: 
 
   let product: ShopProduct | null = null;
   let extraImages: ProductImage[] = [];
+  let productPdfs: ProductPdf[]   = [];
   let related: RelatedProduct[]   = [];
 
   try {
     const res = await fetch(
-      `${BASE}/shop_products?slug=eq.${encodeURIComponent(slug)}&isActive=eq.true&select=id,name,slug,basePrice,mainImageUrl,mainImageAlt,description,technicalSpecs,isFeatured,hasVariations,stock,sku,weight,dimensionWidth,dimensionHeight,dimensionLength,pdfFileUrl,metaTitle,metaDescription,categoryId,category:shop_categories(id,title,slug),variations:shop_product_variations(id,name,attributes,price,stock,sku,isActive,sortOrder)&limit=1`,
+      `${BASE}/shop_products?slug=eq.${encodeURIComponent(slug)}&isActive=eq.true&select=id,name,slug,basePrice,mainImageUrl,mainImageAlt,description,technicalSpecs,contentTabs,isFeatured,hasVariations,stock,sku,weight,dimensionWidth,dimensionHeight,dimensionLength,metaTitle,metaDescription,categoryId,category:shop_categories(id,title,slug),variations:shop_product_variations(id,name,attributes,price,stock,sku,isActive,sortOrder)&limit=1`,
       { headers: HEADERS, cache: "no-store" }
     );
     if (res.ok) {
@@ -67,16 +72,14 @@ export default async function ProdutoPage({ params }: { params: Promise<{ slug: 
 
   if (!product) notFound();
 
-  // Fetch extra images
+  // Fetch extra images + PDFs in parallel
   try {
-    const imgRes = await fetch(
-      `${BASE}/shop_product_images?productId=eq.${product.id}&select=id,imageUrl,imageAlt,sortOrder,isMain&order=sortOrder.asc`,
-      { headers: HEADERS, cache: "no-store" }
-    );
-    if (imgRes.ok) {
-      const d = await imgRes.json();
-      if (Array.isArray(d)) extraImages = d;
-    }
+    const [imgRes, pdfRes] = await Promise.all([
+      fetch(`${BASE}/shop_product_images?productId=eq.${product.id}&select=id,imageUrl,imageAlt,sortOrder,isMain&order=sortOrder.asc`, { headers: HEADERS, cache: "no-store" }),
+      fetch(`${BASE}/shop_product_pdfs?productId=eq.${product.id}&select=id,title,fileUrl,sortOrder&order=sortOrder.asc`, { headers: HEADERS, cache: "no-store" }),
+    ]);
+    if (imgRes.ok) { const d = await imgRes.json(); if (Array.isArray(d)) extraImages = d; }
+    if (pdfRes.ok) { const d = await pdfRes.json(); if (Array.isArray(d)) productPdfs = d; }
   } catch { /* ignore */ }
 
   // Fetch related products (same category)
@@ -102,7 +105,13 @@ export default async function ProdutoPage({ params }: { params: Promise<{ slug: 
     ?.filter(v => v.isActive)
     .sort((a, b) => a.sortOrder - b.sortOrder) ?? [];
 
-  const hasSpecs = !!(product.technicalSpecs || product.weight || product.sku || product.dimensionWidth);
+  // Build all content tabs: description first (if present), then dynamic tabs, then legacy technicalSpecs
+  const allContentTabs: { id: string; title: string; content: string }[] = [];
+  if (product.description) allContentTabs.push({ id: "description", title: "Descrição", content: product.description });
+  if (product.contentTabs?.length) allContentTabs.push(...product.contentTabs.filter(t => t.content));
+  else if (product.technicalSpecs) allContentTabs.push({ id: "specs", title: "Especificações Técnicas", content: product.technicalSpecs });
+
+  const hasSpecs = !!(product.weight || product.sku || product.dimensionWidth);
 
   return (
     <div className="min-h-screen bg-[#070a12] flex flex-col">
@@ -134,17 +143,24 @@ export default async function ProdutoPage({ params }: { params: Promise<{ slug: 
             <div className="w-full lg:w-[480px] shrink-0">
               <ProductGallery images={galleryImages} alt={product.name} />
 
-              {/* PDF */}
-              {product.pdfFileUrl && (
-                <a href={product.pdfFileUrl} target="_blank" rel="noopener noreferrer"
-                  className="mt-4 w-full h-[44px] flex items-center justify-center gap-2 rounded-[8px] border border-[#1c2a3e] hover:border-[#526888] text-[#7a9ab5] hover:text-white text-[13px] font-semibold transition-colors">
-                  <svg width="14" height="16" viewBox="0 0 14 16" fill="none">
-                    <path d="M2 1h7l3 3v11H2V1z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-                    <path d="M9 1v3h3" stroke="currentColor" strokeWidth="1.5"/>
-                    <path d="M4 8h6M4 11h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                  </svg>
-                  Baixar ficha técnica (PDF)
-                </a>
+              {/* PDFs */}
+              {productPdfs.length > 0 && (
+                <div className="mt-4 flex flex-col gap-2">
+                  {productPdfs.map((pdf) => (
+                    <a key={pdf.id} href={pdf.fileUrl} target="_blank" rel="noopener noreferrer"
+                      className="w-full h-[44px] flex items-center gap-3 px-4 rounded-[8px] border border-[#1c2a3e] hover:border-[#526888] text-[#7a9ab5] hover:text-white text-[13px] font-semibold transition-colors">
+                      <svg width="14" height="16" viewBox="0 0 14 16" fill="none" className="shrink-0">
+                        <path d="M2 1h7l3 3v11H2V1z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                        <path d="M9 1v3h3" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M4 8h6M4 11h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                      <span className="flex-1 truncate">{pdf.title || "Baixar PDF"}</span>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="shrink-0 opacity-50">
+                        <path d="M6 1v7M3 5l3 3 3-3M1 9v1a1 1 0 001 1h8a1 1 0 001-1V9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </a>
+                  ))}
+                </div>
               )}
             </div>
 
@@ -205,41 +221,44 @@ export default async function ProdutoPage({ params }: { params: Promise<{ slug: 
             </div>
           </div>
 
-          {/* Conteúdo estendido */}
-          {(product.description || hasSpecs) && (
-            <div className="mt-16 border-t border-[#0e1520] pt-12 flex flex-col gap-12">
-              {product.description && (
-                <div>
-                  <h2 className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[28px] mb-5">Descrição</h2>
-                  <div className="prose prose-invert prose-sm max-w-none text-[#7a9ab5] leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: product.description }} />
+          {/* Conteúdo estendido — tabs dinâmicas + specs técnicas */}
+          {(allContentTabs.length > 0 || hasSpecs) && (
+            <div className="mt-16 border-t border-[#0e1520] pt-12">
+              {/* Specs table (always shown if data present) */}
+              {hasSpecs && (
+                <div className="mb-10">
+                  <div className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] overflow-hidden">
+                    {[
+                      product.sku && { label: "SKU", value: product.sku },
+                      product.weight && { label: "Peso", value: `${product.weight}g` },
+                      product.dimensionWidth && product.dimensionHeight && product.dimensionLength
+                        && { label: "Dimensões", value: `${product.dimensionWidth} × ${product.dimensionHeight} × ${product.dimensionLength} cm` },
+                    ].filter(Boolean).map((row, i, arr) => {
+                      const r = row as { label: string; value: string };
+                      return (
+                        <div key={r.label} className={`flex items-center gap-4 px-5 py-3 ${i < arr.length - 1 ? "border-b border-[#0a0f1a]" : ""}`}>
+                          <span className="text-[#526888] text-[12px] font-semibold uppercase tracking-[0.6px] w-[120px] shrink-0">{r.label}</span>
+                          <span className="text-[#d4d4da] text-[13px] font-mono">{r.value}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
-              {hasSpecs && (
+              {/* Content tabs */}
+              {allContentTabs.length > 0 && (
                 <div>
-                  <h2 className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[28px] mb-5">Especificações Técnicas</h2>
-                  {(product.sku || product.weight || product.dimensionWidth) && (
-                    <div className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] overflow-hidden mb-6">
-                      {[
-                        product.sku && { label: "SKU", value: product.sku },
-                        product.weight && { label: "Peso", value: `${product.weight}g` },
-                        product.dimensionWidth && product.dimensionHeight && product.dimensionLength
-                          && { label: "Dimensões", value: `${product.dimensionWidth} × ${product.dimensionHeight} × ${product.dimensionLength} cm` },
-                      ].filter(Boolean).map((row, i, arr) => {
-                        const r = row as { label: string; value: string };
-                        return (
-                          <div key={r.label} className={`flex items-center gap-4 px-5 py-3 ${i < arr.length - 1 ? "border-b border-[#0a0f1a]" : ""}`}>
-                            <span className="text-[#526888] text-[12px] font-semibold uppercase tracking-[0.6px] w-[120px] shrink-0">{r.label}</span>
-                            <span className="text-[#d4d4da] text-[13px] font-mono">{r.value}</span>
-                          </div>
-                        );
-                      })}
+                  {allContentTabs.length === 1 ? (
+                    /* Single tab — show without tab bar */
+                    <div>
+                      <h2 className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[28px] mb-5">{allContentTabs[0].title}</h2>
+                      <div className="prose prose-invert prose-sm max-w-none text-[#7a9ab5] leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: allContentTabs[0].content }} />
                     </div>
-                  )}
-                  {product.technicalSpecs && (
-                    <div className="prose prose-invert prose-sm max-w-none text-[#7a9ab5] leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: product.technicalSpecs }} />
+                  ) : (
+                    /* Multiple tabs — show tab bar */
+                    <ProductContentTabs tabs={allContentTabs} />
                   )}
                 </div>
               )}
