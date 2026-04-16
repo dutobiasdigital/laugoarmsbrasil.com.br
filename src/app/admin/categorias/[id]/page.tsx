@@ -24,6 +24,7 @@ export default async function EditarCategoriaPage({
     isActive: boolean;
     sortOrder: number;
     imageUrl: string | null;
+    imageAlt: string | null;
     metaTitle: string | null;
     metaDescription: string | null;
     metaKeywords: string | null;
@@ -31,7 +32,7 @@ export default async function EditarCategoriaPage({
 
   try {
     const res = await fetch(
-      `${BASE}/article_categories?id=eq.${id}&select=id,name,slug,description,isActive,sortOrder,imageUrl,metaTitle,metaDescription,metaKeywords&limit=1`,
+      `${BASE}/article_categories?id=eq.${id}&select=id,name,slug,description,isActive,sortOrder,imageUrl,imageAlt,metaTitle,metaDescription,metaKeywords&limit=1`,
       { headers: HEADERS, cache: "no-store" }
     );
     const data = await res.json();
@@ -50,6 +51,7 @@ export default async function EditarCategoriaPage({
     isActive: category.isActive,
     sortOrder: category.sortOrder,
     imageUrl: category.imageUrl ?? "",
+    imageAlt: category.imageAlt ?? "",
     metaTitle: category.metaTitle ?? "",
     metaDescription: category.metaDescription ?? "",
     metaKeywords: category.metaKeywords ?? "",
