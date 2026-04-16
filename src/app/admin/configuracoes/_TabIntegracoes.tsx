@@ -10,10 +10,18 @@ const INTEGRATIONS = [
     group: "Google",
     icon: "🔵",
     items: [
+      { key: "integrations.google_search_console", label: "Google Search Console — Verificação", placeholder: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", hint: "Cole apenas o valor do atributo content da meta tag fornecida pelo Search Console. Ex: <meta name=\"google-site-verification\" content=\"VALOR_AQUI\" />" },
       { key: "integrations.gtm_id",          label: "Google Tag Manager ID",    placeholder: "GTM-XXXXXXX",   hint: "Injeta no <head>. Recomendado para centralizar todos os tags." },
       { key: "integrations.ga4_id",           label: "Google Analytics 4",       placeholder: "G-XXXXXXXXXX",  hint: "Measurement ID do GA4. Ignore se já estiver configurado no GTM." },
       { key: "integrations.google_ads_id",    label: "Google Ads — Conversion ID",placeholder: "AW-XXXXXXXXX", hint: "ID de conversão do Google Ads." },
       { key: "integrations.google_ads_label", label: "Google Ads — Label",        placeholder: "xxxxxxxxxxxx",  hint: "Label do evento de conversão (opcional)." },
+    ],
+  },
+  {
+    group: "Bing Webmaster Tools",
+    icon: "🔷",
+    items: [
+      { key: "integrations.bing_verification", label: "Bing — Verificação do site", placeholder: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", hint: "Cole apenas o valor do atributo content fornecido pelo Bing Webmaster Tools. Ex: <meta name=\"msvalidate.01\" content=\"VALOR_AQUI\" />" },
     ],
   },
   {
