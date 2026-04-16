@@ -2,43 +2,38 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
+
 const SEGMENT_LABELS: Record<string, string> = {
-  ARMAS:         "Armas",
-  MUNICOES:      "Munições",
-  ACESSORIOS:    "Acessórios",
-  CACA:          "Caça",
-  TIRO_ESPORTIVO:"Tiro Esportivo",
-  OUTROS:        "Outros",
+  ARMAS:          "Armas",
+  MUNICOES:       "Munições",
+  ACESSORIOS:     "Acessórios",
+  CACA:           "Caça",
+  TIRO_ESPORTIVO: "Tiro Esportivo",
+  OUTROS:         "Outros",
 };
 
-interface Advertiser {
+const PIPELINE_STYLE: Record<string, { bg: string; text: string; label: string }> = {
+  REGISTERED:     { bg: "bg-[#141d2c]", text: "text-[#7a9ab5]", label: "Cadastrado"      },
+  EMAIL_VERIFIED: { bg: "bg-[#0f2438]", text: "text-[#60a5fa]", label: "E-mail Validado" },
+  COMPLETE:       { bg: "bg-[#1a1f0f]", text: "text-[#a3e635]", label: "Completo"         },
+  ACTIVE:         { bg: "bg-[#0f381f]", text: "text-[#22c55e]", label: "Ativo"            },
+  SUSPENDED:      { bg: "bg-[#380f0f]", text: "text-[#f87171]", label: "Suspenso"         },
+};
+
+interface UserRow { name: string | null; email: string | null; }
+interface Company {
   id: string;
   tradeName: string;
-  legalName: string | null;
-  contact: string | null;
-  phone: string | null;
   email: string | null;
-  website: string | null;
-  instagram: string | null;
-  segment: string;
-  logoUrl: string | null;
+  segment: string | null;
+  pipelineStatus: string;
+  listingType: string;
   createdAt: string;
-}
-
-async function getAdvertisers(q?: string): Promise<{ data: Advertiser[]; error?: string }> {
-  try {
-    const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
-    const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-    const filter   = q ? `&tradeName=ilike.*${encodeURIComponent(q)}*` : "";
-    const res = await fetch(
-      `https://${PROJECT}.supabase.co/rest/v1/advertisers?select=*&order=tradeName.asc${filter}`,
-      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, cache: "no-store" }
-    );
-    const data = await res.json();
-    return { data: Array.isArray(data) ? data : [] };
-  } catch (e: unknown) {
-    return { data: [], error: (e as Error).message };
-  }
+  users: UserRow | null;
 }
 
 export default async function AdminEmpresasPage({
@@ -47,7 +42,19 @@ export default async function AdminEmpresasPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q } = await searchParams;
-  const { data: empresas } = await getAdvertisers(q);
+
+  let companies: Company[] = [];
+
+  try {
+    let url = `${BASE}/companies?select=id,tradeName,email,segment,pipelineStatus,listingType,createdAt,users(name,email)&order=tradeName.asc`;
+    if (q) url += `&tradeName=ilike.*${encodeURIComponent(q)}*`;
+
+    const res = await fetch(url, { headers: HEADERS, cache: "no-store" });
+    const data = await res.json();
+    companies = Array.isArray(data) ? data : [];
+  } catch {
+    // DB unavailable
+  }
 
   return (
     <>
@@ -57,11 +64,11 @@ export default async function AdminEmpresasPage({
             Empresas Anunciantes
           </h1>
           <p className="text-[#7a9ab5] text-[14px]">
-            {empresas.length} empresa{empresas.length !== 1 ? "s" : ""} cadastrada{empresas.length !== 1 ? "s" : ""}
+            {companies.length} empresa{companies.length !== 1 ? "s" : ""} cadastrada{companies.length !== 1 ? "s" : ""}
           </p>
         </div>
         <Link
-          href="/admin/empresas/nova"
+          href="/admin/anunciantes/nova"
           className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[40px] px-5 flex items-center rounded-[6px] transition-colors"
         >
           + Nova Empresa
@@ -75,7 +82,7 @@ export default async function AdminEmpresasPage({
         <input
           name="q"
           defaultValue={q}
-          placeholder="🔍 Buscar empresa..."
+          placeholder="Buscar empresa..."
           className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-[280px]"
         />
         <button type="submit" className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[38px] px-4 rounded-[6px] transition-colors">
@@ -90,50 +97,66 @@ export default async function AdminEmpresasPage({
 
       {/* Tabela */}
       <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
-        <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-[2fr_2fr_1fr_1fr_1fr_80px] gap-3">
-          {["Empresa", "Contato", "Segmento", "Email", "Telefone", ""].map((h) => (
+        <div className="bg-[#141d2c] px-5 py-3 hidden sm:grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr_80px] gap-3">
+          {["Empresa", "Dono", "Segmento", "Tipo", "Status", ""].map((h) => (
             <p key={h} className="text-white text-[11px] font-semibold tracking-[0.5px] uppercase">{h}</p>
           ))}
         </div>
 
-        {empresas.length === 0 ? (
+        {companies.length === 0 ? (
           <div className="p-10 text-center">
-            <p className="text-white text-[13px] mb-4">Nenhuma empresa cadastrada.</p>
-            <Link href="/admin/empresas/nova" className="inline-flex bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[13px] font-semibold h-[38px] px-5 items-center rounded-[6px] transition-colors">
+            <p className="text-[#7a9ab5] text-[13px] mb-4">Nenhuma empresa cadastrada.</p>
+            <Link href="/admin/anunciantes/nova" className="inline-flex bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[13px] font-semibold h-[38px] px-5 items-center rounded-[6px] transition-colors">
               Cadastrar primeira empresa
             </Link>
           </div>
         ) : (
-          empresas.map((em, i) => (
-            <div key={em.id}>
-              {i > 0 && <div className="bg-[#141d2c] h-px" />}
-              <div className="px-5 py-3.5 grid grid-cols-[2fr_2fr_1fr_1fr_1fr_80px] gap-3 items-center">
-                <div className="flex items-center gap-3 min-w-0">
-                  {em.logoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={em.logoUrl} alt={em.tradeName} className="w-[32px] h-[32px] object-contain rounded-[4px] bg-[#141d2c] shrink-0" />
-                  ) : (
-                    <div className="w-[32px] h-[32px] bg-[#141d2c] rounded-[4px] flex items-center justify-center shrink-0">
-                      <span className="text-white text-[14px]">🏢</span>
-                    </div>
-                  )}
+          companies.map((c, i) => {
+            const ps = PIPELINE_STYLE[c.pipelineStatus] ?? PIPELINE_STYLE.REGISTERED;
+            return (
+              <div key={c.id}>
+                {i > 0 && <div className="bg-[#141d2c] h-px" />}
+                <div className="px-5 py-3.5 hidden sm:grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr_80px] gap-3 items-center">
                   <div className="min-w-0">
-                    <p className="text-[#d4d4da] text-[14px] font-semibold truncate">{em.tradeName}</p>
-                    {em.legalName && <p className="text-[#526888] text-[11px] truncate">{em.legalName}</p>}
+                    <p className="text-[#d4d4da] text-[14px] font-semibold truncate">{c.tradeName}</p>
+                    {c.email && <p className="text-[#526888] text-[11px] truncate">{c.email}</p>}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[#7a9ab5] text-[13px] truncate">{c.users?.name ?? "—"}</p>
+                    {c.users?.email && <p className="text-[#526888] text-[11px] truncate">{c.users.email}</p>}
+                  </div>
+                  <p className="text-[#7a9ab5] text-[13px]">
+                    {SEGMENT_LABELS[c.segment ?? ""] ?? c.segment ?? "—"}
+                  </p>
+                  <span className="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold bg-[#141d2c] text-[#7a9ab5] w-fit">
+                    {c.listingType}
+                  </span>
+                  <span className={`inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold w-fit ${ps.bg} ${ps.text}`}>
+                    {ps.label}
+                  </span>
+                  <Link href={`/admin/anunciantes/${c.id}`} className="text-[#7a9ab5] hover:text-white text-[13px] transition-colors text-right">
+                    Editar →
+                  </Link>
+                </div>
+
+                {/* Mobile */}
+                <div className="px-4 py-3.5 flex items-center justify-between gap-3 sm:hidden">
+                  <div className="min-w-0">
+                    <p className="text-[#d4d4da] text-[13px] font-semibold truncate">{c.tradeName}</p>
+                    <p className="text-[#526888] text-[11px] truncate">{c.users?.name ?? "—"}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className={`inline-flex items-center h-[18px] px-2 rounded-full text-[10px] font-bold ${ps.bg} ${ps.text}`}>
+                      {ps.label}
+                    </span>
+                    <Link href={`/admin/anunciantes/${c.id}`} className="text-[#526888] hover:text-white text-[12px] transition-colors">
+                      Editar →
+                    </Link>
                   </div>
                 </div>
-                <p className="text-[#7a9ab5] text-[13px] truncate">{em.contact ?? "—"}</p>
-                <span className="inline-flex items-center h-[20px] px-2 rounded-[2px] text-[10px] font-bold bg-[#141d2c] text-[#7a9ab5] w-fit">
-                  {SEGMENT_LABELS[em.segment] ?? em.segment}
-                </span>
-                <p className="text-[#7a9ab5] text-[12px] truncate">{em.email ?? "—"}</p>
-                <p className="text-[#7a9ab5] text-[12px]">{em.phone ?? "—"}</p>
-                <Link href={`/admin/empresas/${em.id}`} className="text-[#7a9ab5] hover:text-white text-[13px] transition-colors text-right">
-                  Editar →
-                </Link>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </>
