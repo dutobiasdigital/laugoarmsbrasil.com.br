@@ -29,12 +29,13 @@ export default async function EditarEdicaoPage({
     pdfStoragePath: string | null;
     pageFlipUrl: string | null;
     isPublished: boolean;
+    isOnNewstand: boolean;
     publishedAt: string | null;
   } | null = null;
 
   try {
     const res = await fetch(
-      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,editorial,tableOfContents,pageCount,coverImageUrl,pdfStoragePath,pageFlipUrl,isPublished,publishedAt&limit=1`,
+      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,editorial,tableOfContents,pageCount,coverImageUrl,pdfStoragePath,pageFlipUrl,isPublished,isOnNewstand,publishedAt&limit=1`,
       { headers: HEADERS, cache: "no-store" }
     );
     const data = await res.json();
@@ -46,7 +47,6 @@ export default async function EditarEdicaoPage({
   if (!edition) notFound();
   const ed = edition!;
 
-  // Serialize publishedAt to date-only string for client component
   const serialized = {
     ...ed,
     publishedAt: ed.publishedAt ? ed.publishedAt.slice(0, 10) : null,
@@ -55,16 +55,11 @@ export default async function EditarEdicaoPage({
   return (
     <>
       <div className="flex items-center gap-3 mb-6">
-        <Link
-          href="/admin/edicoes"
-          className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors"
-        >
+        <Link href="/admin/edicoes" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">
           ← Edições
         </Link>
         <span className="text-[#141d2c]">/</span>
-        <span className="text-[#d4d4da] text-[14px] truncate max-w-[300px]">
-          {ed.title}
-        </span>
+        <span className="text-[#d4d4da] text-[14px] truncate max-w-[300px]">{ed.title}</span>
       </div>
 
       <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">

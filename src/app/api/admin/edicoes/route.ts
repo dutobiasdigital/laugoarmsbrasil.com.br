@@ -14,38 +14,42 @@ function toSlug(str: string) {
     .replace(/^-|-$/g, "");
 }
 
+function parseBool(v: unknown) {
+  return v === "on" || v === true || v === "true";
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const title = body.title as string;
-    const slug = (body.slug as string) || toSlug(title);
-    const number = body.number ? Number(body.number) : null;
-    const type = (body.type as string) || "REGULAR";
-    const editorial = (body.editorial as string) || null;
+    const title         = body.title as string;
+    const slug          = (body.slug as string) || toSlug(title);
+    const number        = body.number ? Number(body.number) : null;
+    const type          = (body.type as string) || "REGULAR";
+    const editorial     = (body.editorial as string) || null;
     const tableOfContents = (body.tableOfContents as string) || null;
-    const pageCount = body.pageCount ? Number(body.pageCount) : null;
+    const pageCount     = body.pageCount ? Number(body.pageCount) : null;
     const coverImageUrl = (body.coverImageUrl as string) || null;
     const pdfStoragePath = (body.pdfStoragePath as string) || null;
-    const pageFlipUrl = (body.pageFlipUrl as string) || null;
-    const isPublished = body.isPublished === "on" || body.isPublished === true || body.isPublished === "true";
-    const publishedAt = body.publishedAt ? (body.publishedAt as string) : null;
+    const pageFlipUrl   = (body.pageFlipUrl as string) || null;
+    const isPublished   = parseBool(body.isPublished);
+    const isOnNewstand  = parseBool(body.isOnNewstand);
+    const publishedAt   = body.publishedAt ? (body.publishedAt as string) : null;
+
+    // Apenas uma edição pode estar na banca — limpa as demais
+    if (isOnNewstand) {
+      await fetch(`${BASE}/editions?isOnNewstand=eq.true`, {
+        method: "PATCH",
+        headers: HEADERS,
+        body: JSON.stringify({ isOnNewstand: false }),
+      });
+    }
 
     const res = await fetch(`${BASE}/editions`, {
       method: "POST",
       headers: { ...HEADERS, Prefer: "return=representation" },
       body: JSON.stringify({
-        title,
-        slug,
-        number,
-        type,
-        editorial,
-        tableOfContents,
-        pageCount,
-        coverImageUrl,
-        pdfStoragePath,
-        pageFlipUrl,
-        isPublished,
-        publishedAt,
+        title, slug, number, type, editorial, tableOfContents, pageCount,
+        coverImageUrl, pdfStoragePath, pageFlipUrl, isPublished, isOnNewstand, publishedAt,
       }),
     });
     if (!res.ok) throw new Error(await res.text());
@@ -62,36 +66,36 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const id = body.id as string;
-    const title = body.title as string;
-    const slug = body.slug as string;
-    const number = body.number ? Number(body.number) : null;
-    const type = (body.type as string) || "REGULAR";
-    const editorial = (body.editorial as string) || null;
+    const id            = body.id as string;
+    const title         = body.title as string;
+    const slug          = body.slug as string;
+    const number        = body.number ? Number(body.number) : null;
+    const type          = (body.type as string) || "REGULAR";
+    const editorial     = (body.editorial as string) || null;
     const tableOfContents = (body.tableOfContents as string) || null;
-    const pageCount = body.pageCount ? Number(body.pageCount) : null;
+    const pageCount     = body.pageCount ? Number(body.pageCount) : null;
     const coverImageUrl = (body.coverImageUrl as string) || null;
     const pdfStoragePath = (body.pdfStoragePath as string) || null;
-    const pageFlipUrl = (body.pageFlipUrl as string) || null;
-    const isPublished = body.isPublished === "on" || body.isPublished === true || body.isPublished === "true";
-    const publishedAt = body.publishedAt ? (body.publishedAt as string) : null;
+    const pageFlipUrl   = (body.pageFlipUrl as string) || null;
+    const isPublished   = parseBool(body.isPublished);
+    const isOnNewstand  = parseBool(body.isOnNewstand);
+    const publishedAt   = body.publishedAt ? (body.publishedAt as string) : null;
+
+    // Apenas uma edição pode estar na banca — limpa as outras
+    if (isOnNewstand) {
+      await fetch(`${BASE}/editions?isOnNewstand=eq.true&id=neq.${id}`, {
+        method: "PATCH",
+        headers: HEADERS,
+        body: JSON.stringify({ isOnNewstand: false }),
+      });
+    }
 
     const res = await fetch(`${BASE}/editions?id=eq.${id}`, {
       method: "PATCH",
       headers: { ...HEADERS, Prefer: "return=representation" },
       body: JSON.stringify({
-        title,
-        slug,
-        number,
-        type,
-        editorial,
-        tableOfContents,
-        pageCount,
-        coverImageUrl,
-        pdfStoragePath,
-        pageFlipUrl,
-        isPublished,
-        publishedAt,
+        title, slug, number, type, editorial, tableOfContents, pageCount,
+        coverImageUrl, pdfStoragePath, pageFlipUrl, isPublished, isOnNewstand, publishedAt,
       }),
     });
     if (!res.ok) throw new Error(await res.text());

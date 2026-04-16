@@ -29,12 +29,63 @@ interface Props {
     pdfStoragePath: string | null;
     pageFlipUrl: string | null;
     isPublished: boolean;
+    isOnNewstand: boolean;
     publishedAt: string | null;
   };
 }
 
 function parseToc(raw: string | null): TocItem[] {
   try { return JSON.parse(raw ?? "[]"); } catch { return []; }
+}
+
+/* ── Toggle de visualização HTML ─────────────────────── */
+function HtmlToggle({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const [mode, setMode] = useState<"visual" | "html">("visual");
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <label className={labelCls.replace(" mb-1.5", "")}>{label}</label>
+        <div className="flex rounded-[6px] overflow-hidden border border-[#1c2a3e]">
+          {(["visual", "html"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMode(m)}
+              className={`px-3 h-[28px] text-[11px] font-semibold transition-colors ${
+                mode === m
+                  ? "bg-[#ff1f1f] text-white"
+                  : "bg-[#141d2c] text-[#7a9ab5] hover:text-white"
+              }`}
+            >
+              {m === "visual" ? "Visual" : "HTML"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {mode === "visual" ? (
+        <RichEditor value={value} onChange={onChange} />
+      ) : (
+        <textarea
+          rows={16}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="bg-[#070a12] border border-[#1c2a3e] rounded-[6px] px-3 py-2.5 text-[12px] text-[#22c55e] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full resize-y font-mono leading-relaxed"
+          placeholder="HTML bruto da edição..."
+          spellCheck={false}
+        />
+      )}
+    </div>
+  );
 }
 
 export default function EditionEditForm({ edition }: Props) {
@@ -46,6 +97,7 @@ export default function EditionEditForm({ edition }: Props) {
   const [editionNumber, setEditionNumber] = useState(String(edition.number ?? ""));
   const [editionType, setEditionType] = useState(edition.type);
   const [editorial, setEditorial] = useState(edition.editorial ?? "");
+  const [isOnNewstand, setIsOnNewstand] = useState(edition.isOnNewstand);
 
   // TOC
   const [tocItems, setTocItems] = useState<TocItem[]>(parseToc(edition.tableOfContents));
@@ -84,11 +136,9 @@ export default function EditionEditForm({ edition }: Props) {
   function addTocItem() {
     setTocItems((prev) => [...prev, { page: "", title: "", category: "" }]);
   }
-
   function updateTocItem(i: number, field: keyof TocItem, value: string) {
     setTocItems((prev) => prev.map((item, idx) => idx === i ? { ...item, [field]: value } : item));
   }
-
   function removeTocItem(i: number) {
     setTocItems((prev) => prev.filter((_, idx) => idx !== i));
   }
@@ -120,6 +170,7 @@ export default function EditionEditForm({ edition }: Props) {
       ...Object.fromEntries(formData),
       editorial,
       tableOfContents: JSON.stringify(tocItems.filter((t) => t.title)),
+      isOnNewstand,
     };
     const res = await fetch("/api/admin/edicoes", {
       method: "PUT",
@@ -215,10 +266,9 @@ export default function EditionEditForm({ edition }: Props) {
             <input name="pdfStoragePath" defaultValue={edition.pdfStoragePath ?? ""} placeholder="edicoes/207/revista-magnum-207.pdf" className={inputCls} />
           </div>
 
-          {/* Editorial (RichEditor) */}
+          {/* Editorial com toggle HTML */}
           <div className="lg:col-span-2">
-            <label className={labelCls}>Editorial / Descrição</label>
-            <RichEditor value={edition.editorial ?? ""} onChange={setEditorial} />
+            <HtmlToggle label="Editorial / Descrição" value={editorial} onChange={setEditorial} />
           </div>
 
           {/* Data publicação */}
@@ -227,18 +277,38 @@ export default function EditionEditForm({ edition }: Props) {
             <input name="publishedAt" type="date" defaultValue={edition.publishedAt ?? ""} className={inputCls} />
           </div>
 
-          {/* Publicada */}
-          <div className="flex items-center gap-3 pt-6">
-            <input
-              id="isPublished"
-              name="isPublished"
-              type="checkbox"
-              defaultChecked={edition.isPublished}
-              className="w-[16px] h-[16px] accent-[#ff1f1f]"
-            />
-            <label htmlFor="isPublished" className="text-[#d4d4da] text-[14px]">
-              Publicada (visível no site)
-            </label>
+          {/* Flags */}
+          <div className="flex flex-col gap-3 pt-4">
+            <div className="flex items-center gap-3">
+              <input
+                id="isPublished"
+                name="isPublished"
+                type="checkbox"
+                defaultChecked={edition.isPublished}
+                className="w-[16px] h-[16px] accent-[#ff1f1f]"
+              />
+              <label htmlFor="isPublished" className="text-[#d4d4da] text-[14px]">
+                Publicada (visível no site)
+              </label>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input
+                id="isOnNewstand"
+                type="checkbox"
+                checked={isOnNewstand}
+                onChange={(e) => setIsOnNewstand(e.target.checked)}
+                className="w-[16px] h-[16px] accent-[#ff1f1f]"
+              />
+              <label htmlFor="isOnNewstand" className="text-[#d4d4da] text-[14px]">
+                📰 Na Banca (aparece na página &quot;Nas Bancas&quot;)
+              </label>
+            </div>
+            {isOnNewstand && (
+              <p className="text-[#f59e0b] text-[11px] ml-7">
+                Apenas uma edição pode estar na banca. As outras serão desmarcadas automaticamente.
+              </p>
+            )}
           </div>
         </div>
 
@@ -250,7 +320,6 @@ export default function EditionEditForm({ edition }: Props) {
               <p className="text-white text-[11px] mt-0.5">Cada linha vira uma entrada no índice da edição pública.</p>
             </div>
             <div className="flex items-center gap-2">
-              {/* Inline add category */}
               {addingCat ? (
                 <div className="flex items-center gap-1.5">
                   <input
@@ -261,87 +330,52 @@ export default function EditionEditForm({ edition }: Props) {
                     className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[32px] px-2.5 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-[180px]"
                     autoFocus
                   />
-                  <button
-                    type="button"
-                    onClick={addCategory}
-                    disabled={savingCat}
-                    className="bg-[#ff1f1f] text-white text-[12px] h-[32px] px-3 rounded-[6px] disabled:opacity-50"
-                  >
+                  <button type="button" onClick={addCategory} disabled={savingCat}
+                    className="bg-[#ff1f1f] text-white text-[12px] h-[32px] px-3 rounded-[6px] disabled:opacity-50">
                     {savingCat ? "..." : "Salvar"}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => { setAddingCat(false); setNewCatName(""); }}
-                    className="text-white hover:text-[#7a9ab5] text-[12px] h-[32px] px-2"
-                  >
-                    ✕
-                  </button>
+                  <button type="button" onClick={() => { setAddingCat(false); setNewCatName(""); }}
+                    className="text-white hover:text-[#7a9ab5] text-[12px] h-[32px] px-2">✕</button>
                 </div>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => setAddingCat(true)}
-                  className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#7a9ab5] text-[12px] h-[32px] px-3 rounded-[6px] transition-colors"
-                >
+                <button type="button" onClick={() => setAddingCat(true)}
+                  className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#7a9ab5] text-[12px] h-[32px] px-3 rounded-[6px] transition-colors">
                   + Nova categoria
                 </button>
               )}
-              <button
-                type="button"
-                onClick={addTocItem}
-                className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[12px] h-[32px] px-3 rounded-[6px] transition-colors"
-              >
+              <button type="button" onClick={addTocItem}
+                className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[12px] h-[32px] px-3 rounded-[6px] transition-colors">
                 + Adicionar item
               </button>
             </div>
           </div>
 
           <div className="bg-[#0e1520] border border-[#141d2c] rounded-[8px] overflow-hidden">
-            {/* Header */}
             <div className="bg-[#141d2c] px-4 py-2 grid grid-cols-[100px_1fr_180px_36px] gap-3">
               {["Página", "Título da Matéria", "Categoria", ""].map((h) => (
                 <p key={h} className="text-white text-[10px] font-semibold tracking-[0.5px] uppercase">{h}</p>
               ))}
             </div>
-
             {tocItems.length === 0 ? (
-              <p className="text-white text-[13px] text-center py-6">
-                Nenhum item. Clique em "+ Adicionar item" para começar.
-              </p>
+              <p className="text-white text-[13px] text-center py-6">Nenhum item. Clique em "+ Adicionar item" para começar.</p>
             ) : (
               tocItems.map((item, i) => (
                 <div key={i} className={`px-4 py-2.5 grid grid-cols-[100px_1fr_180px_36px] gap-3 items-center ${i > 0 ? "border-t border-[#141d2c]" : ""}`}>
-                  <input
-                    type="number"
-                    placeholder="Ex: 4"
-                    value={item.page}
+                  <input type="number" placeholder="Ex: 4" value={item.page}
                     onChange={(e) => updateTocItem(i, "page", e.target.value)}
-                    className="bg-[#141d2c] border border-[#1c2a3e] rounded-[4px] h-[34px] px-2.5 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Título do artigo ou seção"
-                    value={item.title}
+                    className="bg-[#141d2c] border border-[#1c2a3e] rounded-[4px] h-[34px] px-2.5 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full" />
+                  <input type="text" placeholder="Título do artigo ou seção" value={item.title}
                     onChange={(e) => updateTocItem(i, "title", e.target.value)}
-                    className="bg-[#141d2c] border border-[#1c2a3e] rounded-[4px] h-[34px] px-2.5 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full"
-                  />
-                  <select
-                    value={item.category}
-                    onChange={(e) => updateTocItem(i, "category", e.target.value)}
-                    className="bg-[#141d2c] border border-[#1c2a3e] rounded-[4px] h-[34px] px-2 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full"
-                  >
+                    className="bg-[#141d2c] border border-[#1c2a3e] rounded-[4px] h-[34px] px-2.5 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full" />
+                  <select value={item.category} onChange={(e) => updateTocItem(i, "category", e.target.value)}
+                    className="bg-[#141d2c] border border-[#1c2a3e] rounded-[4px] h-[34px] px-2 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full">
                     <option value="">Sem categoria</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.name}>{cat.name}</option>
                     ))}
                   </select>
-                  <button
-                    type="button"
-                    onClick={() => removeTocItem(i)}
-                    className="text-white hover:text-[#ff6b6b] text-[16px] h-[34px] flex items-center justify-center transition-colors"
-                  >
-                    ✕
-                  </button>
+                  <button type="button" onClick={() => removeTocItem(i)}
+                    className="text-white hover:text-[#ff6b6b] text-[16px] h-[34px] flex items-center justify-center transition-colors">✕</button>
                 </div>
               ))
             )}
@@ -349,54 +383,33 @@ export default function EditionEditForm({ edition }: Props) {
         </div>
 
         <div className="flex items-center justify-between gap-3 pt-2">
-          {/* Salvar + Cancelar */}
           <div className="flex gap-3">
-            <button
-              type="submit"
-              disabled={loading || deleting}
-              className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[14px] font-semibold h-[44px] px-7 rounded-[6px] transition-colors"
-            >
+            <button type="submit" disabled={loading || deleting}
+              className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[14px] font-semibold h-[44px] px-7 rounded-[6px] transition-colors">
               {loading ? "Salvando..." : "Salvar Alterações"}
             </button>
-            <Link
-              href="/admin/edicoes"
-              className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[44px] px-6 flex items-center rounded-[6px] transition-colors"
-            >
+            <Link href="/admin/edicoes"
+              className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[44px] px-6 flex items-center rounded-[6px] transition-colors">
               Cancelar
             </Link>
           </div>
 
-          {/* Excluir */}
           <div className="flex items-center gap-2">
             {confirmDelete ? (
               <>
-                <span className="text-[#ff6b6b] text-[13px] font-medium">
-                  Confirma exclusão?
-                </span>
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[13px] font-semibold h-[38px] px-4 rounded-[6px] transition-colors"
-                >
+                <span className="text-[#ff6b6b] text-[13px] font-medium">Confirma exclusão?</span>
+                <button type="button" onClick={handleDelete} disabled={deleting}
+                  className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[13px] font-semibold h-[38px] px-4 rounded-[6px] transition-colors">
                   {deleting ? "Excluindo..." : "Sim, excluir"}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setConfirmDelete(false)}
-                  disabled={deleting}
-                  className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[13px] h-[38px] px-4 rounded-[6px] transition-colors"
-                >
+                <button type="button" onClick={() => setConfirmDelete(false)} disabled={deleting}
+                  className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[13px] h-[38px] px-4 rounded-[6px] transition-colors">
                   Não
                 </button>
               </>
             ) : (
-              <button
-                type="button"
-                onClick={() => setConfirmDelete(true)}
-                disabled={loading}
-                className="border border-[#3a1010] hover:border-[#ff1f1f]/50 text-[#526888] hover:text-[#ff6b6b] text-[13px] h-[38px] px-4 rounded-[6px] transition-colors bg-transparent"
-              >
+              <button type="button" onClick={() => setConfirmDelete(true)} disabled={loading}
+                className="border border-[#3a1010] hover:border-[#ff1f1f]/50 text-[#526888] hover:text-[#ff6b6b] text-[13px] h-[38px] px-4 rounded-[6px] transition-colors bg-transparent">
                 🗑 Excluir edição
               </button>
             )}

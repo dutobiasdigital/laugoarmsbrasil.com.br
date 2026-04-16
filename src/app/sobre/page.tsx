@@ -29,6 +29,7 @@ export default function SobrePage() {
 
       <main className="flex-1 pt-16">
         {/* Hero */}
+        <div className="hero-metal border-b border-[#141d2c]">
         <div className="px-5 lg:px-20 pt-16 pb-12 max-w-[1200px]">
           <div className="flex items-center gap-2 mb-5">
             <div className="w-[6px] h-[6px] bg-[#ff1f1f] rounded-full" />
@@ -45,6 +46,7 @@ export default function SobrePage() {
             análises técnicas e cobertura legislativa.
           </p>
         </div>
+        </div>{/* /hero-metal */}
 
         {/* Stats */}
         <div className="px-5 lg:px-20 pb-16">

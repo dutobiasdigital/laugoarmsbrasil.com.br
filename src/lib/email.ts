@@ -66,7 +66,7 @@ function wrapHtml(title: string, body: string): string {
           <!-- Footer -->
           <tr>
             <td style="padding:20px 32px;border-top:1px solid #141d2c;">
-              <p style="margin:0;font-size:11px;color:#253750;text-align:center;">
+              <p style="margin:0;font-size:11px;color:#526888;text-align:center;">
                 © Revista Magnum · <a href="https://revistamagnum.com.br" style="color:#526888;text-decoration:none;">revistamagnum.com.br</a>
                 <br>Dúvidas? <a href="mailto:publicidade@revistamagnum.com.br" style="color:#526888;">publicidade@revistamagnum.com.br</a>
               </p>
@@ -186,7 +186,7 @@ export async function sendPaymentConfirmationEmail({
       <tr>
         <td style="padding:16px 20px;">
           <p style="margin:0;font-size:11px;color:#526888;">REFERÊNCIA</p>
-          <p style="margin:4px 0 0;font-size:11px;color:#253750;font-family:monospace;">${externalRef}</p>
+          <p style="margin:4px 0 0;font-size:11px;color:#526888;font-family:monospace;">${externalRef}</p>
         </td>
       </tr>
     </table>
@@ -195,7 +195,7 @@ export async function sendPaymentConfirmationEmail({
       ${profileBtn}
       <tr>
         <td style="padding-top:16px;">
-          <p style="margin:0;font-size:12px;color:#253750;text-align:center;">
+          <p style="margin:0;font-size:12px;color:#526888;text-align:center;">
             Guarde este e-mail como comprovante. Em caso de dúvidas, entre em contato conosco.
           </p>
         </td>

@@ -33,6 +33,54 @@ interface Props {
   categories: { id: string; name: string }[];
 }
 
+/* ── Toggle de visualização HTML ─────────────────────── */
+function HtmlToggle({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const [mode, setMode] = useState<"visual" | "html">("visual");
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <label className={labelCls.replace(" mb-1.5", "")}>Conteúdo</label>
+        <div className="flex rounded-[6px] overflow-hidden border border-[#1c2a3e]">
+          {(["visual", "html"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMode(m)}
+              className={`px-3 h-[28px] text-[11px] font-semibold transition-colors ${
+                mode === m
+                  ? "bg-[#ff1f1f] text-white"
+                  : "bg-[#141d2c] text-[#7a9ab5] hover:text-white"
+              }`}
+            >
+              {m === "visual" ? "Visual" : "HTML"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {mode === "visual" ? (
+        <RichEditor value={value} onChange={onChange} />
+      ) : (
+        <textarea
+          rows={20}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="bg-[#070a12] border border-[#1c2a3e] rounded-[6px] px-3 py-2.5 text-[12px] text-[#22c55e] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full resize-y font-mono leading-relaxed"
+          placeholder="HTML bruto do artigo..."
+          spellCheck={false}
+        />
+      )}
+    </div>
+  );
+}
+
 export default function ArticleEditForm({ article, categories }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -100,9 +148,9 @@ export default function ArticleEditForm({ article, categories }: Props) {
             <textarea name="excerpt" rows={2} defaultValue={article.excerpt ?? ""} className={textareaCls} />
           </div>
 
+          {/* Conteúdo com toggle HTML */}
           <div className="lg:col-span-3">
-            <label className={labelCls}>Conteúdo</label>
-            <RichEditor value={article.content} onChange={setContent} />
+            <HtmlToggle value={content} onChange={setContent} />
           </div>
 
           <div className="lg:col-span-3">
@@ -146,10 +194,12 @@ export default function ArticleEditForm({ article, categories }: Props) {
         </div>
 
         <div className="flex gap-3 pt-2">
-          <button type="submit" disabled={loading} className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[14px] font-semibold h-[44px] px-7 rounded-[6px] transition-colors">
+          <button type="submit" disabled={loading}
+            className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[14px] font-semibold h-[44px] px-7 rounded-[6px] transition-colors">
             {loading ? "Salvando..." : "Salvar Alterações"}
           </button>
-          <Link href="/admin/artigos" className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[44px] px-6 flex items-center rounded-[6px] transition-colors">
+          <Link href="/admin/artigos"
+            className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[44px] px-6 flex items-center rounded-[6px] transition-colors">
             Cancelar
           </Link>
         </div>

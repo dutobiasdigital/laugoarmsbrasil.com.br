@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ThemeToggle } from "./ThemeToggle";
+import NavEditionsDropdown from "./NavEditionsDropdown";
 
 export default async function Header() {
   const supabase = await createClient();
@@ -29,7 +30,6 @@ export default async function Header() {
       <nav className="hidden lg:flex items-center gap-7">
         {[
           { href: "/", label: "HOME" },
-          { href: "/edicoes", label: "EDIÇÕES", arrow: true },
           { href: "/guia", label: "GUIA" },
           { href: "/assine", label: "ASSINE" },
           { href: "/anuncie", label: "ANUNCIE" },
@@ -43,9 +43,9 @@ export default async function Header() {
             className="flex items-center gap-1 text-[#7a9ab5] hover:text-white text-[13px] font-semibold transition-colors"
           >
             {item.label}
-            {item.arrow && <span className="text-white text-[11px]">▾</span>}
           </Link>
         ))}
+        <NavEditionsDropdown />
       </nav>
 
       <div className="flex-1" />

@@ -106,7 +106,7 @@ export default async function EdicoesPage({
       <Header />
 
       {/* Page hero */}
-      <div className="bg-[#0e1520] border-b border-[#141d2c] h-[100px] flex items-center px-5 lg:px-20 mt-16">
+      <div className="hero-metal border-b border-[#141d2c] h-[100px] flex items-center px-5 lg:px-20 mt-16">
         <div className="flex flex-col gap-1">
           <h1 className="font-['Barlow_Condensed'] font-extrabold text-[#dce8ff] text-[36px] leading-none">
             Edições
