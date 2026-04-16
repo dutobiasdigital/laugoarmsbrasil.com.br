@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import FeaturedCarousel from "@/components/loja/FeaturedCarousel";
 
 export const dynamic = "force-dynamic";
 
@@ -28,291 +29,250 @@ interface ShopProduct {
   slug: string;
   basePrice: number;
   mainImageUrl: string | null;
-  mainImageAlt: string | null;
   isFeatured: boolean;
   hasVariations: boolean;
   stock: number | null;
   categoryId: string | null;
-  category: { id: string; title: string; slug: string } | null;
+  category: { title: string; slug: string } | null;
 }
 
-function formatCurrency(cents: number) {
-  return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
+// Gradientes de fallback por posição de categoria
+const CAT_GRADIENTS = [
+  "from-[#1a0808] to-[#0e1520]",
+  "from-[#080f1a] to-[#0a0f1a]",
+  "from-[#0a0e08] to-[#0e1520]",
+  "from-[#10080a] to-[#0e1520]",
+  "from-[#08101a] to-[#070a12]",
+  "from-[#121008] to-[#0e1520]",
+];
 
-function StockBadge({ product }: { product: ShopProduct }) {
-  if (product.hasVariations) return null;
-  const qty = product.stock ?? 0;
-  if (qty === 0)
-    return (
-      <span className="text-[10px] font-bold tracking-[0.6px] uppercase px-2 py-[3px] rounded-[4px] bg-[#1a0808] border border-[#ff1f1f]/20 text-[#ff6b6b]">
-        Esgotado
-      </span>
-    );
-  if (qty <= 5)
-    return (
-      <span className="text-[10px] font-bold tracking-[0.6px] uppercase px-2 py-[3px] rounded-[4px] bg-[#1a1200] border border-[#f59e0b]/20 text-[#f59e0b]">
-        Últimas unidades
-      </span>
-    );
-  return (
-    <span className="text-[10px] font-bold tracking-[0.6px] uppercase px-2 py-[3px] rounded-[4px] bg-[#071a10] border border-[#22c55e]/20 text-[#22c55e]">
-      Em estoque
-    </span>
-  );
-}
-
-export default async function LojaPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ categoria?: string }>;
-}) {
-  const { categoria } = await searchParams;
-
+export default async function LojaPage() {
   let categories: ShopCategory[] = [];
-  let products: ShopProduct[] = [];
+  let products: ShopProduct[]    = [];
 
   try {
     const [catRes, prodRes] = await Promise.all([
-      fetch(
-        `${BASE}/shop_categories?isActive=eq.true&select=id,title,slug,description,sortOrder&order=sortOrder.asc`,
-        { headers: HEADERS, cache: "no-store" }
-      ),
-      fetch(
-        `${BASE}/shop_products?isActive=eq.true&select=id,name,slug,basePrice,mainImageUrl,mainImageAlt,isFeatured,hasVariations,stock,categoryId,category:shop_categories(id,title,slug)&order=isFeatured.desc,name.asc`,
-        { headers: HEADERS, cache: "no-store" }
-      ),
+      fetch(`${BASE}/shop_categories?isActive=eq.true&select=id,title,slug,description,sortOrder&order=sortOrder.asc`, { headers: HEADERS, cache: "no-store" }),
+      fetch(`${BASE}/shop_products?isActive=eq.true&select=id,name,slug,basePrice,mainImageUrl,isFeatured,hasVariations,stock,categoryId,category:shop_categories(title,slug)&order=isFeatured.desc,name.asc`, { headers: HEADERS, cache: "no-store" }),
     ]);
-    if (catRes.ok) {
-      const data = await catRes.json();
-      if (Array.isArray(data)) categories = data;
-    }
-    if (prodRes.ok) {
-      const data = await prodRes.json();
-      if (Array.isArray(data)) products = data;
-    }
+    if (catRes.ok)  { const d = await catRes.json();  if (Array.isArray(d)) categories = d; }
+    if (prodRes.ok) { const d = await prodRes.json(); if (Array.isArray(d)) products   = d; }
   } catch { /* DB unavailable */ }
 
-  // Filter by category slug
-  const activeCategory = categories.find(c => c.slug === categoria) ?? null;
-  const visible = activeCategory
-    ? products.filter(p => p.categoryId === activeCategory.id)
-    : products;
+  // Map: categoryId → first product imageUrl
+  const catImageMap: Record<string, string | null> = {};
+  for (const p of products) {
+    if (p.categoryId && !catImageMap[p.categoryId]) {
+      catImageMap[p.categoryId] = p.mainImageUrl;
+    }
+  }
 
-  const featured = visible.filter(p => p.isFeatured);
-  const rest     = visible.filter(p => !p.isFeatured);
-  const sorted   = [...featured, ...rest];
+  // Map: categoryId → product count
+  const catCountMap: Record<string, number> = {};
+  for (const p of products) {
+    if (p.categoryId) catCountMap[p.categoryId] = (catCountMap[p.categoryId] ?? 0) + 1;
+  }
+
+  const featured = products.filter(p => p.isFeatured);
+  const totalCount = products.length;
 
   return (
     <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
 
-      {/* ── Hero ──────────────────────────────────────────────────── */}
       <div className="mt-16">
-        <section className="relative overflow-hidden px-5 lg:px-20 py-14 lg:py-20">
-          {/* Grade decorativa */}
-          <div
-            className="absolute inset-0 opacity-[0.025] pointer-events-none"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(0deg,#7a9ab5 0,transparent 1px,transparent 60px),repeating-linear-gradient(90deg,#7a9ab5 0,transparent 1px,transparent 60px)",
-            }}
-          />
-          {/* Glows */}
-          <div className="absolute -top-32 right-[10%] w-[500px] h-[500px] rounded-full opacity-[0.07] pointer-events-none"
-            style={{ background: "radial-gradient(circle,#ff1f1f 0%,transparent 70%)" }} />
-          <div className="absolute bottom-0 left-[20%] w-[400px] h-[300px] rounded-full opacity-[0.04] pointer-events-none"
-            style={{ background: "radial-gradient(circle,#7a9ab5 0%,transparent 70%)" }} />
 
-          <div className="relative z-10 flex flex-col gap-4 max-w-[680px]">
-            {/* Eyebrow */}
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#ff1f1f] animate-pulse" />
-              <span className="text-[#ff1f1f] text-[10px] font-bold tracking-[2.5px] uppercase">
-                Loja Oficial
-              </span>
+        {/* ── Cabeçalho da loja ─────────────────────────────────── */}
+        <section className="relative overflow-hidden border-b border-[#0e1520]">
+          {/* Grade decorativa */}
+          <div className="absolute inset-0 opacity-[0.025] pointer-events-none"
+            style={{ backgroundImage: "repeating-linear-gradient(0deg,#7a9ab5 0,transparent 1px,transparent 60px),repeating-linear-gradient(90deg,#7a9ab5 0,transparent 1px,transparent 60px)" }} />
+          <div className="absolute -top-40 right-[5%] w-[600px] h-[600px] rounded-full opacity-[0.05] pointer-events-none"
+            style={{ background: "radial-gradient(circle,#ff1f1f 0%,transparent 70%)" }} />
+
+          <div className="relative z-10 px-5 lg:px-20 py-14 lg:py-20 flex flex-col lg:flex-row items-start lg:items-end justify-between gap-6">
+            <div className="flex flex-col gap-4 max-w-[600px]">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#ff1f1f] animate-pulse" />
+                <span className="text-[#ff1f1f] text-[10px] font-bold tracking-[2.5px] uppercase">Loja Oficial</span>
+              </div>
+              <h1 className="font-['Barlow_Condensed'] font-extrabold leading-[0.95]">
+                <span className="text-[#dce8ff] text-[56px] lg:text-[80px] block">Loja</span>
+                <span className="text-[#ff1f1f] text-[56px] lg:text-[80px] block">Magnum</span>
+              </h1>
+              <p className="text-[#7a9ab5] text-[15px] leading-relaxed max-w-md">
+                Equipamentos, livros técnicos e acessórios selecionados para o atirador profissional e o entusiasta de armas.
+              </p>
             </div>
 
-            <h1 className="font-['Barlow_Condensed'] font-extrabold leading-[1.0]">
-              <span className="text-[#dce8ff] text-[52px] lg:text-[72px] block">Loja</span>
-              <span className="text-[#ff1f1f] text-[52px] lg:text-[72px] block">Magnum</span>
-            </h1>
-
-            <p className="text-[#7a9ab5] text-[15px] leading-relaxed max-w-lg">
-              Livros técnicos, equipamentos e acessórios selecionados para o atirador profissional e o entusiasta de armas.
-            </p>
-
-            {products.length > 0 && (
-              <p className="text-[#526888] text-[12px] font-mono">
-                {products.length} {products.length === 1 ? "produto disponível" : "produtos disponíveis"}
-                {categories.length > 0 && ` · ${categories.length} categorias`}
-              </p>
-            )}
-          </div>
-
-          {/* Stripe vertical decorativa */}
-          <div className="hidden lg:block absolute right-[15%] top-[15%] bottom-[15%] w-[1px] opacity-10"
-            style={{ background: "linear-gradient(180deg,transparent,#ff1f1f 30%,#ff1f1f 70%,transparent)" }} />
-        </section>
-
-        {/* ── Filtro de categorias ──────────────────────────────── */}
-        {categories.length > 0 && (
-          <div className="border-b border-[#141d2c] bg-[#070a12] sticky top-16 z-20">
-            <div className="px-5 lg:px-20 flex items-center gap-0 overflow-x-auto hide-scrollbar">
-              <Link
-                href="/loja"
-                className={`shrink-0 h-[48px] px-5 flex items-center text-[13px] font-semibold border-b-2 transition-colors whitespace-nowrap ${
-                  !categoria
-                    ? "border-[#ff1f1f] text-white"
-                    : "border-transparent text-[#526888] hover:text-[#7a9ab5]"
-                }`}
-              >
-                Tudo
-              </Link>
-              {categories.map(cat => (
-                <Link
-                  key={cat.id}
-                  href={`/loja?categoria=${cat.slug}`}
-                  className={`shrink-0 h-[48px] px-5 flex items-center text-[13px] font-semibold border-b-2 transition-colors whitespace-nowrap ${
-                    categoria === cat.slug
-                      ? "border-[#ff1f1f] text-white"
-                      : "border-transparent text-[#526888] hover:text-[#7a9ab5]"
-                  }`}
-                >
-                  {cat.title}
-                </Link>
+            {/* Stats */}
+            <div className="flex items-center gap-6 lg:gap-10 shrink-0">
+              {[
+                { n: totalCount, label: "Produtos" },
+                { n: categories.length, label: "Categorias" },
+                { n: featured.length, label: "Em Destaque" },
+              ].map(s => (
+                <div key={s.label} className="flex flex-col items-center">
+                  <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[36px] leading-none">{s.n}</p>
+                  <p className="text-[#526888] text-[11px] font-semibold uppercase tracking-[0.8px] mt-0.5">{s.label}</p>
+                </div>
               ))}
             </div>
           </div>
-        )}
+        </section>
 
-        {/* ── Grade de produtos ─────────────────────────────────── */}
-        <div className="px-5 lg:px-20 py-12">
-
-          {sorted.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 gap-4">
-              <div className="w-[64px] h-[64px] rounded-full bg-[#0e1520] border border-[#141d2c] flex items-center justify-center text-[28px]">
-                🏪
+        {/* ── Categorias ────────────────────────────────────────── */}
+        {categories.length > 0 && (
+          <section className="px-5 lg:px-20 py-14">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <p className="text-[#ff1f1f] text-[10px] font-bold tracking-[2px] uppercase mb-1">Explorar</p>
+                <h2 className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[36px] leading-none">
+                  Categorias
+                </h2>
               </div>
-              <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[24px]">
-                {categoria ? "Nenhum produto nesta categoria" : "Loja em breve"}
-              </p>
-              <p className="text-[#526888] text-[14px] text-center max-w-xs">
-                {categoria
-                  ? "Tente outra categoria ou veja todos os produtos."
-                  : "Estamos preparando produtos especiais para você."}
-              </p>
-              {categoria && (
-                <Link href="/loja"
-                  className="mt-2 text-[#ff1f1f] text-[13px] font-semibold hover:text-white transition-colors">
-                  ← Ver todos os produtos
-                </Link>
-              )}
+              <Link href="/loja/produtos" className="text-[#526888] hover:text-[#7a9ab5] text-[13px] font-semibold transition-colors">
+                Ver todos os produtos →
+              </Link>
             </div>
-          ) : (
-            <>
-              {/* Cabeçalho da grade */}
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h2 className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[28px] leading-none">
-                    {activeCategory ? activeCategory.title : "Todos os Produtos"}
-                  </h2>
-                  {activeCategory?.description && (
-                    <p className="text-[#526888] text-[13px] mt-1">{activeCategory.description}</p>
-                  )}
-                </div>
-                <span className="text-[#526888] text-[13px] font-mono">
-                  {sorted.length} {sorted.length === 1 ? "produto" : "produtos"}
-                </span>
-              </div>
 
-              {/* Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
-                {sorted.map(product => {
-                  const inStock = product.hasVariations || (product.stock ?? 0) > 0;
-                  return (
-                    <Link
-                      key={product.id}
-                      href={`/loja/produto/${product.slug}`}
-                      className="group flex flex-col bg-[#0a0f1a] border border-[#141d2c] hover:border-[#1c2a3e] rounded-[14px] overflow-hidden transition-all duration-200 hover:shadow-[0_0_30px_rgba(255,31,31,0.06)]"
-                    >
-                      {/* Imagem */}
-                      <div className="relative aspect-square bg-[#0e1520] overflow-hidden">
-                        {product.mainImageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={product.mainImageUrl}
-                            alt={product.mainImageAlt ?? product.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="text-[#1c2a3e]">
-                              <rect x="4" y="8" width="32" height="24" rx="3" stroke="currentColor" strokeWidth="2"/>
-                              <circle cx="15" cy="17" r="4" stroke="currentColor" strokeWidth="1.5"/>
-                              <path d="M4 28l9-7 7 6 5-4 11 9" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-                            </svg>
-                          </div>
-                        )}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {categories.map((cat, i) => {
+                const img    = catImageMap[cat.id];
+                const count  = catCountMap[cat.id] ?? 0;
+                const grad   = CAT_GRADIENTS[i % CAT_GRADIENTS.length];
+                return (
+                  <Link
+                    key={cat.id}
+                    href={`/loja/produtos?categoria=${cat.slug}`}
+                    className="group relative aspect-[3/4] rounded-[16px] overflow-hidden bg-[#0e1520] border border-[#141d2c] hover:border-[#ff1f1f]/30 transition-all hover:shadow-[0_0_32px_rgba(255,31,31,0.1)]"
+                  >
+                    {/* Imagem de fundo */}
+                    {img ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={img}
+                        alt={cat.title}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                    ) : (
+                      <div className={`absolute inset-0 bg-gradient-to-br ${grad}`} />
+                    )}
 
-                        {/* Badge destaque */}
-                        {product.isFeatured && (
-                          <div className="absolute top-3 left-3">
-                            <span className="bg-[#ff1f1f] text-white text-[9px] font-bold px-2 py-[3px] rounded-[4px] tracking-[0.8px] uppercase shadow-lg">
-                              Destaque
-                            </span>
-                          </div>
-                        )}
+                    {/* Overlay gradiente sempre ativo */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#070a12] via-[#070a12]/60 to-transparent" />
+                    {/* Overlay vermelho no hover */}
+                    <div className="absolute inset-0 bg-[#ff1f1f]/0 group-hover:bg-[#ff1f1f]/10 transition-colors duration-500" />
 
-                        {/* Overlay esgotado */}
-                        {!inStock && (
-                          <div className="absolute inset-0 bg-[#070a12]/60 flex items-center justify-center backdrop-blur-[1px]">
-                            <span className="text-[#526888] text-[11px] font-bold tracking-[1px] uppercase">Esgotado</span>
-                          </div>
-                        )}
-                      </div>
+                    {/* Grid de fundo decorativa */}
+                    <div className="absolute inset-0 opacity-[0.04]"
+                      style={{ backgroundImage: "repeating-linear-gradient(0deg,#7a9ab5 0,transparent 1px,transparent 40px),repeating-linear-gradient(90deg,#7a9ab5 0,transparent 1px,transparent 40px)" }} />
 
-                      {/* Info */}
-                      <div className="flex flex-col gap-2.5 p-4 flex-1">
-                        {/* Categoria */}
-                        {product.category && (
-                          <span className="text-[#ff1f1f] text-[10px] font-bold tracking-[1px] uppercase">
-                            {product.category.title}
-                          </span>
-                        )}
-
-                        {/* Nome */}
-                        <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[16px] leading-snug line-clamp-2 group-hover:text-white transition-colors">
-                          {product.name}
+                    {/* Conteúdo */}
+                    <div className="absolute inset-0 flex flex-col justify-end p-4">
+                      <p className="font-['Barlow_Condensed'] font-extrabold text-white text-[18px] leading-tight group-hover:text-[#ff9999] transition-colors">
+                        {cat.title}
+                      </p>
+                      {cat.description && (
+                        <p className="text-[#7a9ab5] text-[11px] mt-0.5 line-clamp-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {cat.description}
                         </p>
-
-                        {/* Rodapé do card */}
-                        <div className="flex items-end justify-between gap-2 mt-auto pt-1">
-                          <div>
-                            {product.hasVariations ? (
-                              <p className="text-[#526888] text-[11px] mb-0.5">a partir de</p>
-                            ) : null}
-                            <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[20px] leading-none">
-                              {formatCurrency(product.basePrice)}
-                            </p>
-                          </div>
-                          <StockBadge product={product} />
-                        </div>
-                      </div>
-
-                      {/* CTA hover */}
-                      <div className="h-[40px] mx-4 mb-4 rounded-[6px] bg-[#ff1f1f]/0 group-hover:bg-[#ff1f1f] border border-[#1c2a3e] group-hover:border-[#ff1f1f] flex items-center justify-center transition-all duration-200">
-                        <span className="text-[#526888] group-hover:text-white text-[12px] font-semibold transition-colors">
-                          {inStock ? "Ver produto →" : "Ver detalhes →"}
+                      )}
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-[#526888] text-[11px] font-semibold">
+                          {count} {count === 1 ? "produto" : "produtos"}
+                        </p>
+                        <span className="text-[#ff1f1f] text-[12px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                          Ver →
                         </span>
                       </div>
-                    </Link>
-                  );
-                })}
+                    </div>
+                  </Link>
+                );
+              })}
+
+              {/* Card especial "Ver tudo" */}
+              <Link
+                href="/loja/produtos"
+                className="group relative aspect-[3/4] rounded-[16px] overflow-hidden bg-[#070a12] border border-dashed border-[#141d2c] hover:border-[#ff1f1f]/40 transition-all flex flex-col items-center justify-center gap-3"
+              >
+                <div className="w-12 h-12 rounded-full bg-[#0e1520] border border-[#141d2c] group-hover:border-[#ff1f1f]/40 flex items-center justify-center transition-colors">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#526888" strokeWidth="1.8" strokeLinecap="round">
+                    <path d="M9 3v12M3 9h12"/>
+                  </svg>
+                </div>
+                <div className="text-center px-3">
+                  <p className="font-['Barlow_Condensed'] font-bold text-[#526888] group-hover:text-[#7a9ab5] text-[16px] transition-colors">
+                    Ver todos
+                  </p>
+                  <p className="text-[#1c2a3e] text-[11px] mt-0.5">{totalCount} produtos</p>
+                </div>
+              </Link>
+            </div>
+          </section>
+        )}
+
+        {/* ── Produtos em destaque ──────────────────────────────── */}
+        {featured.length > 0 && (
+          <section className="px-5 lg:px-20 py-12 border-t border-[#0e1520]">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <p className="text-[#ff1f1f] text-[10px] font-bold tracking-[2px] uppercase mb-1">Selecionados</p>
+                <h2 className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[36px] leading-none">
+                  Em Destaque
+                </h2>
               </div>
-            </>
-          )}
-        </div>
+              <Link href="/loja/produtos?destaque=1" className="text-[#526888] hover:text-[#7a9ab5] text-[13px] font-semibold transition-colors">
+                Ver todos →
+              </Link>
+            </div>
+            <FeaturedCarousel products={featured} />
+          </section>
+        )}
+
+        {/* ── Todos os produtos (fallback se sem categorias) ───── */}
+        {categories.length === 0 && products.length > 0 && (
+          <section className="px-5 lg:px-20 py-14">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[36px]">Produtos</h2>
+              <Link href="/loja/produtos" className="text-[#526888] hover:text-[#7a9ab5] text-[13px] font-semibold transition-colors">
+                Ver todos →
+              </Link>
+            </div>
+            <FeaturedCarousel products={products.slice(0, 8)} />
+          </section>
+        )}
+
+        {/* ── Empty state ───────────────────────────────────────── */}
+        {products.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-32 gap-5">
+            <div className="w-16 h-16 rounded-full bg-[#0e1520] border border-[#141d2c] flex items-center justify-center text-3xl">🏪</div>
+            <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[28px]">Em breve</p>
+            <p className="text-[#526888] text-[14px] text-center max-w-xs">Estamos preparando produtos incríveis para você.</p>
+          </div>
+        )}
+
+        {/* ── CTA final ────────────────────────────────────────── */}
+        {products.length > 0 && (
+          <div className="px-5 lg:px-20 py-10 border-t border-[#0e1520]">
+            <div className="bg-[#0e1520] border border-[#141d2c] rounded-[16px] px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-5">
+              <div>
+                <p className="font-['Barlow_Condensed'] font-extrabold text-[#dce8ff] text-[28px] leading-tight">
+                  Explorar catálogo completo
+                </p>
+                <p className="text-[#526888] text-[13px] mt-1">
+                  {totalCount} produtos disponíveis em {categories.length} categorias
+                </p>
+              </div>
+              <Link
+                href="/loja/produtos"
+                className="shrink-0 h-[48px] px-8 bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-bold rounded-[8px] flex items-center gap-2 transition-colors"
+              >
+                Ver todos os produtos →
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
 
       <Footer />

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ThemeToggle } from "./ThemeToggle";
 import NavEditionsDropdown from "./NavEditionsDropdown";
+import CartIcon from "./CartIcon";
 
 const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
@@ -77,9 +78,11 @@ export default async function Header() {
       <div className="flex-1" />
 
       {/* Actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {/* Tema claro/escuro */}
         <ThemeToggle />
+        {/* Carrinho */}
+        <CartIcon />
 
         {user ? (
           <Link

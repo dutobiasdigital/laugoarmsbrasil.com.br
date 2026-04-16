@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Barlow_Condensed, Oswald, Bebas_Neue, Montserrat, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { CartProvider } from "@/contexts/CartContext";
+import CartDrawer from "@/components/CartDrawer";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -167,9 +169,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </noscript>
         )}
 
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <CartProvider>
+          <ThemeProvider>
+            <CartDrawer />
+            {children}
+          </ThemeProvider>
+        </CartProvider>
       </body>
     </html>
   );
