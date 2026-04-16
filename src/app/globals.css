@@ -118,17 +118,20 @@ html.light [class*="bg-[#ff6b6b]"]      { color: #ffffff !important; }
 /* ── Placeholder ───────────────────────────────────────── */
 html.light [class*="placeholder-white"]::placeholder { color: #94a3b8 !important; }
 
+/* ── reCAPTCHA v3 — oculta badge flutuante (disclosure inline nos forms) ── */
+.grecaptcha-badge { visibility: hidden !important; }
+
 /* ── Hero gradient ─────────────────────────────────────── */
 html.light .hero-metal {
   background: linear-gradient(
     125deg,
-    #dde3ec 0%,
-    #e8edf5 18%,
-    #edf1f8 32%,
-    #e4eaf3 48%,
-    #eaf0f8 62%,
-    #e8edf5 76%,
-    #dde3ec 100%
+    #a8bfd4 0%,
+    #d4e2f0 15%,
+    #eef4fb 30%,
+    #c8d8ea 45%,
+    #f0f6fc 60%,
+    #c0d2e4 75%,
+    #a8bfd4 100%
   ) !important;
   background-size: 350% 350% !important;
   animation: metalShimmer 14s ease infinite !important;

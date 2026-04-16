@@ -200,6 +200,13 @@ export default function AnuncieForm() {
         />
       </div>
 
+      {/* reCAPTCHA disclosure */}
+      <p className="text-[#526888] text-[11px] text-center leading-relaxed">
+        🔒 Protegido por reCAPTCHA.{" "}
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#7a9ab5] transition-colors">Privacidade</a>{" "}e{" "}
+        <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#7a9ab5] transition-colors">Termos</a>{" "}do Google se aplicam.
+      </p>
+
       <button
         type="submit"
         disabled={loading}
@@ -208,7 +215,7 @@ export default function AnuncieForm() {
         {loading ? "Enviando..." : "Enviar solicitação →"}
       </button>
 
-      <p className="text-white text-[12px] text-center">
+      <p className="text-[#526888] text-[12px] text-center">
         Seus dados são usados apenas para fins comerciais e não são compartilhados com terceiros.
       </p>
     </form>

@@ -105,6 +105,13 @@ export default function ContactForm() {
         />
       </div>
 
+      {/* reCAPTCHA disclosure */}
+      <p className="text-[#526888] text-[11px] text-center leading-relaxed">
+        🔒 Este formulário é protegido por reCAPTCHA.{" "}
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#7a9ab5] transition-colors">Privacidade</a>{" "}e{" "}
+        <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#7a9ab5] transition-colors">Termos</a>{" "}do Google se aplicam.
+      </p>
+
       <button
         type="submit"
         disabled={loading}
@@ -113,7 +120,7 @@ export default function ContactForm() {
         {loading ? "Enviando..." : "Enviar mensagem →"}
       </button>
 
-      <p className="text-white text-[12px]">Respondemos em até 2 dias úteis.</p>
+      <p className="text-[#526888] text-[12px] text-center">Respondemos em até 2 dias úteis.</p>
     </form>
   );
 }
