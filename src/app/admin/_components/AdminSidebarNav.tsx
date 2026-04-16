@@ -48,7 +48,7 @@ const NAV: NavEntry[] = [
   { type: "link", href: "/admin/pagamentos",    label: "Pagamentos",    icon: ICONS.creditCard },
   { type: "link", href: "/admin/visualizacoes", label: "Visualizações", icon: ICONS.chartBar },
   { type: "section", key: "usuarios",    label: "Usuários",    icon: ICONS.users,    children: [
-    { href: "/admin/assinantes",           label: "Assinantes" },
+    { href: "/admin/assinantes",           label: "Lista" },
     { href: "/admin/empresas",             label: "Empresas" },
     { href: "/admin/anunciantes",          label: "Anunciantes",  exact: true },
     { href: "/admin/solicitacoes",         label: "Solicitações" },

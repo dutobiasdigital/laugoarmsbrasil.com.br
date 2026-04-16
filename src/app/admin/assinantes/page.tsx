@@ -11,50 +11,55 @@ const HEADERS  = {
   Prefer:        "count=exact",
 };
 
-const STATUS_STYLE: Record<string, { bg: string; text: string; label: string }> = {
+const SUB_STATUS: Record<string, { bg: string; text: string; label: string }> = {
   ACTIVE:   { bg: "bg-[#0f381f]",  text: "text-[#22c55e]",  label: "ATIVO"      },
   PAST_DUE: { bg: "bg-[#382405]",  text: "text-[#ef9f1b]",  label: "ATRASADO"   },
-  CANCELED: { bg: "bg-[#141d2c]",  text: "text-white",  label: "CANCELADO"  },
+  CANCELED: { bg: "bg-[#1c1c1c]",  text: "text-[#7a9ab5]",  label: "CANCELADO"  },
   PENDING:  { bg: "bg-[#382405]",  text: "text-[#ef9f1b]",  label: "PENDENTE"   },
-  EXPIRED:  { bg: "bg-[#141d2c]",  text: "text-white",  label: "EXPIRADO"   },
+  EXPIRED:  { bg: "bg-[#1c1c1c]",  text: "text-[#7a9ab5]",  label: "EXPIRADO"   },
 };
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
-}
-function fmtMon(iso: string) {
-  return new Date(iso).toLocaleDateString("pt-BR", { month: "2-digit", year: "numeric" });
-}
-function fmtCurrency(cents: number) {
-  return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+function fmtDate(iso: string | null | undefined) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("pt-BR", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+  });
 }
 
-interface SubPlan { name: string; }
-interface Subscription {
+interface SubscriptionRow {
   status: string;
   planPriceInCents: number;
-  intervalMonths: number;
-  currentPeriodEnd: string | null;
-  subscribedAt: string;
-  subscription_plans: SubPlan | null;
+  subscription_plans: { name: string } | null;
 }
+interface CompanyRow   { id: string }
+interface ShopOrderRow { id: string }
 interface UserRow {
   id: string;
   name: string;
   email: string;
-  role: string;
+  phone: string | null;
   createdAt: string;
-  subscriptions: Subscription[];
+  subscriptions: SubscriptionRow[];
+  companies: CompanyRow[];
+  shop_orders: ShopOrderRow[];
 }
 
-const PER_PAGE = 15;
+const PER_PAGE = 20;
 
-export default async function AdminAssinantesPage({
+const TABS = [
+  { key: "todos",       label: "Todos"        },
+  { key: "assinantes",  label: "Assinantes"   },
+  { key: "anunciantes", label: "Anunciantes"  },
+  { key: "clientes",    label: "Clientes Loja"},
+];
+
+export default async function AdminListaUsuariosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string; pagina?: string }>;
+  searchParams: Promise<{ tipo?: string; q?: string; pagina?: string }>;
 }) {
-  const { q, status, pagina } = await searchParams;
+  const { tipo, q, pagina } = await searchParams;
+  const tab    = tipo ?? "todos";
   const page   = Math.max(1, parseInt(pagina ?? "1", 10));
   const offset = (page - 1) * PER_PAGE;
 
@@ -62,25 +67,17 @@ export default async function AdminAssinantesPage({
   let total = 0;
 
   try {
-    const hasStatusFilter = status && status !== "TODOS";
+    const subJoin  = tab === "assinantes"  ? "subscriptions!inner(status,planPriceInCents,subscription_plans(name))" : "subscriptions(status,planPriceInCents,subscription_plans(name))";
+    const compJoin = tab === "anunciantes" ? "companies!inner(id)"  : "companies(id)";
+    const ordJoin  = tab === "clientes"    ? "shop_orders!inner(id)" : "shop_orders(id)";
 
-    // Monta select — usa !inner se há filtro de status (só retorna usuários com assinatura nesse status)
-    const subJoin = hasStatusFilter
-      ? "subscriptions!inner(status,planPriceInCents,intervalMonths,currentPeriodEnd,subscribedAt,subscription_plans(name))"
-      : "subscriptions(status,planPriceInCents,intervalMonths,currentPeriodEnd,subscribedAt,subscription_plans(name))";
-
-    let url = `${BASE}/users?select=id,name,email,role,createdAt,${subJoin}&order=createdAt.desc&limit=${PER_PAGE}&offset=${offset}`;
+    let url = `${BASE}/users?select=id,name,email,phone,createdAt,${subJoin},${compJoin},${ordJoin}&order=createdAt.desc&limit=${PER_PAGE}&offset=${offset}`;
 
     if (q) {
       url += `&or=(name.ilike.*${encodeURIComponent(q)}*,email.ilike.*${encodeURIComponent(q)}*)`;
     }
-    if (hasStatusFilter) {
-      url += `&subscriptions.status=eq.${status}`;
-    }
 
     const res = await fetch(url, { headers: HEADERS, cache: "no-store" });
-
-    // Content-Range: 0-14/350
     const cr = res.headers.get("Content-Range");
     total = parseInt(cr?.split("/")?.[1] ?? "0", 10);
     if (isNaN(total)) total = 0;
@@ -95,18 +92,26 @@ export default async function AdminAssinantesPage({
 
   function buildHref(p: number) {
     const params = new URLSearchParams();
-    if (q)      params.set("q", q);
-    if (status) params.set("status", status);
+    if (tab !== "todos") params.set("tipo", tab);
+    if (q) params.set("q", q);
     params.set("pagina", String(p));
+    return `/admin/assinantes?${params}`;
+  }
+
+  function buildTabHref(t: string) {
+    const params = new URLSearchParams();
+    if (t !== "todos") params.set("tipo", t);
+    if (q) params.set("q", q);
     return `/admin/assinantes?${params}`;
   }
 
   return (
     <>
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">
-            Assinantes
+            Usuários Cadastrados
           </h1>
           <p className="text-[#7a9ab5] text-[14px]">
             {total.toLocaleString("pt-BR")} usuário{total !== 1 ? "s" : ""} encontrado{total !== 1 ? "s" : ""}
@@ -116,35 +121,41 @@ export default async function AdminAssinantesPage({
 
       <div className="bg-[#141d2c] h-px mb-6" />
 
-      {/* Filters */}
+      {/* Tabs */}
+      <div className="flex gap-1.5 mb-5 overflow-x-auto">
+        {TABS.map((t) => (
+          <Link
+            key={t.key}
+            href={buildTabHref(t.key)}
+            className={`h-[34px] px-4 flex items-center rounded-[6px] text-[12px] font-semibold whitespace-nowrap transition-colors ${
+              tab === t.key
+                ? "bg-[#ff1f1f] text-white"
+                : "bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
+            }`}
+          >
+            {t.label}
+          </Link>
+        ))}
+      </div>
+
+      {/* Search */}
       <form method="GET" className="flex flex-wrap gap-2 mb-5">
+        {tab !== "todos" && <input type="hidden" name="tipo" value={tab} />}
         <input
           name="q"
           defaultValue={q}
-          placeholder="🔍 Buscar por nome ou e-mail..."
+          placeholder="Buscar por nome ou e-mail..."
           className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-[300px]"
         />
-        <select
-          name="status"
-          defaultValue={status ?? "TODOS"}
-          className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f]"
-        >
-          <option value="TODOS">Todos os status</option>
-          <option value="ACTIVE">Ativo</option>
-          <option value="PAST_DUE">Atrasado</option>
-          <option value="CANCELED">Cancelado</option>
-          <option value="PENDING">Pendente</option>
-          <option value="EXPIRED">Expirado</option>
-        </select>
         <button
           type="submit"
           className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] h-[38px] px-4 rounded-[6px] transition-colors"
         >
           Filtrar
         </button>
-        {(q || (status && status !== "TODOS")) && (
+        {q && (
           <Link
-            href="/admin/assinantes"
+            href={buildTabHref(tab)}
             className="text-[#7a9ab5] hover:text-white text-[13px] h-[38px] flex items-center px-2 transition-colors"
           >
             Limpar
@@ -154,81 +165,115 @@ export default async function AdminAssinantesPage({
 
       {/* Table */}
       <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] overflow-hidden">
-        <div className="bg-[#141d2c] px-5 py-3 grid grid-cols-8 gap-3 hidden sm:grid">
-          {["Nome", "E-mail", "Plano", "Valor", "Status", "Próx. cobrança", "Desde", "Ações"].map(h => (
-            <p key={h} className="text-white text-[11px] font-semibold tracking-[0.5px]">{h}</p>
+
+        {/* Header row — desktop */}
+        <div className="bg-[#141d2c] px-5 py-3 hidden sm:grid grid-cols-[2fr_2fr_1fr_1.5fr_1fr_60px] gap-3">
+          {["Usuário", "E-mail", "Telefone", "Perfil", "Cadastro", ""].map((h) => (
+            <p key={h} className="text-white text-[11px] font-semibold tracking-[0.5px] uppercase">{h}</p>
           ))}
         </div>
 
         {users.length === 0 ? (
-          <p className="text-white text-[13px] p-8 text-center">
-            Nenhum usuário encontrado.
-          </p>
+          <p className="text-[#7a9ab5] text-[13px] p-8 text-center">Nenhum usuário encontrado.</p>
         ) : (
           users.map((u, i) => {
             const sub = u.subscriptions?.[0] ?? null;
-            const st  = sub ? (STATUS_STYLE[sub.status] ?? STATUS_STYLE.EXPIRED) : null;
+            const hasActiveSub  = u.subscriptions?.some((s) => s.status === "ACTIVE");
+            const hasSub        = u.subscriptions?.length > 0;
+            const hasCompany    = u.companies?.length > 0;
+            const hasOrder      = u.shop_orders?.length > 0;
+            const st            = sub ? (SUB_STATUS[sub.status] ?? SUB_STATUS.EXPIRED) : null;
+
             return (
               <div key={u.id}>
                 {i > 0 && <div className="bg-[#141d2c] h-px" />}
 
                 {/* Desktop */}
-                <div className="px-5 py-3.5 grid grid-cols-8 gap-3 items-center hidden sm:grid">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-[28px] h-[28px] rounded-full bg-[#141d2c] flex items-center justify-center text-[11px] text-[#7a9ab5] font-semibold shrink-0">
-                      {u.name.slice(0, 2).toUpperCase()}
+                <div className="px-5 py-3.5 hidden sm:grid grid-cols-[2fr_2fr_1fr_1.5fr_1fr_60px] gap-3 items-center">
+                  {/* Avatar + Nome */}
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-[30px] h-[30px] rounded-full bg-[#141d2c] border border-[#1c2a3e] flex items-center justify-center text-[11px] text-[#7a9ab5] font-bold shrink-0">
+                      {u.name?.slice(0, 2).toUpperCase() ?? "??"}
                     </div>
-                    <p className="text-[#d4d4da] text-[13px] truncate">{u.name}</p>
+                    <p className="text-[#d4d4da] text-[13px] font-medium truncate">{u.name}</p>
                   </div>
+
+                  {/* E-mail */}
                   <p className="text-[#7a9ab5] text-[13px] truncate">{u.email}</p>
-                  <p className="text-[#7a9ab5] text-[13px] truncate">
-                    {(sub?.subscription_plans as SubPlan | null)?.name ?? "—"}
-                  </p>
-                  <p className="text-[#7a9ab5] text-[13px]">
-                    {sub ? fmtCurrency(sub.planPriceInCents) : "—"}
-                  </p>
-                  {st ? (
-                    <span className={`inline-flex items-center h-[20px] px-2.5 rounded-full text-[10px] font-bold ${st.bg} ${st.text}`}>
-                      {st.label}
-                    </span>
-                  ) : (
-                    <span className="text-white text-[13px]">—</span>
-                  )}
-                  <p className="text-[#7a9ab5] text-[13px]">
-                    {sub?.currentPeriodEnd ? fmtDate(sub.currentPeriodEnd) : "—"}
-                  </p>
-                  <p className="text-[#7a9ab5] text-[13px]">
-                    {sub ? fmtMon(sub.subscribedAt) : fmtMon(u.createdAt)}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href={`/admin/assinantes/${u.id}`}
-                      className="text-[#7a9ab5] hover:text-white text-[13px] transition-colors"
-                    >
-                      Ver →
-                    </Link>
+
+                  {/* Telefone */}
+                  <p className="text-[#7a9ab5] text-[12px] truncate">{u.phone ?? "—"}</p>
+
+                  {/* Badges */}
+                  <div className="flex flex-wrap gap-1">
+                    {hasSub && st && (
+                      <span className={`inline-flex items-center h-[18px] px-2 rounded-full text-[10px] font-bold ${st.bg} ${st.text}`}>
+                        {hasActiveSub ? "Assinante" : `Assinante · ${st.label}`}
+                      </span>
+                    )}
+                    {!hasSub && (
+                      <span className="inline-flex items-center h-[18px] px-2 rounded-full text-[10px] font-semibold bg-[#141d2c] text-[#526888]">
+                        Cadastrado
+                      </span>
+                    )}
+                    {hasCompany && (
+                      <span className="inline-flex items-center h-[18px] px-2 rounded-full text-[10px] font-bold bg-[#1a0f38] text-[#a78bfa]">
+                        Anunciante
+                      </span>
+                    )}
+                    {hasOrder && (
+                      <span className="inline-flex items-center h-[18px] px-2 rounded-full text-[10px] font-bold bg-[#0f2438] text-[#60a5fa]">
+                        Cliente
+                      </span>
+                    )}
                   </div>
+
+                  {/* Data */}
+                  <p className="text-[#7a9ab5] text-[12px]">{fmtDate(u.createdAt)}</p>
+
+                  {/* Ação */}
+                  <Link
+                    href={`/admin/usuarios/${u.id}`}
+                    className="text-[#7a9ab5] hover:text-white text-[12px] transition-colors text-right"
+                  >
+                    Ver →
+                  </Link>
                 </div>
 
                 {/* Mobile */}
                 <div className="px-4 py-3.5 flex items-center justify-between gap-3 sm:hidden">
-                  <div className="min-w-0">
-                    <p className="text-[#d4d4da] text-[13px] font-medium truncate">{u.name}</p>
-                    <p className="text-[#526888] text-[11px] truncate">{u.email}</p>
-                    <p className="text-white text-[11px] mt-0.5">
-                      {(sub?.subscription_plans as SubPlan | null)?.name ?? "Sem assinatura"}
-                    </p>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-[30px] h-[30px] rounded-full bg-[#141d2c] border border-[#1c2a3e] flex items-center justify-center text-[10px] text-[#7a9ab5] font-bold shrink-0">
+                      {u.name?.slice(0, 2).toUpperCase() ?? "??"}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[#d4d4da] text-[13px] font-medium truncate">{u.name}</p>
+                      <p className="text-[#526888] text-[11px] truncate">{u.email}</p>
+                      <div className="flex gap-1 mt-0.5 flex-wrap">
+                        {hasSub && st && (
+                          <span className={`inline-flex items-center h-[16px] px-1.5 rounded-full text-[9px] font-bold ${st.bg} ${st.text}`}>
+                            Assinante
+                          </span>
+                        )}
+                        {hasCompany && (
+                          <span className="inline-flex items-center h-[16px] px-1.5 rounded-full text-[9px] font-bold bg-[#1a0f38] text-[#a78bfa]">
+                            Anunciante
+                          </span>
+                        )}
+                        {hasOrder && (
+                          <span className="inline-flex items-center h-[16px] px-1.5 rounded-full text-[9px] font-bold bg-[#0f2438] text-[#60a5fa]">
+                            Cliente
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1.5 shrink-0">
-                    {st && (
-                      <span className={`inline-flex items-center h-[18px] px-2 rounded-full text-[10px] font-bold ${st.bg} ${st.text}`}>
-                        {st.label}
-                      </span>
-                    )}
-                    <Link href={`/admin/assinantes/${u.id}`} className="text-[#526888] hover:text-white text-[12px] transition-colors">
-                      Ver →
-                    </Link>
-                  </div>
+                  <Link
+                    href={`/admin/usuarios/${u.id}`}
+                    className="text-[#526888] hover:text-white text-[12px] transition-colors shrink-0"
+                  >
+                    Ver →
+                  </Link>
                 </div>
               </div>
             );
@@ -238,35 +283,24 @@ export default async function AdminAssinantesPage({
         {/* Paginação */}
         {totalPages > 1 && (
           <div className="px-5 py-3 flex items-center justify-between border-t border-[#141d2c]">
-            <p className="text-white text-[13px]">
+            <p className="text-[#7a9ab5] text-[13px]">
               {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, total)} de {total.toLocaleString("pt-BR")}
             </p>
             <div className="flex items-center gap-1.5">
               {page > 1 && (
-                <Link href={buildHref(page - 1)}
-                  className="w-[30px] h-[30px] flex items-center justify-center rounded-[4px] text-[13px] bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white transition-colors">
-                  ‹
-                </Link>
+                <Link href={buildHref(page - 1)} className="w-[30px] h-[30px] flex items-center justify-center rounded-[4px] text-[13px] bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white transition-colors">‹</Link>
               )}
-              {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-                const p = Math.max(1, page - 3) + i;
+              {Array.from({ length: Math.min(totalPages, 7) }, (_, idx) => {
+                const p = Math.max(1, page - 3) + idx;
                 if (p > totalPages) return null;
                 return (
-                  <Link key={p} href={buildHref(p)}
-                    className={`w-[30px] h-[30px] flex items-center justify-center rounded-[4px] text-[13px] font-semibold transition-colors ${
-                      p === page
-                        ? "bg-[#ff1f1f] text-white"
-                        : "bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
-                    }`}>
+                  <Link key={p} href={buildHref(p)} className={`w-[30px] h-[30px] flex items-center justify-center rounded-[4px] text-[13px] font-semibold transition-colors ${p === page ? "bg-[#ff1f1f] text-white" : "bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"}`}>
                     {p}
                   </Link>
                 );
               })}
               {page < totalPages && (
-                <Link href={buildHref(page + 1)}
-                  className="w-[30px] h-[30px] flex items-center justify-center rounded-[4px] text-[13px] bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white transition-colors">
-                  ›
-                </Link>
+                <Link href={buildHref(page + 1)} className="w-[30px] h-[30px] flex items-center justify-center rounded-[4px] text-[13px] bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white transition-colors">›</Link>
               )}
             </div>
           </div>
