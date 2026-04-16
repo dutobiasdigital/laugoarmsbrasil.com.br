@@ -24,17 +24,22 @@ export default async function EditarArtigoPage({
     content: string;
     authorName: string;
     featureImageUrl: string | null;
+    featureImageAlt: string | null;
     categoryId: string;
     isExclusive: boolean;
     status: string;
     publishedAt: string | null;
+    seoTitle: string | null;
+    seoDescription: string | null;
+    seoKeywords: string | null;
+    canonicalUrl: string | null;
   } | null = null;
   let categories: { id: string; name: string }[] = [];
 
   try {
     const [artRes, catRes] = await Promise.all([
       fetch(
-        `${BASE}/articles?id=eq.${id}&select=id,title,slug,excerpt,content,authorName,featureImageUrl,categoryId,isExclusive,status,publishedAt&limit=1`,
+        `${BASE}/articles?id=eq.${id}&select=id,title,slug,excerpt,content,authorName,featureImageUrl,featureImageAlt,categoryId,isExclusive,status,publishedAt,seoTitle,seoDescription,seoKeywords,canonicalUrl&limit=1`,
         { headers: HEADERS, cache: "no-store" }
       ),
       fetch(
