@@ -100,8 +100,9 @@ const SECTIONS: Section[] = [
   {
     title: "Sessões",
     items: [
-      { href: "/admin/hero",    label: "Hero" },
-      { href: "/admin/galeria", label: "Galeria", indent: true },
+      { href: "/admin/hero",         label: "Hero" },
+      { href: "/admin/galeria",      label: "Galeria",    indent: true },
+      { href: "/admin/formularios",  label: "Formulários", indent: true },
     ],
   },
 
