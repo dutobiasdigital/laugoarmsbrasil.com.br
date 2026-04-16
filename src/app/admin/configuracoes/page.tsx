@@ -52,7 +52,7 @@ export default async function AdminConfiguracoesPage({
         Gerencie o site, integrações, e-mail e acesso administrativo.
       </p>
       <div className="bg-[#141d2c] h-px mb-6" />
-      <ConfiguracoesClient initialTab={aba ?? "integracoes"} settings={settings} admins={admins} />
+      <ConfiguracoesClient initialTab={aba ?? "home"} settings={settings} admins={admins} />
     </>
   );
 }
