@@ -56,6 +56,7 @@ export default async function Header() {
         {[
           { href: "/", label: "HOME" },
           { href: "/guia", label: "GUIA" },
+          { href: "/loja", label: "LOJA" },
           { href: "/assine", label: "ASSINE" },
           { href: "/anuncie", label: "ANUNCIE" },
           { href: "/blog", label: "BLOG" },
