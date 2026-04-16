@@ -8,17 +8,29 @@ const inputCls =
 const labelCls = "block text-[#7a9ab5] text-[11px] font-semibold mb-1";
 const selectCls =
   "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full";
+const areaCls =
+  "bg-[#070a12] border border-[#1c2a3e] rounded-[6px] px-3 py-2.5 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full resize-none";
 
-interface Plan {
+interface GuiaPlan {
   id: string;
   name: string;
   slug: string;
   description: string | null;
+  listingType: string;
   priceInCents: number;
   intervalMonths: number;
+  features: string | null;
   active: boolean;
-  subscriberCount: number;
+  sortOrder: number;
 }
+
+const LISTING_TYPES = ["FREE", "PREMIUM", "DESTAQUE"] as const;
+
+const listingTypeBadge: Record<string, string> = {
+  FREE:     "bg-[#141d2c] text-[#526888]",
+  PREMIUM:  "bg-[#1a1a40] text-[#818cf8]",
+  DESTAQUE: "bg-[#260a0a] text-[#ff1f1f]",
+};
 
 const intervalLabel = (months: number) => {
   if (months === 1)  return "Mensal";
@@ -50,7 +62,6 @@ function centsToDisplay(cents: number): string {
     maximumFractionDigits: 2,
   });
 }
-
 /* ─────────────────────────────────────────────────────── */
 
 function toSlug(str: string) {
@@ -62,41 +73,55 @@ function toSlug(str: string) {
     .replace(/^-|-$/g, "");
 }
 
+const formatPrice = (cents: number) =>
+  (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
 interface FormState {
   name: string;
   slug: string;
   description: string;
-  priceDisplay: string; // "R$ 89,90" formatted
+  listingType: string;
+  priceDisplay: string;
   intervalMonths: string;
+  features: string;
   active: boolean;
 }
 
 const emptyForm = (): FormState => ({
-  name: "", slug: "", description: "",
-  priceDisplay: "", intervalMonths: "3", active: true,
+  name: "",
+  slug: "",
+  description: "",
+  listingType: "FREE",
+  priceDisplay: "",
+  intervalMonths: "1",
+  features: "",
+  active: true,
 });
 
-export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] }) {
+export default function PlanosGuiaClient({ plans: initialPlans }: { plans: GuiaPlan[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showNew,   setShowNew]   = useState(false);
   const [error,     setError]     = useState<string | null>(null);
+  const [deleting,  setDeleting]  = useState<string | null>(null);
   const [form,      setForm]      = useState<FormState>(emptyForm());
 
   function setPrice(raw: string) {
     setForm((f) => ({ ...f, priceDisplay: formatMoneyInput(raw) }));
   }
 
-  function startEditing(plan: Plan) {
+  function startEditing(plan: GuiaPlan) {
     setEditingId(plan.id);
     setForm({
-      name:          plan.name,
-      slug:          plan.slug,
-      description:   plan.description ?? "",
-      priceDisplay:  centsToDisplay(plan.priceInCents),
+      name:           plan.name,
+      slug:           plan.slug,
+      description:    plan.description ?? "",
+      listingType:    plan.listingType,
+      priceDisplay:   centsToDisplay(plan.priceInCents),
       intervalMonths: String(plan.intervalMonths),
-      active:        plan.active,
+      features:       plan.features ?? "",
+      active:         plan.active,
     });
     setShowNew(false);
     setError(null);
@@ -109,22 +134,28 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
     setError(null);
   }
 
+  function cancel() {
+    setEditingId(null);
+    setShowNew(false);
+    setError(null);
+  }
+
   async function handleSave(id?: string) {
     setError(null);
-    const priceInCents = centsFromDisplay(form.priceDisplay);
     if (!form.name.trim()) { setError("Nome é obrigatório."); return; }
-    if (priceInCents <= 0 && id === undefined) { setError("Preço deve ser maior que zero."); return; }
 
     const payload = {
       name:           form.name.trim(),
       slug:           form.slug || toSlug(form.name),
       description:    form.description.trim() || null,
-      priceInCents,
+      listingType:    form.listingType,
+      priceInCents:   centsFromDisplay(form.priceDisplay),
       intervalMonths: parseInt(form.intervalMonths, 10),
+      features:       form.features.trim() || null,
       active:         form.active,
     };
 
-    const url    = id ? `/api/admin/planos/${id}` : "/api/admin/planos";
+    const url    = id ? `/api/admin/planos/guia/${id}` : "/api/admin/planos/guia";
     const method = id ? "PATCH" : "POST";
 
     try {
@@ -146,8 +177,23 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
     }
   }
 
-  const formatPrice = (cents: number) =>
-    (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  async function handleDelete(id: string) {
+    if (!window.confirm("Tem certeza que deseja excluir este plano?")) return;
+    setDeleting(id);
+    try {
+      const res = await fetch(`/api/admin/planos/guia/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error ?? "Erro ao excluir.");
+        return;
+      }
+      startTransition(() => router.refresh());
+    } catch {
+      setError("Erro de conexão.");
+    } finally {
+      setDeleting(null);
+    }
+  }
 
   /* ── Form compartilhado ─────────────────────────────── */
   function PlanForm({ planId }: { planId?: string }) {
@@ -160,28 +206,25 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
             <input
               className={inputCls}
               value={form.name}
-              placeholder="Ex: Plano Trimestral"
+              placeholder="Ex: Plano Premium"
               onChange={(e) =>
                 setForm({ ...form, name: e.target.value, slug: toSlug(e.target.value) })
               }
             />
           </div>
 
-          {/* Preço */}
+          {/* Tipo de Listagem */}
           <div>
-            <label className={labelCls}>Preço (R$) *</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#526888] text-[13px] pointer-events-none">
-                R$
-              </span>
-              <input
-                className={inputCls + " pl-8"}
-                value={form.priceDisplay}
-                placeholder="0,00"
-                inputMode="numeric"
-                onChange={(e) => setPrice(e.target.value)}
-              />
-            </div>
+            <label className={labelCls}>Tipo de Listagem</label>
+            <select
+              className={selectCls}
+              value={form.listingType}
+              onChange={(e) => setForm({ ...form, listingType: e.target.value })}
+            >
+              {LISTING_TYPES.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
           </div>
 
           {/* Intervalo */}
@@ -199,14 +242,43 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
             </select>
           </div>
 
+          {/* Preço */}
+          <div>
+            <label className={labelCls}>Preço (R$)</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#526888] text-[13px] pointer-events-none">
+                R$
+              </span>
+              <input
+                className={inputCls + " pl-8"}
+                value={form.priceDisplay}
+                placeholder="0,00"
+                inputMode="numeric"
+                onChange={(e) => setPrice(e.target.value)}
+              />
+            </div>
+          </div>
+
           {/* Descrição */}
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-3">
             <label className={labelCls}>Descrição</label>
             <input
               className={inputCls}
               value={form.description}
               placeholder="Descrição breve do plano"
               onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
+          </div>
+
+          {/* Recursos/Benefícios */}
+          <div className="lg:col-span-4">
+            <label className={labelCls}>Recursos / Benefícios</label>
+            <textarea
+              className={areaCls}
+              rows={4}
+              value={form.features}
+              placeholder={"Um benefício por linha\nDestaque nas buscas\nLogo e foto de capa"}
+              onChange={(e) => setForm({ ...form, features: e.target.value })}
             />
           </div>
 
@@ -236,7 +308,7 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
           </button>
           <button
             type="button"
-            onClick={() => { setEditingId(null); setShowNew(false); setError(null); }}
+            onClick={cancel}
             className="bg-[#141d2c] border border-[#1c2a3e] text-[#d4d4da] text-[13px] h-[36px] px-4 rounded-[6px] hover:border-zinc-500 transition-colors"
           >
             Cancelar
@@ -266,30 +338,63 @@ export default function PlanosClient({ plans: initialPlans }: { plans: Plan[] })
                 <PlanForm planId={plan.id} />
               </div>
             ) : (
-              <div className="flex items-center gap-4">
+              <div className="flex items-start gap-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                  {/* Nome + badges */}
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <p className="text-white text-[16px] font-semibold">{plan.name}</p>
-                    <span className={`text-[10px] font-bold px-2 py-[2px] rounded-[2px] ${plan.active ? "bg-[#0f381f] text-[#22c55e]" : "bg-[#141d2c] text-[#526888]"}`}>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-[2px] rounded-[2px] ${listingTypeBadge[plan.listingType] ?? "bg-[#141d2c] text-[#526888]"}`}
+                    >
+                      {plan.listingType}
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-[2px] rounded-[2px] ${plan.active ? "bg-[#0f381f] text-[#22c55e]" : "bg-[#141d2c] text-[#526888]"}`}
+                    >
                       {plan.active ? "ATIVO" : "INATIVO"}
                     </span>
                   </div>
-                  <p className="text-[#7a9ab5] text-[13px]">
+
+                  {/* Preço + intervalo */}
+                  <p className="text-[#7a9ab5] text-[13px] mb-1">
                     {formatPrice(plan.priceInCents)} /{" "}
-                    {intervalLabel(plan.intervalMonths).toLowerCase()} ·{" "}
-                    {plan.subscriberCount.toLocaleString("pt-BR")} assinante
-                    {plan.subscriberCount !== 1 ? "s" : ""}
+                    {intervalLabel(plan.intervalMonths).toLowerCase()}
                   </p>
+
+                  {/* Descrição */}
                   {plan.description && (
-                    <p className="text-white text-[12px] mt-1">{plan.description}</p>
+                    <p className="text-white/70 text-[12px] mb-2">{plan.description}</p>
+                  )}
+
+                  {/* Features */}
+                  {plan.features && (
+                    <ul className="flex flex-col gap-[3px] mt-2">
+                      {plan.features.split("\n").filter(Boolean).map((f, i) => (
+                        <li key={i} className="flex items-center gap-2 text-[12px] text-[#7a9ab5]">
+                          <span className="text-[#ff1f1f] text-[10px]">✓</span>
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </div>
-                <button
-                  onClick={() => startEditing(plan)}
-                  className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[13px] h-[36px] px-4 rounded-[6px] transition-colors whitespace-nowrap"
-                >
-                  Editar
-                </button>
+
+                {/* Ações */}
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    onClick={() => startEditing(plan)}
+                    className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[13px] h-[36px] px-4 rounded-[6px] transition-colors"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(plan.id)}
+                    disabled={deleting === plan.id}
+                    className="bg-[#1a0808] border border-[#3d1010] hover:border-[#ff1f1f] text-[#ff6b6b] text-[13px] h-[36px] px-3 rounded-[6px] transition-colors disabled:opacity-50"
+                  >
+                    {deleting === plan.id ? "..." : "Excluir"}
+                  </button>
+                </div>
               </div>
             )}
           </div>

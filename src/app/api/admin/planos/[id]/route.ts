@@ -18,9 +18,7 @@ export async function PATCH(
     const { id } = await params;
     const body   = await req.json();
 
-    const payload: Record<string, unknown> = {
-      updatedAt: new Date().toISOString(),
-    };
+    const payload: Record<string, unknown> = {};
     if (body.name           !== undefined) payload.name           = String(body.name);
     if (body.slug           !== undefined) payload.slug           = String(body.slug);
     if (body.description    !== undefined) payload.description    = body.description ? String(body.description) : null;

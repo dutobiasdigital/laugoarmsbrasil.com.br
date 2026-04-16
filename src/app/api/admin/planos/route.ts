@@ -26,7 +26,6 @@ export async function POST(req: NextRequest) {
       intervalMonths: parseInt(String(body.intervalMonths), 10),
       active:         body.active === true || body.active === "true",
       createdAt:      new Date().toISOString(),
-      updatedAt:      new Date().toISOString(),
     };
 
     const res = await fetch(`${BASE}/subscription_plans`, {
