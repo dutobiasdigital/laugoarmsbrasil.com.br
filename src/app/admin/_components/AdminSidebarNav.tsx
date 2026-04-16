@@ -16,6 +16,7 @@ const ITEMS = [
   { href: "/admin/solicitacoes", label: "Solicitações", icon: "📨" },
   { href: "/admin/pagamentos", label: "Pagamentos", icon: "💳" },
   { href: "/admin/planos", label: "Planos", icon: "⭐" },
+  { href: "/admin/design", label: "Design System", icon: "🎨" },
   { href: "/admin/configuracoes", label: "Configurações", icon: "⚙" },
 ];
 

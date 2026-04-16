@@ -8,6 +8,7 @@ interface Props {
   defaultUrl?: string;
   inputName: string;
   aspectHint?: string; // e.g. "Capa: proporção 3:4"
+  onUrlChange?: (url: string) => void;
 }
 
 function slugify(text: string) {
@@ -22,7 +23,7 @@ function slugify(text: string) {
 
 export { slugify };
 
-export default function ImageUpload({ folder, filename, defaultUrl, inputName, aspectHint }: Props) {
+export default function ImageUpload({ folder, filename, defaultUrl, inputName, aspectHint, onUrlChange }: Props) {
   const [url, setUrl] = useState(defaultUrl || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +41,7 @@ export default function ImageUpload({ folder, filename, defaultUrl, inputName, a
       const data = await res.json();
       if (data.url) {
         setUrl(data.url);
+        onUrlChange?.(data.url);
       } else {
         setError(data.error || "Erro ao fazer upload.");
       }

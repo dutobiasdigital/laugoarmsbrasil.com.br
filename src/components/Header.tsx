@@ -1,26 +1,51 @@
-import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ThemeToggle } from "./ThemeToggle";
 import NavEditionsDropdown from "./NavEditionsDropdown";
 
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+
+async function getBrandLogos(): Promise<{ dark: string; light: string }> {
+  try {
+    const res = await fetch(
+      `https://${PROJECT}.supabase.co/rest/v1/site_settings?key=in.(brand.logo_dark,brand.logo_light,brand.logo_main)&select=key,value`,
+      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, next: { revalidate: 60 } }
+    );
+    const rows: { key: string; value: string }[] = await res.json();
+    const map: Record<string, string> = {};
+    for (const r of rows) if (r.value) map[r.key] = r.value;
+    const main = map["brand.logo_main"] || "/logo.png";
+    return {
+      dark:  map["brand.logo_dark"]  || main,
+      light: map["brand.logo_light"] || main,
+    };
+  } catch {
+    return { dark: "/logo.png", light: "/logo.png" };
+  }
+}
+
 export default async function Header() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [{ data: { user } }, logos] = await Promise.all([
+    supabase.auth.getUser(),
+    getBrandLogos(),
+  ]);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#070a12] border-b border-[#141d2c] h-16 flex items-center px-5 lg:px-20">
-      {/* Logo — substitua /logo.png pelo logotipo oficial */}
       <Link href="/" className="flex items-center shrink-0">
-        <Image
-          src="/logo.png"
-          alt="Revista Magnum"
-          width={200}
-          height={64}
-          className="h-[52px] w-auto object-contain"
-          priority
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logos.dark}
+          alt="Logo"
+          className="logo-for-dark h-[52px] w-auto object-contain"
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logos.light}
+          alt="Logo"
+          className="logo-for-light h-[52px] w-auto object-contain"
         />
       </Link>
 
