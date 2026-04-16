@@ -88,12 +88,14 @@ function buildDesignCss(cfg: Record<string, string>): string {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cfg = await getSiteSettings();
 
-  const gtmId           = cfg["integrations.gtm_id"]               ?? "";
-  const ga4Id           = cfg["integrations.ga4_id"]               ?? "";
-  const pixelId         = cfg["integrations.meta_pixel_id"]        ?? "";
-  const hotjarId        = cfg["integrations.hotjar_id"]            ?? "";
-  const clarityId       = cfg["integrations.clarity_id"]           ?? "";
-  const recaptchaSiteKey = cfg["integrations.recaptcha_site_key"]  ?? process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? "";
+  const gtmId              = cfg["integrations.gtm_id"]               ?? "";
+  const ga4Id              = cfg["integrations.ga4_id"]               ?? "";
+  const pixelId            = cfg["integrations.meta_pixel_id"]        ?? "";
+  const hotjarId           = cfg["integrations.hotjar_id"]            ?? "";
+  const clarityId          = cfg["integrations.clarity_id"]           ?? "";
+  const recaptchaSiteKey   = cfg["integrations.recaptcha_site_key"]   ?? process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? "";
+  const gSearchConsole     = cfg["integrations.google_search_console"] ?? "";
+  const bingVerification   = cfg["integrations.bing_verification"]    ?? "";
 
   return (
     <html
@@ -107,6 +109,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
         {/* ── reCAPTCHA v3 site key (lido pelo useRecaptcha hook) ── */}
         {recaptchaSiteKey && <meta name="rcsk" content={recaptchaSiteKey} />}
+
+        {/* ── Google Search Console verification ── */}
+        {gSearchConsole && <meta name="google-site-verification" content={gSearchConsole} />}
+
+        {/* ── Bing Webmaster Tools verification ── */}
+        {bingVerification && <meta name="msvalidate.01" content={bingVerification} />}
 
         {/* ── Google Tag Manager ── */}
         {gtmId && (

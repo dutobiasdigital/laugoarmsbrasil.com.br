@@ -68,11 +68,6 @@ const GATEWAYS = [
   },
 ];
 
-const PRICE_KEYS = [
-  { key: "payment.guia.premium_price",  label: "Guia Premium (mensal)",  ph: "7900"  },
-  { key: "payment.guia.destaque_price", label: "Guia Destaque (mensal)", ph: "14900" },
-];
-
 export default function TabPagamentos({ settings }: Props) {
   // Inicializa todos os valores dos settings
   const initValues = () => {
@@ -82,7 +77,6 @@ export default function TabPagamentos({ settings }: Props) {
       for (const k of g.keys) vals[k.key] = settings[k.key] ?? "";
     }
     vals["payment.default_gateway"] = settings["payment.default_gateway"] ?? "mercadopago";
-    for (const p of PRICE_KEYS) vals[p.key] = settings[p.key] ?? p.ph;
     return vals;
   };
 
@@ -241,31 +235,6 @@ export default function TabPagamentos({ settings }: Props) {
               ))}
             </select>
           </div>
-        </div>
-      </section>
-
-      {/* Preços */}
-      <section className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] p-5">
-        <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase mb-1">Preços do Guia Comercial</p>
-        <p className="text-white text-[12px] mb-4">Valores em centavos (ex: R$ 79,00 = 7900)</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {PRICE_KEYS.map(p => (
-            <div key={p.key}>
-              <label className={labelCls}>{p.label}</label>
-              <div className="relative">
-                <input
-                  type="number"
-                  value={values[p.key]}
-                  onChange={e => setValues(v => ({ ...v, [p.key]: e.target.value }))}
-                  placeholder={p.ph}
-                  className={inputCls}
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-white text-[12px]">
-                  {values[p.key] ? `= R$ ${(parseInt(values[p.key]) / 100).toFixed(2)}` : ""}
-                </span>
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 

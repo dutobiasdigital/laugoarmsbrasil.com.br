@@ -25,6 +25,20 @@ interface GuiaPlan {
   buttonText: string | null;
 }
 
+interface FormState {
+  name: string;
+  slug: string;
+  description: string;
+  listingType: string;
+  priceDisplay: string;
+  intervalMonths: string;
+  featureItems: string[];
+  active: boolean;
+  highlight: boolean;
+  badge: string;
+  buttonText: string;
+}
+
 const LISTING_TYPES = ["FREE", "PREMIUM", "DESTAQUE"] as const;
 
 const listingTypeBadge: Record<string, string> = {
@@ -64,7 +78,7 @@ function toSlug(str: string) {
 const formatPrice = (cents: number) =>
   (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-/* ── Editor de itens ────────────────────────────────────── */
+/* ── Editor de itens — fora do componente pai ───────────── */
 function FeatureEditor({ items, onChange }: { items: string[]; onChange: (items: string[]) => void }) {
   function move(from: number, to: number) {
     const next = [...items];
@@ -77,7 +91,6 @@ function FeatureEditor({ items, onChange }: { items: string[]; onChange: (items:
     next[idx] = val;
     onChange(next);
   }
-
   return (
     <div className="flex flex-col gap-1.5">
       {items.map((item, idx) => (
@@ -88,53 +101,137 @@ function FeatureEditor({ items, onChange }: { items: string[]; onChange: (items:
             placeholder="Ex: Logo e fotos de capa"
             onChange={(e) => update(idx, e.target.value)}
           />
-          <button
-            type="button"
-            disabled={idx === 0}
-            onClick={() => move(idx, idx - 1)}
-            className="h-[38px] w-[32px] flex items-center justify-center bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] text-[#7a9ab5] hover:text-white disabled:opacity-30 text-[12px] shrink-0 transition-colors"
-            title="Mover para cima"
-          >↑</button>
-          <button
-            type="button"
-            disabled={idx === items.length - 1}
-            onClick={() => move(idx, idx + 1)}
-            className="h-[38px] w-[32px] flex items-center justify-center bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] text-[#7a9ab5] hover:text-white disabled:opacity-30 text-[12px] shrink-0 transition-colors"
-            title="Mover para baixo"
-          >↓</button>
-          <button
-            type="button"
-            onClick={() => remove(idx)}
-            className="h-[38px] w-[32px] flex items-center justify-center bg-[#1a0808] border border-[#3d1010] rounded-[6px] text-[#ff6b6b] hover:border-[#ff1f1f] text-[12px] shrink-0 transition-colors"
-            title="Remover item"
-          >✕</button>
+          <button type="button" disabled={idx === 0} onClick={() => move(idx, idx - 1)}
+            className="h-[38px] w-[32px] flex items-center justify-center bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] text-[#7a9ab5] hover:text-white disabled:opacity-30 text-[12px] shrink-0 transition-colors">↑</button>
+          <button type="button" disabled={idx === items.length - 1} onClick={() => move(idx, idx + 1)}
+            className="h-[38px] w-[32px] flex items-center justify-center bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] text-[#7a9ab5] hover:text-white disabled:opacity-30 text-[12px] shrink-0 transition-colors">↓</button>
+          <button type="button" onClick={() => remove(idx)}
+            className="h-[38px] w-[32px] flex items-center justify-center bg-[#1a0808] border border-[#3d1010] rounded-[6px] text-[#ff6b6b] hover:border-[#ff1f1f] text-[12px] shrink-0 transition-colors">✕</button>
         </div>
       ))}
-      <button
-        type="button"
-        onClick={() => onChange([...items, ""])}
-        className="h-[34px] bg-[#141d2c] border border-dashed border-[#1c2a3e] hover:border-zinc-500 text-[#7a9ab5] hover:text-white text-[12px] rounded-[6px] transition-colors mt-0.5"
-      >
+      <button type="button" onClick={() => onChange([...items, ""])}
+        className="h-[34px] bg-[#141d2c] border border-dashed border-[#1c2a3e] hover:border-zinc-500 text-[#7a9ab5] hover:text-white text-[12px] rounded-[6px] transition-colors mt-0.5">
         + Adicionar item
       </button>
     </div>
   );
 }
 
-interface FormState {
-  name: string;
-  slug: string;
-  description: string;
-  listingType: string;
-  priceDisplay: string;
-  intervalMonths: string;
-  featureItems: string[];
-  active: boolean;
-  highlight: boolean;
-  badge: string;
-  buttonText: string;
+/* ── Formulário — fora do componente pai (evita perda de foco) ── */
+interface PlanFormProps {
+  planId?: string;
+  form: FormState;
+  setForm: React.Dispatch<React.SetStateAction<FormState>>;
+  isPending: boolean;
+  onSave: (id?: string) => void;
+  onCancel: () => void;
 }
 
+function PlanForm({ planId, form, setForm, isPending, onSave, onCancel }: PlanFormProps) {
+  return (
+    <>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        {/* Nome */}
+        <div className="lg:col-span-2">
+          <label className={labelCls}>Nome *</label>
+          <input className={inputCls} value={form.name} placeholder="Ex: Plano Premium"
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value, slug: toSlug(e.target.value) }))} />
+        </div>
+
+        {/* Tipo de Listagem */}
+        <div>
+          <label className={labelCls}>Tipo de Listagem</label>
+          <select className={selectCls} value={form.listingType}
+            onChange={(e) => setForm((f) => ({ ...f, listingType: e.target.value }))}>
+            {LISTING_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+        </div>
+
+        {/* Intervalo */}
+        <div>
+          <label className={labelCls}>Intervalo (meses)</label>
+          <select className={selectCls} value={form.intervalMonths}
+            onChange={(e) => setForm((f) => ({ ...f, intervalMonths: e.target.value }))}>
+            <option value="1">1 — Mensal</option>
+            <option value="3">3 — Trimestral</option>
+            <option value="6">6 — Semestral</option>
+            <option value="12">12 — Anual</option>
+          </select>
+        </div>
+
+        {/* Preço */}
+        <div>
+          <label className={labelCls}>Preço (R$)</label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#526888] text-[13px] pointer-events-none">R$</span>
+            <input className={inputCls + " pl-8"} value={form.priceDisplay} placeholder="0,00" inputMode="numeric"
+              onChange={(e) => setForm((f) => ({ ...f, priceDisplay: formatMoneyInput(e.target.value) }))} />
+          </div>
+        </div>
+
+        {/* Descrição */}
+        <div className="lg:col-span-3">
+          <label className={labelCls}>Descrição</label>
+          <input className={inputCls} value={form.description} placeholder="Descrição breve do plano"
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
+        </div>
+
+        {/* Ativo */}
+        <div className="flex items-center gap-2 pt-5">
+          <input id={`active-${planId ?? "new"}`} type="checkbox" checked={form.active}
+            onChange={(e) => setForm((f) => ({ ...f, active: e.target.checked }))}
+            className="w-[14px] h-[14px] accent-[#ff1f1f]" />
+          <label htmlFor={`active-${planId ?? "new"}`} className="text-[#d4d4da] text-[13px]">Ativo</label>
+        </div>
+      </div>
+
+      {/* Seção Destaque */}
+      <div className="bg-[#0a0f1a] border border-[#1c2a3e] rounded-[8px] p-4 mb-4">
+        <p className="text-[#7a9ab5] text-[11px] font-semibold uppercase tracking-[0.5px] mb-3">Destaque &amp; Apresentação</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="flex items-center gap-2 pt-5">
+            <input id={`highlight-${planId ?? "new"}`} type="checkbox" checked={form.highlight}
+              onChange={(e) => setForm((f) => ({ ...f, highlight: e.target.checked }))}
+              className="w-[14px] h-[14px] accent-[#ff1f1f]" />
+            <label htmlFor={`highlight-${planId ?? "new"}`} className="text-[#d4d4da] text-[13px]">Destacar plano</label>
+          </div>
+          <div>
+            <label className={labelCls}>Label (badge acima)</label>
+            <input className={inputCls} value={form.badge} placeholder="Ex: MAIS POPULAR"
+              onChange={(e) => setForm((f) => ({ ...f, badge: e.target.value }))} />
+          </div>
+          <div className="lg:col-span-2">
+            <label className={labelCls}>Texto do botão</label>
+            <input className={inputCls} value={form.buttonText} placeholder="Ex: Cadastrar agora →"
+              onChange={(e) => setForm((f) => ({ ...f, buttonText: e.target.value }))} />
+          </div>
+        </div>
+      </div>
+
+      {/* Itens */}
+      <div className="mb-4">
+        <label className={labelCls}>Itens / Benefícios</label>
+        <FeatureEditor
+          items={form.featureItems}
+          onChange={(items) => setForm((f) => ({ ...f, featureItems: items }))}
+        />
+      </div>
+
+      <div className="flex gap-2">
+        <button type="button" onClick={() => onSave(planId)} disabled={isPending}
+          className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[13px] font-semibold h-[36px] px-5 rounded-[6px] transition-colors">
+          {planId ? "Salvar" : "Criar Plano"}
+        </button>
+        <button type="button" onClick={onCancel}
+          className="bg-[#141d2c] border border-[#1c2a3e] text-[#d4d4da] text-[13px] h-[36px] px-4 rounded-[6px] hover:border-zinc-500 transition-colors">
+          Cancelar
+        </button>
+      </div>
+    </>
+  );
+}
+
+/* ── Componente principal ───────────────────────────────── */
 const emptyForm = (): FormState => ({
   name: "", slug: "", description: "",
   listingType: "FREE", priceDisplay: "",
@@ -151,10 +248,6 @@ export default function PlanosGuiaClient({ plans: initialPlans }: { plans: GuiaP
   const [error,     setError]     = useState<string | null>(null);
   const [deleting,  setDeleting]  = useState<string | null>(null);
   const [form,      setForm]      = useState<FormState>(emptyForm());
-
-  function setPrice(raw: string) {
-    setForm((f) => ({ ...f, priceDisplay: formatMoneyInput(raw) }));
-  }
 
   function startEditing(plan: GuiaPlan) {
     setEditingId(plan.id);
@@ -242,151 +335,6 @@ export default function PlanosGuiaClient({ plans: initialPlans }: { plans: GuiaP
     }
   }
 
-  function PlanForm({ planId }: { planId?: string }) {
-    return (
-      <>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          {/* Nome */}
-          <div className="lg:col-span-2">
-            <label className={labelCls}>Nome *</label>
-            <input
-              className={inputCls}
-              value={form.name}
-              placeholder="Ex: Plano Premium"
-              onChange={(e) => setForm({ ...form, name: e.target.value, slug: toSlug(e.target.value) })}
-            />
-          </div>
-
-          {/* Tipo de Listagem */}
-          <div>
-            <label className={labelCls}>Tipo de Listagem</label>
-            <select className={selectCls} value={form.listingType} onChange={(e) => setForm({ ...form, listingType: e.target.value })}>
-              {LISTING_TYPES.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Intervalo */}
-          <div>
-            <label className={labelCls}>Intervalo (meses)</label>
-            <select className={selectCls} value={form.intervalMonths} onChange={(e) => setForm({ ...form, intervalMonths: e.target.value })}>
-              <option value="1">1 — Mensal</option>
-              <option value="3">3 — Trimestral</option>
-              <option value="6">6 — Semestral</option>
-              <option value="12">12 — Anual</option>
-            </select>
-          </div>
-
-          {/* Preço */}
-          <div>
-            <label className={labelCls}>Preço (R$)</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#526888] text-[13px] pointer-events-none">R$</span>
-              <input
-                className={inputCls + " pl-8"}
-                value={form.priceDisplay}
-                placeholder="0,00"
-                inputMode="numeric"
-                onChange={(e) => setPrice(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Descrição */}
-          <div className="lg:col-span-3">
-            <label className={labelCls}>Descrição</label>
-            <input
-              className={inputCls}
-              value={form.description}
-              placeholder="Descrição breve do plano"
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-            />
-          </div>
-
-          {/* Ativo */}
-          <div className="flex items-center gap-2 pt-5">
-            <input
-              id={`active-${planId ?? "new"}`}
-              type="checkbox"
-              checked={form.active}
-              onChange={(e) => setForm({ ...form, active: e.target.checked })}
-              className="w-[14px] h-[14px] accent-[#ff1f1f]"
-            />
-            <label htmlFor={`active-${planId ?? "new"}`} className="text-[#d4d4da] text-[13px]">Ativo</label>
-          </div>
-        </div>
-
-        {/* Seção Destaque */}
-        <div className="bg-[#0a0f1a] border border-[#1c2a3e] rounded-[8px] p-4 mb-4">
-          <p className="text-[#7a9ab5] text-[11px] font-semibold uppercase tracking-[0.5px] mb-3">Destaque &amp; Apresentação</p>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Destaque */}
-            <div className="flex items-center gap-2 pt-5">
-              <input
-                id={`highlight-${planId ?? "new"}`}
-                type="checkbox"
-                checked={form.highlight}
-                onChange={(e) => setForm({ ...form, highlight: e.target.checked })}
-                className="w-[14px] h-[14px] accent-[#ff1f1f]"
-              />
-              <label htmlFor={`highlight-${planId ?? "new"}`} className="text-[#d4d4da] text-[13px]">Destacar plano</label>
-            </div>
-
-            {/* Label/Badge */}
-            <div>
-              <label className={labelCls}>Label (badge acima)</label>
-              <input
-                className={inputCls}
-                value={form.badge}
-                placeholder="Ex: MAIS POPULAR"
-                onChange={(e) => setForm({ ...form, badge: e.target.value })}
-              />
-            </div>
-
-            {/* Texto do botão */}
-            <div className="lg:col-span-2">
-              <label className={labelCls}>Texto do botão</label>
-              <input
-                className={inputCls}
-                value={form.buttonText}
-                placeholder="Ex: Cadastrar agora →"
-                onChange={(e) => setForm({ ...form, buttonText: e.target.value })}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Itens / Benefícios */}
-        <div className="mb-4">
-          <label className={labelCls}>Itens / Benefícios</label>
-          <FeatureEditor
-            items={form.featureItems}
-            onChange={(items) => setForm({ ...form, featureItems: items })}
-          />
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => handleSave(planId)}
-            disabled={isPending}
-            className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[13px] font-semibold h-[36px] px-5 rounded-[6px] transition-colors"
-          >
-            {planId ? "Salvar" : "Criar Plano"}
-          </button>
-          <button
-            type="button"
-            onClick={cancel}
-            className="bg-[#141d2c] border border-[#1c2a3e] text-[#d4d4da] text-[13px] h-[36px] px-4 rounded-[6px] hover:border-zinc-500 transition-colors"
-          >
-            Cancelar
-          </button>
-        </div>
-      </>
-    );
-  }
-
   return (
     <div className="max-w-[900px]">
       {error && (
@@ -395,19 +343,17 @@ export default function PlanosGuiaClient({ plans: initialPlans }: { plans: GuiaP
         </div>
       )}
 
-      {/* Lista de planos */}
       <div className="flex flex-col gap-4 mb-6">
         {initialPlans.map((plan) => (
           <div key={plan.id} className={`bg-[#0e1520] border rounded-[10px] p-5 ${plan.highlight ? "border-[#ff1f1f]/40" : "border-[#141d2c]"}`}>
             {editingId === plan.id ? (
               <div>
                 <p className="text-[#7a9ab5] text-[12px] font-semibold mb-4 uppercase tracking-[0.5px]">Editando plano</p>
-                <PlanForm planId={plan.id} />
+                <PlanForm planId={plan.id} form={form} setForm={setForm} isPending={isPending} onSave={handleSave} onCancel={cancel} />
               </div>
             ) : (
               <div className="flex items-start gap-4">
                 <div className="flex-1">
-                  {/* Nome + badges */}
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <p className="text-white text-[16px] font-semibold">{plan.name}</p>
                     <span className={`text-[10px] font-bold px-2 py-[2px] rounded-[2px] ${listingTypeBadge[plan.listingType] ?? "bg-[#141d2c] text-[#526888]"}`}>
@@ -417,57 +363,34 @@ export default function PlanosGuiaClient({ plans: initialPlans }: { plans: GuiaP
                       <span className="text-[10px] font-bold px-2 py-[2px] rounded-[2px] bg-[#ff1f1f]/20 text-[#ff1f1f]">DESTAQUE</span>
                     )}
                     {plan.badge && (
-                      <span className="text-[10px] font-bold px-2 py-[2px] rounded-[2px] bg-[#141d2c] text-[#7a9ab5] border border-[#1c2a3e]">
-                        {plan.badge}
-                      </span>
+                      <span className="text-[10px] font-bold px-2 py-[2px] rounded-[2px] bg-[#141d2c] text-[#7a9ab5] border border-[#1c2a3e]">{plan.badge}</span>
                     )}
                     <span className={`text-[10px] font-bold px-2 py-[2px] rounded-[2px] ${plan.active ? "bg-[#0f381f] text-[#22c55e]" : "bg-[#141d2c] text-[#526888]"}`}>
                       {plan.active ? "ATIVO" : "INATIVO"}
                     </span>
                   </div>
-
-                  {/* Preço + intervalo */}
                   <p className="text-[#7a9ab5] text-[13px] mb-1">
-                    {formatPrice(plan.priceInCents)} /{" "}
-                    {intervalLabel(plan.intervalMonths).toLowerCase()}
+                    {formatPrice(plan.priceInCents)} / {intervalLabel(plan.intervalMonths).toLowerCase()}
                   </p>
-
-                  {/* Descrição */}
-                  {plan.description && (
-                    <p className="text-white/70 text-[12px] mb-2">{plan.description}</p>
-                  )}
-
-                  {/* Botão */}
-                  {plan.buttonText && (
-                    <p className="text-[#526888] text-[11px] mb-2">Botão: <span className="text-[#d4d4da]">{plan.buttonText}</span></p>
-                  )}
-
-                  {/* Features */}
+                  {plan.description && <p className="text-white/70 text-[12px] mb-2">{plan.description}</p>}
+                  {plan.buttonText && <p className="text-[#526888] text-[11px] mb-2">Botão: <span className="text-[#d4d4da]">{plan.buttonText}</span></p>}
                   {plan.features && (
                     <ul className="flex flex-col gap-[3px] mt-2">
                       {plan.features.split("\n").filter(Boolean).map((f, i) => (
                         <li key={i} className="flex items-center gap-2 text-[12px] text-[#7a9ab5]">
-                          <span className="text-[#ff1f1f] text-[10px]">✓</span>
-                          {f}
+                          <span className="text-[#ff1f1f] text-[10px]">✓</span>{f}
                         </li>
                       ))}
                     </ul>
                   )}
                 </div>
-
-                {/* Ações */}
                 <div className="flex gap-2 shrink-0">
-                  <button
-                    onClick={() => startEditing(plan)}
-                    className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[13px] h-[36px] px-4 rounded-[6px] transition-colors"
-                  >
+                  <button onClick={() => startEditing(plan)}
+                    className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[13px] h-[36px] px-4 rounded-[6px] transition-colors">
                     Editar
                   </button>
-                  <button
-                    onClick={() => handleDelete(plan.id)}
-                    disabled={deleting === plan.id}
-                    className="bg-[#1a0808] border border-[#3d1010] hover:border-[#ff1f1f] text-[#ff6b6b] text-[13px] h-[36px] px-3 rounded-[6px] transition-colors disabled:opacity-50"
-                  >
+                  <button onClick={() => handleDelete(plan.id)} disabled={deleting === plan.id}
+                    className="bg-[#1a0808] border border-[#3d1010] hover:border-[#ff1f1f] text-[#ff6b6b] text-[13px] h-[36px] px-3 rounded-[6px] transition-colors disabled:opacity-50">
                     {deleting === plan.id ? "..." : "Excluir"}
                   </button>
                 </div>
@@ -477,17 +400,14 @@ export default function PlanosGuiaClient({ plans: initialPlans }: { plans: GuiaP
         ))}
       </div>
 
-      {/* Novo plano */}
       {showNew ? (
         <div className="bg-[#0e1520] border border-[#ff1f1f] rounded-[10px] p-5">
           <p className="text-[#ff1f1f] text-[12px] font-semibold mb-4 uppercase tracking-[1px]">Novo Plano</p>
-          <PlanForm />
+          <PlanForm form={form} setForm={setForm} isPending={isPending} onSave={handleSave} onCancel={cancel} />
         </div>
       ) : (
-        <button
-          onClick={startNew}
-          className="bg-[#141d2c] border border-dashed border-[#1c2a3e] hover:border-zinc-500 text-[#7a9ab5] hover:text-white text-[14px] h-[48px] w-full rounded-[10px] transition-colors"
-        >
+        <button onClick={startNew}
+          className="bg-[#141d2c] border border-dashed border-[#1c2a3e] hover:border-zinc-500 text-[#7a9ab5] hover:text-white text-[14px] h-[48px] w-full rounded-[10px] transition-colors">
           + Adicionar novo plano
         </button>
       )}
