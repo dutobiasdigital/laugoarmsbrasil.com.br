@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -25,10 +25,15 @@ interface Props {
     content: string;
     authorName: string;
     featureImageUrl: string | null;
+    featureImageAlt: string | null;
     categoryId: string;
     isExclusive: boolean;
     status: string;
     publishedAt: string | null;
+    seoTitle: string | null;
+    seoDescription: string | null;
+    seoKeywords: string | null;
+    canonicalUrl: string | null;
   };
   categories: { id: string; name: string }[];
 }
@@ -136,15 +141,36 @@ export default function ArticleEditForm({ article, categories }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [content, setContent] = useState(article.content);
   const [title, setTitle] = useState(article.title);
+  const [featureImageAlt, setFeatureImageAlt] = useState(article.featureImageAlt ?? "");
+  const [seoTitle, setSeoTitle]               = useState(article.seoTitle ?? "");
+  const [seoDescription, setSeoDescription]   = useState(article.seoDescription ?? "");
+  const [seoKeywords, setSeoKeywords]         = useState(article.seoKeywords ?? "");
+  const [canonicalUrl, setCanonicalUrl]       = useState(article.canonicalUrl ?? "");
+
+  useEffect(() => {
+    if (!featureImageAlt) setFeatureImageAlt(title);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title]);
 
   const imageFilename = title ? `artigo-${slugify(title)}` : undefined;
+
+  const seoTitleCount       = seoTitle.length;
+  const seoDescCount        = seoDescription.length;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError(null);
     const formData = new FormData(e.currentTarget);
-    const body = { ...Object.fromEntries(formData), content };
+    const body = {
+      ...Object.fromEntries(formData),
+      content,
+      featureImageAlt,
+      seoTitle,
+      seoDescription,
+      seoKeywords,
+      canonicalUrl,
+    };
     const res = await fetch("/api/admin/artigos", {
       method: "PUT",
       body: JSON.stringify(body),
@@ -213,6 +239,19 @@ export default function ArticleEditForm({ article, categories }: Props) {
             />
           </div>
 
+          <div className="lg:col-span-3">
+            <label className={labelCls}>Texto alternativo (alt) da imagem</label>
+            <input
+              value={featureImageAlt}
+              onChange={(e) => setFeatureImageAlt(e.target.value)}
+              className={inputCls}
+              placeholder="Descrição da imagem para acessibilidade e SEO"
+            />
+            <p className="text-[#526888] text-[11px] mt-1">
+              Preenchido automaticamente com o título quando deixado em branco.
+            </p>
+          </div>
+
           <div>
             <label className={labelCls}>Categoria *</label>
             <select name="categoryId" required defaultValue={article.categoryId} className={selectCls}>
@@ -239,6 +278,60 @@ export default function ArticleEditForm({ article, categories }: Props) {
           <div className="flex items-center gap-3 pt-5">
             <input id="isExclusive" name="isExclusive" type="checkbox" defaultChecked={article.isExclusive} className="w-[16px] h-[16px] accent-[#ff1f1f]" />
             <label htmlFor="isExclusive" className="text-[#d4d4da] text-[14px]">Conteúdo exclusivo para assinantes</label>
+          </div>
+        </div>
+
+        {/* ── SEO ── */}
+        <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5 mb-8">
+          <p className="text-[#ff1f1f] text-[10px] font-bold tracking-[1.5px] uppercase mb-4">SEO</p>
+          <div className="flex flex-col gap-4">
+            <div>
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="block text-[#7a9ab5] text-[12px] font-semibold">Título SEO</label>
+                <span className={`text-[11px] ${seoTitleCount > 70 ? "text-red-400" : seoTitleCount > 60 ? "text-amber-400" : "text-[#526888]"}`}>{seoTitleCount}/70</span>
+              </div>
+              <input
+                value={seoTitle}
+                onChange={(e) => setSeoTitle(e.target.value)}
+                className={inputCls}
+                placeholder="Título para os mecanismos de busca (deixe vazio para usar o título do artigo)"
+                maxLength={70}
+              />
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="block text-[#7a9ab5] text-[12px] font-semibold">Descrição SEO</label>
+                <span className={`text-[11px] ${seoDescCount > 160 ? "text-red-400" : seoDescCount > 130 ? "text-amber-400" : "text-[#526888]"}`}>{seoDescCount}/160</span>
+              </div>
+              <textarea
+                rows={3}
+                value={seoDescription}
+                onChange={(e) => setSeoDescription(e.target.value)}
+                className={textareaCls}
+                placeholder="Resumo atrativo para aparecer nos resultados do Google. Até 160 caracteres."
+                maxLength={200}
+              />
+            </div>
+            <div>
+              <label className="block text-[#7a9ab5] text-[12px] font-semibold mb-1.5">Palavras-chave</label>
+              <input
+                value={seoKeywords}
+                onChange={(e) => setSeoKeywords(e.target.value)}
+                className={inputCls}
+                placeholder="Ex: tiro esportivo, IPSC, CBTS, competição"
+              />
+              <p className="text-[#526888] text-[11px] mt-1">Separadas por vírgula.</p>
+            </div>
+            <div>
+              <label className="block text-[#7a9ab5] text-[12px] font-semibold mb-1.5">URL Canônica</label>
+              <input
+                value={canonicalUrl}
+                onChange={(e) => setCanonicalUrl(e.target.value)}
+                className={inputCls}
+                placeholder="https://revistamagnum.com.br/blog/... (opcional)"
+              />
+              <p className="text-[#526888] text-[11px] mt-1">Preencha apenas se este artigo for uma cópia de outro URL.</p>
+            </div>
           </div>
         </div>
 

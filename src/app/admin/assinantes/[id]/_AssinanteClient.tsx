@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import AvatarUpload from "@/components/AvatarUpload";
 
 const inputCls =
   "bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[38px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full";
@@ -38,7 +39,7 @@ interface Subscription {
 }
 
 interface Props {
-  user: { id: string; name: string; email: string; phone: string; role: string };
+  user: { id: string; name: string; email: string; phone: string; role: string; avatarUrl: string | null };
   subscription: Subscription | null;
   plans: Plan[];
 }
@@ -47,6 +48,7 @@ export default function AssinanteClient({ user, subscription, plans }: Props) {
   const [userName, setUserName] = useState(user.name);
   const [phone, setPhone] = useState(user.phone);
   const [role, setRole] = useState(user.role);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(user.avatarUrl);
   const [saving, setSaving] = useState(false);
   const [userMsg, setUserMsg] = useState<string | null>(null);
 
@@ -78,7 +80,7 @@ export default function AssinanteClient({ user, subscription, plans }: Props) {
     const res = await fetch(`/api/admin/assinantes/${user.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: userName, phone, role }),
+      body: JSON.stringify({ name: userName, phone, role, avatarUrl }),
     });
     setSaving(false);
     setUserMsg(res.ok ? "Dados salvos!" : "Erro ao salvar.");
@@ -122,6 +124,17 @@ export default function AssinanteClient({ user, subscription, plans }: Props) {
       {/* User info */}
       <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5">
         <p className="text-[#7a9ab5] text-[12px] font-semibold uppercase tracking-[1px] mb-4">Dados Pessoais</p>
+        <div className="flex items-center gap-4 mb-5">
+          <AvatarUpload
+            userId={user.id}
+            currentUrl={avatarUrl}
+            onUrlChange={(url) => setAvatarUrl(url)}
+          />
+          <div>
+            <p className="text-white font-semibold">{userName || user.name}</p>
+            <p className="text-[#7a9ab5] text-[13px]">{user.email}</p>
+          </div>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Nome</label>

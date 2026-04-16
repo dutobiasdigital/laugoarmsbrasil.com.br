@@ -123,7 +123,11 @@ export async function POST(req: NextRequest) {
     const dimensionHeight = body.dimensionHeight != null && body.dimensionHeight !== "" ? Number(body.dimensionHeight) : null;
     const dimensionLength = body.dimensionLength != null && body.dimensionLength !== "" ? Number(body.dimensionLength) : null;
     const mainImageUrl  = (body.mainImageUrl as string) || null;
+    const mainImageAlt  = (body.mainImageAlt as string) || null;
     const pdfFileUrl    = (body.pdfFileUrl as string) || null;
+    const metaTitle       = (body.metaTitle as string) || null;
+    const metaDescription = (body.metaDescription as string) || null;
+    const metaKeywords    = (body.metaKeywords as string) || null;
 
     if (!name) return NextResponse.json({ error: "Nome obrigatório." }, { status: 400 });
 
@@ -133,7 +137,9 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         name, slug, categoryId, isActive, isFeatured, basePrice, hasVariations,
         stock, sku, description, technicalSpecs, weight,
-        dimensionWidth, dimensionHeight, dimensionLength, mainImageUrl, pdfFileUrl,
+        dimensionWidth, dimensionHeight, dimensionLength,
+        mainImageUrl, mainImageAlt, pdfFileUrl,
+        metaTitle, metaDescription, metaKeywords,
       }),
     });
     if (!res.ok) throw new Error(await res.text());
@@ -176,7 +182,11 @@ export async function PUT(req: NextRequest) {
     const dimensionHeight = body.dimensionHeight != null && body.dimensionHeight !== "" ? Number(body.dimensionHeight) : null;
     const dimensionLength = body.dimensionLength != null && body.dimensionLength !== "" ? Number(body.dimensionLength) : null;
     const mainImageUrl  = (body.mainImageUrl as string) || null;
+    const mainImageAlt  = (body.mainImageAlt as string) || null;
     const pdfFileUrl    = (body.pdfFileUrl as string) || null;
+    const metaTitle       = (body.metaTitle as string) || null;
+    const metaDescription = (body.metaDescription as string) || null;
+    const metaKeywords    = (body.metaKeywords as string) || null;
 
     if (!id)   return NextResponse.json({ error: "ID obrigatório." }, { status: 400 });
     if (!name) return NextResponse.json({ error: "Nome obrigatório." }, { status: 400 });
@@ -187,7 +197,9 @@ export async function PUT(req: NextRequest) {
       body: JSON.stringify({
         name, slug, categoryId, isActive, isFeatured, basePrice, hasVariations,
         stock, sku, description, technicalSpecs, weight,
-        dimensionWidth, dimensionHeight, dimensionLength, mainImageUrl, pdfFileUrl,
+        dimensionWidth, dimensionHeight, dimensionLength,
+        mainImageUrl, mainImageAlt, pdfFileUrl,
+        metaTitle, metaDescription, metaKeywords,
       }),
     });
     if (!res.ok) throw new Error(await res.text());

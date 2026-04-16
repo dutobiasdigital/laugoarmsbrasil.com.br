@@ -70,6 +70,7 @@ export async function PUT(req: NextRequest) {
     const content = (body.content as string) || "";
     const authorName = (body.authorName as string) || "Redação Magnum";
     const featureImageUrl = (body.featureImageUrl as string) || null;
+    const featureImageAlt = (body.featureImageAlt as string) || null;
     const categoryId = body.categoryId as string;
     const isExclusive = body.isExclusive === "on" || body.isExclusive === true || body.isExclusive === "true";
     const status = (body.status as string) || "DRAFT";
@@ -78,6 +79,10 @@ export async function PUT(req: NextRequest) {
       : status === "PUBLISHED"
       ? new Date().toISOString()
       : null;
+    const seoTitle       = (body.seoTitle as string) || null;
+    const seoDescription = (body.seoDescription as string) || null;
+    const seoKeywords    = (body.seoKeywords as string) || null;
+    const canonicalUrl   = (body.canonicalUrl as string) || null;
 
     const res = await fetch(`${BASE}/articles?id=eq.${id}`, {
       method: "PATCH",
@@ -89,10 +94,15 @@ export async function PUT(req: NextRequest) {
         content,
         authorName,
         featureImageUrl,
+        featureImageAlt,
         categoryId,
         isExclusive,
         status,
         publishedAt,
+        seoTitle,
+        seoDescription,
+        seoKeywords,
+        canonicalUrl,
       }),
     });
     if (!res.ok) throw new Error(await res.text());

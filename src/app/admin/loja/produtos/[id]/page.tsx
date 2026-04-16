@@ -23,7 +23,7 @@ export default async function EditarProdutoPage({
   try {
     const [prodRes, varRes, catRes] = await Promise.all([
       fetch(
-        `${BASE}/shop_products?id=eq.${id}&select=id,name,slug,categoryId,isActive,isFeatured,basePrice,hasVariations,stock,sku,description,technicalSpecs,weight,dimensionWidth,dimensionHeight,dimensionLength,mainImageUrl,pdfFileUrl&limit=1`,
+        `${BASE}/shop_products?id=eq.${id}&select=id,name,slug,categoryId,isActive,isFeatured,basePrice,hasVariations,stock,sku,description,technicalSpecs,weight,dimensionWidth,dimensionHeight,dimensionLength,mainImageUrl,mainImageAlt,pdfFileUrl,metaTitle,metaDescription,metaKeywords&limit=1`,
         { headers: HEADERS, cache: "no-store" }
       ),
       fetch(
@@ -82,7 +82,11 @@ export default async function EditarProdutoPage({
     dimensionHeight: product.dimensionHeight != null ? String(product.dimensionHeight) : "",
     dimensionLength: product.dimensionLength != null ? String(product.dimensionLength) : "",
     mainImageUrl: (product.mainImageUrl as string) ?? "",
+    mainImageAlt: (product.mainImageAlt as string) ?? "",
     pdfFileUrl: (product.pdfFileUrl as string) ?? "",
+    metaTitle: (product.metaTitle as string) ?? "",
+    metaDescription: (product.metaDescription as string) ?? "",
+    metaKeywords: (product.metaKeywords as string) ?? "",
     variations: mappedVariations,
   };
 

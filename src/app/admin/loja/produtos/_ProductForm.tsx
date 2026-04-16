@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -217,7 +217,11 @@ interface ProductData {
   dimensionHeight: string;
   dimensionLength: string;
   mainImageUrl: string;
+  mainImageAlt: string;
   pdfFileUrl: string;
+  metaTitle: string;
+  metaDescription: string;
+  metaKeywords: string;
   variations: Variation[];
 }
 
@@ -252,11 +256,21 @@ export default function ProductForm({ mode, categories, initial }: Props) {
   const [dimLength, setDimLength]       = useState(initial?.dimensionLength ?? "");
 
   const [mainImageUrl, setMainImageUrl] = useState(initial?.mainImageUrl ?? "");
+  const [mainImageAlt, setMainImageAlt] = useState(initial?.mainImageAlt ?? "");
   const [pdfFileUrl, setPdfFileUrl]     = useState(initial?.pdfFileUrl ?? "");
+
+  const [metaTitle, setMetaTitle]             = useState(initial?.metaTitle ?? "");
+  const [metaDescription, setMetaDescription] = useState(initial?.metaDescription ?? "");
+  const [metaKeywords, setMetaKeywords]       = useState(initial?.metaKeywords ?? "");
 
   const [variations, setVariations] = useState<Variation[]>(initial?.variations ?? []);
 
   const imageFilename = name ? `produto-${slugify(name)}` : undefined;
+
+  useEffect(() => {
+    if (!mainImageAlt) setMainImageAlt(name);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name]);
 
   function handleNameChange(val: string) {
     setName(val);
@@ -299,7 +313,11 @@ export default function ProductForm({ mode, categories, initial }: Props) {
       dimensionHeight: dimHeight ? parseFloat(dimHeight) : null,
       dimensionLength: dimLength ? parseFloat(dimLength) : null,
       mainImageUrl: mainImageUrl || null,
+      mainImageAlt: mainImageAlt || null,
       pdfFileUrl: pdfFileUrl || null,
+      metaTitle: metaTitle || null,
+      metaDescription: metaDescription || null,
+      metaKeywords: metaKeywords || null,
     };
 
     if (mode === "edit" && initial?.id) payload.id = initial.id;
@@ -529,6 +547,15 @@ export default function ProductForm({ mode, categories, initial }: Props) {
               aspectHint="Proporção recomendada: 1:1 ou 4:3"
               onUrlChange={setMainImageUrl}
             />
+            <div className="mt-3">
+              <label className={labelCls}>Texto alternativo (alt) da imagem principal</label>
+              <input
+                value={mainImageAlt}
+                onChange={(e) => setMainImageAlt(e.target.value)}
+                className={inputCls}
+                placeholder="Descrição da imagem para acessibilidade e SEO"
+              />
+            </div>
           </div>
           <div>
             <label className={labelCls}>URL do PDF (ficha técnica)</label>
@@ -578,6 +605,48 @@ export default function ProductForm({ mode, categories, initial }: Props) {
             </div>
           </>
         )}
+
+        {/* ── SEO ── */}
+        <SectionTitle>SEO</SectionTitle>
+        <div className="flex flex-col gap-5 mb-6">
+          <div>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="block text-[#7a9ab5] text-[12px] font-semibold">Meta Title</label>
+              <span className={`text-[11px] ${metaTitle.length > 60 ? "text-amber-400" : "text-[#526888]"}`}>{metaTitle.length}/70</span>
+            </div>
+            <input
+              value={metaTitle}
+              onChange={(e) => setMetaTitle(e.target.value)}
+              maxLength={70}
+              className={inputCls}
+              placeholder="Título para mecanismos de busca..."
+            />
+          </div>
+          <div>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="block text-[#7a9ab5] text-[12px] font-semibold">Meta Description</label>
+              <span className={`text-[11px] ${metaDescription.length > 130 ? "text-amber-400" : "text-[#526888]"}`}>{metaDescription.length}/160</span>
+            </div>
+            <textarea
+              rows={3}
+              value={metaDescription}
+              onChange={(e) => setMetaDescription(e.target.value)}
+              maxLength={160}
+              className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] px-3 py-2 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full resize-none"
+              placeholder="Descrição para mecanismos de busca..."
+            />
+          </div>
+          <div>
+            <label className={labelCls}>Meta Keywords</label>
+            <input
+              value={metaKeywords}
+              onChange={(e) => setMetaKeywords(e.target.value)}
+              className={inputCls}
+              placeholder="palavra-chave1, palavra-chave2, palavra-chave3"
+            />
+            <p className="text-[#7a9ab5] text-[11px] mt-1">Separe as palavras-chave por vírgula.</p>
+          </div>
+        </div>
 
         {/* ── Actions ── */}
         <div className="flex gap-3 pt-2 border-t border-[#1c2a3e] mt-4">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -125,6 +125,7 @@ interface CategoryData {
   isActive: boolean;
   sortOrder: number;
   imageUrl: string;
+  imageAlt: string;
   metaTitle: string;
   metaDescription: string;
   metaKeywords: string;
@@ -146,9 +147,15 @@ export default function CategoryForm({ mode, initial }: Props) {
   const [isActive, setIsActive]     = useState(initial?.isActive ?? true);
   const [sortOrder, setSortOrder]   = useState(initial?.sortOrder ?? 0);
   const [imageUrl, setImageUrl]     = useState(initial?.imageUrl ?? "");
+  const [imageAlt, setImageAlt]     = useState(initial?.imageAlt ?? "");
   const [metaTitle, setMetaTitle]         = useState(initial?.metaTitle ?? "");
   const [metaDescription, setMetaDesc]    = useState(initial?.metaDescription ?? "");
   const [metaKeywords, setMetaKeywords]   = useState(initial?.metaKeywords ?? "");
+
+  useEffect(() => {
+    if (!imageAlt) setImageAlt(name);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name]);
 
   function handleNameChange(val: string) {
     setName(val);
@@ -164,7 +171,7 @@ export default function CategoryForm({ mode, initial }: Props) {
     setError(null);
 
     const body: Record<string, unknown> = {
-      name, slug, description, isActive, sortOrder, imageUrl,
+      name, slug, description, isActive, sortOrder, imageUrl, imageAlt,
       metaTitle, metaDescription, metaKeywords,
     };
     if (mode === "edit" && initial?.id) body.id = initial.id;
@@ -264,6 +271,19 @@ export default function CategoryForm({ mode, initial }: Props) {
               inputName="imageUrl"
               aspectHint="Proporção recomendada: 16:9 (ex: 1200×630px)"
             />
+          </div>
+
+          <div>
+            <label className={labelCls}>Texto alternativo (alt)</label>
+            <input
+              value={imageAlt}
+              onChange={(e) => setImageAlt(e.target.value)}
+              className={inputCls}
+              placeholder="Descrição da imagem para acessibilidade e SEO"
+            />
+            <p className="text-[#526888] text-[11px] mt-1">
+              Deixe em branco para usar o título da categoria automaticamente.
+            </p>
           </div>
         </div>
 

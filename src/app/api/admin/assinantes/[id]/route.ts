@@ -64,6 +64,7 @@ export async function PUT(
         name: body.name || undefined,
         phone: body.phone || null,
         role: body.role || undefined,
+        ...(body.avatarUrl !== undefined ? { avatarUrl: body.avatarUrl } : {}),
       }),
     });
     if (!res.ok) throw new Error(await res.text());

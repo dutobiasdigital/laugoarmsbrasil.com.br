@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
     const isActive        = body.isActive === true || body.isActive === "true";
     const sortOrder       = Number(body.sortOrder ?? 0);
     const imageUrl        = (body.imageUrl as string) || null;
+    const imageAlt        = (body.imageAlt as string) || null;
     const metaTitle       = (body.metaTitle as string) || null;
     const metaDescription = (body.metaDescription as string) || null;
     const metaKeywords    = (body.metaKeywords as string) || null;
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
     const res = await fetch(`${BASE}/article_categories`, {
       method: "POST",
       headers: { ...HEADERS, Prefer: "return=representation" },
-      body: JSON.stringify({ name, slug, description, isActive, sortOrder, imageUrl, metaTitle, metaDescription, metaKeywords }),
+      body: JSON.stringify({ name, slug, description, isActive, sortOrder, imageUrl, imageAlt, metaTitle, metaDescription, metaKeywords }),
     });
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
@@ -65,6 +66,7 @@ export async function PUT(req: NextRequest) {
     const isActive        = body.isActive === true || body.isActive === "true";
     const sortOrder       = Number(body.sortOrder ?? 0);
     const imageUrl        = (body.imageUrl as string) || null;
+    const imageAlt        = (body.imageAlt as string) || null;
     const metaTitle       = (body.metaTitle as string) || null;
     const metaDescription = (body.metaDescription as string) || null;
     const metaKeywords    = (body.metaKeywords as string) || null;
@@ -75,7 +77,7 @@ export async function PUT(req: NextRequest) {
     const res = await fetch(`${BASE}/article_categories?id=eq.${id}`, {
       method: "PATCH",
       headers: { ...HEADERS, Prefer: "return=representation" },
-      body: JSON.stringify({ name, slug, description, isActive, sortOrder, imageUrl, metaTitle, metaDescription, metaKeywords }),
+      body: JSON.stringify({ name, slug, description, isActive, sortOrder, imageUrl, imageAlt, metaTitle, metaDescription, metaKeywords }),
     });
     if (!res.ok) throw new Error(await res.text());
     return NextResponse.json({ success: true });

@@ -32,7 +32,7 @@ interface Payment {
 
 interface UserRow {
   id: string; name: string; email: string; phone: string | null;
-  role: string; createdAt: string;
+  role: string; createdAt: string; avatarUrl: string | null;
   subscriptions: Subscription[];
 }
 
@@ -50,7 +50,7 @@ export default async function AssinantePage({
   try {
     // Fetch user with embedded subscription
     const userRes = await fetch(
-      `${BASE}/users?id=eq.${id}&select=id,name,email,phone,role,createdAt,subscriptions(id,status,planId,planPriceInCents,intervalMonths,currentPeriodStart,currentPeriodEnd,subscribedAt,canceledAt,notes,subscription_plans(name))&limit=1`,
+      `${BASE}/users?id=eq.${id}&select=id,name,email,phone,role,createdAt,avatarUrl,subscriptions(id,status,planId,planPriceInCents,intervalMonths,currentPeriodStart,currentPeriodEnd,subscribedAt,canceledAt,notes,subscription_plans(name))&limit=1`,
       { headers: HEADERS, cache: "no-store" }
     );
     const userData = await userRes.json();
@@ -112,6 +112,7 @@ export default async function AssinantePage({
               email: user.email,
               phone: user.phone ?? "",
               role: user.role,
+              avatarUrl: user.avatarUrl ?? null,
             }}
             subscription={
               subscription

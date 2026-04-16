@@ -16,102 +16,101 @@ type Section = {
 };
 
 const SECTIONS: Section[] = [
-  // ── Topo ────────────────────────────────────────────────────────────
+  // ── Topo (no section title)
   {
     items: [
-      { href: "/admin",               label: "Dashboard",    exact: true },
+      { href: "/admin",               label: "Painel",       exact: true },
       { href: "/admin/pagamentos",    label: "Pagamentos" },
       { href: "/admin/visualizacoes", label: "Visualizações" },
     ],
   },
 
-  // ── USUÁRIOS ─────────────────────────────────────────────────────────
+  // ── USUÁRIOS — only sub-items (no top-level link)
   {
     title: "Usuários",
     items: [
-      { href: "/admin/usuarios",               label: "Usuários",     exact: true },
-      { href: "/admin/assinantes",             label: "Assinantes",   indent: true },
-      { href: "/admin/empresas",               label: "Empresas",     indent: true },
-      { href: "/admin/anunciantes",            label: "Anunciantes",  indent: true, exact: true },
-      { href: "/admin/solicitacoes",           label: "Solicitações", indent: true },
-      { href: "/admin/anunciantes/pipeline",   label: "Pipeline",     indent: true },
+      { href: "/admin/assinantes",           label: "Assinantes",   indent: true },
+      { href: "/admin/empresas",             label: "Empresas",     indent: true },
+      { href: "/admin/anunciantes",          label: "Anunciantes",  indent: true, exact: true },
+      { href: "/admin/solicitacoes",         label: "Solicitações", indent: true },
+      { href: "/admin/anunciantes/pipeline", label: "Pipeline",     indent: true },
     ],
   },
 
-  // ── ANUNCIANTES ───────────────────────────────────────────────────────
+  // ── PUBLICIDADE — only sub-items
   {
-    title: "Anunciantes",
+    title: "Publicidade",
     items: [
-      { href: "/admin/guia",    label: "Guia Magnum" },
+      { href: "/admin/guia",    label: "Guia",    indent: true },
       { href: "/admin/anuncios", label: "Banners", indent: true },
     ],
   },
 
-  // ── LOJA ─────────────────────────────────────────────────────────────
+  // ── LOJA — only sub-items
   {
     title: "Loja",
     items: [
-      { href: "/admin/loja/pedidos",    label: "Pedidos" },
+      { href: "/admin/loja/pedidos",    label: "Pedidos",    indent: true },
       { href: "/admin/loja/categorias", label: "Categorias", indent: true },
       { href: "/admin/loja/produtos",   label: "Produtos",   indent: true },
     ],
   },
 
-  // ── PLANOS ────────────────────────────────────────────────────────────
+  // ── PLANOS — only sub-items
   {
     title: "Planos",
     items: [
-      { href: "/admin/planos",        label: "Assinatura Magnum Online", exact: true },
-      { href: "/admin/planos/guia",   label: "Guia Magnum",              indent: true },
-      { href: "/admin/planos/banner", label: "Banner",                   indent: true },
+      { href: "/admin/planos",        label: "Assinatura Online", indent: true, exact: true },
+      { href: "/admin/planos/guia",   label: "Guia Magnum",       indent: true },
+      { href: "/admin/planos/banner", label: "Banners",           indent: true },
     ],
   },
 
-  // ── CONTEÚDO ──────────────────────────────────────────────────────────
+  // ── CONTEÚDOS — only sub-items
   {
-    title: "Conteúdo",
+    title: "Conteúdos",
     items: [
-      { href: "/admin/edicoes",    label: "Edições" },
+      { href: "/admin/edicoes",    label: "Edições",    indent: true },
       { href: "/admin/artigos",    label: "Artigos",    indent: true },
       { href: "/admin/categorias", label: "Categorias", indent: true },
     ],
   },
 
-  // ── PÁGINAS ───────────────────────────────────────────────────────────
+  // ── PÁGINAS — only sub-items
   {
     title: "Páginas",
     items: [
-      { href: "/admin/paginas",      label: "Listar / Adicionar" },
-      { href: "/admin/paginas/menu", label: "Menu", indent: true },
+      { href: "/admin/paginas",      label: "Listar",    indent: true },
+      { href: "/admin/paginas/nova", label: "Adicionar", indent: true },
+      { href: "/admin/paginas/menu", label: "Menu",      indent: true },
     ],
   },
 
-  // ── MÍDIAS ────────────────────────────────────────────────────────────
+  // ── MÍDIAS — only sub-items
   {
     title: "Mídias",
     items: [
-      { href: "/admin/midias",            label: "Listar" },
-      { href: "/admin/midias/nova",       label: "Adicionar Mídia",    indent: true },
-      { href: "/admin/midias/categorias", label: "Categorias",         indent: true },
+      { href: "/admin/midias",            label: "Listar",     indent: true },
+      { href: "/admin/midias/nova",       label: "Adicionar",  indent: true },
+      { href: "/admin/midias/categorias", label: "Categorias", indent: true },
     ],
   },
 
-  // ── SESSÕES ───────────────────────────────────────────────────────────
+  // ── SESSÕES — only sub-items
   {
     title: "Sessões",
     items: [
-      { href: "/admin/hero",         label: "Hero" },
-      { href: "/admin/galeria",      label: "Galeria",    indent: true },
-      { href: "/admin/formularios",  label: "Formulários", indent: true },
+      { href: "/admin/sessoes",            label: "Listar",     indent: true },
+      { href: "/admin/sessoes/nova",       label: "Adicionar",  indent: true },
+      { href: "/admin/sessoes/categorias", label: "Categorias", indent: true },
     ],
   },
 
-  // ── CONFIGURAÇÕES ─────────────────────────────────────────────────────
+  // ── CONFIGURAÇÕES — single item, no indent
   {
     title: "Configurações",
     items: [
-      { href: "/admin/configuracoes", label: "Configurações", exact: true },
-      { href: "/admin/design",        label: "Design System", indent: true },
+      { href: "/admin/configuracoes", label: "Configurações" },
     ],
   },
 ];
