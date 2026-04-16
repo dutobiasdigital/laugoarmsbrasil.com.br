@@ -83,7 +83,12 @@ export default async function AdminUsuariosPage({
     if (isNaN(total)) total = 0;
 
     const data = await res.json();
-    users = Array.isArray(data) ? data : [];
+    users = (Array.isArray(data) ? data : []).map((u: any) => ({
+      ...u,
+      subscriptions: Array.isArray(u.subscriptions) ? u.subscriptions : (u.subscriptions != null ? [u.subscriptions] : []),
+      companies:     Array.isArray(u.companies)     ? u.companies     : (u.companies     != null ? [u.companies]     : []),
+      shop_orders:   Array.isArray(u.shop_orders)   ? u.shop_orders   : (u.shop_orders   != null ? [u.shop_orders]   : []),
+    }));
   } catch {
     // DB unavailable — renders empty list
   }
