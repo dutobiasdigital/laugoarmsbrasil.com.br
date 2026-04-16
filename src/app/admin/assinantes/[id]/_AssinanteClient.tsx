@@ -53,7 +53,17 @@ export default function AssinanteClient({ user, subscription, plans }: Props) {
   const [subStatus, setSubStatus] = useState(subscription?.status ?? "ACTIVE");
   const [subPlanId, setSubPlanId] = useState(subscription?.planId ?? (plans[0]?.id ?? ""));
   const [subStart, setSubStart] = useState(subscription?.currentPeriodStart ?? new Date().toISOString().split("T")[0]);
-  const [subEnd, setSubEnd] = useState(subscription?.currentPeriodEnd ?? "");
+  const [subEnd, setSubEnd] = useState<string>(() => {
+    if (subscription?.currentPeriodEnd) return subscription.currentPeriodEnd;
+    // Auto-calculate end date from today + first plan's interval
+    const firstPlan = plans[0];
+    if (firstPlan) {
+      const start = new Date();
+      start.setMonth(start.getMonth() + firstPlan.intervalMonths);
+      return start.toISOString().split("T")[0];
+    }
+    return "";
+  });
   const [subNotes, setSubNotes] = useState(subscription?.notes ?? "");
   const [subSaving, setSubSaving] = useState(false);
   const [subMsg, setSubMsg] = useState<string | null>(null);
