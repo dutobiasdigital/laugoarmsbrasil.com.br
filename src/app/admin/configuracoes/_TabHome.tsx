@@ -2,10 +2,11 @@
 
 export default function TabHome() {
   const cards = [
-    { icon: "🏢", title: "Empresa",      desc: "Identidade, filiais e redes sociais", tab: "empresa" },
+    { icon: "🏢", title: "Empresa",      desc: "Identidade, design system, filiais e redes sociais", tab: "empresa" },
     { icon: "🌐", title: "SEO",          desc: "Meta tags, palavras-chave e imagens OG", tab: "seo" },
     { icon: "💳", title: "Pagamentos",   desc: "Gateways e configurações de cobrança", tab: "pagamentos" },
-    { icon: "📖", title: "Leitura",      desc: "Paywall, paginação e textos legais", tab: "leitura" },
+    { icon: "🧩", title: "Módulos",      desc: "Paginação, scroll infinito e paywall por módulo", tab: "modulos" },
+    { icon: "📄", title: "Páginas",      desc: "Termos de uso e política de privacidade", tab: "paginas" },
     { icon: "📧", title: "E-mails",      desc: "SMTP, templates e notificações", tab: "emails" },
     { icon: "🔌", title: "Integrações",  desc: "Analytics, APIs e serviços externos", tab: "integracoes" },
     { icon: "🔐", title: "Acesso",       desc: "Usuários administrativos e permissões", tab: "acesso" },

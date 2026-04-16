@@ -6,7 +6,8 @@ import TabHome        from "./_TabHome";
 import TabEmpresa     from "./_TabEmpresa";
 import TabSEO         from "./_TabSEO";
 import TabPagamentos  from "./_TabPagamentos";
-import TabEditorial   from "./_TabEditorial";
+import TabModulos     from "./_TabModulos";
+import TabPaginas     from "./_TabPaginas";
 import TabEmails      from "./_TabEmails";
 import TabIntegracoes from "./_TabIntegracoes";
 import TabSistema     from "./_TabSistema";
@@ -32,9 +33,10 @@ const TABS = [
   { id: "empresa",     icon: "🏢", label: "Empresa" },
   { id: "seo",         icon: "🌐", label: "SEO" },
   { id: "pagamentos",  icon: "💳", label: "Pagamentos" },
-  { id: "leitura",     icon: "📖", label: "Leitura" },
   { id: "emails",      icon: "📧", label: "E-mails" },
   { id: "integracoes", icon: "🔌", label: "Integrações" },
+  { id: "modulos",     icon: "🧩", label: "Módulos" },
+  { id: "paginas",     icon: "📄", label: "Páginas" },
   { id: "sistema",     icon: "⚙️", label: "Sistema" },
 ];
 
@@ -91,9 +93,10 @@ export default function ConfiguracoesClient({ initialTab, settings, admins }: Pr
         {tab === "empresa"     && <TabEmpresa settings={settings} />}
         {tab === "seo"         && <TabSEO settings={settings} />}
         {tab === "pagamentos"  && <TabPagamentos settings={settings} />}
-        {tab === "leitura"     && <TabEditorial settings={settings} />}
         {tab === "emails"      && <TabEmails settings={settings} />}
         {tab === "integracoes" && <TabIntegracoes settings={settings} />}
+        {tab === "modulos"     && <TabModulos settings={settings} />}
+        {tab === "paginas"     && <TabPaginas />}
         {tab === "sistema"     && <TabSistema settings={settings} />}
       </div>
     </div>

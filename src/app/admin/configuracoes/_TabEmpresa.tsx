@@ -9,6 +9,7 @@ interface Props { settings: Record<string, string>; }
 
 const SUB_TABS = [
   { id: "dados",   label: "Dados da Empresa" },
+  { id: "design",  label: "Design System" },
   { id: "filiais", label: "Filiais" },
   { id: "redes",   label: "Redes Sociais" },
 ];
@@ -59,9 +60,10 @@ export default function TabEmpresa({ settings }: Props) {
         ))}
       </div>
 
-      {sub === "dados"   && <TabDados settings={settings} />}
+      {sub === "dados"   && <TabDados   settings={settings} />}
+      {sub === "design"  && <TabDesign  settings={settings} />}
       {sub === "filiais" && <TabFiliais />}
-      {sub === "redes"   && <TabRedes settings={settings} />}
+      {sub === "redes"   && <TabRedes   settings={settings} />}
     </div>
   );
 }
@@ -343,6 +345,158 @@ function TabDados({ settings }: Props) {
           className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[14px] font-semibold h-[44px] px-8 rounded-[6px] transition-colors"
         >
           {saving ? "Salvando..." : "Salvar Empresa"}
+        </button>
+        {saved && <p className="text-[#22c55e] text-[13px] font-medium">✓ Salvo com sucesso!</p>}
+      </div>
+    </form>
+  );
+}
+
+/* ── Sub-componente: Design System ─────────────────────────────── */
+const DESIGN_KEYS = [
+  "site.logo_url", "site.logo_dark_url", "site.favicon_url",
+  "brand.cor_primaria", "brand.cor_secundaria", "brand.cor_acento",
+  "brand.fonte_titulo", "brand.fonte_corpo",
+];
+
+function TabDesign({ settings }: Props) {
+  const [values, setValues] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = {};
+    for (const k of DESIGN_KEYS) init[k] = settings[k] ?? "";
+    if (!init["brand.cor_primaria"])   init["brand.cor_primaria"]   = "#ff1f1f";
+    if (!init["brand.cor_secundaria"]) init["brand.cor_secundaria"] = "#0e1520";
+    if (!init["brand.cor_acento"])     init["brand.cor_acento"]     = "#7a9ab5";
+    if (!init["brand.fonte_titulo"])   init["brand.fonte_titulo"]   = "Barlow Condensed";
+    if (!init["brand.fonte_corpo"])    init["brand.fonte_corpo"]    = "Inter";
+    return init;
+  });
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved]   = useState(false);
+  const [error, setError]   = useState<string | null>(null);
+
+  function set(k: string, v: string) { setValues((p) => ({ ...p, [k]: v })); }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true); setSaved(false); setError(null);
+    const r = await saveSettings(values);
+    if (r.error) setError(r.error); else setSaved(true);
+    setSaving(false);
+    if (r.ok) setTimeout(() => setSaved(false), 3000);
+  }
+
+  return (
+    <form onSubmit={handleSave} className="flex flex-col gap-6 max-w-[720px]">
+      <div>
+        <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[26px] leading-none mb-1">Design System</h2>
+        <p className="text-[#526888] text-[13px]">Identidade visual da marca — logotipos, cores e tipografia.</p>
+      </div>
+
+      {error && <div className="bg-[#2d0a0a] border border-[#ff1f1f] rounded-[8px] px-4 py-3 text-[#ff6b6b] text-[13px]">{error}</div>}
+
+      {/* Logotipos */}
+      <section className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] p-6 flex flex-col gap-4">
+        <h3 className="font-['Barlow_Condensed'] font-bold text-white text-[18px] pb-2 border-b border-[#141d2c]">🖼️ Logotipos</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className={labelCls}>Logo (versão clara / padrão)</label>
+            <input value={values["site.logo_url"]} onChange={e => set("site.logo_url", e.target.value)}
+              type="url" placeholder="https://..." className={inputCls} />
+            {values["site.logo_url"] && (
+              <div className="mt-2 bg-white rounded-[6px] p-3 flex items-center justify-center h-[60px]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={values["site.logo_url"]} alt="Logo preview" className="max-h-full max-w-full object-contain" />
+              </div>
+            )}
+          </div>
+          <div>
+            <label className={labelCls}>Logo (versão escura / fundo claro)</label>
+            <input value={values["site.logo_dark_url"]} onChange={e => set("site.logo_dark_url", e.target.value)}
+              type="url" placeholder="https://..." className={inputCls} />
+            {values["site.logo_dark_url"] && (
+              <div className="mt-2 bg-[#141d2c] rounded-[6px] p-3 flex items-center justify-center h-[60px]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={values["site.logo_dark_url"]} alt="Logo dark preview" className="max-h-full max-w-full object-contain" />
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="max-w-[240px]">
+          <label className={labelCls}>Favicon (URL)</label>
+          <input value={values["site.favicon_url"]} onChange={e => set("site.favicon_url", e.target.value)}
+            type="url" placeholder="https://.../favicon.ico" className={inputCls} />
+        </div>
+      </section>
+
+      {/* Cores */}
+      <section className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] p-6 flex flex-col gap-4">
+        <h3 className="font-['Barlow_Condensed'] font-bold text-white text-[18px] pb-2 border-b border-[#141d2c]">🎨 Paleta de Cores</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { key: "brand.cor_primaria",   label: "Cor Primária",   hint: "Botões, links e destaques" },
+            { key: "brand.cor_secundaria", label: "Cor Secundária", hint: "Fundos e elementos neutros" },
+            { key: "brand.cor_acento",     label: "Cor de Acento",  hint: "Destaques secundários" },
+          ].map(({ key, label, hint }) => (
+            <div key={key}>
+              <label className={labelCls}>{label}</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={values[key] || "#000000"}
+                  onChange={e => set(key, e.target.value)}
+                  className="w-[40px] h-[40px] rounded-[6px] border border-[#1c2a3e] bg-transparent cursor-pointer p-0.5"
+                />
+                <input
+                  type="text"
+                  value={values[key]}
+                  onChange={e => set(key, e.target.value)}
+                  placeholder="#ff1f1f"
+                  maxLength={7}
+                  className="bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] flex-1 font-mono transition-colors"
+                />
+              </div>
+              <p className="text-[#526888] text-[11px] mt-1">{hint}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Tipografia */}
+      <section className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] p-6 flex flex-col gap-4">
+        <h3 className="font-['Barlow_Condensed'] font-bold text-white text-[18px] pb-2 border-b border-[#141d2c]">🔤 Tipografia</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className={labelCls}>Fonte para títulos</label>
+            <input value={values["brand.fonte_titulo"]} onChange={e => set("brand.fonte_titulo", e.target.value)}
+              placeholder="Barlow Condensed" className={inputCls} />
+            <p className="text-[#526888] text-[11px] mt-1">Nome exato da fonte (Google Fonts ou local)</p>
+          </div>
+          <div>
+            <label className={labelCls}>Fonte para corpo de texto</label>
+            <input value={values["brand.fonte_corpo"]} onChange={e => set("brand.fonte_corpo", e.target.value)}
+              placeholder="Inter" className={inputCls} />
+            <p className="text-[#526888] text-[11px] mt-1">Usada em parágrafos, labels e textos gerais</p>
+          </div>
+        </div>
+        {(values["brand.fonte_titulo"] || values["brand.fonte_corpo"]) && (
+          <div className="bg-[#141d2c] rounded-[8px] p-4 flex flex-col gap-2">
+            <p className="text-[#526888] text-[11px] font-semibold uppercase tracking-wide">Pré-visualização</p>
+            <p style={{ fontFamily: values["brand.fonte_titulo"] || "inherit" }}
+              className="text-white text-[22px] leading-tight">
+              Revista Magnum — Título
+            </p>
+            <p style={{ fontFamily: values["brand.fonte_corpo"] || "inherit" }}
+              className="text-[#7a9ab5] text-[14px]">
+              Texto de corpo com a fonte configurada para parágrafos e descrições gerais do site.
+            </p>
+          </div>
+        )}
+      </section>
+
+      <div className="flex items-center gap-3 sticky bottom-0 bg-[#070a12]/90 backdrop-blur py-3 -mx-1 px-1">
+        <button type="submit" disabled={saving}
+          className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[14px] font-semibold h-[44px] px-8 rounded-[6px] transition-colors">
+          {saving ? "Salvando..." : "Salvar Design System"}
         </button>
         {saved && <p className="text-[#22c55e] text-[13px] font-medium">✓ Salvo com sucesso!</p>}
       </div>
