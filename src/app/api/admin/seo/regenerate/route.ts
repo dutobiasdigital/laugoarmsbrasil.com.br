@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
@@ -30,8 +30,6 @@ export async function POST() {
     // Bust Next.js cache for sitemap and robots
     revalidatePath("/sitemap.xml");
     revalidatePath("/robots.txt");
-    revalidateTag("sitemap");
-    revalidateTag("robots");
 
     return NextResponse.json({ ok: true, generatedAt });
   } catch (e: unknown) {
