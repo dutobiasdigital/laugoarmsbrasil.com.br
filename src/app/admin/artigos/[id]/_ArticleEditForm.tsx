@@ -33,6 +33,43 @@ interface Props {
   categories: { id: string; name: string }[];
 }
 
+/* ── Limpador de HTML sujo (Word / Google Docs) ─────── */
+function cleanHtml(html: string): string {
+  const ALLOWED: Record<string, string[]> = {
+    p: [], br: [], strong: [], em: [], b: [], i: [], u: [],
+    h2: [], h3: [], h4: [],
+    ul: [], ol: [], li: [],
+    a: ["href"],
+    blockquote: [], hr: [],
+  };
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+
+  function walk(node: Node): string {
+    if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? "";
+    if (node.nodeType !== Node.ELEMENT_NODE) return "";
+    const el = node as Element;
+    const tag = el.tagName.toLowerCase();
+    const inner = Array.from(el.childNodes).map(walk).join("");
+    if (!(tag in ALLOWED)) return inner; // unwrap unknown tags
+    if (tag === "br" || tag === "hr") return `<${tag} />`;
+    let attrs = "";
+    for (const attr of ALLOWED[tag]) {
+      if (el.hasAttribute(attr)) {
+        attrs += ` ${attr}="${(el.getAttribute(attr) ?? "").replace(/"/g, "&quot;")}"`;
+      }
+    }
+    return `<${tag}${attrs}>${inner}</${tag}>`;
+  }
+
+  return Array.from(doc.body.childNodes)
+    .map(walk)
+    .join("")
+    .replace(/<p>\s*<\/p>/g, "")
+    .trim();
+}
+
 /* ── Toggle de visualização HTML ─────────────────────── */
 function HtmlToggle({
   value,
@@ -47,21 +84,33 @@ function HtmlToggle({
     <div>
       <div className="flex items-center justify-between mb-1.5">
         <label className={labelCls.replace(" mb-1.5", "")}>Conteúdo</label>
-        <div className="flex rounded-[6px] overflow-hidden border border-[#1c2a3e]">
-          {(["visual", "html"] as const).map((m) => (
+        <div className="flex items-center gap-2">
+          {mode === "html" && (
             <button
-              key={m}
               type="button"
-              onClick={() => setMode(m)}
-              className={`px-3 h-[28px] text-[11px] font-semibold transition-colors ${
-                mode === m
-                  ? "bg-[#ff1f1f] text-white"
-                  : "bg-[#141d2c] text-[#7a9ab5] hover:text-white"
-              }`}
+              onClick={() => onChange(cleanHtml(value))}
+              title="Remove formatação suja do Word/Google Docs, mantendo apenas tags básicas"
+              className="px-2.5 h-[28px] text-[11px] font-semibold bg-[#0e1520] hover:bg-[#141d2c] text-[#7a9ab5] hover:text-white rounded-[6px] border border-[#1c2a3e] transition-colors"
             >
-              {m === "visual" ? "Visual" : "HTML"}
+              🧹 Limpar HTML
             </button>
-          ))}
+          )}
+          <div className="flex rounded-[6px] overflow-hidden border border-[#1c2a3e]">
+            {(["visual", "html"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMode(m)}
+                className={`px-3 h-[28px] text-[11px] font-semibold transition-colors ${
+                  mode === m
+                    ? "bg-[#ff1f1f] text-white"
+                    : "bg-[#141d2c] text-[#7a9ab5] hover:text-white"
+                }`}
+              >
+                {m === "visual" ? "Visual" : "HTML"}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

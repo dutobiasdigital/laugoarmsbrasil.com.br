@@ -18,11 +18,12 @@ export default async function EditarCategoriaPage({
 
   let category: {
     id: string;
-    title: string;
+    name: string;
     slug: string;
     description: string | null;
     isActive: boolean;
     sortOrder: number;
+    imageUrl: string | null;
     metaTitle: string | null;
     metaDescription: string | null;
     metaKeywords: string | null;
@@ -30,7 +31,7 @@ export default async function EditarCategoriaPage({
 
   try {
     const res = await fetch(
-      `${BASE}/shop_categories?id=eq.${id}&select=id,title,slug,description,isActive,sortOrder,metaTitle,metaDescription,metaKeywords&limit=1`,
+      `${BASE}/article_categories?id=eq.${id}&select=id,name,slug,description,isActive,sortOrder,imageUrl,metaTitle,metaDescription,metaKeywords&limit=1`,
       { headers: HEADERS, cache: "no-store" }
     );
     const data = await res.json();
@@ -43,11 +44,12 @@ export default async function EditarCategoriaPage({
 
   const initial = {
     id: category.id,
-    title: category.title,
+    name: category.name,
     slug: category.slug,
     description: category.description ?? "",
     isActive: category.isActive,
     sortOrder: category.sortOrder,
+    imageUrl: category.imageUrl ?? "",
     metaTitle: category.metaTitle ?? "",
     metaDescription: category.metaDescription ?? "",
     metaKeywords: category.metaKeywords ?? "",
@@ -56,21 +58,17 @@ export default async function EditarCategoriaPage({
   return (
     <>
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/loja" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">
-          Loja
-        </Link>
-        <span className="text-[#141d2c]">/</span>
-        <Link href="/admin/loja/categorias" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">
+        <Link href="/admin/categorias" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">
           Categorias
         </Link>
         <span className="text-[#141d2c]">/</span>
-        <span className="text-[#d4d4da] text-[14px] truncate max-w-[200px]">{category.title}</span>
+        <span className="text-[#d4d4da] text-[14px] truncate max-w-[240px]">{category.name}</span>
       </div>
 
       <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">
         Editar Categoria
       </h1>
-      <p className="text-[#7a9ab5] text-[14px] mb-6">{category.title}</p>
+      <p className="text-[#7a9ab5] text-[14px] mb-6">{category.name}</p>
       <div className="bg-[#141d2c] h-px mb-6" />
 
       <CategoryForm mode="edit" initial={initial} />

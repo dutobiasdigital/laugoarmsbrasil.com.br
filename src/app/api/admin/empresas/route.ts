@@ -28,17 +28,20 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const db = await adminDb();
     const { data, error } = await db.from("advertisers").insert({
-      tradeName:   body.tradeName,
-      legalName:   body.legalName   || null,
-      contact:     body.contact     || null,
-      phone:       body.phone       || null,
-      email:       body.email       || null,
-      website:     body.website     || null,
-      instagram:   body.instagram   || null,
-      address:     body.address     || null,
-      segment:     body.segment     || "OUTROS",
-      logoUrl:     body.logoUrl     || null,
-      description: body.description || null,
+      tradeName:        body.tradeName,
+      legalName:        body.legalName        || null,
+      contact:          body.contact          || null,
+      phone:            body.phone            || null,
+      email:            body.email            || null,
+      website:          body.website          || null,
+      instagram:        body.instagram        || null,
+      address:          body.address          || null,
+      segment:          body.segment          || "OUTROS",
+      logoUrl:          body.logoUrl          || null,
+      coverImageUrl:    body.coverImageUrl    || null,
+      description:      body.description      || null,
+      whatsappNumber:   body.whatsappNumber   || null,
+      whatsappMessage:  body.whatsappMessage  || null,
     }).select().single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json(data);
@@ -53,18 +56,21 @@ export async function PUT(req: NextRequest) {
     const { id, ...rest } = body;
     const db = await adminDb();
     const { error } = await db.from("advertisers").update({
-      tradeName:   rest.tradeName,
-      legalName:   rest.legalName   || null,
-      contact:     rest.contact     || null,
-      phone:       rest.phone       || null,
-      email:       rest.email       || null,
-      website:     rest.website     || null,
-      instagram:   rest.instagram   || null,
-      address:     rest.address     || null,
-      segment:     rest.segment     || "OUTROS",
-      logoUrl:     rest.logoUrl     || null,
-      description: rest.description || null,
-      updatedAt:   new Date().toISOString(),
+      tradeName:        rest.tradeName,
+      legalName:        rest.legalName        || null,
+      contact:          rest.contact          || null,
+      phone:            rest.phone            || null,
+      email:            rest.email            || null,
+      website:          rest.website          || null,
+      instagram:        rest.instagram        || null,
+      address:          rest.address          || null,
+      segment:          rest.segment          || "OUTROS",
+      logoUrl:          rest.logoUrl          || null,
+      coverImageUrl:    rest.coverImageUrl    || null,
+      description:      rest.description      || null,
+      whatsappNumber:   rest.whatsappNumber   || null,
+      whatsappMessage:  rest.whatsappMessage  || null,
+      updatedAt:        new Date().toISOString(),
     }).eq("id", id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });

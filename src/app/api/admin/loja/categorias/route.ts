@@ -25,10 +25,14 @@ export async function POST(req: NextRequest) {
 
     if (!title) return NextResponse.json({ error: "Título obrigatório." }, { status: 400 });
 
+    const metaTitle       = (body.metaTitle as string) || null;
+    const metaDescription = (body.metaDescription as string) || null;
+    const metaKeywords    = (body.metaKeywords as string) || null;
+
     const res = await fetch(`${BASE}/shop_categories`, {
       method: "POST",
       headers: { ...HEADERS, Prefer: "return=representation" },
-      body: JSON.stringify({ title, slug, description, isActive, sortOrder }),
+      body: JSON.stringify({ title, slug, description, isActive, sortOrder, metaTitle, metaDescription, metaKeywords }),
     });
     if (!res.ok) throw new Error(await res.text());
 
@@ -55,10 +59,14 @@ export async function PUT(req: NextRequest) {
     if (!id)    return NextResponse.json({ error: "ID obrigatório." }, { status: 400 });
     if (!title) return NextResponse.json({ error: "Título obrigatório." }, { status: 400 });
 
+    const metaTitle       = (body.metaTitle as string) || null;
+    const metaDescription = (body.metaDescription as string) || null;
+    const metaKeywords    = (body.metaKeywords as string) || null;
+
     const res = await fetch(`${BASE}/shop_categories?id=eq.${id}`, {
       method: "PATCH",
       headers: { ...HEADERS, Prefer: "return=representation" },
-      body: JSON.stringify({ title, slug, description, isActive, sortOrder }),
+      body: JSON.stringify({ title, slug, description, isActive, sortOrder, metaTitle, metaDescription, metaKeywords }),
     });
     if (!res.ok) throw new Error(await res.text());
 
