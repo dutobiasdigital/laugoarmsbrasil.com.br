@@ -25,6 +25,11 @@ export async function PATCH(
     if (body.priceInCents   !== undefined) payload.priceInCents   = parseInt(String(body.priceInCents).replace(/\D/g, ""), 10);
     if (body.intervalMonths !== undefined) payload.intervalMonths = parseInt(String(body.intervalMonths), 10);
     if (body.active         !== undefined) payload.active         = body.active === true || body.active === "true";
+    if (body.highlight      !== undefined) payload.highlight      = body.highlight === true || body.highlight === "true";
+    if (body.badge          !== undefined) payload.badge          = body.badge ? String(body.badge) : null;
+    if (body.buttonText     !== undefined) payload.buttonText     = body.buttonText ? String(body.buttonText) : null;
+    if (body.features       !== undefined) payload.features       = body.features ? String(body.features) : null;
+    if (body.sortOrder      !== undefined) payload.sortOrder      = parseInt(String(body.sortOrder), 10);
 
     const res = await fetch(`${BASE}/subscription_plans?id=eq.${id}`, {
       method:  "PATCH",

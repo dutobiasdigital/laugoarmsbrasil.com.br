@@ -16,6 +16,11 @@ interface Plan {
   intervalMonths: number;
   active: boolean;
   subscriberCount: number;
+  highlight: boolean;
+  badge: string | null;
+  buttonText: string | null;
+  features: string | null;
+  sortOrder: number;
 }
 
 export default async function AdminPlanosPage() {
@@ -24,7 +29,7 @@ export default async function AdminPlanosPage() {
   try {
     // Busca planos ordenados por intervalo
     const plansRes = await fetch(
-      `${BASE}/subscription_plans?order=intervalMonths.asc&select=id,name,slug,description,priceInCents,intervalMonths,active`,
+      `${BASE}/subscription_plans?order=sortOrder.asc,intervalMonths.asc&select=id,name,slug,description,priceInCents,intervalMonths,active,highlight,badge,buttonText,features,sortOrder`,
       { headers: HEADERS, cache: "no-store" }
     );
     const rawPlans = await plansRes.json();

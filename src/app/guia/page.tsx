@@ -21,6 +21,30 @@ interface Listing {
   featured: boolean; viewsCount: number;
 }
 
+interface GuidePlan {
+  id: string;
+  name: string;
+  listingType: string;
+  priceInCents: number;
+  intervalMonths: number;
+  features: string | null;
+  highlight: boolean;
+  badge: string | null;
+  buttonText: string | null;
+  sortOrder: number;
+}
+
+async function getGuidePlans(): Promise<GuidePlan[]> {
+  try {
+    const res = await fetch(
+      `https://${PROJECT}.supabase.co/rest/v1/guide_plans?active=eq.true&order=sortOrder.asc&select=id,name,listingType,priceInCents,intervalMonths,features,highlight,badge,buttonText,sortOrder`,
+      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, cache: "no-store" }
+    );
+    const d = await res.json();
+    return Array.isArray(d) ? d : [];
+  } catch { return []; }
+}
+
 async function getDestaques(): Promise<Listing[]> {
   try {
     const res = await fetch(
@@ -46,7 +70,7 @@ async function getTotal(): Promise<number> {
 }
 
 export default async function GuiaPage() {
-  const [destaques, total] = await Promise.all([getDestaques(), getTotal()]);
+  const [destaques, total, guidePlans] = await Promise.all([getDestaques(), getTotal(), getGuidePlans()]);
 
   return (
     <div className="min-h-screen bg-[#070a12] flex flex-col">
@@ -171,25 +195,25 @@ export default async function GuiaPage() {
 
             {/* Planos resumidos */}
             <div className="flex flex-col gap-3">
-              {[
-                { plan: "FREE",     price: "Gratuito", items: ["Nome e cidade", "Categoria", "Telefone de contato", "Aprovação manual"] },
-                { plan: "PREMIUM",  price: "R$ 79/mês", items: ["Logo + fotos", "Descrição completa", "WhatsApp, site e Instagram", "Destaque na listagem"] },
-                { plan: "DESTAQUE", price: "R$ 149/mês", items: ["Tudo do Premium", "Topo da categoria", "Badge Destaque", "Banner na página"] },
-              ].map((pkg) => {
-                const pl = PLAN_LABELS[pkg.plan];
+              {guidePlans.map((pkg) => {
+                const pl = PLAN_LABELS[pkg.listingType] ?? PLAN_LABELS["FREE"];
+                const items = pkg.features ? pkg.features.split("\n").filter(Boolean) : [];
+                const priceLabel = pkg.priceInCents === 0
+                  ? "Gratuito"
+                  : `${(pkg.priceInCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}/${pkg.intervalMonths === 1 ? "mês" : pkg.intervalMonths === 3 ? "trim" : pkg.intervalMonths === 6 ? "sem" : "ano"}`;
                 return (
-                  <div key={pkg.plan} className={`bg-[#0e1520] rounded-[10px] p-5 flex items-center gap-5 border ${pkg.plan === "DESTAQUE" ? "border-[#ff1f1f]/30" : "border-[#141d2c]"}`}>
+                  <div key={pkg.id} className={`bg-[#0e1520] rounded-[10px] p-5 flex items-center gap-5 border ${pkg.highlight ? "border-[#ff1f1f]/30" : "border-[#141d2c]"}`}>
                     <div className="shrink-0">
                       <span className={`text-[11px] font-bold px-2.5 py-1 rounded-[4px] ${pl.color}`}>{pl.label}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap gap-2">
-                        {pkg.items.map(i => (
+                        {items.map(i => (
                           <span key={i} className="text-[#526888] text-[12px]">✓ {i}</span>
                         ))}
                       </div>
                     </div>
-                    <p className="font-['Barlow_Condensed'] font-bold text-white text-[20px] shrink-0">{pkg.price}</p>
+                    <p className="font-['Barlow_Condensed'] font-bold text-white text-[20px] shrink-0">{priceLabel}</p>
                   </div>
                 );
               })}

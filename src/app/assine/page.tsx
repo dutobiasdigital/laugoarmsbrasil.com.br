@@ -16,12 +16,25 @@ function formatCurrency(cents: number) {
   return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+interface DbPlan {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  priceInCents: number;
+  intervalMonths: number;
+  highlight: boolean;
+  badge: string | null;
+  buttonText: string | null;
+  features: string | null;
+}
+
 const FALLBACK_PLANS = [
   {
     id: "trimestral", name: "Trimestral", slug: "trimestral",
     description: "Cobrança a cada 3 meses",
     priceInCents: 2990, intervalMonths: 3,
-    highlight: false, badge: null,
+    highlight: false, badge: null as string | null, buttonText: null as string | null,
     features: [
       "Acesso ao acervo completo",
       "207 edições disponíveis",
@@ -33,8 +46,7 @@ const FALLBACK_PLANS = [
     id: "semestral", name: "Semestral", slug: "semestral",
     description: "Cobrança a cada 6 meses",
     priceInCents: 5490, intervalMonths: 6,
-    highlight: true, badge: "MAIS POPULAR",
-    savings: "Economize 8% vs trimestral",
+    highlight: true, badge: "MAIS POPULAR" as string | null, buttonText: null as string | null,
     features: [
       "Acesso ao acervo completo",
       "207 edições disponíveis",
@@ -47,8 +59,7 @@ const FALLBACK_PLANS = [
     id: "anual", name: "Anual", slug: "anual",
     description: "Cobrança anual",
     priceInCents: 9990, intervalMonths: 12,
-    highlight: false, badge: "MELHOR VALOR",
-    savings: "Economize 17% vs trimestral",
+    highlight: false, badge: "MELHOR VALOR" as string | null, buttonText: null as string | null,
     features: [
       "Acesso ao acervo completo",
       "207 edições disponíveis",
@@ -86,11 +97,11 @@ const TESTIMONIALS = [
 ];
 
 export default async function AssinePage() {
-  let dbPlans: { id: string; name: string; slug: string; description: string | null; priceInCents: number; intervalMonths: number }[] = [];
+  let dbPlans: DbPlan[] = [];
 
   try {
     const res = await fetch(
-      `https://${PROJECT}.supabase.co/rest/v1/subscription_plans?active=eq.true&order=priceInCents.asc`,
+      `https://${PROJECT}.supabase.co/rest/v1/subscription_plans?active=eq.true&order=sortOrder.asc,priceInCents.asc&select=id,name,slug,description,priceInCents,intervalMonths,highlight,badge,buttonText,features`,
       { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, cache: "no-store" }
     );
     const data = await res.json();
@@ -102,16 +113,15 @@ export default async function AssinePage() {
   const plans = dbPlans.length > 0
     ? dbPlans.map((p) => ({
         ...p,
-        highlight: p.intervalMonths === 6,
-        badge: p.intervalMonths === 6 ? "MAIS POPULAR" : p.intervalMonths === 12 ? "MELHOR VALOR" : null,
-        savings: p.intervalMonths === 6 ? "Economize 8% vs trimestral" : p.intervalMonths === 12 ? "Economize 17% vs trimestral" : undefined,
-        features: [
-          "Acesso ao acervo completo",
-          "207 edições disponíveis",
-          "Leitura em qualquer dispositivo",
-          p.intervalMonths >= 12 ? "Suporte VIP" : p.intervalMonths >= 6 ? "Suporte prioritário" : "Suporte padrão",
-          ...(p.intervalMonths >= 12 ? ["Acesso antecipado a edições"] : []),
-        ],
+        features: p.features
+          ? p.features.split("\n").filter(Boolean)
+          : [
+              "Acesso ao acervo completo",
+              "207 edições disponíveis",
+              "Leitura em qualquer dispositivo",
+              p.intervalMonths >= 12 ? "Suporte VIP" : p.intervalMonths >= 6 ? "Suporte prioritário" : "Suporte padrão",
+              ...(p.intervalMonths >= 12 ? ["Acesso antecipado a edições"] : []),
+            ],
       }))
     : FALLBACK_PLANS;
 
@@ -225,7 +235,7 @@ export default async function AssinePage() {
                       : "bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da]"
                   }`}
                 >
-                  {plan.highlight ? "Assinar agora →" : "Escolher plano"}
+                  {plan.buttonText ?? (plan.highlight ? "Assinar agora →" : "Escolher plano")}
                 </Link>
               </div>
             ))}
@@ -259,7 +269,7 @@ export default async function AssinePage() {
             {TESTIMONIALS.map((t) => (
               <div key={t.author} className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5">
                 <p className="text-[#ff1f1f] text-[14px] mb-3">★★★★★</p>
-                <p className="text-[#d4d4da] text-[14px] leading-[22px] mb-3">"{t.quote}"</p>
+                <p className="text-[#d4d4da] text-[14px] leading-[22px] mb-3">&ldquo;{t.quote}&rdquo;</p>
                 <p className="text-white text-[13px] font-medium">— {t.author}</p>
               </div>
             ))}

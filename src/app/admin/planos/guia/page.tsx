@@ -19,6 +19,9 @@ interface GuiaPlan {
   features: string | null;
   active: boolean;
   sortOrder: number;
+  highlight: boolean;
+  badge: string | null;
+  buttonText: string | null;
 }
 
 export default async function AdminPlanosGuiaPage() {
@@ -26,7 +29,7 @@ export default async function AdminPlanosGuiaPage() {
 
   try {
     const res = await fetch(
-      `${BASE}/guide_plans?order=sortOrder.asc&select=id,name,slug,description,listingType,priceInCents,intervalMonths,features,active,sortOrder`,
+      `${BASE}/guide_plans?order=sortOrder.asc&select=id,name,slug,description,listingType,priceInCents,intervalMonths,features,active,sortOrder,highlight,badge,buttonText`,
       { headers: HEADERS, cache: "no-store" }
     );
     const raw = await res.json();

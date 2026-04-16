@@ -4,10 +4,10 @@ const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
 const HEADERS  = {
-  "Content-Type":  "application/json",
-  apikey:          SERVICE,
-  Authorization:   `Bearer ${SERVICE}`,
-  Prefer:          "return=representation",
+  "Content-Type": "application/json",
+  apikey:         SERVICE,
+  Authorization:  `Bearer ${SERVICE}`,
+  Prefer:         "return=representation",
 };
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -24,6 +24,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (body.features       !== undefined) p.features       = body.features ? String(body.features) : null;
     if (body.active         !== undefined) p.active         = body.active === true || body.active === "true";
     if (body.sortOrder      !== undefined) p.sortOrder      = parseInt(String(body.sortOrder), 10);
+    if (body.highlight      !== undefined) p.highlight      = body.highlight === true || body.highlight === "true";
+    if (body.badge          !== undefined) p.badge          = body.badge ? String(body.badge) : null;
+    if (body.buttonText     !== undefined) p.buttonText     = body.buttonText ? String(body.buttonText) : null;
 
     const res  = await fetch(`${BASE}/guide_plans?id=eq.${id}`, { method: "PATCH", headers: HEADERS, body: JSON.stringify(p) });
     const data = await res.json();

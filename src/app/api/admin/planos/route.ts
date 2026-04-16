@@ -25,6 +25,11 @@ export async function POST(req: NextRequest) {
       priceInCents:   parseInt(String(body.priceInCents).replace(/\D/g, ""), 10),
       intervalMonths: parseInt(String(body.intervalMonths), 10),
       active:         body.active === true || body.active === "true",
+      highlight:      body.highlight === true || body.highlight === "true",
+      badge:          body.badge ? String(body.badge) : null,
+      buttonText:     body.buttonText ? String(body.buttonText) : null,
+      features:       body.features ? String(body.features) : null,
+      sortOrder:      parseInt(String(body.sortOrder ?? "0"), 10),
       createdAt:      new Date().toISOString(),
     };
 
