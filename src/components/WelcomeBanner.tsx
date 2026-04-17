@@ -6,24 +6,24 @@ import { useState, useEffect, useCallback } from "react";
 const SLIDES = [
   {
     label: "207 Edições · Acervo Digital Completo",
-    lines: ["O Maior", "Acervo", "do Brasil."],
-    lineColors: ["text-white", "text-white", "text-[#ff1f1f]"],
+    lines: ["O Maior Acervo", "do Brasil."],
+    lineColors: ["text-white", "text-[#ff1f1f]"],
     sub: "40 anos de conteúdo técnico reunidos\nnuma só plataforma. Leia quando quiser.",
     cta: { href: "/edicoes", label: "Explorar o Acervo →" },
     ctaSecondary: { href: "/edicoes?tipo=SPECIAL", label: "Ver Edições Especiais" },
   },
   {
     label: "Guia Comercial · Empresas do Setor",
-    lines: ["Armas.", "Acessórios.", "Empresas."],
-    lineColors: ["text-white", "text-white", "text-[#ff1f1f]"],
+    lines: ["Armas. Acessórios.", "Empresas."],
+    lineColors: ["text-white", "text-[#ff1f1f]"],
     sub: "Encontre armeiros, clubes de tiro,\nimportadores e distribuidoras perto de você.",
     cta: { href: "/guia", label: "Acessar o Guia →" },
     ctaSecondary: { href: "/loja", label: "Ver a Loja" },
   },
   {
     label: "Assinatura Digital · Acesso Imediato",
-    lines: ["Assine.", "Acesse.", "Agora."],
-    lineColors: ["text-white", "text-white", "text-[#ff1f1f]"],
+    lines: ["Assine. Acesse.", "Agora."],
+    lineColors: ["text-white", "text-[#ff1f1f]"],
     sub: "Acervo completo liberado na hora.\nSem frete. Sem espera. Direto no seu celular.",
     cta: { href: "/assine", label: "Ver Planos de Assinatura →" },
     ctaSecondary: { href: "/edicoes", label: "Conhecer o Acervo" },
@@ -46,7 +46,6 @@ export default function WelcomeBanner() {
   const prev = useCallback(() => goTo((current - 1 + SLIDES.length) % SLIDES.length), [current, goTo]);
   const next = useCallback(() => goTo((current + 1) % SLIDES.length), [current, goTo]);
 
-  // Auto-advance a cada 10s
   useEffect(() => {
     const timer = setInterval(() => next(), 10000);
     return () => clearInterval(timer);
@@ -61,43 +60,47 @@ export default function WelcomeBanner() {
       <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
         style={{ backgroundImage: "repeating-linear-gradient(0deg,#7a9ab5 0,transparent 1px,transparent 64px),repeating-linear-gradient(90deg,#7a9ab5 0,transparent 1px,transparent 64px)" }} />
 
-      {/* ── Glow vermelho — centro ────────────────────────────── */}
-      <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(255,31,31,0.07) 0%, transparent 65%)" }} />
+      {/* ── Glow vermelho — esquerda ──────────────────────────── */}
+      <div className="absolute top-1/2 -translate-y-1/2 -left-10 w-[600px] h-[600px] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(255,31,31,0.09) 0%, transparent 65%)" }} />
 
-      {/* ── Layout principal — centrado ───────────────────────── */}
-      <div className="relative z-10 w-full px-5 lg:px-20 py-6 lg:py-8 flex flex-col items-center">
+      {/* ── Glow azul-aço — inferior direita ──────────────────── */}
+      <div className="absolute -bottom-20 right-[10%] w-[500px] h-[400px] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(122,154,181,0.04) 0%, transparent 70%)" }} />
 
-        {/* ── Conteúdo — fade puro por key ─────────────────────── */}
+      {/* ── Layout — esquerda + círculo direita ───────────────── */}
+      <div className="relative z-10 w-full px-5 lg:px-20 py-6 lg:py-8 flex items-center gap-12">
+
+        {/* ── Conteúdo esquerda ─────────────────────────────────── */}
         <div
           key={current}
-          className="animate-fade-slide-in w-full max-w-[600px] text-center"
+          className="animate-fade-slide-in flex-1 max-w-[640px]"
         >
           {/* Label */}
-          <div className="flex items-center justify-center gap-2.5 mb-4">
+          <div className="flex items-center gap-2.5 mb-4">
             <div className="w-[6px] h-[6px] bg-[#ff1f1f] rounded-full" />
             <span className="text-[#ff1f1f] text-[11px] font-bold tracking-[2.5px] uppercase">
               {slide.label}
             </span>
           </div>
 
-          {/* Headline */}
-          <h1 className="font-['Barlow_Condensed'] font-extrabold leading-[0.90] mb-5 select-none">
+          {/* Headline — 2 linhas */}
+          <h1 className="font-['Barlow_Condensed'] font-extrabold leading-[0.92] mb-5 select-none">
             {slide.lines.map((line, i) => (
               <span key={i} className={`block ${slide.lineColors[i]}`}
-                style={{ fontSize: "clamp(52px, 7vw, 96px)" }}>
+                style={{ fontSize: "clamp(48px, 6.2vw, 90px)" }}>
                 {line}
               </span>
             ))}
           </h1>
 
           {/* Subheadline */}
-          <p className="text-[#7a9ab5] text-[15px] leading-relaxed mb-6 whitespace-pre-line">
+          <p className="text-[#7a9ab5] text-[15px] leading-relaxed max-w-[480px] mb-5 whitespace-pre-line">
             {slide.sub}
           </p>
 
           {/* CTAs */}
-          <div className="flex items-center justify-center gap-3 flex-wrap mb-7">
+          <div className="flex items-center gap-3 flex-wrap mb-6">
             <Link
               href={slide.cta.href}
               className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-bold px-7 py-3.5 rounded transition-colors"
@@ -114,7 +117,7 @@ export default function WelcomeBanner() {
           </div>
 
           {/* Stats */}
-          <div className="flex items-center justify-center flex-wrap gap-0">
+          <div className="flex items-center flex-wrap gap-0">
             {STATS.map((stat, i) => (
               <div
                 key={i}
@@ -133,12 +136,38 @@ export default function WelcomeBanner() {
           </div>
         </div>
 
+        {/* ── Coluna direita — círculo 40 anos (desktop) ────────── */}
+        <div className="hidden lg:flex flex-col items-center justify-center shrink-0 select-none pointer-events-none"
+          style={{ width: "30%" }}>
+          <div className="relative flex items-center justify-center w-[200px] h-[200px]">
+            {/* Anel externo */}
+            <div className="absolute inset-0 rounded-full"
+              style={{ border: "1px solid rgba(28,42,62,0.8)" }} />
+            {/* Anel interno */}
+            <div className="absolute inset-[18px] rounded-full"
+              style={{ border: "1px solid rgba(255,31,31,0.12)" }} />
+            {/* Conteúdo central */}
+            <div className="flex flex-col items-center gap-1 relative z-10">
+              <span className="font-['Barlow_Condensed'] font-extrabold text-white text-[60px] leading-none">40</span>
+              <span className="text-[#ff1f1f] text-[11px] font-bold tracking-[3px] uppercase">Anos</span>
+              <div className="w-8 h-[1px] bg-[#1c2a3e] my-1" />
+              <span className="text-[#526888] text-[10px] font-semibold tracking-[1.5px]">1986 — 2026</span>
+            </div>
+          </div>
+          {/* Label abaixo */}
+          <div className="mt-3 flex flex-col items-center gap-1">
+            <div className="w-[1px] h-5 bg-[#1c2a3e]" />
+            <span className="text-[#1c2a3e] text-[9px] font-bold tracking-[3px] uppercase">
+              Maior Acervo Digital do Brasil
+            </span>
+          </div>
+        </div>
+
       </div>
 
-      {/* ── Controles — centrados ─────────────────────────────── */}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
+      {/* ── Controles — alinhados à esquerda ─────────────────── */}
+      <div className="absolute bottom-5 left-5 lg:left-20 z-20 flex items-center gap-4">
 
-        {/* Setinha esquerda */}
         <button
           onClick={prev}
           className="slider-nav-btn w-8 h-8 rounded-full flex items-center justify-center transition-all"
@@ -152,7 +181,6 @@ export default function WelcomeBanner() {
           </svg>
         </button>
 
-        {/* Bolinhas de paginação */}
         <div className="flex items-center gap-2">
           {SLIDES.map((_, i) => (
             <button
@@ -169,7 +197,6 @@ export default function WelcomeBanner() {
           ))}
         </div>
 
-        {/* Setinha direita */}
         <button
           onClick={next}
           className="slider-nav-btn w-8 h-8 rounded-full flex items-center justify-center transition-all"
