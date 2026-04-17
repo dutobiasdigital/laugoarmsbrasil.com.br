@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -67,8 +68,8 @@ export default function MobileMenu({
         <span className="block w-3 h-[1.5px] bg-[#ff1f1f] rounded-full self-end" />
       </button>
 
-      {/* ── Full-screen overlay ─────────────────────────── */}
-      {open && (
+      {/* ── Full-screen overlay (portal → body, escapa do transform do header) ── */}
+      {open && createPortal(
         <div
           className="fixed inset-0 z-[999] flex flex-col hero-metal"
           style={{
@@ -213,7 +214,8 @@ export default function MobileMenu({
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
