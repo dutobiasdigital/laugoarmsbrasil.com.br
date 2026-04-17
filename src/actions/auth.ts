@@ -91,19 +91,43 @@ export async function forgotPassword(
     return { error: "Verificação de segurança falhou. Tente novamente." };
   }
 
-  const supabase = await createClient();
-
   const email = formData.get("email") as string;
+  if (!email) return { error: "E-mail obrigatório." };
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/auth/nova-senha`,
-  });
+  try {
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const { sendPasswordResetEmail } = await import("@/lib/email");
 
-  if (error) {
-    return { error: error.message };
+    const admin = createAdminClient();
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://revistamagnum.com.br";
+
+    // Gera o link de recuperação via Admin API (bypass do e-mail padrão do Supabase)
+    const { data, error } = await admin.auth.admin.generateLink({
+      type: "recovery",
+      email,
+      options: {
+        redirectTo: `${appUrl}/auth/callback?next=/auth/nova-senha`,
+      },
+    });
+
+    if (error) {
+      // Não revelar se o e-mail existe ou não (prevenção de enumeração)
+      console.error("[forgotPassword] generateLink error:", error.message);
+    } else if (data?.properties?.action_link) {
+      // Envia pelo nosso SMTP com o template customizado
+      await sendPasswordResetEmail({
+        email,
+        resetLink: data.properties.action_link,
+        name: data.user?.user_metadata?.full_name as string | undefined,
+      });
+    }
+  } catch (err) {
+    console.error("[forgotPassword] unexpected error:", err);
+    // Não exibir erro ao usuário para evitar enumeração de e-mails
   }
 
-  return { success: true, message: "E-mail de recuperação enviado. Verifique sua caixa de entrada." };
+  // Sempre retornar sucesso (não revelar se e-mail existe)
+  return { success: true, message: "Se este e-mail estiver cadastrado, você receberá o link em breve." };
 }
 
 export async function updatePassword(

@@ -317,6 +317,73 @@ export async function sendSubscriptionCancelledEmail({
   });
 }
 
+/* ── E-mail de recuperação de senha ──────────────────────────── */
+export async function sendPasswordResetEmail({
+  email,
+  resetLink,
+  name,
+}: {
+  email: string;
+  resetLink: string;
+  name?: string;
+}): Promise<void> {
+  const displayName = name || email.split("@")[0];
+
+  const fb = {
+    subject: "Redefinição de senha — Revista Magnum",
+    body: `Olá, {{nome}}!\n\nRecebemos uma solicitação para redefinir a senha da sua conta na Revista Magnum.\n\nClique no botão abaixo para criar uma nova senha. O link é válido por 24 horas.\n\nSe você não solicitou a redefinição de senha, ignore este e-mail com segurança.\n\nEquipe Revista Magnum`,
+  };
+
+  const tpl  = await getEmailTemplate("recuperacao_senha", fb.subject, fb.body);
+  const vars: Record<string, string> = {
+    nome:        displayName,
+    email,
+    link_reset:  resetLink,
+    data:        new Date().toLocaleDateString("pt-BR"),
+  };
+
+  const bodyHtml = `
+    <p style="margin:0 0 6px;font-size:12px;color:#526888;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;">Segurança da Conta</p>
+    <h1 style="margin:0 0 20px;font-size:28px;font-weight:900;color:#ffffff;font-family:'Arial Black',Arial,sans-serif;">
+      Redefinição de senha
+    </h1>
+    ${textToHtml(renderTemplate(tpl.body, vars))}
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">
+      <tr>
+        <td>
+          <a href="${resetLink}"
+             style="background:#ff1f1f;color:#ffffff;text-decoration:none;font-weight:bold;font-size:15px;padding:14px 32px;border-radius:6px;display:inline-block;">
+            Redefinir minha senha →
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-top:20px;">
+          <p style="margin:0;font-size:12px;color:#526888;line-height:18px;">
+            Ou copie e cole este link no seu navegador:<br>
+            <a href="${resetLink}" style="color:#7a9ab5;word-break:break-all;">${resetLink}</a>
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-top:16px;">
+          <p style="margin:0;font-size:12px;color:#526888;">
+            ⚠ Este link expira em <strong style="color:#d4d4da;">24 horas</strong>.
+            Se não foi você, ignore este e-mail.
+          </p>
+        </td>
+      </tr>
+    </table>
+  `;
+
+  await sendEmail({
+    to:      email,
+    subject: renderTemplate(tpl.subject, vars),
+    html:    wrapHtml("Redefinição de senha — Revista Magnum", bodyHtml),
+    text:    `Olá ${displayName}, acesse este link para redefinir sua senha: ${resetLink} (válido por 24h)`,
+  });
+}
+
 /* ── E-mail de teste ──────────────────────────────────────────── */
 export async function sendTestEmail(to: string, templateId?: string): Promise<void> {
   if (templateId && templateId !== "smtp") {
