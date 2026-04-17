@@ -49,7 +49,7 @@ export default async function AdminEdicoesPage({
   const { q, tipo, pagina, ordem } = await searchParams;
 
   const page      = Math.max(1, parseInt(pagina ?? "1", 10));
-  const PER_PAGE  = 12;
+  const PER_PAGE  = 50;
   const sortDir   = ordem === "asc" ? "asc" : "desc";
   const nextDir   = sortDir === "desc" ? "asc" : "desc";
   const baseParams = { q, tipo };
