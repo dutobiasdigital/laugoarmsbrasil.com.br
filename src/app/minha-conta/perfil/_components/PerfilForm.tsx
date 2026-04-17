@@ -59,7 +59,7 @@ export default function PerfilForm({ profile }: { profile: FullProfile }) {
           <h2 className="text-[#dce8ff] text-[16px] font-semibold">Informações Pessoais</h2>
         </div>
 
-        {/* Avatar + nome/email row */}
+        {/* Avatar + nome */}
         <div className="flex flex-col sm:flex-row items-start gap-6">
           <div className="shrink-0">
             <AvatarUpload
@@ -68,19 +68,18 @@ export default function PerfilForm({ profile }: { profile: FullProfile }) {
               onUrlChange={(url) => setAvatarUrl(url)}
             />
           </div>
-          <div className="flex flex-col gap-4 flex-1 w-full">
-            <div>
-              <label className={LABEL}>Nome completo *</label>
-              <input type="text" name="name" required defaultValue={profile.name} className={INPUT} />
-            </div>
-            <div>
-              <label className={LABEL}>CPF</label>
-              <input type="text" name="cpf" defaultValue={profile.cpf ?? ""} placeholder="000.000.000-00" className={INPUT} />
-            </div>
+          <div className="flex-1 w-full">
+            <label className={LABEL}>Nome completo *</label>
+            <input type="text" name="name" required defaultValue={profile.name} className={INPUT} />
           </div>
         </div>
 
+        {/* CPF + Telefone */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className={LABEL}>CPF</label>
+            <input type="text" name="cpf" defaultValue={profile.cpf ?? ""} placeholder="000.000.000-00" className={INPUT} />
+          </div>
           <div>
             <label className={LABEL}>Telefone / WhatsApp</label>
             <input type="tel" name="phone" defaultValue={profile.phone ?? ""} placeholder="(11) 99999-9999" className={INPUT} />
@@ -94,19 +93,21 @@ export default function PerfilForm({ profile }: { profile: FullProfile }) {
           <div className="w-[3px] h-5 bg-[#ff1f1f] rounded-full" />
           <h2 className="text-[#dce8ff] text-[16px] font-semibold">E-mail</h2>
         </div>
-        <div>
-          <label className={LABEL}>E-mail atual</label>
-          <input type="email" value={profile.email} disabled
-            className="w-full bg-[#0a0e18] border border-[#1c2a3e]/50 text-[#526888] rounded-[8px] px-4 py-2.5 text-[14px] cursor-not-allowed"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className={LABEL}>E-mail atual</label>
+            <input type="email" value={profile.email} disabled
+              className="w-full bg-[#0a0e18] border border-[#1c2a3e]/50 text-[#526888] rounded-[8px] px-4 py-2.5 text-[14px] cursor-not-allowed"
+            />
+          </div>
+          <div>
+            <label className={LABEL}>Novo e-mail <span className="text-[#526888] normal-case font-normal">(opcional)</span></label>
+            <input type="email" name="newEmail" placeholder="novo@email.com" className={INPUT} />
+          </div>
         </div>
-        <div>
-          <label className={LABEL}>Novo e-mail <span className="text-[#526888] normal-case font-normal">(deixe em branco para manter o atual)</span></label>
-          <input type="email" name="newEmail" placeholder="novo@email.com" className={INPUT} />
-          <p className="text-[#526888] text-[12px] mt-1.5 leading-relaxed">
-            🔒 Ao informar um novo e-mail, você receberá confirmações no endereço atual e no novo. A alteração só é efetivada após ambas as confirmações.
-          </p>
-        </div>
+        <p className="text-[#526888] text-[12px] leading-relaxed -mt-2">
+          🔒 Ao informar um novo e-mail, você receberá confirmações nos dois endereços. A alteração só é efetivada após ambas as confirmações.
+        </p>
       </section>
 
       {/* ── Seção: Endereço ── */}

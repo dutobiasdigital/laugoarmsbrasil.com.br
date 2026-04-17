@@ -49,7 +49,7 @@ export default async function PerfilPage() {
         <p className="text-[#7a9ab5] text-[15px]">Gerencie suas informações, endereço e redes sociais.</p>
       </section>
 
-      <div className="px-5 lg:px-10 py-8 max-w-[760px] flex flex-col gap-6">
+      <div className="px-5 lg:px-10 py-8 max-w-[900px] flex flex-col gap-6">
         <PerfilForm profile={profile} />
         <SenhaForm email={email} />
       </div>

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Header from "@/components/Header";
-import FooterMinimal from "@/components/FooterMinimal";
+import Footer from "@/components/Footer";
 import SidebarNav from "./_components/SidebarNav";
 
 export const metadata = {
@@ -85,7 +85,9 @@ export default async function MinhaContaLayout({ children }: { children: React.R
         </main>
       </div>
 
-      <FooterMinimal />
+      <div className="lg:ml-[260px]">
+        <Footer />
+      </div>
     </div>
   );
 }

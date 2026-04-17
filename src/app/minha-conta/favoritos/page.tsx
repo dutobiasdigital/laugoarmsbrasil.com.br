@@ -25,6 +25,11 @@ type Company = {
   id: string; tradeName: string; segment: string; logoUrl: string | null;
   city: string | null; state: string | null; listingType: string;
 };
+type Article = {
+  id: string; title: string; slug: string; excerpt: string | null;
+  featureImageUrl: string | null; publishedAt: string | null;
+  category: { name: string } | null;
+};
 
 function fmtCurrency(cents: number) {
   return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -51,13 +56,15 @@ export default async function FavoritosPage() {
   );
   const allFavorites: Favorite[] = await favRes.json().then(d => Array.isArray(d) ? d : []);
 
-  const editionIds     = allFavorites.filter(f => f.contentType === "edition").map(f => f.contentId);
-  const productIds     = allFavorites.filter(f => f.contentType === "product").map(f => f.contentId);
-  const guideIds       = allFavorites.filter(f => f.contentType === "guide_listing").map(f => f.contentId);
+  const editionIds = allFavorites.filter(f => f.contentType === "edition").map(f => f.contentId);
+  const productIds = allFavorites.filter(f => f.contentType === "product").map(f => f.contentId);
+  const guideIds   = allFavorites.filter(f => f.contentType === "guide_listing").map(f => f.contentId);
+  const articleIds = allFavorites.filter(f => f.contentType === "article").map(f => f.contentId);
 
-  let editions: Edition[]   = [];
-  let products: Product[]   = [];
-  let companies: Company[]  = [];
+  let editions: Edition[]  = [];
+  let products: Product[]  = [];
+  let companies: Company[] = [];
+  let articles: Article[]  = [];
 
   await Promise.all([
     editionIds.length > 0 && fetch(
@@ -74,9 +81,14 @@ export default async function FavoritosPage() {
       `${BASE}/companies?id=in.(${guideIds.join(",")})&select=id,tradeName,segment,logoUrl,city,state,listingType`,
       { headers: H, cache: "no-store" }
     ).then(r => r.json()).then(d => { companies = Array.isArray(d) ? d : []; }),
+
+    articleIds.length > 0 && fetch(
+      `${BASE}/articles?id=in.(${articleIds.join(",")})&select=id,title,slug,excerpt,featureImageUrl,publishedAt,category:article_categories(name)`,
+      { headers: H, cache: "no-store" }
+    ).then(r => r.json()).then(d => { articles = Array.isArray(d) ? d : []; }),
   ]);
 
-  const total = editions.length + products.length + companies.length;
+  const total = editions.length + products.length + companies.length + articles.length;
 
   return (
     <div className="flex flex-col">
@@ -92,7 +104,7 @@ export default async function FavoritosPage() {
         <p className="text-[#7a9ab5] text-[15px]">
           {total > 0
             ? `${total} item${total !== 1 ? "s" : ""} salvo${total !== 1 ? "s" : ""} na sua coleção`
-            : "Salve edições, produtos e empresas do guia para encontrar rápido depois."
+            : "Salve edições, artigos, produtos e empresas do guia para encontrar rápido depois."
           }
         </p>
       </section>
@@ -101,25 +113,28 @@ export default async function FavoritosPage() {
 
         {total === 0 && (
           <div className="bg-[#0e1520] border border-[#141d2c] rounded-[14px] p-12 text-center flex flex-col items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-[#ff1f1f]/10 border border-[#ff1f1f]/20 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-[#141d2c] border border-[#1c2a3e] flex items-center justify-center">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff1f1f" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
               </svg>
             </div>
             <div>
               <p className="font-['Barlow_Condensed'] font-bold text-white text-[22px] mb-2">Nenhum favorito ainda</p>
-              <p className="text-[#7a9ab5] text-[14px] max-w-[360px] mx-auto leading-relaxed">
-                Explore o acervo e clique no ❤ para salvar edições, produtos e empresas que você queira acompanhar.
+              <p className="text-[#7a9ab5] text-[14px] max-w-[400px] mx-auto leading-relaxed">
+                Explore o acervo e clique no ❤ para salvar edições, artigos, produtos e empresas que você queira acompanhar.
               </p>
             </div>
             <div className="flex flex-wrap gap-3 justify-center mt-2">
-              <Link href="/edicoes" className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[13px] font-semibold h-[40px] px-5 rounded-[8px] transition-colors">
+              <Link href="/edicoes" className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[13px] font-semibold h-[40px] px-5 rounded-[8px] transition-colors flex items-center justify-center">
                 Navegar edições
               </Link>
-              <Link href="/loja" className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[13px] font-semibold h-[40px] px-5 rounded-[8px] transition-colors">
+              <Link href="/blog" className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[13px] font-semibold h-[40px] px-5 rounded-[8px] transition-colors flex items-center justify-center">
+                Ver blog
+              </Link>
+              <Link href="/loja" className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[13px] font-semibold h-[40px] px-5 rounded-[8px] transition-colors flex items-center justify-center">
                 Ver loja
               </Link>
-              <Link href="/guia" className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[13px] font-semibold h-[40px] px-5 rounded-[8px] transition-colors">
+              <Link href="/guia" className="bg-[#141d2c] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[13px] font-semibold h-[40px] px-5 rounded-[8px] transition-colors flex items-center justify-center">
                 Guia Comercial
               </Link>
             </div>
@@ -171,6 +186,64 @@ export default async function FavoritosPage() {
                         {ed.number ? `Edição ${ed.number}` : ed.title}
                       </p>
                       {date && <p className="text-white/25 text-[10px]">{date}</p>}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ── Artigos ── */}
+        {articles.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-[3px] h-5 bg-[#ff1f1f] rounded-full" />
+                <h2 className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[24px] leading-none">
+                  Artigos <span className="text-[#526888] text-[16px] font-normal">({articles.length})</span>
+                </h2>
+              </div>
+              <Link href="/blog" className="text-[#7a9ab5] hover:text-white text-[13px] transition-colors">
+                Ver blog →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {articles.map(art => {
+                const date = art.publishedAt
+                  ? new Date(art.publishedAt).toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" })
+                  : null;
+                return (
+                  <Link key={art.id} href={`/blog/${art.slug}`}
+                    className="group bg-[#0e1520] border border-[#141d2c] hover:border-[#1c2a3e] rounded-[12px] overflow-hidden flex flex-col transition-all hover:shadow-lg hover:shadow-black/30"
+                  >
+                    <div className="aspect-[16/9] bg-[#141d2c] overflow-hidden">
+                      {art.featureImageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={art.featureImageUrl} alt={art.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1c2a3e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-2 p-4">
+                      {art.category?.name && (
+                        <span className="text-[10px] font-semibold text-[#ff1f1f] uppercase tracking-[0.8px]">
+                          {art.category.name}
+                        </span>
+                      )}
+                      <p className="text-white text-[14px] font-semibold leading-snug line-clamp-2 group-hover:text-white/90">
+                        {art.title}
+                      </p>
+                      {art.excerpt && (
+                        <p className="text-[#526888] text-[12px] line-clamp-2 leading-relaxed">{art.excerpt}</p>
+                      )}
+                      {date && <p className="text-[#526888] text-[11px] mt-auto pt-1">{date}</p>}
                     </div>
                   </Link>
                 );

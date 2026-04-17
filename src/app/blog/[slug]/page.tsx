@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ViewTracker from "@/components/ViewTracker";
+import FavoriteButton from "@/components/FavoriteButton";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -27,29 +28,47 @@ export default async function BlogArtigoPage({
   } | null = null;
 
   let isSubscriber = false;
+  let isLoggedIn   = false;
+  let isFavorited  = false;
+  let dbUserId: string | null = null;
 
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (user) {
+      isLoggedIn = true;
       const userRes = await fetch(
-        `${BASE}/users?authId=eq.${user.id}&select=role,subscriptions(status)&limit=1`,
+        `${BASE}/users?authId=eq.${user.id}&select=id,role,subscriptions(status)&limit=1`,
         { headers: HEADERS, cache: "no-store" }
       );
       const rows = await userRes.json();
       const u = rows?.[0];
-      isSubscriber =
-        u?.role === "ADMIN" ||
-        u?.subscriptions?.some((s: { status: string }) => s.status === "ACTIVE");
+      if (u) {
+        dbUserId = u.id;
+        isSubscriber =
+          u.role === "ADMIN" ||
+          u.subscriptions?.some((s: { status: string }) => s.status === "ACTIVE");
+      }
     }
 
-    const res = await fetch(
-      `${BASE}/articles?slug=eq.${encodeURIComponent(slug)}&status=eq.PUBLISHED&select=id,title,slug,excerpt,content,featureImageUrl,publishedAt,isExclusive,authorName,category:article_categories(name)&limit=1`,
-      { headers: HEADERS, cache: "no-store" }
-    );
-    const data = await res.json();
+    const [articleRes] = await Promise.all([
+      fetch(
+        `${BASE}/articles?slug=eq.${encodeURIComponent(slug)}&status=eq.PUBLISHED&select=id,title,slug,excerpt,content,featureImageUrl,publishedAt,isExclusive,authorName,category:article_categories(name)&limit=1`,
+        { headers: HEADERS, cache: "no-store" }
+      ),
+    ]);
+    const data = await articleRes.json();
     post = Array.isArray(data) && data.length > 0 ? data[0] : null;
+
+    if (post && dbUserId) {
+      const favRes = await fetch(
+        `${BASE}/user_favorites?userId=eq.${dbUserId}&contentType=eq.article&contentId=eq.${post.id}&select=id&limit=1`,
+        { headers: HEADERS, cache: "no-store" }
+      );
+      const favData = await favRes.json();
+      isFavorited = Array.isArray(favData) && favData.length > 0;
+    }
   } catch {
     // DB unavailable
   }
@@ -100,7 +119,7 @@ export default async function BlogArtigoPage({
           </p>
         )}
 
-        <div className="flex items-center gap-3 text-[13px] text-[#526888]">
+        <div className="flex items-center flex-wrap gap-3 text-[13px] text-[#526888]">
           {post.authorName && <span className="font-medium text-[#7a9ab5]">{post.authorName}</span>}
           {post.authorName && post.publishedAt && <span>·</span>}
           {post.publishedAt && (
@@ -108,6 +127,14 @@ export default async function BlogArtigoPage({
               {new Date(post.publishedAt).toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}
             </span>
           )}
+          <FavoriteButton
+            contentType="article"
+            contentId={post.id}
+            isLoggedIn={isLoggedIn}
+            initialIsFavorited={isFavorited}
+            size="sm"
+            label={isFavorited ? "Favoritado" : "Favoritar artigo"}
+          />
         </div>
       </section>
 

@@ -130,7 +130,7 @@ export default async function MinhaContaPage() {
         </p>
       </section>
 
-      <div className="px-5 lg:px-10 py-8 flex flex-col gap-8 max-w-[900px]">
+      <div className="px-5 lg:px-10 py-8 flex flex-col gap-8">
 
         {/* Stats grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -254,7 +254,7 @@ export default async function MinhaContaPage() {
               { href: "/minha-conta/favoritos", label: "Favoritos", desc: "Seus itens salvos", icon: "❤️" },
             ].map(({ href, label, desc, icon }) => (
               <Link key={href} href={href}
-                className="bg-[#0e1520] border border-[#141d2c] hover:border-[#1c2a3e] rounded-[10px] p-4 flex items-start gap-3 transition-all hover:shadow-md hover:shadow-black/20 group"
+                className="bg-[#0e1520] border border-[#141d2c] hover:border-[#1c2a3e] rounded-[10px] p-4 flex items-center gap-3 transition-all hover:shadow-md hover:shadow-black/20 group"
               >
                 <span className="text-[24px]">{icon}</span>
                 <div>

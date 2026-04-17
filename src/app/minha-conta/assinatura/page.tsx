@@ -71,11 +71,24 @@ export default async function MinhaAssinaturaPage() {
   const days       = subscription?.currentPeriodEnd ? daysLeft(subscription.currentPeriodEnd) : 0;
 
   return (
-    <div className="max-w-[680px] py-7">
-      <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[36px] leading-none mb-1">
-        Minha Assinatura
-      </h1>
-      <p className="text-[#7a9ab5] text-[16px] mb-8">Detalhes e gerenciamento da sua assinatura</p>
+    <div className="flex flex-col">
+      {/* ── Hero ─────────────────────────────────────────────── */}
+      <section className="hero-metal px-5 lg:px-10 pt-10 pb-8 border-b border-[#141d2c]">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-[6px] h-[6px] bg-[#ff1f1f] rounded-full" />
+          <span className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase">Assinante</span>
+        </div>
+        <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[44px] lg:text-[52px] leading-[0.95] mb-2">
+          Minha Assinatura
+        </h1>
+        <p className="text-[#7a9ab5] text-[15px]">
+          {isActive
+            ? `${subscription!.subscription_plans?.name ?? "Plano Magnum"} — ${days} dia${days !== 1 ? "s" : ""} restante${days !== 1 ? "s" : ""}`
+            : "Detalhes e gerenciamento da sua assinatura"}
+        </p>
+      </section>
+
+    <div className="px-5 lg:px-10 py-8 max-w-[760px] flex flex-col gap-5">
 
       {subscription ? (
         <>
@@ -184,6 +197,7 @@ export default async function MinhaAssinaturaPage() {
           </Link>
         </div>
       )}
+    </div>
     </div>
   );
 }
