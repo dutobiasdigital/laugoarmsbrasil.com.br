@@ -70,7 +70,7 @@ export default async function HomePage() {
       viewStatsRes,
     ] = await Promise.all([
       fetch(
-        `${BASE}/editions?isPublished=eq.true&order=publishedAt.desc&limit=3&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount`,
+        `${BASE}/editions?isPublished=eq.true&order=publishedAt.desc&limit=4&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount`,
         { headers: HEADERS, cache: "no-store" }
       ),
       // Fetch a pool of 10 specials so we can randomise on the server
@@ -216,8 +216,8 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(latestEditions.length > 0 ? latestEditions : Array(3).fill(null)).map((edition, i) => {
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {(latestEditions.length > 0 ? latestEditions : Array(4).fill(null)).map((edition, i) => {
                 const ctaLabel = CTA_VARIANTS[(edition?.number ?? i + 2) % CTA_VARIANTS.length];
                 const isSpecial = edition?.type === "SPECIAL";
                 return (

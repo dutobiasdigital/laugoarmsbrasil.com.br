@@ -58,10 +58,13 @@ export default async function EdicoesPage({
   const limit  = ITEMS_PER_PAGE;
   const offset = infiniteScroll ? 0 : (page - 1) * ITEMS_PER_PAGE;
 
+  type TopEdition = { id: string; title: string; number: number | null; slug: string; totalViews: number };
+
   let editions: Edition[] = [];
   let total        = 0;
   let totalRegular = 0;
   let totalSpecial = 0;
+  let topEditions: TopEdition[] = [];
 
   try {
     const typeFilter   = tipo === "normais"   ? "&type=eq.REGULAR"
@@ -69,7 +72,7 @@ export default async function EdicoesPage({
                        : "";
     const searchFilter = buildSearchFilter(q);
 
-    const [edRes, regRes, spRes] = await Promise.all([
+    const [edRes, regRes, spRes, viewStatsRes] = await Promise.all([
       fetch(
         `${BASE}/editions?isPublished=eq.true${typeFilter}${searchFilter}&order=publishedAt.desc&limit=${limit}&offset=${offset}&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount,summary`,
         { headers: HEADERS, cache: "no-store" }
@@ -77,6 +80,8 @@ export default async function EdicoesPage({
       fetch(`${BASE}/editions?isPublished=eq.true&type=eq.REGULAR&select=id`,
         { headers: HEADERS, cache: "no-store" }),
       fetch(`${BASE}/editions?isPublished=eq.true&type=eq.SPECIAL&select=id`,
+        { headers: HEADERS, cache: "no-store" }),
+      fetch(`${BASE}/edition_view_stats?order=total_views.desc&limit=5&select=edition_slug,total_views`,
         { headers: HEADERS, cache: "no-store" }),
     ]);
 
@@ -86,6 +91,27 @@ export default async function EdicoesPage({
 
     const data = await edRes.json();
     editions = Array.isArray(data) ? data : [];
+
+    /* ── Top 5 mais visualizadas ── */
+    if (viewStatsRes.ok) {
+      const stats: { edition_slug: string; total_views: number }[] = await viewStatsRes.json();
+      if (stats.length > 0) {
+        const slugList = stats.map((s) => s.edition_slug).join(",");
+        const topRes = await fetch(
+          `${BASE}/editions?slug=in.(${slugList})&select=id,title,number,slug`,
+          { headers: HEADERS, cache: "no-store" }
+        );
+        if (topRes.ok) {
+          const topData: { id: string; title: string; number: number | null; slug: string }[] = await topRes.json();
+          topEditions = stats
+            .map((s) => {
+              const ed = topData.find((e) => e.slug === s.edition_slug);
+              return ed ? { ...ed, totalViews: s.total_views } : null;
+            })
+            .filter(Boolean) as TopEdition[];
+        }
+      }
+    }
   } catch {
     // DB unavailable
   }
@@ -185,30 +211,6 @@ export default async function EdicoesPage({
           )}
         </div>
 
-        {/* Toggle grid / lista */}
-        <div className="flex items-center gap-1 shrink-0">
-          <Link href={viewHref("grid")} title="Visualização em grade"
-            className={`w-[34px] h-[34px] flex items-center justify-center rounded-[6px] transition-colors ${
-              view === "grid" ? "bg-[#ff1f1f] text-white" : "bg-[#141d2c] border border-[#1c2a3e] text-[#526888] hover:text-white"
-            }`}>
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-              <rect x="0" y="0" width="6.5" height="6.5" rx="1" fill="currentColor"/>
-              <rect x="8.5" y="0" width="6.5" height="6.5" rx="1" fill="currentColor"/>
-              <rect x="0" y="8.5" width="6.5" height="6.5" rx="1" fill="currentColor"/>
-              <rect x="8.5" y="8.5" width="6.5" height="6.5" rx="1" fill="currentColor"/>
-            </svg>
-          </Link>
-          <Link href={viewHref("list")} title="Visualização em lista"
-            className={`w-[34px] h-[34px] flex items-center justify-center rounded-[6px] transition-colors ${
-              view === "list" ? "bg-[#ff1f1f] text-white" : "bg-[#141d2c] border border-[#1c2a3e] text-[#526888] hover:text-white"
-            }`}>
-            <svg width="15" height="12" viewBox="0 0 15 12" fill="none">
-              <rect x="0" y="0" width="15" height="2.5" rx="1" fill="currentColor"/>
-              <rect x="0" y="4.75" width="15" height="2.5" rx="1" fill="currentColor"/>
-              <rect x="0" y="9.5" width="15" height="2.5" rx="1" fill="currentColor"/>
-            </svg>
-          </Link>
-        </div>
       </div>
 
       {/* Ad leaderboard */}
@@ -221,6 +223,39 @@ export default async function EdicoesPage({
 
         {/* Main */}
         <div className="flex flex-col gap-8 flex-1 min-w-0">
+
+          {/* ── Barra de visualização ── */}
+          <div className="flex items-center justify-between">
+            <p className="text-[#526888] text-[13px]">
+              {q
+                ? <>{total} resultado{total !== 1 ? "s" : ""} para <span className="text-white font-semibold">&ldquo;{q}&rdquo;</span></>
+                : <>{total} edição{total !== 1 ? "es" : ""} no acervo</>
+              }
+            </p>
+            <div className="flex items-center gap-1">
+              <Link href={viewHref("grid")} title="Visualização em grade"
+                className={`w-[36px] h-[36px] flex items-center justify-center rounded-[6px] transition-colors ${
+                  view === "grid" ? "bg-[#ff1f1f] text-white" : "bg-[#141d2c] border border-[#1c2a3e] text-[#526888] hover:text-white"
+                }`}>
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+                  <rect x="0" y="0" width="6.5" height="6.5" rx="1" fill="currentColor"/>
+                  <rect x="8.5" y="0" width="6.5" height="6.5" rx="1" fill="currentColor"/>
+                  <rect x="0" y="8.5" width="6.5" height="6.5" rx="1" fill="currentColor"/>
+                  <rect x="8.5" y="8.5" width="6.5" height="6.5" rx="1" fill="currentColor"/>
+                </svg>
+              </Link>
+              <Link href={viewHref("list")} title="Visualização em lista"
+                className={`w-[36px] h-[36px] flex items-center justify-center rounded-[6px] transition-colors ${
+                  view === "list" ? "bg-[#ff1f1f] text-white" : "bg-[#141d2c] border border-[#1c2a3e] text-[#526888] hover:text-white"
+                }`}>
+                <svg width="15" height="12" viewBox="0 0 15 12" fill="none" aria-hidden="true">
+                  <rect x="0" y="0" width="15" height="2.5" rx="1" fill="currentColor"/>
+                  <rect x="0" y="4.75" width="15" height="2.5" rx="1" fill="currentColor"/>
+                  <rect x="0" y="9.5" width="15" height="2.5" rx="1" fill="currentColor"/>
+                </svg>
+              </Link>
+            </div>
+          </div>
 
           {/* ── SCROLL INFINITO ── */}
           {infiniteScroll && (
@@ -330,6 +365,41 @@ export default async function EdicoesPage({
         {/* Sidebar */}
         <aside className="hidden lg:flex flex-col gap-8 w-[300px] shrink-0">
           <AdBanner position="EDITIONS_SIDEBAR" bannerSize="MED_RECT" />
+
+          {/* Edições Mais Visualizadas */}
+          <div className="bg-[#0e1520] border border-[#141d2c] rounded-lg p-5 flex flex-col gap-4">
+            <div className="flex items-center gap-2 pb-1 border-b border-[#141d2c]">
+              <div className="w-[3px] h-5 bg-[#ff1f1f] rounded-full" />
+              <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[18px] leading-none">
+                Mais Visualizadas
+              </p>
+            </div>
+            {(topEditions.length > 0
+              ? topEditions
+              : [
+                  { id: "1", title: "Edição 145", slug: "edicao-145", number: 145, totalViews: 0 },
+                  { id: "2", title: "Edição 144", slug: "edicao-144", number: 144, totalViews: 0 },
+                  { id: "3", title: "Edição 143", slug: "edicao-143", number: 143, totalViews: 0 },
+                  { id: "4", title: "Edição 142", slug: "edicao-142", number: 142, totalViews: 0 },
+                  { id: "5", title: "Edição 141", slug: "edicao-141", number: 141, totalViews: 0 },
+                ]
+            ).map((edition, i) => (
+              <Link key={edition.id} href={`/edicoes/${edition.slug}`} className="group flex items-start gap-3 hover:opacity-80 transition-opacity">
+                <span className="font-['Barlow_Condensed'] font-extrabold text-[22px] leading-none shrink-0 w-8 tabular-nums" style={{ color: "var(--brand, #ff1f1f)" }}>
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <p className="text-[#dce8ff] text-[13px] leading-snug line-clamp-2 group-hover:text-white transition-colors">
+                    {edition.title}
+                  </p>
+                  {edition.number && (
+                    <span className="text-[#526888] text-[11px] font-mono">Nº {edition.number}</span>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+
           <div className="bg-[#0e1520] border border-[#141d2c] rounded-lg p-5 flex flex-col gap-3">
             <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[18px]">Edições Especiais</p>
             <p className="text-[#526888] text-[12px] leading-relaxed">
