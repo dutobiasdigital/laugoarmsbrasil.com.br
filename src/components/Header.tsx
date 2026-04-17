@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { ThemeToggle } from "./ThemeToggle";
 import NavEditionsDropdown from "./NavEditionsDropdown";
 import CartIcon from "./CartIcon";
+import MobileMenu from "./MobileMenu";
+import HeaderScrollController from "./HeaderScrollController";
 
 const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
@@ -34,7 +36,8 @@ export default async function Header() {
   ]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[#070a12] border-b border-[#141d2c] h-16 flex items-center px-5 lg:px-20">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#070a12] border-b border-[#141d2c] h-16 flex items-center px-5 lg:px-20 transition-transform duration-300">
+      <HeaderScrollController />
       <Link href="/" className="flex items-center shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -86,10 +89,11 @@ export default async function Header() {
         {/* Carrinho */}
         <CartIcon />
 
+        {/* Desktop auth */}
         {user ? (
           <Link
             href="/minha-conta"
-            className="border border-[#1c2a3e] text-[#7a9ab5] hover:text-white hover:border-zinc-500 text-[13px] font-semibold px-4 py-2 rounded transition-colors"
+            className="hidden lg:flex border border-[#1c2a3e] text-[#7a9ab5] hover:text-white hover:border-zinc-500 text-[13px] font-semibold px-4 py-2 rounded transition-colors"
           >
             Minha conta
           </Link>
@@ -97,18 +101,21 @@ export default async function Header() {
           <>
             <Link
               href="/auth/login"
-              className="border border-[#1c2a3e] text-[#7a9ab5] hover:text-white hover:border-zinc-500 text-[13px] font-semibold px-4 py-2 rounded transition-colors hidden sm:flex"
+              className="border border-[#1c2a3e] text-[#7a9ab5] hover:text-white hover:border-zinc-500 text-[13px] font-semibold px-4 py-2 rounded transition-colors hidden lg:flex"
             >
               Entrar
             </Link>
             <Link
               href="/assine"
-              className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[13px] font-semibold px-5 py-2 rounded transition-colors"
+              className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[13px] font-semibold px-5 py-2 rounded transition-colors hidden lg:flex"
             >
               Assine
             </Link>
           </>
         )}
+
+        {/* Hamburguer — só mobile */}
+        <MobileMenu isLoggedIn={!!user} />
       </div>
     </header>
   );

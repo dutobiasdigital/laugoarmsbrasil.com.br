@@ -28,6 +28,15 @@ body {
 
 /* ─── Animações Silício-Ferro ─────────────────────────── */
 
+/* Mobile menu drawer desliza da direita */
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+.animate-slide-in-right {
+  animation: slideInRight 0.22s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
 @keyframes metalShimmer {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
