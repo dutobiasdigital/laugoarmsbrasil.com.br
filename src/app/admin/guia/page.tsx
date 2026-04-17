@@ -17,16 +17,16 @@ const PLAN_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 const STATUS_CFG: Record<string, { label: string; color: string }> = {
-  PENDING:   { label: "Pendente",  color: "bg-[#1a1a0a] text-[#facc15]" },
-  ACTIVE:    { label: "Ativo",     color: "bg-[#0f381f] text-[#22c55e]" },
-  SUSPENDED: { label: "Suspenso",  color: "bg-[#141d2c] text-[#526888]" },
+  PENDING:   { label: "Pendente", color: "bg-[#1a1a0a] text-[#facc15]" },
+  ACTIVE:    { label: "Ativo",    color: "bg-[#0f381f] text-[#22c55e]" },
+  SUSPENDED: { label: "Inativo",  color: "bg-[#141d2c] text-[#526888]" },
 };
 
 const FILTER_TABS = [
-  { label: "Todos",     value: "" },
+  { label: "Todos",    value: "" },
   { label: "Pendentes", value: "PENDING" },
-  { label: "Ativos",    value: "ACTIVE" },
-  { label: "Suspensos", value: "SUSPENDED" },
+  { label: "Ativos",   value: "ACTIVE" },
+  { label: "Inativos", value: "SUSPENDED" },  // Empresas que já anunciaram mas estão inativas
 ];
 
 interface Listing {
@@ -111,10 +111,10 @@ export default function AdminGuiaPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Total",     value: stats.total,     color: "text-white" },
+          { label: "Total",    value: stats.total,     color: "text-white" },
           { label: "Pendentes", value: stats.pending,   color: "text-[#facc15]" },
-          { label: "Ativos",    value: stats.active,    color: "text-[#22c55e]" },
-          { label: "Suspensos", value: stats.suspended, color: "text-[#526888]" },
+          { label: "Ativos",   value: stats.active,    color: "text-[#22c55e]" },
+          { label: "Inativos", value: stats.suspended, color: "text-[#526888]" },
         ].map(s => (
           <div key={s.label} className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-4">
             <p className={`font-['Barlow_Condensed'] font-bold text-[36px] leading-none ${s.color}`}>{s.value}</p>
