@@ -31,7 +31,11 @@ interface Props {
     isPublished: boolean;
     isOnNewstand: boolean;
     publishedAt: string | null;
+    editorialPageFile?: string | null;
+    indexPageFile?: string | null;
   };
+  editorialPageUrl?: string | null;
+  indexPageUrl?: string | null;
 }
 
 function parseToc(raw: string | null): TocItem[] {
@@ -137,7 +141,7 @@ function HtmlToggle({
   );
 }
 
-export default function EditionEditForm({ edition }: Props) {
+export default function EditionEditForm({ edition, editorialPageUrl, indexPageUrl }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -306,8 +310,69 @@ export default function EditionEditForm({ edition }: Props) {
           {/* Page Flip */}
           <div className="lg:col-span-2">
             <label className={labelCls}>URL do Page Flip (leitor online)</label>
-            <input name="pageFlipUrl" defaultValue={edition.pageFlipUrl ?? ""} placeholder="https://online.fliphtml5.com/..." className={inputCls} />
+            {edition.pageFlipUrl === "native" ? (
+              <div className="flex items-center gap-3 h-[40px] bg-[#0f2a1a] border border-[#22c55e]/30 rounded-[6px] px-3">
+                <span className="text-[#22c55e] text-[13px] font-semibold">✓ Leitor nativo ativo</span>
+                <span className="text-[#526888] text-[12px]">— páginas no Storage (gerenciado na aba Páginas do Leitor)</span>
+                <input type="hidden" name="pageFlipUrl" value="native" />
+              </div>
+            ) : (
+              <input name="pageFlipUrl" defaultValue={edition.pageFlipUrl ?? ""} placeholder="https://online.fliphtml5.com/..." className={inputCls} />
+            )}
           </div>
+
+          {/* Páginas marcadas (Editorial / Índice) */}
+          {(editorialPageUrl || indexPageUrl || edition.editorialPageFile || edition.indexPageFile) && (
+            <div className="lg:col-span-2">
+              <label className={labelCls}>Páginas Marcadas no Leitor</label>
+              <div className="flex gap-4 flex-wrap">
+                {(editorialPageUrl || edition.editorialPageFile) && (
+                  <div className="flex flex-col gap-1.5">
+                    <div className="relative w-[72px] h-[96px] bg-[#0d1422] rounded-[6px] overflow-hidden border border-[#ff1f1f]/30">
+                      {editorialPageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={editorialPageUrl} alt="Página Editorial" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[#2a3a5e] text-[10px]">sem prévia</div>
+                      )}
+                      <div className="absolute top-1 left-1 bg-[#ff1f1f] text-white text-[7px] font-bold px-1 py-[1px] rounded-[2px]">Ed.</div>
+                    </div>
+                    <p className="text-[#7a9ab5] text-[10px] text-center font-mono truncate w-[72px]">
+                      {edition.editorialPageFile
+                        ? edition.editorialPageFile.replace(/page-(\d+)\..+/, "pág. $1")
+                        : "—"}
+                    </p>
+                  </div>
+                )}
+                {(indexPageUrl || edition.indexPageFile) && (
+                  <div className="flex flex-col gap-1.5">
+                    <div className="relative w-[72px] h-[96px] bg-[#0d1422] rounded-[6px] overflow-hidden border border-[#0ea5e9]/30">
+                      {indexPageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={indexPageUrl} alt="Página Índice" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[#2a3a5e] text-[10px]">sem prévia</div>
+                      )}
+                      <div className="absolute top-1 right-1 bg-[#0ea5e9] text-white text-[7px] font-bold px-1 py-[1px] rounded-[2px]">Índ.</div>
+                    </div>
+                    <p className="text-[#7a9ab5] text-[10px] text-center font-mono truncate w-[72px]">
+                      {edition.indexPageFile
+                        ? edition.indexPageFile.replace(/page-(\d+)\..+/, "pág. $1")
+                        : "—"}
+                    </p>
+                  </div>
+                )}
+                <div className="flex items-end pb-6">
+                  <a
+                    href={`/admin/edicoes/${edition.id}/paginas`}
+                    className="text-[#7a9ab5] hover:text-white text-[12px] transition-colors underline underline-offset-2"
+                  >
+                    Gerenciar páginas →
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* PDF */}
           <div className="lg:col-span-2">

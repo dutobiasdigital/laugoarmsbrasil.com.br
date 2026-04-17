@@ -1,15 +1,20 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import Image from "next/image";
 
 interface PageFile {
   name: string;
   size: number;
+  signedUrl: string;
 }
 
 interface Props {
   slug: string;
+  editionId: string;
   initialPages: PageFile[];
+  initialEditorialPage: string | null;
+  initialIndexPage: string | null;
 }
 
 function formatBytes(b: number) {
@@ -19,22 +24,37 @@ function formatBytes(b: number) {
 }
 
 function pageLabel(name: string) {
-  // "page-001.jpg" → "001"
   const m = name.match(/page-(\d+)\./);
   return m ? m[1] : name;
 }
 
-export default function PagesManager({ slug, initialPages }: Props) {
-  const [pages,     setPages]     = useState<PageFile[]>(initialPages);
-  const [uploading, setUploading] = useState(false);
-  const [progress,  setProgress]  = useState<{ done: number; total: number } | null>(null);
-  const [error,     setError]     = useState<string | null>(null);
-  const [success,   setSuccess]   = useState<string | null>(null);
-  const [deleting,  setDeleting]  = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
+export default function PagesManager({
+  slug,
+  initialPages,
+  initialEditorialPage,
+  initialIndexPage,
+}: Props) {
+  const [pages,        setPages]        = useState<PageFile[]>(initialPages);
+  const [editorialPg,  setEditorialPg]  = useState<string | null>(initialEditorialPage);
+  const [indexPg,      setIndexPg]      = useState<string | null>(initialIndexPage);
+  const [modal,        setModal]        = useState<PageFile | null>(null);
+  const [uploading,    setUploading]    = useState(false);
+  const [progress,     setProgress]     = useState<{ done: number; total: number } | null>(null);
+  const [error,        setError]        = useState<string | null>(null);
+  const [success,      setSuccess]      = useState<string | null>(null);
+  const [deleting,     setDeleting]     = useState<string | null>(null);
+  const [savingMarker, setSavingMarker] = useState<"editorial" | "index" | null>(null);
+  const [isDragging,   setIsDragging]   = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Refresh lista do servidor
+  // Fecha modal com Escape
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setModal(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Refresh lista do servidor (inclui novas signed URLs)
   const refreshPages = useCallback(async () => {
     try {
       const r = await fetch(`/api/admin/edition-pages/${slug}`);
@@ -53,13 +73,11 @@ export default function PagesManager({ slug, initialPages }: Props) {
     setSuccess(null);
     setProgress({ done: 0, total: arr.length });
 
-    // Determina o próximo número de página disponível
     const maxExisting = pages.reduce((acc, p) => {
       const m = p.name.match(/page-(\d+)\./);
       return m ? Math.max(acc, parseInt(m[1])) : acc;
     }, 0);
 
-    // Ordena os arquivos selecionados pelo nome original para respeitar sequência
     arr.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
 
     let failed = 0;
@@ -94,7 +112,7 @@ export default function PagesManager({ slug, initialPages }: Props) {
   }, [pages, slug, refreshPages]);
 
   // Drag & Drop
-  const onDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
+  const onDragOver  = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
   const onDragLeave = (e: React.DragEvent) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragging(false);
   };
@@ -104,9 +122,10 @@ export default function PagesManager({ slug, initialPages }: Props) {
     if (e.dataTransfer.files?.length) handleFiles(e.dataTransfer.files);
   };
 
-  // Delete
-  const handleDelete = async (filename: string) => {
-    if (!confirm(`Remover "${filename}"?`)) return;
+  // Delete (chamado pelo modal)
+  const handleDelete = useCallback(async (filename: string) => {
+    setModal(null);
+    if (!confirm(`Remover a página "${filename}"? Esta ação não pode ser desfeita.`)) return;
     setDeleting(filename);
     setError(null);
     try {
@@ -117,6 +136,8 @@ export default function PagesManager({ slug, initialPages }: Props) {
       });
       if (res.ok) {
         setPages((prev) => prev.filter((p) => p.name !== filename));
+        if (editorialPg === filename) setEditorialPg(null);
+        if (indexPg === filename)     setIndexPg(null);
         setSuccess(`"${filename}" removida.`);
       } else {
         const d = await res.json();
@@ -126,7 +147,31 @@ export default function PagesManager({ slug, initialPages }: Props) {
       setError("Erro ao remover.");
     }
     setDeleting(null);
-  };
+  }, [slug, editorialPg, indexPg]);
+
+  // Marcar como Editorial ou Índice (toggle)
+  const handleMark = useCallback(async (type: "editorial" | "index", filename: string) => {
+    const current = type === "editorial" ? editorialPg : indexPg;
+    const newValue = current === filename ? null : filename;
+    setSavingMarker(type);
+    try {
+      const res = await fetch(`/api/admin/edition-pages/${slug}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, filename: newValue }),
+      });
+      if (res.ok) {
+        if (type === "editorial") setEditorialPg(newValue);
+        else                      setIndexPg(newValue);
+      } else {
+        const d = await res.json();
+        setError(d.error ?? "Erro ao salvar marcação.");
+      }
+    } catch {
+      setError("Erro ao salvar marcação.");
+    }
+    setSavingMarker(null);
+  }, [slug, editorialPg, indexPg]);
 
   // Limpa mensagens após 4s
   useEffect(() => {
@@ -138,7 +183,7 @@ export default function PagesManager({ slug, initialPages }: Props) {
   return (
     <div className="flex flex-col gap-6">
 
-      {/* ── Área de upload ────────────────────────────────────────────── */}
+      {/* ── Área de upload ─────────────────────────────────────────── */}
       <div
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
@@ -184,7 +229,6 @@ export default function PagesManager({ slug, initialPages }: Props) {
           </p>
         </div>
 
-        {/* Barra de progresso */}
         {uploading && progress && (
           <div className="w-full max-w-xs">
             <div className="h-1.5 bg-[#1c2a3e] rounded-full overflow-hidden">
@@ -200,7 +244,7 @@ export default function PagesManager({ slug, initialPages }: Props) {
         )}
       </div>
 
-      {/* ── Mensagens ─────────────────────────────────────────────────── */}
+      {/* ── Mensagens ──────────────────────────────────────────────── */}
       {success && (
         <div className="rounded-lg bg-[#0f381f] border border-[#22c55e]/30 px-4 py-3 text-[#22c55e] text-[13px]">
           ✓ {success}
@@ -212,62 +256,106 @@ export default function PagesManager({ slug, initialPages }: Props) {
         </div>
       )}
 
-      {/* ── Cabeçalho da lista ────────────────────────────────────────── */}
+      {/* ── Cabeçalho da lista ──────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-white text-[15px] font-semibold">
-            Páginas carregadas
-          </h2>
+          <h2 className="text-white text-[15px] font-semibold">Páginas carregadas</h2>
           <p className="text-[#526888] text-[12px] mt-0.5">
             {pages.length > 0
               ? `${pages.length} página${pages.length > 1 ? "s" : ""} no leitor`
               : "Nenhuma página cadastrada ainda"}
           </p>
         </div>
-        {pages.length > 0 && (
-          <span className="bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] text-[11px] font-bold px-2.5 py-1 rounded-full">
-            {pages.length}
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {/* Legenda das marcações */}
+          {(editorialPg || indexPg) && (
+            <div className="flex items-center gap-2 text-[11px]">
+              {editorialPg && (
+                <span className="flex items-center gap-1 bg-[#ff1f1f]/10 border border-[#ff1f1f]/30 text-[#ff6b6b] px-2 py-0.5 rounded-[4px]">
+                  📝 {pageLabel(editorialPg)}
+                </span>
+              )}
+              {indexPg && (
+                <span className="flex items-center gap-1 bg-[#0ea5e9]/10 border border-[#0ea5e9]/30 text-[#38bdf8] px-2 py-0.5 rounded-[4px]">
+                  📋 {pageLabel(indexPg)}
+                </span>
+              )}
+            </div>
+          )}
+          {pages.length > 0 && (
+            <span className="bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] text-[11px] font-bold px-2.5 py-1 rounded-full">
+              {pages.length}
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* ── Grid de páginas ───────────────────────────────────────────── */}
+      {/* ── Grid de páginas ────────────────────────────────────────── */}
       {pages.length > 0 && (
         <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2">
-          {pages.map((page) => (
-            <div
-              key={page.name}
-              className="group relative bg-[#0d1422] rounded-lg overflow-hidden border border-[#1c2a3e] hover:border-[#2a3a5e] transition-colors"
-              style={{ aspectRatio: "3/4" }}
-            >
-              {/* Número */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="font-['Barlow_Condensed'] font-bold text-[#2a3a5e] text-[20px] leading-none">
-                  {pageLabel(page.name)}
-                </span>
-                <span className="text-[#1c2a3e] text-[9px] mt-1">{formatBytes(page.size)}</span>
-              </div>
+          {pages.map((page) => {
+            const isEditorial = editorialPg === page.name;
+            const isIndex     = indexPg === page.name;
+            const isDeleting  = deleting === page.name;
 
-              {/* Overlay com botão delete no hover */}
-              <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button
-                  onClick={() => handleDelete(page.name)}
-                  disabled={deleting === page.name}
-                  className="w-8 h-8 rounded-full bg-[#ff1f1f] hover:bg-[#cc0000] flex items-center justify-center text-white text-[14px] transition-colors disabled:opacity-50"
-                  title={`Remover página ${pageLabel(page.name)}`}
-                >
-                  {deleting === page.name ? (
-                    <span className="w-3 h-3 border border-white/50 border-t-white rounded-full animate-spin block" />
-                  ) : "✕"}
-                </button>
-              </div>
+            return (
+              <button
+                key={page.name}
+                onClick={() => setModal(page)}
+                disabled={isDeleting}
+                title={`${page.name}${isEditorial ? " · Página Editorial" : ""}${isIndex ? " · Página Índice" : ""}`}
+                className="group relative bg-[#0d1422] rounded-lg overflow-hidden border border-[#1c2a3e] hover:border-[#ff1f1f]/50 transition-colors cursor-pointer disabled:opacity-40"
+                style={{ aspectRatio: "3/4" }}
+              >
+                {/* Imagem da página */}
+                {page.signedUrl ? (
+                  <Image
+                    src={page.signedUrl}
+                    alt={page.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width:640px) 25vw, (max-width:1024px) 17vw, 10vw"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="font-['Barlow_Condensed'] font-bold text-[#2a3a5e] text-[18px]">
+                      {pageLabel(page.name)}
+                    </span>
+                  </div>
+                )}
 
-              {/* Nome do arquivo (tooltip bottom) */}
-              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity py-1 px-1">
-                <p className="text-white/60 text-[8px] text-center truncate">{page.name}</p>
-              </div>
-            </div>
-          ))}
+                {/* Overlay escuro no hover */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors" />
+
+                {/* Badge editorial */}
+                {isEditorial && (
+                  <div className="absolute top-1 left-1 bg-[#ff1f1f] text-white text-[7px] font-bold px-1 py-[1px] rounded-[2px] leading-tight z-10">
+                    Ed.
+                  </div>
+                )}
+
+                {/* Badge índice */}
+                {isIndex && (
+                  <div className="absolute top-1 right-1 bg-[#0ea5e9] text-white text-[7px] font-bold px-1 py-[1px] rounded-[2px] leading-tight z-10">
+                    Índ.
+                  </div>
+                )}
+
+                {/* Número da página (bottom, aparece no hover) */}
+                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent py-1.5 px-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <p className="text-white text-[9px] font-bold text-center">{pageLabel(page.name)}</p>
+                </div>
+
+                {/* Spinner de delete */}
+                {isDeleting && (
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-20">
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -278,6 +366,107 @@ export default function PagesManager({ slug, initialPages }: Props) {
           <p className="text-[#526888] text-[13px]">
             Faça upload das páginas da edição acima para ativar o leitor
           </p>
+        </div>
+      )}
+
+      {/* ── Modal de página ────────────────────────────────────────── */}
+      {modal && (
+        <div
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setModal(null)}
+        >
+          <div
+            className="relative bg-[#0e1520] border border-[#1c2a3e] rounded-[14px] overflow-hidden flex flex-col max-w-[520px] w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Cabeçalho do modal */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#141d2c]">
+              <div>
+                <p className="text-white text-[14px] font-semibold">
+                  Página {pageLabel(modal.name)}
+                </p>
+                <p className="text-[#526888] text-[11px] font-mono">{modal.name} · {formatBytes(modal.size)}</p>
+              </div>
+              <button
+                onClick={() => setModal(null)}
+                className="w-[28px] h-[28px] flex items-center justify-center rounded-full bg-[#141d2c] border border-[#1c2a3e] hover:border-[#2a3a5e] text-[#7a9ab5] hover:text-white text-[14px] transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Imagem grande */}
+            <div className="relative bg-[#070a12] flex items-center justify-center" style={{ minHeight: 320 }}>
+              {modal.signedUrl ? (
+                <img
+                  src={modal.signedUrl}
+                  alt={modal.name}
+                  className="max-h-[60vh] max-w-full object-contain"
+                  style={{ display: "block" }}
+                />
+              ) : (
+                <div className="py-12 text-[#2a3a5e] text-[13px]">Sem prévia disponível</div>
+              )}
+
+              {/* Badges sobrepostos na imagem */}
+              {editorialPg === modal.name && (
+                <div className="absolute top-2 left-2 bg-[#ff1f1f] text-white text-[10px] font-bold px-2 py-0.5 rounded-[4px]">
+                  📝 Página Editorial
+                </div>
+              )}
+              {indexPg === modal.name && (
+                <div className="absolute top-2 right-2 bg-[#0ea5e9] text-white text-[10px] font-bold px-2 py-0.5 rounded-[4px]">
+                  📋 Página Índice
+                </div>
+              )}
+            </div>
+
+            {/* Ações */}
+            <div className="p-4 flex flex-col gap-2">
+              {/* Marcações */}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => handleMark("editorial", modal.name)}
+                  disabled={savingMarker !== null}
+                  className={`h-[40px] text-[12px] font-semibold rounded-[8px] border transition-colors disabled:opacity-50 ${
+                    editorialPg === modal.name
+                      ? "bg-[#ff1f1f]/15 border-[#ff1f1f]/50 text-[#ff6b6b]"
+                      : "bg-[#141d2c] border-[#1c2a3e] hover:border-[#ff1f1f]/40 text-[#7a9ab5] hover:text-white"
+                  }`}
+                >
+                  {savingMarker === "editorial"
+                    ? "Salvando…"
+                    : editorialPg === modal.name
+                      ? "✓ Página Editorial"
+                      : "📝 Marcar como Editorial"}
+                </button>
+                <button
+                  onClick={() => handleMark("index", modal.name)}
+                  disabled={savingMarker !== null}
+                  className={`h-[40px] text-[12px] font-semibold rounded-[8px] border transition-colors disabled:opacity-50 ${
+                    indexPg === modal.name
+                      ? "bg-[#0ea5e9]/15 border-[#0ea5e9]/50 text-[#38bdf8]"
+                      : "bg-[#141d2c] border-[#1c2a3e] hover:border-[#0ea5e9]/40 text-[#7a9ab5] hover:text-white"
+                  }`}
+                >
+                  {savingMarker === "index"
+                    ? "Salvando…"
+                    : indexPg === modal.name
+                      ? "✓ Página Índice"
+                      : "📋 Marcar como Índice"}
+                </button>
+              </div>
+
+              {/* Excluir */}
+              <button
+                onClick={() => handleDelete(modal.name)}
+                disabled={deleting !== null || savingMarker !== null}
+                className="h-[40px] text-[12px] font-semibold rounded-[8px] border border-[#3a1010] hover:border-[#ff1f1f]/50 text-[#526888] hover:text-[#ff6b6b] bg-transparent transition-colors disabled:opacity-50"
+              >
+                🗑 Excluir esta página
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

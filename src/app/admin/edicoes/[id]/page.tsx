@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import EditionEditForm from "./_EditionEditForm";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -31,11 +32,13 @@ export default async function EditarEdicaoPage({
     isPublished: boolean;
     isOnNewstand: boolean;
     publishedAt: string | null;
+    editorialPageFile: string | null;
+    indexPageFile: string | null;
   } | null = null;
 
   try {
     const res = await fetch(
-      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,editorial,tableOfContents,pageCount,coverImageUrl,pdfStoragePath,pageFlipUrl,isPublished,isOnNewstand,publishedAt&limit=1`,
+      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,editorial,tableOfContents,pageCount,coverImageUrl,pdfStoragePath,pageFlipUrl,isPublished,isOnNewstand,publishedAt,editorialPageFile,indexPageFile&limit=1`,
       { headers: HEADERS, cache: "no-store" }
     );
     const data = await res.json();
@@ -46,6 +49,32 @@ export default async function EditarEdicaoPage({
 
   if (!edition) notFound();
   const ed = edition!;
+
+  // Gera signed URLs para as páginas marcadas (Editorial e Índice)
+  let editorialPageUrl: string | null = null;
+  let indexPageUrl: string | null = null;
+
+  if (ed.editorialPageFile || ed.indexPageFile) {
+    try {
+      const admin = createAdminClient();
+      const paths: string[] = [];
+      if (ed.editorialPageFile) paths.push(`${ed.slug}/${ed.editorialPageFile}`);
+      if (ed.indexPageFile)     paths.push(`${ed.slug}/${ed.indexPageFile}`);
+
+      const { data: signed } = await admin.storage
+        .from("edition-pages")
+        .createSignedUrls(paths, 3600);
+
+      (signed ?? []).forEach((s) => {
+        if (!s.signedUrl) return;
+        const filename = s.path.split("/").pop() ?? "";
+        if (filename === ed.editorialPageFile) editorialPageUrl = s.signedUrl;
+        if (filename === ed.indexPageFile)     indexPageUrl     = s.signedUrl;
+      });
+    } catch {
+      // Storage indisponível — thumbnails serão omitidos
+    }
+  }
 
   const serialized = {
     ...ed,
@@ -71,7 +100,6 @@ export default async function EditarEdicaoPage({
             {ed.number ? `Edição Nº ${ed.number}` : ed.title}
           </p>
         </div>
-        {/* Acesso rápido às páginas do leitor */}
         <Link
           href={`/admin/edicoes/${id}/paginas`}
           className="flex items-center gap-2 bg-[#141d2c] border border-[#1c2a3e] hover:border-[#2a3a5e] text-[#7a9ab5] hover:text-white text-[13px] h-[38px] px-4 rounded-[6px] transition-colors whitespace-nowrap"
@@ -81,7 +109,11 @@ export default async function EditarEdicaoPage({
       </div>
       <div className="bg-[#141d2c] h-px mb-6" />
 
-      <EditionEditForm edition={serialized} />
+      <EditionEditForm
+        edition={serialized}
+        editorialPageUrl={editorialPageUrl}
+        indexPageUrl={indexPageUrl}
+      />
     </>
   );
 }

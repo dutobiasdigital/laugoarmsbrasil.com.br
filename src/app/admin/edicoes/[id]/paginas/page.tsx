@@ -17,11 +17,20 @@ export default async function PaginasEdicaoPage({
 }) {
   const { id } = await params;
 
-  // Busca dados básicos da edição
-  let edition: { id: string; title: string; slug: string; number: number | null; type: string } | null = null;
+  // Busca dados da edição incluindo marcadores de página
+  let edition: {
+    id: string;
+    title: string;
+    slug: string;
+    number: number | null;
+    type: string;
+    editorialPageFile: string | null;
+    indexPageFile: string | null;
+  } | null = null;
+
   try {
     const res = await fetch(
-      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type&limit=1`,
+      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,editorialPageFile,indexPageFile&limit=1`,
       { headers: HEADERS, cache: "no-store" }
     );
     const data = await res.json();
@@ -32,17 +41,34 @@ export default async function PaginasEdicaoPage({
 
   if (!edition) notFound();
 
-  // Busca páginas existentes no Storage
-  let initialPages: { name: string; size: number }[] = [];
+  // Busca páginas existentes no Storage e gera signed URLs
+  let initialPages: { name: string; size: number; signedUrl: string }[] = [];
   try {
     const admin = createAdminClient();
     const { data: files } = await admin.storage
       .from("edition-pages")
       .list(edition.slug, { limit: 500, sortBy: { column: "name", order: "asc" } });
 
-    initialPages = (files ?? [])
-      .filter((f) => f.name && f.id)
-      .map((f) => ({ name: f.name, size: f.metadata?.size ?? 0 }));
+    const rawPages = (files ?? []).filter((f) => f.name && f.id);
+
+    if (rawPages.length > 0) {
+      const paths = rawPages.map((f) => `${edition!.slug}/${f.name}`);
+      const { data: signed } = await admin.storage
+        .from("edition-pages")
+        .createSignedUrls(paths, 3600);
+
+      const signedMap: Record<string, string> = {};
+      (signed ?? []).forEach((s) => {
+        const filename = s.path.split("/").pop() ?? "";
+        if (s.signedUrl) signedMap[filename] = s.signedUrl;
+      });
+
+      initialPages = rawPages.map((f) => ({
+        name: f.name,
+        size: f.metadata?.size ?? 0,
+        signedUrl: signedMap[f.name] ?? "",
+      }));
+    }
   } catch {
     // bucket pode não existir ainda
   }
@@ -80,7 +106,6 @@ export default async function PaginasEdicaoPage({
           </p>
         </div>
 
-        {/* Link para o leitor */}
         {initialPages.length > 0 && (
           <a
             href={`/ler/${edition.slug}`}
@@ -98,14 +123,21 @@ export default async function PaginasEdicaoPage({
         <span className="text-xl shrink-0 mt-0.5">ℹ️</span>
         <div className="text-[#7a9ab5] text-[13px] leading-[22px]">
           <strong className="text-white">Como funciona:</strong> Faça upload das páginas em
-          ordem (page-001.jpg, page-002.jpg…). As imagens são armazenadas de forma privada no
-          Supabase Storage — o acesso é controlado por assinatura, e as URLs expiram em 1 hora.
-          O leitor usa animação de viragem de página com efeito 3D.
+          ordem (page-001.jpg, page-002.jpg…). Clique em qualquer página para ampliar,
+          excluir ou marcá-la como <strong className="text-[#ff6b6b]">Página Editorial</strong> ou{" "}
+          <strong className="text-[#38bdf8]">Página Índice</strong> — esses marcadores ficam
+          salvos no cadastro da edição.
         </div>
       </div>
 
       {/* Gerenciador */}
-      <PagesManager slug={edition.slug} initialPages={initialPages} />
+      <PagesManager
+        slug={edition.slug}
+        editionId={edition.id}
+        initialPages={initialPages}
+        initialEditorialPage={edition.editorialPageFile}
+        initialIndexPage={edition.indexPageFile}
+      />
     </>
   );
 }
