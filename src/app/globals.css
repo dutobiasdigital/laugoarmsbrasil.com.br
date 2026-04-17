@@ -37,6 +37,15 @@ body {
   animation: slideInRight 0.22s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
+/* Slide content fade-in suave (sem piscar o fundo) */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-slide-in {
+  animation: fadeSlideIn 0.40s ease-out both;
+}
+
 @keyframes metalShimmer {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
@@ -230,3 +239,14 @@ html.light [class*="bg-[#1f0a0a]"] [class*="text-[#7a9ab5]"] { color: #94a3b8 !i
 .logo-for-light { display: none; }
 html.light .logo-for-dark  { display: none; }
 html.light .logo-for-light { display: block; }
+
+/* WelcomeBanner — setinhas de navegação no tema claro */
+html.light .slider-nav-btn {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border-color: rgba(100, 116, 139, 0.5) !important;
+  color: #1e293b !important;
+}
+html.light .slider-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #0f172a !important;
+}

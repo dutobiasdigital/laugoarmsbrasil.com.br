@@ -37,15 +37,10 @@ const STATS = [
 ];
 
 export default function WelcomeBanner() {
-  const [current, setCurrent]   = useState(0);
-  const [visible, setVisible]   = useState(true); // controla fade
+  const [current, setCurrent] = useState(0);
 
   const goTo = useCallback((idx: number) => {
-    setVisible(false);
-    setTimeout(() => {
-      setCurrent(idx);
-      setVisible(true);
-    }, 280);
+    setCurrent(idx);
   }, []);
 
   const prev = useCallback(() => goTo((current - 1 + SLIDES.length) % SLIDES.length), [current, goTo]);
@@ -62,7 +57,7 @@ export default function WelcomeBanner() {
   const slide = SLIDES[current];
 
   return (
-    <section className="hero-metal relative overflow-hidden min-h-[580px] lg:min-h-[660px] flex items-center">
+    <section className="hero-metal relative overflow-hidden min-h-[520px] lg:min-h-[580px] flex items-center">
 
       {/* ── Grade decorativa ──────────────────────────────────── */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
@@ -81,15 +76,15 @@ export default function WelcomeBanner() {
         style={{ background: "linear-gradient(180deg, transparent, rgba(255,31,31,0.5) 20%, rgba(255,31,31,0.5) 80%, transparent)" }} />
 
       {/* ── Layout principal ──────────────────────────────────── */}
-      <div className="relative z-10 w-full px-5 lg:px-20 py-14 lg:py-20 flex items-center gap-12">
+      <div className="relative z-10 w-full px-5 lg:px-20 py-8 lg:py-10 flex items-center gap-12">
 
-        {/* ── Conteúdo — com fade ───────────────────────────────── */}
+        {/* ── Conteúdo — fade-in por key (sem piscar o fundo) ────── */}
         <div
-          className="flex-1 max-w-[640px] transition-opacity duration-300"
-          style={{ opacity: visible ? 1 : 0 }}
+          key={current}
+          className="animate-fade-slide-in flex-1 max-w-[640px]"
         >
           {/* Label */}
-          <div className="flex items-center gap-2.5 mb-6">
+          <div className="flex items-center gap-2.5 mb-4">
             <div className="w-[6px] h-[6px] bg-[#ff1f1f] rounded-full" />
             <span className="text-[#ff1f1f] text-[11px] font-bold tracking-[2.5px] uppercase">
               {slide.label}
@@ -97,22 +92,22 @@ export default function WelcomeBanner() {
           </div>
 
           {/* Headline */}
-          <h1 className="font-['Barlow_Condensed'] font-extrabold leading-[0.90] mb-6 select-none">
+          <h1 className="font-['Barlow_Condensed'] font-extrabold leading-[0.90] mb-4 select-none">
             {slide.lines.map((line, i) => (
               <span key={i} className={`block ${slide.lineColors[i]}`}
-                style={{ fontSize: "clamp(58px, 8vw, 106px)" }}>
+                style={{ fontSize: "clamp(48px, 6.5vw, 88px)" }}>
                 {line}
               </span>
             ))}
           </h1>
 
           {/* Subheadline */}
-          <p className="text-[#7a9ab5] text-[16px] leading-relaxed max-w-[480px] mb-8 whitespace-pre-line">
+          <p className="text-[#7a9ab5] text-[15px] leading-relaxed max-w-[480px] mb-5 whitespace-pre-line">
             {slide.sub}
           </p>
 
           {/* CTAs */}
-          <div className="flex items-center gap-3 flex-wrap mb-9">
+          <div className="flex items-center gap-3 flex-wrap mb-6">
             <Link
               href={slide.cta.href}
               className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-bold px-7 py-3.5 rounded transition-colors"
@@ -183,7 +178,7 @@ export default function WelcomeBanner() {
         {/* Setinha esquerda */}
         <button
           onClick={prev}
-          className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+          className="slider-nav-btn w-8 h-8 rounded-full flex items-center justify-center transition-all"
           style={{ border: "1px solid rgba(28,42,62,0.9)", background: "rgba(7,10,18,0.6)", color: "#526888" }}
           onMouseEnter={e => (e.currentTarget.style.color = "#ffffff")}
           onMouseLeave={e => (e.currentTarget.style.color = "#526888")}
@@ -214,7 +209,7 @@ export default function WelcomeBanner() {
         {/* Setinha direita */}
         <button
           onClick={next}
-          className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+          className="slider-nav-btn w-8 h-8 rounded-full flex items-center justify-center transition-all"
           style={{ border: "1px solid rgba(28,42,62,0.9)", background: "rgba(7,10,18,0.6)", color: "#526888" }}
           onMouseEnter={e => (e.currentTarget.style.color = "#ffffff")}
           onMouseLeave={e => (e.currentTarget.style.color = "#526888")}
