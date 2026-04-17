@@ -1,0 +1,112 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import Reader from "./Reader";
+
+export const dynamic = "force-dynamic";
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
+const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
+
+interface Edition {
+  id: string;
+  title: string;
+  number: number | null;
+  pageCount: number | null;
+  type: string;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  return {
+    title: `Lendo edição — Revista Magnum`,
+    robots: "noindex, nofollow",
+    other: { slug },
+  };
+}
+
+export default async function LerEdicaoPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+
+  // 1. Auth
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(`/auth/login?redirect=/ler/${slug}`);
+  }
+
+  // 2. Busca edição + acesso em paralelo
+  let edition: Edition | null = null;
+  let canRead = false;
+
+  try {
+    const [editionRes, userRes] = await Promise.all([
+      fetch(
+        `${BASE}/editions?slug=eq.${slug}&isPublished=eq.true&select=id,title,number,pageCount,type&limit=1`,
+        { headers: HEADERS, cache: "no-store" }
+      ),
+      fetch(
+        `${BASE}/users?authId=eq.${user.id}&select=role,subscriptions(status)&limit=1`,
+        { headers: HEADERS, cache: "no-store" }
+      ),
+    ]);
+
+    const edData = await editionRes.json();
+    edition = Array.isArray(edData) && edData.length > 0 ? edData[0] : null;
+
+    const users  = await userRes.json();
+    const dbUser = Array.isArray(users) ? users[0] : null;
+
+    const isAdmin  = dbUser?.role === "ADMIN";
+    const activeSub =
+      Array.isArray(dbUser?.subscriptions) &&
+      dbUser.subscriptions.some((s: { status: string }) => s.status === "ACTIVE");
+
+    canRead = isAdmin || activeSub;
+
+    // Compra avulsa
+    if (!canRead && edition && user.email) {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 86_400_000).toISOString();
+      const purchasedRes  = await fetch(
+        `${BASE}/payment_intents?payer_email=eq.${encodeURIComponent(user.email)}&product_type=eq.edition_purchase&status=eq.APPROVED&createdAt=gte.${thirtyDaysAgo}&select=metadata`,
+        { headers: HEADERS, cache: "no-store" }
+      );
+      const purchased = await purchasedRes.json();
+      canRead =
+        Array.isArray(purchased) &&
+        purchased.some(
+          (p: { metadata?: { edition_slug?: string } }) =>
+            p.metadata?.edition_slug === slug
+        );
+    }
+  } catch {
+    // DB indisponível
+  }
+
+  if (!edition) redirect("/edicoes");
+  if (!canRead) redirect(`/edicoes/${slug}`);
+
+  const title = edition.number
+    ? `Edição ${edition.type === "SPECIAL" ? "Especial" : `Nº ${edition.number}`}`
+    : edition.title;
+
+  return (
+    <Reader
+      slug={slug}
+      editionTitle={title}
+      backUrl={`/edicoes/${slug}`}
+    />
+  );
+}

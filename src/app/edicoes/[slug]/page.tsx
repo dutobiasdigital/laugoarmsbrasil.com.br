@@ -179,20 +179,36 @@ export default async function EdicaoDetalhePage({
             {/* CTAs */}
             <div className="flex flex-wrap items-center gap-3 mt-2">
               {canRead ? (
-                edition.pageFlipUrl ? (
-                  <a
-                    href={edition.pageFlipUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[48px] px-8 flex items-center justify-center rounded-[4px] transition-colors gap-2"
-                  >
-                    <span>📖</span> Ler Edição
-                  </a>
-                ) : (
-                  <span className="bg-[#141d2c] text-white text-[14px] h-[48px] px-8 flex items-center justify-center rounded-[4px] cursor-default">
-                    Leitura em breve
-                  </span>
-                )
+                (() => {
+                  // Leitor nativo: /ler/{slug} (novo sistema)
+                  // URL externa (legado): pageFlipUrl que começa com http
+                  const isExternalUrl =
+                    edition.pageFlipUrl?.startsWith("http://") ||
+                    edition.pageFlipUrl?.startsWith("https://");
+
+                  if (isExternalUrl) {
+                    // Edição com viewer legado externo — mantém comportamento original
+                    return (
+                      <a
+                        href={edition.pageFlipUrl!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[48px] px-8 flex items-center justify-center rounded-[4px] transition-colors gap-2"
+                      >
+                        <span>📖</span> Ler Edição
+                      </a>
+                    );
+                  }
+                  // Leitor nativo integrado (rota /ler/[slug])
+                  return (
+                    <Link
+                      href={`/ler/${slug}`}
+                      className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[48px] px-8 flex items-center justify-center rounded-[4px] transition-colors gap-2"
+                    >
+                      <span>📖</span> Ler Edição
+                    </Link>
+                  );
+                })()
               ) : (
                 <>
                   <Link
