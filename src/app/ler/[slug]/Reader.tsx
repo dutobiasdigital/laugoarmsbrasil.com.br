@@ -92,26 +92,22 @@ const Page = React.forwardRef<
 ));
 Page.displayName = "Page";
 
-// ── Calcula dimensões do livro para o viewport ────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function calcBookSize(vw: number, vh: number, isMobile: boolean) {
   const TOP_BAR    = 48;
   const BOTTOM_BAR = 56;
   const H_PAD      = isMobile ? 8 : 40;
-  const PAGE_RATIO = 1211 / 1624; // largura / altura original
+  const PAGE_RATIO = 1211 / 1624;
 
   const availH = vh - TOP_BAR - BOTTOM_BAR;
   const availW = vw - H_PAD;
 
-  let pageH: number;
-  let pageW: number;
-
+  let pageH: number, pageW: number;
   if (isMobile) {
-    // portrait: uma página por vez
     pageH = Math.min(availH, availW / PAGE_RATIO);
     pageW = pageH * PAGE_RATIO;
   } else {
-    // landscape: duas páginas lado a lado
     pageH = Math.min(availH, (availW / 2) / PAGE_RATIO);
     pageW = pageH * PAGE_RATIO;
   }
@@ -122,20 +118,31 @@ function calcBookSize(vw: number, vh: number, isMobile: boolean) {
   };
 }
 
+const ZOOM_MIN  = 1;
+const ZOOM_MAX  = 4;
+const ZOOM_STEP = 0.25;
+
+function clampZoom(z: number) {
+  return Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z));
+}
+
 // ── Props ──────────────────────────────────────────────────────────────────────
 
 interface ReaderProps {
   slug: string;
   editionTitle: string;
   backUrl: string;
+  initialPage?: number; // página inicial (vinda do índice, 1-based)
 }
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-export default function Reader({ slug, editionTitle, backUrl }: ReaderProps) {
+export default function Reader({ slug, editionTitle, backUrl, initialPage }: ReaderProps) {
   const router = useRouter();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const bookRef = useRef<any>(null);
+  const bookRef    = useRef<any>(null);
+  const areaRef    = useRef<HTMLDivElement>(null);   // container do livro
+  const wrapperRef = useRef<HTMLDivElement>(null);   // wrapper com transform
 
   const [pages,        setPages]        = useState<string[]>([]);
   const [loading,      setLoading]      = useState(true);
@@ -146,16 +153,140 @@ export default function Reader({ slug, editionTitle, backUrl }: ReaderProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [ready,        setReady]        = useState(false);
 
-  // Busca as signed URLs das páginas
+  // ── Zoom / Pan ──────────────────────────────────────────────────────────────
+  const [zoom,      setZoom]      = useState(1);
+  const [pan,       setPan]       = useState({ x: 0, y: 0 });
+  const isPanning   = useRef(false);
+  const panStart    = useRef({ mx: 0, my: 0, ox: 0, oy: 0 });
+  const pinchDist   = useRef(0);
+
+  // Reseta pan quando zoom volta a 1
+  const resetZoom = useCallback(() => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, []);
+
+  const zoomIn  = useCallback(() => setZoom((z) => clampZoom(z + ZOOM_STEP)), []);
+  const zoomOut = useCallback(() => {
+    setZoom((z) => {
+      const next = clampZoom(z - ZOOM_STEP);
+      if (next <= 1) setPan({ x: 0, y: 0 });
+      return next;
+    });
+  }, []);
+
+  // ── Ir para página ───────────────────────────────────────────────────────
+  const [gotoValue, setGotoValue] = useState("");
+
+  const handleGotoSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      const n = parseInt(gotoValue, 10);
+      if (!isNaN(n) && n >= 1 && n <= pages.length) {
+        bookRef.current?.pageFlip().turnToPage(n - 1);
+        resetZoom();
+      }
+      setGotoValue("");
+    },
+    [gotoValue, pages.length, resetZoom]
+  );
+
+  // Limita o pan para não ultrapassar o conteúdo ampliado
+  const clampPan = useCallback(
+    (x: number, y: number, currentZoom: number) => {
+      if (!areaRef.current) return { x, y };
+      const area = areaRef.current.getBoundingClientRect();
+      const contentW = bookSize.width  * (isMobile ? 1 : 2) * currentZoom;
+      const contentH = bookSize.height * currentZoom;
+      const maxX = Math.max(0, (contentW - area.width)  / 2);
+      const maxY = Math.max(0, (contentH - area.height) / 2);
+      return {
+        x: Math.max(-maxX, Math.min(maxX, x)),
+        y: Math.max(-maxY, Math.min(maxY, y)),
+      };
+    },
+    [bookSize, isMobile]
+  );
+
+  // ── Scroll do mouse para zoom ─────────────────────────────────────────────
+  useEffect(() => {
+    const area = areaRef.current;
+    if (!area) return;
+
+    function onWheel(e: WheelEvent) {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      setZoom((z) => {
+        const next = clampZoom(z + delta);
+        if (next <= 1) setPan({ x: 0, y: 0 });
+        return next;
+      });
+    }
+
+    area.addEventListener("wheel", onWheel, { passive: false });
+    return () => area.removeEventListener("wheel", onWheel);
+  }, []);
+
+  // ── Arrasto para pan (mouse) ──────────────────────────────────────────────
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    if (zoom <= 1) return;
+    isPanning.current = true;
+    panStart.current = { mx: e.clientX, my: e.clientY, ox: pan.x, oy: pan.y };
+  }, [zoom, pan]);
+
+  const onMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isPanning.current) return;
+    const raw = {
+      x: panStart.current.ox + e.clientX - panStart.current.mx,
+      y: panStart.current.oy + e.clientY - panStart.current.my,
+    };
+    setPan(clampPan(raw.x, raw.y, zoom));
+  }, [zoom, clampPan]);
+
+  const stopPan = useCallback(() => { isPanning.current = false; }, []);
+
+  // ── Pinch-to-zoom (touch) ─────────────────────────────────────────────────
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchDist.current = Math.sqrt(dx * dx + dy * dy);
+    }
+  }, []);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length !== 2) return;
+    e.preventDefault?.();
+    const dx   = e.touches[0].clientX - e.touches[1].clientX;
+    const dy   = e.touches[0].clientY - e.touches[1].clientY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const ratio = dist / (pinchDist.current || dist);
+    pinchDist.current = dist;
+    setZoom((z) => {
+      const next = clampZoom(z * ratio);
+      if (next <= 1) setPan({ x: 0, y: 0 });
+      return next;
+    });
+  }, []);
+
+  // ── Pula para página inicial quando vindo de link do índice ──────────────
+  useEffect(() => {
+    if (!ready || !initialPage || initialPage <= 1) return;
+    const idx = Math.min(initialPage - 1, pages.length - 1);
+    bookRef.current?.pageFlip().turnToPage(idx);
+    setCurrentPage(idx);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready]); // intencionalmente só dispara quando o livro fica pronto
+
+  // ── Busca páginas + registra visualização ────────────────────────────────
   useEffect(() => {
     fetch(`/api/editions/${slug}/pages`)
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data.urls) && data.urls.length > 0) {
-          setPages(data.urls);
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then((d) => {
+        if (Array.isArray(d.urls) && d.urls.length > 0) {
+          setPages(d.urls);
+          // Registra a leitura (fire & forget — não bloqueia o leitor)
+          fetch(`/api/editions/${slug}/view`, { method: "POST" }).catch(() => {});
         } else {
           setError("Nenhuma página encontrada para esta edição.");
         }
@@ -164,7 +295,7 @@ export default function Reader({ slug, editionTitle, backUrl }: ReaderProps) {
       .finally(() => setLoading(false));
   }, [slug]);
 
-  // Calcula tamanho do livro conforme viewport
+  // ── Tamanho do livro ──────────────────────────────────────────────────────
   useEffect(() => {
     function update() {
       const mobile = window.innerWidth < 768;
@@ -176,39 +307,51 @@ export default function Reader({ slug, editionTitle, backUrl }: ReaderProps) {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // Controles de navegação
+  // ── Navegação de páginas ──────────────────────────────────────────────────
   const flipNext = useCallback(() => bookRef.current?.pageFlip().flipNext("bottom"), []);
   const flipPrev = useCallback(() => bookRef.current?.pageFlip().flipPrev("bottom"), []);
 
-  // Atalhos de teclado
+  // Reseta zoom ao virar página
+  const handleFlip = useCallback((e: { data: number }) => {
+    setCurrentPage(e.data);
+    resetZoom();
+  }, [resetZoom]);
+
+  // ── Teclado ───────────────────────────────────────────────────────────────
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      // Zoom: Ctrl + / Ctrl −  ou  + / −  quando sem foco em input
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === "=" || e.key === "+") { e.preventDefault(); zoomIn(); return; }
+        if (e.key === "-")                  { e.preventDefault(); zoomOut(); return; }
+        if (e.key === "0")                  { e.preventDefault(); resetZoom(); return; }
+      }
+      // Navegação (só quando zoom = 1)
+      if (zoom > 1) return;
       if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === "PageDown") flipNext();
       if (e.key === "ArrowLeft"  || e.key === "ArrowUp"   || e.key === "PageUp")   flipPrev();
       if (e.key === "Escape") router.push(backUrl);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [flipNext, flipPrev, router, backUrl]);
+  }, [flipNext, flipPrev, zoomIn, zoomOut, resetZoom, zoom, router, backUrl]);
 
-  // Fullscreen API
+  // ── Fullscreen ────────────────────────────────────────────────────────────
   const toggleFullscreen = useCallback(async () => {
     if (!document.fullscreenElement) {
       await document.documentElement.requestFullscreen?.();
-      setIsFullscreen(true);
     } else {
       await document.exitFullscreen?.();
-      setIsFullscreen(false);
     }
   }, []);
 
   useEffect(() => {
-    const handler = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener("fullscreenchange", handler);
-    return () => document.removeEventListener("fullscreenchange", handler);
+    const h = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", h);
+    return () => document.removeEventListener("fullscreenchange", h);
   }, []);
 
-  // ── Estado: carregando ────────────────────────────────────────────────────
+  // ── Estados de loading / erro ─────────────────────────────────────────────
   if (loading) {
     return (
       <div className="fixed inset-0 bg-[#070a12] flex items-center justify-center z-50">
@@ -220,22 +363,16 @@ export default function Reader({ slug, editionTitle, backUrl }: ReaderProps) {
     );
   }
 
-  // ── Estado: erro ou sem páginas ───────────────────────────────────────────
   if (error || pages.length === 0) {
     return (
       <div className="fixed inset-0 bg-[#070a12] flex items-center justify-center z-50">
         <div className="flex flex-col items-center gap-4 text-center px-6">
           <span className="text-5xl">📖</span>
-          <p className="text-white text-lg font-semibold">
-            {error ?? "Conteúdo em preparação"}
-          </p>
+          <p className="text-white text-lg font-semibold">{error ?? "Conteúdo em preparação"}</p>
           <p className="text-[#7a9ab5] text-sm max-w-sm">
             As páginas desta edição ainda estão sendo adicionadas ao sistema.
           </p>
-          <button
-            onClick={() => router.push(backUrl)}
-            className="mt-2 text-[#ff1f1f] hover:underline text-sm"
-          >
+          <button onClick={() => router.push(backUrl)} className="mt-2 text-[#ff1f1f] hover:underline text-sm">
             ← Voltar para a edição
           </button>
         </div>
@@ -243,13 +380,13 @@ export default function Reader({ slug, editionTitle, backUrl }: ReaderProps) {
     );
   }
 
-  // Páginas visíveis no spread atual
+  // ── Derivados ─────────────────────────────────────────────────────────────
   const displayLeft  = currentPage + 1;
   const displayRight = !isMobile && currentPage + 2 <= pages.length ? currentPage + 2 : null;
   const isFirst      = currentPage === 0;
-  const isLast       = isMobile
-    ? currentPage >= pages.length - 1
-    : currentPage >= pages.length - 2;
+  const isLast       = isMobile ? currentPage >= pages.length - 1 : currentPage >= pages.length - 2;
+  const isZoomed     = zoom > 1.01;
+  const zoomPct      = Math.round(zoom * 100);
 
   return (
     <div className="fixed inset-0 bg-[#0b0f1a] flex flex-col z-50 select-none">
@@ -263,10 +400,7 @@ export default function Reader({ slug, editionTitle, backUrl }: ReaderProps) {
         }}
       >
         <div className="flex items-center gap-2 min-w-0">
-          <span
-            className="font-['Barlow_Condensed'] font-black text-white text-[18px] leading-none shrink-0"
-            style={{ letterSpacing: "0.04em" }}
-          >
+          <span className="font-['Barlow_Condensed'] font-black text-white text-[18px] leading-none shrink-0" style={{ letterSpacing: "0.04em" }}>
             MAGNUM
           </span>
           <span className="text-[#2a3a4e] shrink-0 mx-1">|</span>
@@ -276,11 +410,18 @@ export default function Reader({ slug, editionTitle, backUrl }: ReaderProps) {
         <div className="flex items-center gap-3 shrink-0">
           {ready && (
             <span className="text-[#526888] text-[11px] tabular-nums hidden sm:block">
-              {displayRight
-                ? `${displayLeft}–${displayRight}`
-                : `${displayLeft}`}{" "}
-              / {pages.length}
+              {displayRight ? `${displayLeft}–${displayRight}` : `${displayLeft}`} / {pages.length}
             </span>
+          )}
+          {/* Indicador de zoom no top bar (visível quando ampliado) */}
+          {isZoomed && (
+            <button
+              onClick={resetZoom}
+              className="text-[#ff1f1f] text-[11px] font-bold tabular-nums hover:text-white transition-colors px-1.5 py-0.5 rounded bg-[#ff1f1f]/10 hover:bg-[#ff1f1f]/20"
+              title="Resetar zoom (Ctrl+0)"
+            >
+              {zoomPct}% ✕
+            </button>
           )}
           <button
             onClick={() => router.push(backUrl)}
@@ -293,72 +434,102 @@ export default function Reader({ slug, editionTitle, backUrl }: ReaderProps) {
       </div>
 
       {/* ── Área do livro ─────────────────────────────────────────────────── */}
-      <div className="flex-1 flex items-center justify-center overflow-hidden relative">
+      <div
+        ref={areaRef}
+        className="flex-1 flex items-center justify-center overflow-hidden relative"
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={stopPan}
+        onMouseLeave={stopPan}
+        onDoubleClick={isZoomed ? resetZoom : undefined}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        style={{ cursor: isZoomed ? (isPanning.current ? "grabbing" : "grab") : "default" }}
+      >
+        {/* Seta esquerda — fora do zoom wrapper, sempre acessível */}
+        {!isZoomed && (
+          <button
+            onClick={flipPrev}
+            disabled={isFirst}
+            className="absolute left-2 z-10 w-10 h-16 flex items-center justify-center rounded-full text-white/35 hover:text-white hover:bg-white/8 disabled:opacity-0 transition-all text-3xl font-light"
+            title="Página anterior (←)"
+          >
+            ‹
+          </button>
+        )}
 
-        {/* Seta esquerda */}
-        <button
-          onClick={flipPrev}
-          disabled={isFirst}
-          className="absolute left-2 z-10 w-10 h-16 flex items-center justify-center rounded-full text-white/35 hover:text-white hover:bg-white/8 disabled:opacity-0 transition-all text-3xl font-light pointer-events-auto"
-          title="Página anterior (←)"
+        {/* Wrapper com transform de zoom + pan */}
+        <div
+          ref={wrapperRef}
+          style={{
+            transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
+            transformOrigin: "center center",
+            willChange: "transform",
+            transition: isPanning.current ? "none" : "transform 0.15s ease",
+          }}
         >
-          ‹
-        </button>
-
-        {/* FlipBook */}
-        <HTMLFlipBook
-          ref={bookRef}
-          width={bookSize.width}
-          height={bookSize.height}
-          size="fixed"
-          showCover={true}
-          usePortrait={isMobile}
-          drawShadow={true}
-          flippingTime={650}
-          startZIndex={1}
-          maxShadowOpacity={0.5}
-          clickEventForward={false}
-          useMouseEvents={true}
-          swipeDistance={isMobile ? 20 : 30}
-          showPageCorners={!isMobile}
-          disableFlipByClick={false}
-          mobileScrollSupport={false}
-          autoSize={false}
-          minWidth={150}
-          maxWidth={1200}
-          minHeight={200}
-          maxHeight={1800}
-          startPage={0}
-          onFlip={(e) => setCurrentPage(e.data)}
-          onInit={() => setReady(true)}
-          className=""
-          style={{}}
-        >
-          {pages.map((url, i) => (
-            <Page
-              key={i}
-              url={url}
-              index={i}
-              width={bookSize.width}
-              height={bookSize.height}
-            />
-          ))}
-        </HTMLFlipBook>
+          <HTMLFlipBook
+            ref={bookRef}
+            width={bookSize.width}
+            height={bookSize.height}
+            size="fixed"
+            showCover={true}
+            usePortrait={isMobile}
+            drawShadow={true}
+            flippingTime={650}
+            startZIndex={1}
+            maxShadowOpacity={0.5}
+            clickEventForward={false}
+            useMouseEvents={!isZoomed}      // desativa drag-flip quando em zoom
+            swipeDistance={isMobile ? 20 : 30}
+            showPageCorners={!isMobile && !isZoomed}
+            disableFlipByClick={isZoomed}   // click não vira página quando ampliado
+            mobileScrollSupport={false}
+            autoSize={false}
+            minWidth={150}
+            maxWidth={1200}
+            minHeight={200}
+            maxHeight={1800}
+            startPage={0}
+            onFlip={handleFlip}
+            onInit={() => setReady(true)}
+            className=""
+            style={{}}
+          >
+            {pages.map((url, i) => (
+              <Page key={i} url={url} index={i} width={bookSize.width} height={bookSize.height} />
+            ))}
+          </HTMLFlipBook>
+        </div>
 
         {/* Seta direita */}
-        <button
-          onClick={flipNext}
-          disabled={isLast}
-          className="absolute right-2 z-10 w-10 h-16 flex items-center justify-center rounded-full text-white/35 hover:text-white hover:bg-white/8 disabled:opacity-0 transition-all text-3xl font-light pointer-events-auto"
-          title="Próxima página (→)"
-        >
-          ›
-        </button>
+        {!isZoomed && (
+          <button
+            onClick={flipNext}
+            disabled={isLast}
+            className="absolute right-2 z-10 w-10 h-16 flex items-center justify-center rounded-full text-white/35 hover:text-white hover:bg-white/8 disabled:opacity-0 transition-all text-3xl font-light"
+            title="Próxima página (→)"
+          >
+            ›
+          </button>
+        )}
+
+        {/* Dica de zoom (aparece brevemente ao entrar em modo zoom) */}
+        {isZoomed && (
+          <div
+            className="absolute bottom-3 left-1/2 -translate-x-1/2 pointer-events-none"
+            style={{ zIndex: 20 }}
+          >
+            <span className="text-[#526888] text-[10px] bg-black/60 px-2 py-1 rounded">
+              arraste para mover · duplo-clique ou Ctrl+0 para resetar
+            </span>
+          </div>
+        )}
       </div>
 
       {/* ── Bottom Bar ───────────────────────────────────────────────────── */}
       <div
-        className="h-14 shrink-0 flex items-center justify-center gap-3"
+        className="h-14 shrink-0 flex items-center justify-center gap-2 px-3"
         style={{
           background: "linear-gradient(0deg, #080c16 0%, rgba(8,12,22,0.95) 100%)",
           borderTop: "1px solid rgba(28,42,62,0.8)",
@@ -369,11 +540,12 @@ export default function Reader({ slug, editionTitle, backUrl }: ReaderProps) {
           onClick={flipPrev}
           disabled={isFirst}
           className="w-9 h-9 flex items-center justify-center rounded-full border border-[#1c2a3e] hover:border-[#ff1f1f]/50 text-[#7a9ab5] hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors text-2xl font-light"
+          title="Página anterior"
         >
           ‹
         </button>
 
-        {/* Contador */}
+        {/* Contador de páginas */}
         {ready ? (
           <div className="flex items-center gap-1.5 min-w-[80px] justify-center">
             <span className="text-[#3a4a5e] text-[10px] uppercase tracking-widest hidden sm:block">pág.</span>
@@ -392,8 +564,73 @@ export default function Reader({ slug, editionTitle, backUrl }: ReaderProps) {
           onClick={flipNext}
           disabled={isLast}
           className="w-9 h-9 flex items-center justify-center rounded-full border border-[#1c2a3e] hover:border-[#ff1f1f]/50 text-[#7a9ab5] hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors text-2xl font-light"
+          title="Próxima página"
         >
           ›
+        </button>
+
+        <div className="w-px h-5 bg-[#1c2a3e]" />
+
+        {/* ── Ir para página ───────────────────────── */}
+        <form
+          onSubmit={handleGotoSubmit}
+          className="flex items-center gap-1"
+          title="Ir para a página"
+        >
+          <label className="text-[#3a4a5e] text-[10px] uppercase tracking-wider hidden md:block shrink-0">
+            ir
+          </label>
+          <input
+            type="number"
+            min={1}
+            max={pages.length}
+            value={gotoValue}
+            onChange={(e) => setGotoValue(e.target.value)}
+            placeholder="pág."
+            className="w-12 h-7 bg-[#0e1520] border border-[#1c2a3e] focus:border-[#ff1f1f]/60 rounded text-white text-[12px] text-center tabular-nums focus:outline-none transition-colors placeholder:text-[#2a3a4e]"
+            style={{ appearance: "textfield" }}
+            onKeyDown={(e) => e.key === "Escape" && setGotoValue("")}
+          />
+          <button
+            type="submit"
+            className="h-7 px-2 bg-[#141d2c] hover:bg-[#1c2a3e] border border-[#1c2a3e] rounded text-[#7a9ab5] hover:text-white text-[11px] font-medium transition-colors"
+          >
+            →
+          </button>
+        </form>
+
+        <div className="w-px h-5 bg-[#1c2a3e]" />
+
+        {/* ── Controles de zoom ─────────────────────── */}
+        <button
+          onClick={zoomOut}
+          disabled={zoom <= ZOOM_MIN}
+          className="w-8 h-8 flex items-center justify-center rounded border border-[#1c2a3e] hover:border-[#2a3a5e] text-[#7a9ab5] hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors text-lg font-light"
+          title="Diminuir zoom (Ctrl−)"
+        >
+          −
+        </button>
+
+        {/* Percentual — clicável para resetar */}
+        <button
+          onClick={resetZoom}
+          className={`min-w-[44px] h-7 flex items-center justify-center rounded text-[11px] font-bold tabular-nums transition-colors ${
+            isZoomed
+              ? "text-[#ff1f1f] bg-[#ff1f1f]/10 hover:bg-[#ff1f1f]/20"
+              : "text-[#526888] hover:text-white hover:bg-white/5"
+          }`}
+          title="Resetar zoom (Ctrl+0)"
+        >
+          {zoomPct}%
+        </button>
+
+        <button
+          onClick={zoomIn}
+          disabled={zoom >= ZOOM_MAX}
+          className="w-8 h-8 flex items-center justify-center rounded border border-[#1c2a3e] hover:border-[#2a3a5e] text-[#7a9ab5] hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors text-lg"
+          title="Aumentar zoom (Ctrl+)"
+        >
+          +
         </button>
 
         <div className="w-px h-5 bg-[#1c2a3e]" />
@@ -402,7 +639,7 @@ export default function Reader({ slug, editionTitle, backUrl }: ReaderProps) {
         <button
           onClick={toggleFullscreen}
           className="w-9 h-9 flex items-center justify-center rounded text-[#526888] hover:text-white hover:bg-white/8 transition-colors"
-          title={isFullscreen ? "Sair do fullscreen" : "Tela cheia"}
+          title={isFullscreen ? "Sair da tela cheia" : "Tela cheia"}
         >
           {isFullscreen ? (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -417,7 +654,7 @@ export default function Reader({ slug, editionTitle, backUrl }: ReaderProps) {
 
         {/* Ir para capa */}
         <button
-          onClick={() => bookRef.current?.pageFlip().turnToPage(0)}
+          onClick={() => { bookRef.current?.pageFlip().turnToPage(0); resetZoom(); }}
           className="w-9 h-9 flex items-center justify-center rounded text-[#526888] hover:text-white hover:bg-white/8 transition-colors"
           title="Ir para a capa"
         >

@@ -255,19 +255,51 @@ export default async function EdicaoDetalhePage({
               }
               return (
                 <div className="grid grid-cols-1 lg:grid-cols-2 divide-y divide-[#1c2a3e]/30 lg:divide-y-0">
-                  {toc.map((item, i) => (
-                    <div key={i} className={`flex items-start gap-4 px-6 py-3.5 ${i % 2 === 0 ? "lg:border-r border-[#1c2a3e]/30" : ""} border-b border-[#1c2a3e]/20`}>
-                      <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f]/70 text-[18px] w-[32px] shrink-0 leading-none pt-0.5 text-right tabular-nums">
-                        {item.page}
-                      </span>
-                      <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="text-[#b0c4d8] text-[13px] font-medium leading-snug">{item.title}</span>
-                        {item.category && (
-                          <span className="text-[#526888] text-[10px] tracking-wide">{item.category}</span>
+                  {toc.map((item, i) => {
+                    const pageNum = parseInt(item.page, 10);
+                    const href = canRead && !isNaN(pageNum)
+                      ? `/ler/${slug}?page=${pageNum}`
+                      : null;
+
+                    const inner = (
+                      <>
+                        <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f]/70 text-[18px] w-[32px] shrink-0 leading-none pt-0.5 text-right tabular-nums">
+                          {item.page}
+                        </span>
+                        <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                          <span className="text-[#b0c4d8] text-[13px] font-medium leading-snug group-hover:text-white transition-colors">
+                            {item.title}
+                          </span>
+                          {item.category && (
+                            <span className="text-[#526888] text-[10px] tracking-wide">{item.category}</span>
+                          )}
+                        </div>
+                        {href && (
+                          <span className="text-[#ff1f1f]/0 group-hover:text-[#ff1f1f]/60 text-[11px] shrink-0 transition-colors self-center">
+                            →
+                          </span>
                         )}
+                      </>
+                    );
+
+                    const cls = `group flex items-start gap-4 px-6 py-3.5 ${
+                      i % 2 === 0 ? "lg:border-r border-[#1c2a3e]/30" : ""
+                    } border-b border-[#1c2a3e]/20 ${
+                      href
+                        ? "cursor-pointer hover:bg-white/[0.02] transition-colors"
+                        : ""
+                    }`;
+
+                    return href ? (
+                      <Link key={i} href={href} className={cls}>
+                        {inner}
+                      </Link>
+                    ) : (
+                      <div key={i} className={cls}>
+                        {inner}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               );
             })()}

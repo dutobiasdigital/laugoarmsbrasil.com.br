@@ -32,10 +32,14 @@ export async function generateMetadata({
 
 export default async function LerEdicaoPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ page?: string }>;
 }) {
   const { slug } = await params;
+  const sp = await searchParams;
+  const initialPage = sp.page ? parseInt(sp.page, 10) : undefined;
 
   // 1. Auth
   const supabase = await createClient();
@@ -107,6 +111,7 @@ export default async function LerEdicaoPage({
       slug={slug}
       editionTitle={title}
       backUrl={`/edicoes/${slug}`}
+      initialPage={initialPage}
     />
   );
 }
