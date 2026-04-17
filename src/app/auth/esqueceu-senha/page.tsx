@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { forgotPassword } from "@/actions/auth";
 import { useRecaptcha } from "@/hooks/useRecaptcha";
 import Link from "next/link";
@@ -9,6 +9,17 @@ export default function EsqueceuSenhaPage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Detecta quando o callback redireciona aqui por link expirado
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get("error");
+    if (err === "link_expirado") {
+      setError("O link de redefinição expirou. Solicite um novo abaixo.");
+    } else if (err) {
+      setError("O link de verificação é inválido. Solicite um novo abaixo.");
+    }
+  }, []);
   const { executeRecaptcha } = useRecaptcha();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
