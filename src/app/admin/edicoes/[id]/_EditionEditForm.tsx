@@ -35,6 +35,7 @@ interface Props {
     pageFlipUrl: string | null;
     isPublished: boolean;
     isOnNewstand: boolean;
+    isFeatured: boolean;
     publishedAt: string | null;
     editorialPageFiles?: string[];
     indexPageFiles?: string[];
@@ -160,6 +161,7 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
   const [editionType, setEditionType] = useState(edition.type);
   const [editorial, setEditorial] = useState(edition.editorial ?? "");
   const [isOnNewstand, setIsOnNewstand] = useState(edition.isOnNewstand);
+  const [isFeatured,   setIsFeatured]   = useState(edition.isFeatured);
 
   // TOC
   const [tocItems, setTocItems] = useState<TocItem[]>(parseToc(edition.tableOfContents));
@@ -241,6 +243,7 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
       editorial,
       tableOfContents: JSON.stringify(tocItems.filter((t) => t.title)),
       isOnNewstand,
+      isFeatured,
       seoTitle,
       seoDescription,
       seoKeywords,
@@ -475,6 +478,19 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
                 Apenas uma edição pode estar na banca. As outras serão desmarcadas automaticamente.
               </p>
             )}
+
+            <div className="flex items-center gap-3">
+              <input
+                id="isFeatured"
+                type="checkbox"
+                checked={isFeatured}
+                onChange={(e) => setIsFeatured(e.target.checked)}
+                className="w-[16px] h-[16px] accent-[#ff1f1f]"
+              />
+              <label htmlFor="isFeatured" className="text-[#d4d4da] text-[14px]">
+                ⭐ Destaque (aparece em seções de destaque e carrosséis)
+              </label>
+            </div>
           </div>
         </div>
 

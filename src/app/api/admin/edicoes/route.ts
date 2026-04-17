@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
     const pageFlipUrl      = str(body.pageFlipUrl);
     const isPublished      = parseBool(body.isPublished);
     const isOnNewstand     = parseBool(body.isOnNewstand);
+    const isFeatured       = parseBool(body.isFeatured);
     const publishedAt      = body.publishedAt ? (body.publishedAt as string) : null;
     const seoTitle         = str(body.seoTitle);
     const seoDescription   = str(body.seoDescription);
@@ -58,8 +59,8 @@ export async function POST(req: NextRequest) {
       headers: { ...HEADERS, Prefer: "return=representation" },
       body: JSON.stringify({
         title, slug, number, type, summary, editorial, tableOfContents, pageCount,
-        coverImageUrl, pdfStoragePath, pageFlipUrl, isPublished, isOnNewstand, publishedAt,
-        seoTitle, seoDescription, seoKeywords, canonicalUrl,
+        coverImageUrl, pdfStoragePath, pageFlipUrl, isPublished, isOnNewstand, isFeatured,
+        publishedAt, seoTitle, seoDescription, seoKeywords, canonicalUrl,
       }),
     });
     if (!res.ok) throw new Error(await res.text());
@@ -90,6 +91,7 @@ export async function PUT(req: NextRequest) {
     const pageFlipUrl      = str(body.pageFlipUrl);
     const isPublished      = parseBool(body.isPublished);
     const isOnNewstand     = parseBool(body.isOnNewstand);
+    const isFeatured       = parseBool(body.isFeatured);
     const publishedAt      = body.publishedAt ? (body.publishedAt as string) : null;
     const seoTitle         = str(body.seoTitle);
     const seoDescription   = str(body.seoDescription);
@@ -109,8 +111,8 @@ export async function PUT(req: NextRequest) {
       headers: { ...HEADERS, Prefer: "return=representation" },
       body: JSON.stringify({
         title, slug, number, type, summary, editorial, tableOfContents, pageCount,
-        coverImageUrl, pdfStoragePath, pageFlipUrl, isPublished, isOnNewstand, publishedAt,
-        seoTitle, seoDescription, seoKeywords, canonicalUrl,
+        coverImageUrl, pdfStoragePath, pageFlipUrl, isPublished, isOnNewstand, isFeatured,
+        publishedAt, seoTitle, seoDescription, seoKeywords, canonicalUrl,
       }),
     });
     if (!res.ok) throw new Error(await res.text());

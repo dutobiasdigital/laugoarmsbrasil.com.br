@@ -32,6 +32,7 @@ export default async function EditarEdicaoPage({
     pageFlipUrl: string | null;
     isPublished: boolean;
     isOnNewstand: boolean;
+    isFeatured: boolean;
     publishedAt: string | null;
     editorialPageFiles: string[] | null;
     indexPageFiles: string[] | null;
@@ -43,7 +44,7 @@ export default async function EditarEdicaoPage({
 
   try {
     const res = await fetch(
-      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,summary,editorial,tableOfContents,pageCount,coverImageUrl,pdfStoragePath,pageFlipUrl,isPublished,isOnNewstand,publishedAt,editorialPageFiles,indexPageFiles,seoTitle,seoDescription,seoKeywords,canonicalUrl&limit=1`,
+      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,summary,editorial,tableOfContents,pageCount,coverImageUrl,pdfStoragePath,pageFlipUrl,isPublished,isOnNewstand,isFeatured,publishedAt,editorialPageFiles,indexPageFiles,seoTitle,seoDescription,seoKeywords,canonicalUrl&limit=1`,
       { headers: HEADERS, cache: "no-store" }
     );
     const data = await res.json();
