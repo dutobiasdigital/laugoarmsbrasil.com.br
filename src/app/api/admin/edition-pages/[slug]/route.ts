@@ -101,7 +101,7 @@ export async function GET(
       .from("edition-pages")
       .createSignedUrls(paths, 3600);
     (signed ?? []).forEach((s) => {
-      const filename = s.path.split("/").pop() ?? "";
+      const filename = (s.path ?? "").split("/").pop() ?? "";
       if (s.signedUrl) signedMap[filename] = s.signedUrl;
     });
   }

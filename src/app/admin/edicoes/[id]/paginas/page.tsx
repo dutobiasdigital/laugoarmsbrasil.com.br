@@ -59,7 +59,7 @@ export default async function PaginasEdicaoPage({
 
       const signedMap: Record<string, string> = {};
       (signed ?? []).forEach((s) => {
-        const filename = s.path.split("/").pop() ?? "";
+        const filename = (s.path ?? "").split("/").pop() ?? "";
         if (s.signedUrl) signedMap[filename] = s.signedUrl;
       });
 
