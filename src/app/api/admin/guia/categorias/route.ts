@@ -9,6 +9,21 @@ const HEADERS  = {
   Authorization:   `Bearer ${SERVICE}`,
   Prefer:          "return=representation",
 };
+const H_READ   = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
+
+export async function GET() {
+  try {
+    const res = await fetch(
+      `${BASE}/guide_categories?select=id,title,slug,icon,shortCall,description,imageUrl,imageAlt,metaTitle,metaDescription,metaKeywords,isActive,sortOrder,segmentKey&order=sortOrder.asc`,
+      { headers: H_READ, cache: "no-store" }
+    );
+    const data = await res.json();
+    if (!res.ok) return NextResponse.json({ error: data?.message ?? "Erro" }, { status: res.status });
+    return NextResponse.json(Array.isArray(data) ? data : []);
+  } catch (e) {
+    return NextResponse.json({ error: String(e) }, { status: 500 });
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,14 +34,15 @@ export async function POST(req: NextRequest) {
     const payload = {
       title:           String(body.title),
       slug:            String(body.slug),
-      icon:            body.icon ? String(body.icon) : null,
-      description:     body.description ? String(body.description) : null,
-      shortCall:       body.shortCall ? String(body.shortCall) : null,
-      imageUrl:        body.imageUrl ? String(body.imageUrl) : null,
-      imageAlt:        body.imageAlt ? String(body.imageAlt) : null,
-      metaTitle:       body.metaTitle ? String(body.metaTitle) : null,
+      icon:            body.icon       ? String(body.icon)            : null,
+      description:     body.description ? String(body.description)   : null,
+      shortCall:       body.shortCall  ? String(body.shortCall)       : null,
+      imageUrl:        body.imageUrl   ? String(body.imageUrl)        : null,
+      imageAlt:        body.imageAlt   ? String(body.imageAlt)        : null,
+      metaTitle:       body.metaTitle  ? String(body.metaTitle)       : null,
       metaDescription: body.metaDescription ? String(body.metaDescription) : null,
-      metaKeywords:    body.metaKeywords ? String(body.metaKeywords) : null,
+      metaKeywords:    body.metaKeywords ? String(body.metaKeywords)  : null,
+      segmentKey:      body.segmentKey ? String(body.segmentKey)      : null,
       isActive:        body.isActive !== false,
       sortOrder:       parseInt(String(body.sortOrder ?? "0"), 10),
       createdAt:       new Date().toISOString(),

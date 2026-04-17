@@ -8,12 +8,13 @@ const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
 const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
 
-interface GuiaCategory {
+export interface GuiaCategory {
   id: string;
   title: string;
   slug: string;
   icon: string | null;
   shortCall: string | null;
+  description: string | null;
   imageUrl: string | null;
   imageAlt: string | null;
   metaTitle: string | null;
@@ -21,6 +22,7 @@ interface GuiaCategory {
   metaKeywords: string | null;
   isActive: boolean;
   sortOrder: number;
+  segmentKey: string | null;
 }
 
 export default async function GuiaCategoriasPage() {
@@ -28,7 +30,7 @@ export default async function GuiaCategoriasPage() {
 
   try {
     const res = await fetch(
-      `${BASE}/guide_categories?select=id,title,slug,icon,shortCall,imageUrl,imageAlt,metaTitle,metaDescription,metaKeywords,isActive,sortOrder&order=sortOrder.asc`,
+      `${BASE}/guide_categories?select=id,title,slug,icon,shortCall,description,imageUrl,imageAlt,metaTitle,metaDescription,metaKeywords,isActive,sortOrder,segmentKey&order=sortOrder.asc`,
       { headers: HEADERS, cache: "no-store" }
     );
     const data = await res.json();
@@ -41,10 +43,7 @@ export default async function GuiaCategoriasPage() {
     <>
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-[12px] text-[#526888] mb-5">
-        <Link
-          href="/admin/guia"
-          className="hover:text-[#d4d4da] transition-colors"
-        >
+        <Link href="/admin/guia" className="hover:text-[#d4d4da] transition-colors">
           Guia
         </Link>
         <span className="text-[#1c2a3e]">/</span>
