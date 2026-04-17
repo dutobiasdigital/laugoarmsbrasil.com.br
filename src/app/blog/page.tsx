@@ -120,19 +120,25 @@ export default async function BlogPage({
     <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
 
-      <main className="flex-1 pt-16">
-        {/* Page Header */}
-        <div className="px-5 lg:px-20 pt-10 pb-6">
-          <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[56px] leading-none mb-3">
-            Blog
-          </h1>
-          <p className="text-[#7a9ab5] text-[16px]">
-            Artigos, avaliações e análises sobre armas, munições e legislação
-          </p>
+      {/* ── Hero — estilo GUIA ─────────────────────────────────── */}
+      <section className="hero-metal px-5 lg:px-20 pt-14 pb-10 border-b border-[#141d2c] mt-16">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-[6px] h-[6px] bg-[#ff1f1f] rounded-full" />
+          <span className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase">
+            Conteúdo
+          </span>
         </div>
+        <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[52px] lg:text-[64px] leading-[0.95] mb-3">
+          Blog
+        </h1>
+        <p className="text-[#7a9ab5] text-[16px]">
+          Artigos, avaliações e análises sobre armas, munições e legislação
+        </p>
+      </section>
 
+      <main className="flex-1">
         {/* Category Pills */}
-        <div className="px-5 lg:px-20 pb-6 flex flex-wrap gap-2">
+        <div className="px-5 lg:px-20 pt-6 pb-4 flex flex-wrap gap-2">
           {allCategories.map((cat) => {
             const active = (cat === "Todos" && !categoria) || cat === categoria;
             return (

@@ -68,49 +68,52 @@ export default async function BlogArtigoPage({
     <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
 
-      <main className="flex-1 pt-16">
+      {/* ── Hero — estilo GUIA ─────────────────────────────────── */}
+      <section className="hero-metal px-5 lg:px-20 pt-10 pb-10 border-b border-[#141d2c] mt-16">
         {/* Breadcrumb */}
-        <div className="px-5 lg:px-20 pt-7 pb-2">
+        <div className="mb-6">
           <Link href="/blog" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">
             ← Blog
           </Link>
         </div>
 
-        {/* Article Header */}
-        <div className="px-5 lg:px-20 pt-4 pb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] text-[11px] px-2.5 py-[3px] rounded-full">
-              {post.category.name}
+        {/* Badges */}
+        <div className="flex items-center gap-2 mb-4">
+          <span className="bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] text-[11px] px-2.5 py-[3px] rounded-[2px] font-semibold tracking-[0.5px] uppercase">
+            {post.category.name}
+          </span>
+          {post.isExclusive && (
+            <span className="bg-[#ff1f1f] text-white text-[10px] font-semibold px-2.5 py-[3px] rounded-[2px] uppercase tracking-[0.5px]">
+              Exclusivo
             </span>
-            {post.isExclusive && (
-              <span className="bg-[#ff1f1f] text-white text-[10px] font-semibold px-2.5 py-[3px] rounded-full uppercase">
-                Exclusivo
-              </span>
-            )}
-          </div>
-
-          <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[38px] lg:text-[52px] leading-[42px] lg:leading-[56px] max-w-[860px] mb-4">
-            {post.title}
-          </h1>
-
-          {post.excerpt && (
-            <p className="text-[#d4d4da] text-[16px] lg:text-[18px] leading-[28px] max-w-[860px] mb-4">
-              {post.excerpt}
-            </p>
           )}
-
-          <div className="bg-[#141d2c] h-px max-w-[860px] mb-4" />
-          <p className="text-[#d4d4da] text-[14px] font-medium mb-1">{post.authorName}</p>
-          <p className="text-white text-[13px] mb-4">
-            {post.publishedAt
-              ? new Date(post.publishedAt).toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })
-              : ""}
-          </p>
-          <div className="bg-[#141d2c] h-px max-w-[860px]" />
         </div>
 
+        <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[46px] lg:text-[64px] leading-[0.95] max-w-[860px] mb-4">
+          {post.title}
+        </h1>
+
+        {post.excerpt && (
+          <p className="text-[#7a9ab5] text-[16px] lg:text-[18px] leading-[28px] max-w-[860px] mb-5">
+            {post.excerpt}
+          </p>
+        )}
+
+        <div className="flex items-center gap-3 text-[13px] text-[#526888]">
+          {post.authorName && <span className="font-medium text-[#7a9ab5]">{post.authorName}</span>}
+          {post.authorName && post.publishedAt && <span>·</span>}
+          {post.publishedAt && (
+            <span>
+              {new Date(post.publishedAt).toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}
+            </span>
+          )}
+        </div>
+      </section>
+
+      <main className="flex-1">
+
         {/* Content + Sidebar */}
-        <div className="px-5 lg:px-20 pb-16 flex gap-10 items-start">
+        <div className="px-5 lg:px-20 pt-10 pb-16 flex gap-10 items-start">
           {/* Article Body */}
           <div className="flex-1 min-w-0 max-w-[860px]">
             {/* Featured Image */}
