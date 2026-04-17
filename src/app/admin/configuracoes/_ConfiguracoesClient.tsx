@@ -96,7 +96,7 @@ export default function ConfiguracoesClient({ initialTab, settings, admins }: Pr
         {tab === "emails"      && <TabEmails settings={settings} />}
         {tab === "integracoes" && <TabIntegracoes settings={settings} />}
         {tab === "modulos"     && <TabModulos settings={settings} />}
-        {tab === "paginas"     && <TabPaginas />}
+        {tab === "paginas"     && <TabPaginas settings={settings} />}
         {tab === "sistema"     && <TabSistema settings={settings} />}
       </div>
     </div>

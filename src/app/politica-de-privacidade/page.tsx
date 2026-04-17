@@ -5,122 +5,161 @@ import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Política de Privacidade — Revista Magnum",
-  description: "Saiba como a Revista Magnum coleta, usa e protege seus dados pessoais.",
+  description: "Saiba como a Revista Magnum coleta, usa e protege seus dados pessoais em conformidade com a LGPD.",
 };
 
-const LAST_UPDATED = "15 de abril de 2025";
+async function getPageContent() {
+  const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+  const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+  try {
+    const res = await fetch(
+      `https://${PROJECT}.supabase.co/rest/v1/site_settings?key=in.(page.privacidade.title,page.privacidade.content)&select=key,value`,
+      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, next: { revalidate: 300 } }
+    );
+    const rows: { key: string; value: string }[] = await res.json();
+    const map: Record<string, string> = {};
+    if (Array.isArray(rows)) rows.forEach(r => { map[r.key] = r.value; });
+    return map;
+  } catch { return {}; }
+}
 
-const sections = [
-  {
-    title: "1. Quem Somos",
-    content: `A Revista Magnum é uma publicação digital especializada em armamento civil, operada no Brasil. Este documento descreve como coletamos, usamos, armazenamos e protegemos seus dados pessoais em conformidade com a Lei Geral de Proteção de Dados (LGPD — Lei 13.709/2018).`,
-  },
-  {
-    title: "2. Dados que Coletamos",
-    content: `Coletamos apenas os dados necessários para fornecer nossos serviços:\n\n• Dados de cadastro: nome, e-mail e telefone (opcional)\n• Dados de pagamento: processados por gateways certificados (Mercado Pago, Stripe, PagSeguro, PayPal) — não armazenamos dados de cartão\n• Dados de acesso: endereço IP, tipo de navegador, páginas visitadas (para fins de segurança e melhoria do serviço)\n• Dados de comunicação: mensagens enviadas ao suporte`,
-  },
-  {
-    title: "3. Como Usamos seus Dados",
-    content: `Seus dados são utilizados para:\n\n• Criar e gerenciar sua conta de acesso\n• Processar pagamentos e gerenciar assinaturas\n• Enviar e-mails transacionais (confirmação de pagamento, renovação, etc.)\n• Comunicar alterações importantes nos serviços\n• Cumprir obrigações legais e regulatórias`,
-  },
-  {
-    title: "4. Base Legal para o Tratamento",
-    content: `O tratamento dos seus dados se baseia nas seguintes hipóteses legais previstas na LGPD:\n\n• Execução de contrato: dados necessários para prestar os serviços contratados\n• Cumprimento de obrigação legal: retenção de dados fiscais e contábeis\n• Legítimo interesse: segurança da plataforma e prevenção a fraudes\n• Consentimento: quando aplicável, solicitado explicitamente`,
-  },
-  {
-    title: "5. Compartilhamento de Dados",
-    content: `Não vendemos seus dados pessoais. Podemos compartilhá-los apenas com:\n\n• Gateways de pagamento (Mercado Pago, Stripe, PagSeguro, PayPal) — para processar transações\n• Supabase — infraestrutura de banco de dados e autenticação\n• Autoridades públicas — quando exigido por lei`,
-  },
-  {
-    title: "6. Retenção de Dados",
-    content: `Mantemos seus dados pelo tempo necessário para prestar os serviços e cumprir obrigações legais:\n\n• Dados de conta: enquanto a conta estiver ativa + 5 anos após encerramento\n• Dados de transações: 5 anos (obrigação fiscal)\n• Dados de acesso/logs: 6 meses\n\nApós esses prazos, os dados são excluídos ou anonimizados.`,
-  },
-  {
-    title: "7. Seus Direitos (LGPD)",
-    content: `Você tem os seguintes direitos em relação aos seus dados pessoais:\n\n• Confirmação de tratamento e acesso aos dados\n• Correção de dados incompletos ou incorretos\n• Anonimização, bloqueio ou eliminação de dados desnecessários\n• Portabilidade dos dados\n• Eliminação dos dados tratados com consentimento\n• Informação sobre compartilhamento\n• Revogação do consentimento\n\nPara exercer qualquer direito, envie solicitação para publicidade@revistamagnum.com.br.`,
-  },
-  {
-    title: "8. Segurança",
-    content: `Adotamos medidas técnicas e organizacionais para proteger seus dados, incluindo:\n\n• Criptografia em trânsito (HTTPS/TLS)\n• Autenticação segura gerenciada pelo Supabase\n• Acesso restrito por função (RBAC)\n• Gateways de pagamento certificados PCI-DSS`,
-  },
-  {
-    title: "9. Cookies e Rastreamento",
-    content: `Utilizamos cookies estritamente necessários para o funcionamento da plataforma (autenticação e sessão). Não utilizamos cookies de rastreamento publicitário de terceiros. Você pode configurar seu navegador para bloquear cookies, mas isso pode afetar o funcionamento do site.`,
-  },
-  {
-    title: "10. Menores de Idade",
-    content: `Nossos serviços são destinados a maiores de 18 anos. Não coletamos intencionalmente dados de menores. Se identificarmos que um menor cadastrou-se em nossa plataforma, excluiremos os dados imediatamente.`,
-  },
-  {
-    title: "11. Alterações nesta Política",
-    content: `Podemos atualizar esta Política periodicamente. Alterações significativas serão comunicadas por e-mail com antecedência mínima de 15 dias. A data da última atualização é sempre indicada no topo deste documento.`,
-  },
-  {
-    title: "12. Encarregado de Dados (DPO)",
-    content: `O responsável pelo tratamento de dados pessoais pode ser contatado pelo e-mail publicidade@revistamagnum.com.br. Responderemos às solicitações em até 15 dias úteis.`,
-  },
-];
+export default async function PoliticaPrivacidadePage() {
+  const data    = await getPageContent();
+  const titulo  = data["page.privacidade.title"]   || "Política de Privacidade";
+  const content = data["page.privacidade.content"] || null;
 
-export default function PoliticaDePrivacidadePage() {
   return (
     <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
-      <main className="flex-1 pt-16">
-        <div className="h-[4px] bg-[#ff1f1f] w-full" />
-
-        <div className="max-w-[860px] mx-auto px-5 py-14">
-
-          {/* Header */}
-          <div className="mb-10">
-            <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase mb-3">Legal</p>
-            <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[44px] leading-none mb-4">
-              Política de Privacidade
-            </h1>
-            <p className="text-[#526888] text-[13px]">Última atualização: {LAST_UPDATED}</p>
+      <main className="flex-1 mt-16">
+        <section className="hero-metal px-5 lg:px-20 pt-14 pb-12 border-b border-[#141d2c]">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-[6px] h-[6px] bg-[#ff1f1f] rounded-full" />
+            <span className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase">Legal · LGPD</span>
           </div>
-
-          {/* LGPD badge */}
-          <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5 mb-8">
-            <div className="flex items-start gap-4">
-              <div className="bg-[#141d2c] w-[44px] h-[44px] rounded-[8px] flex items-center justify-center shrink-0 text-[20px]">
-                🔒
-              </div>
-              <div>
-                <p className="text-white text-[14px] font-semibold mb-1">Conformidade com a LGPD</p>
-                <p className="text-[#7a9ab5] text-[13px] leading-[22px]">
-                  Esta política está em conformidade com a Lei Geral de Proteção de Dados Pessoais (LGPD — Lei 13.709/2018).
-                  Seus dados são tratados com responsabilidade e transparência.
-                </p>
-              </div>
+          <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[52px] lg:text-[64px] leading-[0.95] mb-3">{titulo}</h1>
+          <p className="text-[#526888] text-[14px]">Última atualização: 17 de abril de 2026 · Lei nº 13.709/2018 — LGPD</p>
+        </section>
+        <section className="px-5 lg:px-20 py-12 lg:py-16">
+          <div className="max-w-[820px]">
+            {content ? (
+              <div className="text-[#d4d4da] text-[15px] leading-[1.8] [&_h1]:hidden [&_h2]:font-bold [&_h2]:text-white [&_h2]:text-[22px] [&_h2]:mt-10 [&_h2]:mb-3 [&_h2]:pb-2 [&_h2]:border-b [&_h2]:border-[#141d2c] [&_h3]:text-white [&_h3]:font-semibold [&_h3]:text-[17px] [&_h3]:mt-5 [&_h3]:mb-2 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-4 [&_ul]:space-y-1 [&_li]:text-[#7a9ab5] [&_strong]:text-white [&_a]:text-[#ff1f1f] [&_a]:underline [&_table]:w-full [&_table]:border-collapse [&_table]:mb-6 [&_td]:border [&_td]:border-[#1c2a3e] [&_td]:px-3 [&_td]:py-2 [&_td]:text-[14px] [&_td]:text-[#7a9ab5] [&_th]:border [&_th]:border-[#1c2a3e] [&_th]:px-3 [&_th]:py-2 [&_th]:text-[13px] [&_th]:text-[#7a9ab5] [&_th]:bg-[#141d2c] [&_th]:text-left"
+                dangerouslySetInnerHTML={{ __html: content }} />
+            ) : (
+              <PrivacidadeContent />
+            )}
+            <div className="mt-12 pt-6 border-t border-[#141d2c] flex flex-wrap gap-5 text-[13px]">
+              <Link href="/termos-de-uso" className="text-[#7a9ab5] hover:text-white transition-colors">Termos de Uso →</Link>
+              <Link href="/contato" className="text-[#7a9ab5] hover:text-white transition-colors">Exercer direitos LGPD →</Link>
             </div>
           </div>
-
-          {/* Sections */}
-          <div className="flex flex-col gap-6">
-            {sections.map((s) => (
-              <div key={s.title} className="border-b border-[#141d2c] pb-6 last:border-0">
-                <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[20px] mb-3">
-                  {s.title}
-                </h2>
-                <p className="text-[#7a9ab5] text-[14px] leading-[24px] whitespace-pre-line">
-                  {s.content}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {/* Footer links */}
-          <div className="mt-10 pt-8 border-t border-[#141d2c] flex flex-wrap gap-4 text-[13px]">
-            <Link href="/termos-de-uso" className="text-[#526888] hover:text-white transition-colors">
-              Termos de Uso →
-            </Link>
-            <a href="mailto:publicidade@revistamagnum.com.br" className="text-[#526888] hover:text-white transition-colors">
-              Contato: publicidade@revistamagnum.com.br
-            </a>
-          </div>
-        </div>
+        </section>
       </main>
       <Footer />
+    </div>
+  );
+}
+
+function PrivacidadeContent() {
+  return (
+    <div className="flex flex-col">
+      {[
+        {
+          title: "1. Controlador dos Dados",
+          body: "Empresa: Revista Magnum — Endereço: Rua Barão de Suruí, 164 — CEP 04612-120 — São Paulo/SP — E-mail: privacidade@revistamagnum.com.br — Telefone: (11) 5044-3924 — Site: https://revistamagnum.com.br",
+        },
+        {
+          title: "2. Dados Pessoais Coletados",
+          items: [
+            "Cadastro: nome completo, e-mail e senha (armazenada com hash seguro);",
+            "Assinatura: dados de pagamento processados pelo gateway (não armazenamos dados de cartão);",
+            "Loja: endereço de entrega e CPF para emissão de nota fiscal;",
+            "Formulários: nome, e-mail, telefone e mensagem;",
+            "Automáticos: IP, navegador, dispositivo, páginas visitadas e tempo de permanência.",
+          ],
+        },
+        {
+          title: "3. Finalidade e Base Legal (LGPD)",
+          items: [
+            "Criação e gestão de conta: execução de contrato (art. 7º, V);",
+            "Processamento de pagamentos: execução de contrato (art. 7º, V);",
+            "E-mails transacionais (confirmações, redefinição de senha): execução de contrato (art. 7º, V);",
+            "Comunicações de marketing e novidades: consentimento (art. 7º, I);",
+            "Análise e melhoria do Site: interesse legítimo (art. 7º, IX);",
+            "Cumprimento de obrigações fiscais: obrigação legal (art. 7º, II);",
+            "Prevenção a fraudes e segurança: interesse legítimo (art. 7º, IX).",
+          ],
+        },
+        {
+          title: "4. Compartilhamento de Dados",
+          items: [
+            "Processadores de pagamento (Mercado Pago, Stripe) — para processamento seguro de transações;",
+            "Serviços de infraestrutura (Supabase, Hostinger) — para armazenamento e hospedagem;",
+            "Serviços de e-mail — para envio de comunicações transacionais;",
+            "Autoridades públicas — quando exigido por lei, ordem judicial ou regulação aplicável.",
+          ],
+        },
+        {
+          title: "5. Segurança dos Dados",
+          items: [
+            "Criptografia HTTPS em todas as comunicações;",
+            "Senhas armazenadas com hash seguro (bcrypt);",
+            "Controle de acesso restrito a dados pessoais;",
+            "Monitoramento contínuo de vulnerabilidades e incidentes.",
+          ],
+        },
+        {
+          title: "6. Retenção de Dados",
+          items: [
+            "Dados de conta: enquanto ativa, mais 5 anos após encerramento (fins fiscais);",
+            "Dados de transações: 5 anos (obrigação fiscal);",
+            "Logs de acesso: 6 meses (Marco Civil da Internet — Lei nº 12.965/2014);",
+            "Dados de marketing: até o cancelamento do consentimento.",
+          ],
+        },
+        {
+          title: "7. Seus Direitos (LGPD — art. 18)",
+          items: [
+            "Confirmar a existência de tratamento de seus dados;",
+            "Acessar os dados que temos sobre você;",
+            "Corrigir dados incompletos, inexatos ou desatualizados;",
+            "Solicitar a anonimização, bloqueio ou eliminação de dados desnecessários;",
+            "Revogar o consentimento para tratamentos baseados em consentimento;",
+            "Solicitar a portabilidade dos seus dados para outro fornecedor.",
+          ],
+        },
+        {
+          title: "8. Cookies e Rastreamento",
+          items: [
+            "Cookies essenciais: mantêm sua sessão autenticada (necessários para funcionamento);",
+            "Cookies analíticos: entendem como os usuários navegam — Google Analytics 4 (dados anonimizados);",
+            "Cookies de publicidade: Google Ads, Meta Pixel — mediante consentimento.",
+          ],
+        },
+        {
+          title: "9. Menores de Idade",
+          body: "Nossos serviços destinam-se exclusivamente a maiores de 18 anos. Não coletamos intencionalmente dados de menores. Caso identifique tal situação, entre em contato imediatamente em privacidade@revistamagnum.com.br.",
+        },
+        {
+          title: "10. Alterações desta Política",
+          body: "Esta Política pode ser atualizada periodicamente para refletir mudanças em nossas práticas ou na legislação. Notificaremos você sobre alterações significativas por e-mail ou mediante aviso destacado no Site.",
+        },
+        {
+          title: "11. Contato e Encarregado (DPO)",
+          items: [
+            "E-mail: privacidade@revistamagnum.com.br",
+            "Endereço: Rua Barão de Suruí, 164 — CEP 04612-120 — São Paulo/SP",
+            "Telefone: (11) 5044-3924",
+            "ANPD: www.gov.br/anpd — para registrar reclamações junto ao órgão regulador.",
+          ],
+        },
+      ].map((s, i) => (
+        <div key={i} className="py-6 border-b border-[#141d2c] last:border-0">
+          <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[22px] mb-3">{s.title}</h2>
+          {s.body && <p className="text-[#7a9ab5] text-[14px] leading-[26px]">{s.body}</p>}
+          {s.items && <ul className="list-disc pl-5 space-y-1.5">{s.items.map((item, j) => <li key={j} className="text-[#7a9ab5] text-[14px] leading-[24px]">{item}</li>)}</ul>}
+        </div>
+      ))}
     </div>
   );
 }
