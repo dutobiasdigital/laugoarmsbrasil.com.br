@@ -32,8 +32,35 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const payload = {
+      tradeName:       body.tradeName,
+      email:           body.email           || null,
+      phone:           body.phone           || null,
+      segment:         body.segment         || "OUTROS",
+      listingType:     body.listingType     || "NONE",
+      legalName:       body.legalName       || null,
+      cnpj:            body.cnpj            || null,
+      website:         body.website         || null,
+      instagram:       body.instagram       || null,
+      whatsappNumber:  body.whatsappNumber  || null,
+      whatsappMessage: body.whatsappMessage || null,
+      address:         body.address         || null,
+      city:            body.city            || null,
+      state:           body.state           || null,
+      zip:             body.zip             || null,
+      description:     body.description     || null,
+      logoUrl:         body.logoUrl         || null,
+      coverImageUrl:   body.coverImageUrl   || null,
+      notes:           body.notes           || null,
+      // campos obrigatórios com defaults
+      pipelineStatus:  "REGISTERED",
+      emailVerified:   false,
+      featured:        false,
+      viewsCount:      0,
+      clicksCount:     0,
+    };
     const res = await fetch(`${BASE}/companies`, {
-      method: "POST", headers: HEADERS, body: JSON.stringify(body),
+      method: "POST", headers: HEADERS, body: JSON.stringify(payload),
     });
     const data = await res.json();
     if (!res.ok) return NextResponse.json({ error: data.message ?? "Erro ao criar." }, { status: 500 });
