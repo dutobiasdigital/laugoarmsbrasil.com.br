@@ -10,6 +10,8 @@ const RichEditor = dynamic(() => import("@/components/admin/RichEditor"), { ssr:
 
 const inputCls =
   "bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full";
+const textareaCls =
+  "bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] px-3 py-2.5 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full resize-none";
 const labelCls = "block text-[#7a9ab5] text-[12px] font-semibold mb-1.5";
 
 interface TocItem { page: string; title: string; category: string; }
@@ -27,6 +29,7 @@ interface Props {
     editorial: string | null;
     tableOfContents: string | null;
     pageCount: number | null;
+    summary: string | null;
     coverImageUrl: string | null;
     pdfStoragePath: string | null;
     pageFlipUrl: string | null;
@@ -35,6 +38,10 @@ interface Props {
     publishedAt: string | null;
     editorialPageFiles?: string[];
     indexPageFiles?: string[];
+    seoTitle: string | null;
+    seoDescription: string | null;
+    seoKeywords: string | null;
+    canonicalUrl: string | null;
   };
   editorialPageUrls?: MarkedPage[];
   indexPageUrls?: MarkedPage[];
@@ -161,6 +168,14 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
   const [addingCat, setAddingCat] = useState(false);
   const [savingCat, setSavingCat] = useState(false);
 
+  const [seoTitle,       setSeoTitle]       = useState(edition.seoTitle       ?? "");
+  const [seoDescription, setSeoDescription] = useState(edition.seoDescription ?? "");
+  const [seoKeywords,    setSeoKeywords]    = useState(edition.seoKeywords    ?? "");
+  const [canonicalUrl,   setCanonicalUrl]   = useState(edition.canonicalUrl   ?? "");
+
+  const seoTitleCount = seoTitle.length;
+  const seoDescCount  = seoDescription.length;
+
   const folder = editionType === "REGULAR" ? "edicoes/regular" : "edicoes/especiais";
   const filename = editionNumber ? `ed${String(editionNumber).padStart(3, "0")}-capa` : undefined;
 
@@ -226,6 +241,10 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
       editorial,
       tableOfContents: JSON.stringify(tocItems.filter((t) => t.title)),
       isOnNewstand,
+      seoTitle,
+      seoDescription,
+      seoKeywords,
+      canonicalUrl,
     };
     const res = await fetch("/api/admin/edicoes", {
       method: "PUT",
@@ -263,6 +282,24 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
           <div>
             <label className={labelCls}>Slug (URL)</label>
             <input name="slug" defaultValue={edition.slug} className={inputCls} />
+          </div>
+
+          {/* Chamada / Resumo */}
+          <div className="lg:col-span-2">
+            <label className={labelCls}>
+              Chamada da Edição
+              <span className="text-[#3a4a5e] font-normal ml-1">(texto puro — resumo das matérias)</span>
+            </label>
+            <textarea
+              name="summary"
+              rows={3}
+              defaultValue={edition.summary ?? ""}
+              placeholder="Ex: Nesta edição: colecionismo de revólveres históricos, entrevista com campeão do IPSC, as melhores pistolas compactas para porte..."
+              className={textareaCls}
+            />
+            <p className="text-[#3a4a5e] text-[11px] mt-1">
+              Aparece como subtítulo/chamada na página da edição e em listagens. Sem formatação HTML.
+            </p>
           </div>
 
           {/* Número */}
@@ -508,6 +545,64 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
                 </div>
               ))
             )}
+          </div>
+        </div>
+
+        {/* ── SEO ── */}
+        <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5 mb-8">
+          <p className="text-[#ff1f1f] text-[10px] font-bold tracking-[1.5px] uppercase mb-4">SEO</p>
+          <div className="flex flex-col gap-4">
+            <div>
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="block text-[#7a9ab5] text-[12px] font-semibold">Título SEO</label>
+                <span className={`text-[11px] ${seoTitleCount > 70 ? "text-red-400" : seoTitleCount > 60 ? "text-amber-400" : "text-[#526888]"}`}>
+                  {seoTitleCount}/70
+                </span>
+              </div>
+              <input
+                value={seoTitle}
+                onChange={(e) => setSeoTitle(e.target.value)}
+                className={inputCls}
+                placeholder="Título para os mecanismos de busca (deixe vazio para usar o título da edição)"
+                maxLength={70}
+              />
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="block text-[#7a9ab5] text-[12px] font-semibold">Descrição SEO</label>
+                <span className={`text-[11px] ${seoDescCount > 160 ? "text-red-400" : seoDescCount > 130 ? "text-amber-400" : "text-[#526888]"}`}>
+                  {seoDescCount}/160
+                </span>
+              </div>
+              <textarea
+                rows={3}
+                value={seoDescription}
+                onChange={(e) => setSeoDescription(e.target.value)}
+                className={textareaCls}
+                placeholder="Resumo atrativo para aparecer nos resultados do Google. Até 160 caracteres."
+                maxLength={200}
+              />
+            </div>
+            <div>
+              <label className="block text-[#7a9ab5] text-[12px] font-semibold mb-1.5">Palavras-chave</label>
+              <input
+                value={seoKeywords}
+                onChange={(e) => setSeoKeywords(e.target.value)}
+                className={inputCls}
+                placeholder="Ex: revólver, tiro esportivo, IPSC, munição, defesa pessoal"
+              />
+              <p className="text-[#526888] text-[11px] mt-1">Separadas por vírgula.</p>
+            </div>
+            <div>
+              <label className="block text-[#7a9ab5] text-[12px] font-semibold mb-1.5">URL Canônica</label>
+              <input
+                value={canonicalUrl}
+                onChange={(e) => setCanonicalUrl(e.target.value)}
+                className={inputCls}
+                placeholder="https://revistamagnum.com.br/edicoes/... (opcional)"
+              />
+              <p className="text-[#526888] text-[11px] mt-1">Preencha apenas se esta edição for uma cópia de outro URL.</p>
+            </div>
           </div>
         </div>
 

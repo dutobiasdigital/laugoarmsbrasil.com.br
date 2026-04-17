@@ -23,6 +23,7 @@ export default async function EditarEdicaoPage({
     slug: string;
     number: number | null;
     type: string;
+    summary: string | null;
     editorial: string | null;
     tableOfContents: string | null;
     pageCount: number | null;
@@ -34,11 +35,15 @@ export default async function EditarEdicaoPage({
     publishedAt: string | null;
     editorialPageFiles: string[] | null;
     indexPageFiles: string[] | null;
+    seoTitle: string | null;
+    seoDescription: string | null;
+    seoKeywords: string | null;
+    canonicalUrl: string | null;
   } | null = null;
 
   try {
     const res = await fetch(
-      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,editorial,tableOfContents,pageCount,coverImageUrl,pdfStoragePath,pageFlipUrl,isPublished,isOnNewstand,publishedAt,editorialPageFiles,indexPageFiles&limit=1`,
+      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,summary,editorial,tableOfContents,pageCount,coverImageUrl,pdfStoragePath,pageFlipUrl,isPublished,isOnNewstand,publishedAt,editorialPageFiles,indexPageFiles,seoTitle,seoDescription,seoKeywords,canonicalUrl&limit=1`,
       { headers: HEADERS, cache: "no-store" }
     );
     const data = await res.json();
@@ -82,7 +87,7 @@ export default async function EditarEdicaoPage({
     ...ed,
     editorialPageFiles: ed.editorialPageFiles ?? [],
     indexPageFiles:     ed.indexPageFiles     ?? [],
-    publishedAt: ed.publishedAt ? ed.publishedAt.slice(0, 10) : null,
+    publishedAt:        ed.publishedAt ? ed.publishedAt.slice(0, 10) : null,
   };
 
   return (
