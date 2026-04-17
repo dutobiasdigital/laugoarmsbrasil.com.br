@@ -79,7 +79,7 @@ export default async function HomePage() {
         { headers: HEADERS, cache: "no-store" }
       ),
       fetch(
-        `${BASE}/editions?isPublished=eq.true&type=eq.REGULAR&order=publishedAt.desc&limit=3&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount`,
+        `${BASE}/editions?isPublished=eq.true&type=eq.REGULAR&order=publishedAt.desc&limit=4&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount`,
         { headers: HEADERS, cache: "no-store" }
       ),
       fetch(
@@ -107,7 +107,7 @@ export default async function HomePage() {
 
     if (specialPoolRes.ok) {
       const pool: EditionCard[] = await specialPoolRes.json();
-      specialEditions = pickRandom(pool, 3);
+      specialEditions = pickRandom(pool, 4);
     }
 
     if (settingsRes.ok) {
@@ -291,8 +291,8 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {(specialEditions.length > 0 ? specialEditions : Array(3).fill(null)).map((edition, i) => (
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {(specialEditions.length > 0 ? specialEditions : Array(4).fill(null)).map((edition, i) => (
                 <Link
                   key={edition?.id ?? i}
                   href={edition ? `/edicoes/${edition.slug}` : "#"}
@@ -337,8 +337,8 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {(regularEditions.length > 0 ? regularEditions : Array(3).fill(null)).map((edition, i) => (
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {(regularEditions.length > 0 ? regularEditions : Array(4).fill(null)).map((edition, i) => (
                 <Link
                   key={edition?.id ?? i}
                   href={edition ? `/edicoes/${edition.slug}` : "#"}
