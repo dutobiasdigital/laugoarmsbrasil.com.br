@@ -117,18 +117,18 @@ export default function WelcomeBanner() {
           </div>
 
           {/* Stats */}
-          <div className="flex items-center flex-wrap gap-0">
+          <div className="flex items-center flex-nowrap gap-0">
             {STATS.map((stat, i) => (
               <div
                 key={i}
-                className="flex items-center gap-3 px-5 first:pl-0"
+                className="flex items-center gap-2 px-3 lg:px-5 first:pl-0"
                 style={{ borderLeft: i === 0 ? "none" : "1px solid rgba(20,29,44,1)" }}
               >
                 <span className="font-['Barlow_Condensed'] font-extrabold text-white leading-none"
-                  style={{ fontSize: "clamp(24px, 2.8vw, 34px)" }}>
+                  style={{ fontSize: "clamp(20px, 2.8vw, 34px)" }}>
                   {stat.value}
                 </span>
-                <span className="text-[#526888] text-[11px] leading-snug whitespace-pre-line">
+                <span className="text-[#526888] text-[10px] lg:text-[11px] leading-snug whitespace-pre-line">
                   {stat.label}
                 </span>
               </div>
