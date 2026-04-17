@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { CATEGORIES, PLAN_LABELS } from "@/lib/guia";
+import { CATEGORIES, PLAN_LABELS, categoryBySegment } from "@/lib/guia";
 
 export const dynamic = "force-dynamic";
 
@@ -12,13 +12,22 @@ export const metadata = {
 
 const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const H        = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
 
-interface Listing {
-  id: string; slug: string; name: string; category: string;
-  plan: string; city: string; state: string;
-  logoUrl: string | null; description: string | null;
-  phone: string | null; whatsapp: string | null; website: string | null;
-  featured: boolean; viewsCount: number;
+interface Company {
+  id: string;
+  tradeName: string;
+  segment: string;
+  listingType: string;
+  city: string | null;
+  state: string | null;
+  logoUrl: string | null;
+  description: string | null;
+  phone: string | null;
+  whatsappNumber: string | null;
+  website: string | null;
+  featured: boolean;
+  viewsCount: number;
 }
 
 interface GuidePlan {
@@ -38,18 +47,18 @@ async function getGuidePlans(): Promise<GuidePlan[]> {
   try {
     const res = await fetch(
       `https://${PROJECT}.supabase.co/rest/v1/guide_plans?active=eq.true&order=sortOrder.asc&select=id,name,listingType,priceInCents,intervalMonths,features,highlight,badge,buttonText,sortOrder`,
-      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, cache: "no-store" }
+      { headers: H, cache: "no-store" }
     );
     const d = await res.json();
     return Array.isArray(d) ? d : [];
   } catch { return []; }
 }
 
-async function getDestaques(): Promise<Listing[]> {
+async function getDestaques(): Promise<Company[]> {
   try {
     const res = await fetch(
-      `https://${PROJECT}.supabase.co/rest/v1/guide_listings?status=eq.ACTIVE&plan=in.(DESTAQUE,PREMIUM)&select=id,slug,name,category,plan,city,state,logoUrl,description,phone,whatsapp,website,featured,viewsCount&order=featured.desc,plan.desc&limit=6`,
-      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, cache: "no-store" }
+      `https://${PROJECT}.supabase.co/rest/v1/companies?pipelineStatus=eq.ACTIVE&listingType=in.(DESTAQUE,PREMIUM)&select=id,tradeName,segment,listingType,city,state,logoUrl,description,phone,whatsappNumber,website,featured,viewsCount&order=featured.desc,listingType.desc&limit=6`,
+      { headers: H, cache: "no-store" }
     );
     const d = await res.json();
     return Array.isArray(d) ? d : [];
@@ -59,8 +68,8 @@ async function getDestaques(): Promise<Listing[]> {
 async function getTotal(): Promise<number> {
   try {
     const res = await fetch(
-      `https://${PROJECT}.supabase.co/rest/v1/guide_listings?status=eq.ACTIVE&select=id`,
-      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Prefer": "count=exact" }, cache: "no-store" }
+      `https://${PROJECT}.supabase.co/rest/v1/companies?pipelineStatus=eq.ACTIVE&select=id`,
+      { headers: { ...H, Prefer: "count=exact" }, cache: "no-store" }
     );
     const range = res.headers.get("content-range");
     if (range) return parseInt(range.split("/")[1]) || 0;
@@ -144,8 +153,8 @@ export default async function GuiaPage() {
               Parceiros do Guia Magnum
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {destaques.map((l) => (
-                <ListingCard key={l.id} listing={l} />
+              {destaques.map((co) => (
+                <CompanyCard key={co.id} company={co} />
               ))}
             </div>
           </section>
@@ -230,38 +239,37 @@ export default async function GuiaPage() {
   );
 }
 
-/* ── Card de listing ──────────────────────────────────────────── */
-function ListingCard({ listing }: { listing: Listing }) {
-  const cat = CATEGORIES.find(c => c.value === listing.category);
-  const pl  = PLAN_LABELS[listing.plan];
+/* ── Company card ──────────────────────────────────────────── */
+function CompanyCard({ company }: { company: Company }) {
+  const cat = categoryBySegment(company.segment);
+  const pl  = PLAN_LABELS[company.listingType] ?? PLAN_LABELS["FREE"];
   return (
-    <Link href={`/guia/empresa/${listing.slug}`}
+    <Link href={`/guia/empresa/${company.id}`}
       className="group bg-[#0e1520] border border-[#141d2c] hover:border-[#ff1f1f]/30 rounded-[12px] overflow-hidden flex flex-col transition-all">
-      {/* Header colorido */}
       <div className="h-[80px] bg-[#141d2c] flex items-center px-5 gap-4">
-        {listing.logoUrl ? (
+        {company.logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={listing.logoUrl} alt={listing.name} className="w-[48px] h-[48px] object-contain rounded-[6px] bg-[#0e1520] shrink-0" />
+          <img src={company.logoUrl} alt={company.tradeName} className="w-[48px] h-[48px] object-contain rounded-[6px] bg-[#0e1520] shrink-0" />
         ) : (
           <div className="w-[48px] h-[48px] bg-[#0e1520] rounded-[6px] flex items-center justify-center text-[22px] shrink-0">
             {cat?.icon ?? "🏢"}
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <p className="text-white text-[15px] font-bold truncate group-hover:text-[#ff1f1f] transition-colors">{listing.name}</p>
-          <p className="text-[#526888] text-[12px]">{listing.city} · {listing.state}</p>
+          <p className="text-white text-[15px] font-bold truncate group-hover:text-[#ff1f1f] transition-colors">{company.tradeName}</p>
+          <p className="text-[#526888] text-[12px]">{company.city} · {company.state}</p>
         </div>
-        {listing.plan !== "FREE" && (
+        {company.listingType !== "FREE" && company.listingType !== "NONE" && (
           <span className={`text-[10px] font-bold px-2 py-[3px] rounded-[3px] shrink-0 ${pl.color}`}>{pl.label}</span>
         )}
       </div>
       <div className="p-4 flex flex-col gap-3 flex-1">
-        {listing.description && (
-          <p className="text-[#7a9ab5] text-[13px] leading-[20px] line-clamp-2">{listing.description}</p>
+        {company.description && (
+          <p className="text-[#7a9ab5] text-[13px] leading-[20px] line-clamp-2">{company.description}</p>
         )}
         <div className="flex items-center justify-between mt-auto">
           <span className="flex items-center gap-1.5 text-[#526888] text-[11px]">
-            <span>{cat?.icon}</span> {cat?.label}
+            <span>{cat?.icon}</span> {cat?.label ?? company.segment}
           </span>
           <span className="text-[#ff1f1f] text-[12px] font-semibold group-hover:translate-x-1 transition-transform">
             Ver perfil →

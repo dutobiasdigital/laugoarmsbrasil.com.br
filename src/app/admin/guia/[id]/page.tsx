@@ -46,7 +46,6 @@ interface Company {
   featured: boolean;
   emailVerified: boolean;
   viewsCount: number;
-  clicksCount: number;
 }
 
 export default function EditarEmpresaGuiaPage() {
@@ -157,7 +156,7 @@ export default function EditarEmpresaGuiaPage() {
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none">{company.tradeName}</h1>
           <div className="flex items-center gap-2 mt-2">
             <span className={`text-[10px] font-bold px-2 py-[3px] rounded-[3px] ${currentStatus.color}`}>{currentStatus.label}</span>
-            <span className="text-[#526888] text-[12px] font-mono">{company.viewsCount} views · {company.clicksCount} cliques</span>
+            <span className="text-[#526888] text-[12px] font-mono">{company.viewsCount} views</span>
           </div>
         </div>
       </div>

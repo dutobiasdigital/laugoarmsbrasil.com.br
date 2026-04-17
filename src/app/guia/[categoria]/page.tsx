@@ -4,29 +4,36 @@ import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CategoryViewTracker from "@/components/CategoryViewTracker";
-import { CATEGORIES, STATES, PLAN_LABELS, categoryBySlug } from "@/lib/guia";
+import { CATEGORIES, STATES, PLAN_LABELS, categoryBySlug, categoryBySegment, slugToSegments } from "@/lib/guia";
 
 export const dynamic = "force-dynamic";
 
 const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const H        = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
 
-interface Listing {
-  id: string; slug: string; name: string; category: string;
-  plan: string; city: string; state: string;
-  logoUrl: string | null; description: string | null;
-  phone: string | null; whatsapp: string | null; website: string | null;
-  featured: boolean; viewsCount: number;
+interface Company {
+  id: string;
+  tradeName: string;
+  segment: string;
+  listingType: string;
+  city: string | null;
+  state: string | null;
+  logoUrl: string | null;
+  description: string | null;
+  phone: string | null;
+  whatsappNumber: string | null;
+  website: string | null;
+  featured: boolean;
+  viewsCount: number;
 }
 
-async function getListings(categoryValue: string, state?: string): Promise<Listing[]> {
+async function getCompanies(segments: string[], state?: string): Promise<Company[]> {
   try {
-    let url = `https://${PROJECT}.supabase.co/rest/v1/guide_listings?status=eq.ACTIVE&category=eq.${categoryValue}&select=id,slug,name,category,plan,city,state,logoUrl,description,phone,whatsapp,website,featured,viewsCount&order=featured.desc,plan.desc,createdAt.desc`;
+    const segList = segments.map(s => `"${s}"`).join(",");
+    let url = `https://${PROJECT}.supabase.co/rest/v1/companies?pipelineStatus=eq.ACTIVE&segment=in.(${segList})&select=id,tradeName,segment,listingType,city,state,logoUrl,description,phone,whatsappNumber,website,featured,viewsCount&order=featured.desc,listingType.desc,createdAt.desc`;
     if (state) url += `&state=eq.${encodeURIComponent(state)}`;
-    const res = await fetch(url, {
-      headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` },
-      cache: "no-store",
-    });
+    const res = await fetch(url, { headers: H, cache: "no-store" });
     const d = await res.json();
     return Array.isArray(d) ? d : [];
   } catch { return []; }
@@ -58,16 +65,13 @@ export default async function CategoriaPage({
   if (!cat) notFound();
 
   const estadoUpper = estado?.toUpperCase();
-  const listings = await getListings(cat.value, estadoUpper);
+  const segments    = slugToSegments(categoria);
+  const companies   = await getCompanies(segments, estadoUpper);
 
   return (
     <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
-      {/* Rastreia visualização da categoria do guia */}
-      <CategoryViewTracker
-        category={categoria}
-        endpoint="/api/guia/categoria/view"
-      />
+      <CategoryViewTracker category={categoria} endpoint="/api/guia/categoria/view" />
       <main className="flex-1 pt-16">
 
         {/* Breadcrumb */}
@@ -119,16 +123,16 @@ export default async function CategoriaPage({
 
         {/* Listings grid */}
         <section className="px-5 lg:px-20 py-10">
-          {listings.length === 0 ? (
+          {companies.length === 0 ? (
             <EmptyState catLabel={cat.label} />
           ) : (
             <>
               <p className="text-[#526888] text-[13px] mb-6">
-                {listings.length} empresa{listings.length !== 1 ? "s" : ""} encontrada{listings.length !== 1 ? "s" : ""}
+                {companies.length} empresa{companies.length !== 1 ? "s" : ""} encontrada{companies.length !== 1 ? "s" : ""}
                 {estadoUpper ? ` em ${estadoUpper}` : " no Brasil"}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {listings.map(l => <ListingCard key={l.id} listing={l} />)}
+                {companies.map(co => <CompanyCard key={co.id} company={co} />)}
               </div>
             </>
           )}
@@ -138,8 +142,8 @@ export default async function CategoriaPage({
         <section className="px-5 lg:px-20 pb-14">
           <div className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
             <div>
-              <p className="text-white text-[18px] font-bold mb-1">Sua empresa não está aqui?</p>
-              <p className="text-[#526888] text-[14px]">Cadastre-se gratuitamente e seja encontrado por 45 mil leitores.</p>
+              <p className="text-white text-[18px] font-bold mb-1">Sua empresa também pode estar aqui</p>
+              <p className="text-[#526888] text-[14px]">Cadastre-se gratuitamente. Upgrade para Premium ou Destaque a qualquer momento.</p>
             </div>
             <Link href="/guia/cadastrar"
               className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[48px] px-7 flex items-center rounded-[6px] transition-colors whitespace-nowrap">
@@ -154,34 +158,34 @@ export default async function CategoriaPage({
   );
 }
 
-/* ── Empty state ──────────────────────────────────────────────── */
 function EmptyState({ catLabel }: { catLabel: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <p className="text-[48px] mb-4">🔍</p>
-      <p className="font-['Barlow_Condensed'] font-bold text-white text-[28px] mb-2">Nenhuma empresa cadastrada</p>
-      <p className="text-[#526888] text-[15px] mb-8 max-w-[400px]">
-        Ainda não há empresas de {catLabel} cadastradas nesta região. Seja o primeiro!
+      <p className="font-['Barlow_Condensed'] font-bold text-white text-[28px] mb-2">
+        Nenhuma empresa em {catLabel}
+      </p>
+      <p className="text-[#526888] text-[14px] mb-8 max-w-[400px]">
+        Seja o primeiro a cadastrar sua empresa nesta categoria.
       </p>
       <Link href="/guia/cadastrar"
-        className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[48px] px-7 flex items-center rounded-[6px] transition-colors">
-        Cadastrar minha empresa →
+        className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[44px] px-6 flex items-center rounded-[6px] transition-colors">
+        Cadastrar gratuitamente →
       </Link>
     </div>
   );
 }
 
-/* ── Listing Card ─────────────────────────────────────────────── */
-function ListingCard({ listing }: { listing: Listing }) {
-  const cat = CATEGORIES.find(c => c.value === listing.category);
-  const pl  = PLAN_LABELS[listing.plan];
+function CompanyCard({ company }: { company: Company }) {
+  const cat = categoryBySegment(company.segment);
+  const pl  = PLAN_LABELS[company.listingType] ?? PLAN_LABELS["FREE"];
   return (
-    <Link href={`/guia/empresa/${listing.slug}`}
+    <Link href={`/guia/empresa/${company.id}`}
       className="group bg-[#0e1520] border border-[#141d2c] hover:border-[#ff1f1f]/30 rounded-[12px] overflow-hidden flex flex-col transition-all">
       <div className="h-[80px] bg-[#141d2c] flex items-center px-5 gap-4">
-        {listing.logoUrl ? (
+        {company.logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={listing.logoUrl} alt={listing.name}
+          <img src={company.logoUrl} alt={company.tradeName}
             className="w-[48px] h-[48px] object-contain rounded-[6px] bg-[#0e1520] shrink-0" />
         ) : (
           <div className="w-[48px] h-[48px] bg-[#0e1520] rounded-[6px] flex items-center justify-center text-[22px] shrink-0">
@@ -189,20 +193,20 @@ function ListingCard({ listing }: { listing: Listing }) {
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <p className="text-white text-[15px] font-bold truncate group-hover:text-[#ff1f1f] transition-colors">{listing.name}</p>
-          <p className="text-[#526888] text-[12px]">{listing.city} · {listing.state}</p>
+          <p className="text-white text-[15px] font-bold truncate group-hover:text-[#ff1f1f] transition-colors">{company.tradeName}</p>
+          <p className="text-[#526888] text-[12px]">{company.city} · {company.state}</p>
         </div>
-        {listing.plan !== "FREE" && (
+        {company.listingType !== "FREE" && company.listingType !== "NONE" && (
           <span className={`text-[10px] font-bold px-2 py-[3px] rounded-[3px] shrink-0 ${pl.color}`}>{pl.label}</span>
         )}
       </div>
       <div className="p-4 flex flex-col gap-3 flex-1">
-        {listing.description && (
-          <p className="text-[#7a9ab5] text-[13px] leading-[20px] line-clamp-2">{listing.description}</p>
+        {company.description && (
+          <p className="text-[#7a9ab5] text-[13px] leading-[20px] line-clamp-2">{company.description}</p>
         )}
         <div className="flex items-center justify-between mt-auto">
           <span className="flex items-center gap-1.5 text-[#526888] text-[11px]">
-            <span>{cat?.icon}</span> {cat?.label}
+            <span>{cat?.icon}</span> {cat?.label ?? company.segment}
           </span>
           <span className="text-[#ff1f1f] text-[12px] font-semibold group-hover:translate-x-1 transition-transform">
             Ver perfil →

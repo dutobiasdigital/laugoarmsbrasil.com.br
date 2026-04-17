@@ -5,10 +5,13 @@ const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
 export async function POST(req: NextRequest) {
   try {
-    const { slug } = await req.json();
-    if (!slug) return NextResponse.json({ ok: false });
+    const body = await req.json();
+    // Accepts { id } (company UUID) or legacy { slug } (ignored gracefully)
+    const id = body.id ?? body.slug;
+    if (!id) return NextResponse.json({ ok: false });
+
     await fetch(
-      `https://${PROJECT}.supabase.co/rest/v1/rpc/increment_guide_views`,
+      `https://${PROJECT}.supabase.co/rest/v1/rpc/increment_company_views`,
       {
         method: "POST",
         headers: {
@@ -16,7 +19,7 @@ export async function POST(req: NextRequest) {
           "apikey": SERVICE,
           "Authorization": `Bearer ${SERVICE}`,
         },
-        body: JSON.stringify({ p_slug: slug }),
+        body: JSON.stringify({ p_id: id }),
       }
     );
     return NextResponse.json({ ok: true });
