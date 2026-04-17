@@ -54,7 +54,7 @@ export default function WelcomeBanner() {
   const slide = SLIDES[current];
 
   return (
-    <section className="hero-metal relative overflow-hidden min-h-[380px] lg:min-h-[420px] flex items-center">
+    <section className="hero-metal relative overflow-hidden min-h-[530px] lg:min-h-[530px] flex items-center">
 
       {/* ── Grade decorativa ──────────────────────────────────── */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
