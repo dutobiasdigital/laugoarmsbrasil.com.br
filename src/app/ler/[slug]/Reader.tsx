@@ -132,17 +132,28 @@ interface ReaderProps {
   slug: string;
   editionTitle: string;
   backUrl: string;
-  initialPage?: number; // página inicial (vinda do índice, 1-based)
+  initialPage?: number;
+  editionId?: string;
+  isLoggedIn?: boolean;
+  initialIsFavorited?: boolean;
 }
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-export default function Reader({ slug, editionTitle, backUrl, initialPage }: ReaderProps) {
+export default function Reader({
+  slug,
+  editionTitle,
+  backUrl,
+  initialPage,
+  editionId,
+  isLoggedIn = false,
+  initialIsFavorited = false,
+}: ReaderProps) {
   const router = useRouter();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const bookRef    = useRef<any>(null);
-  const areaRef    = useRef<HTMLDivElement>(null);   // container do livro
-  const wrapperRef = useRef<HTMLDivElement>(null);   // wrapper com transform
+  const areaRef    = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [pages,        setPages]        = useState<string[]>([]);
   const [loading,      setLoading]      = useState(true);
@@ -153,17 +164,43 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [ready,        setReady]        = useState(false);
 
-  // ── Zoom / Pan ──────────────────────────────────────────────────────────────
-  const [zoom,      setZoom]      = useState(1);
-  const [pan,       setPan]       = useState({ x: 0, y: 0 });
-  const isPanning   = useRef(false);
-  const panStart    = useRef({ mx: 0, my: 0, ox: 0, oy: 0 });
-  const pinchDist   = useRef(0);
+  // ── Favorito ────────────────────────────────────────────────────────────────
+  const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
+  const [favLoading,  setFavLoading]  = useState(false);
 
-  // Reseta pan quando zoom volta a 1
+  const toggleFavorite = useCallback(async () => {
+    if (!isLoggedIn || !editionId || favLoading) return;
+    setFavLoading(true);
+    try {
+      const res = await fetch("/api/favorites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contentType: "edition", contentId: editionId }),
+      });
+      const data = await res.json();
+      setIsFavorited(data.favorited);
+    } catch { /* ignore */ }
+    setFavLoading(false);
+  }, [isLoggedIn, editionId, favLoading]);
+
+  // ── Zoom / Pan ──────────────────────────────────────────────────────────────
+  const [zoom,         setZoom]        = useState(1);
+  const [pan,          setPan]         = useState({ x: 0, y: 0 });
+  const [isGesturing,  setIsGesturing] = useState(false); // disable transition during gesture
+
+  // Mouse pan
+  const isPanning     = useRef(false);
+  const panStart      = useRef({ mx: 0, my: 0, ox: 0, oy: 0 });
+
+  // Touch pan (single finger when zoomed)
+  const touchPanning  = useRef(false);
+  const touchPanStart = useRef({ x: 0, y: 0, ox: 0, oy: 0 });
+  const pinchDist     = useRef(0);
+
   const resetZoom = useCallback(() => {
     setZoom(1);
     setPan({ x: 0, y: 0 });
+    setIsGesturing(false);
   }, []);
 
   const zoomIn  = useCallback(() => setZoom((z) => clampZoom(z + ZOOM_STEP)), []);
@@ -212,7 +249,6 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
   useEffect(() => {
     const area = areaRef.current;
     if (!area) return;
-
     function onWheel(e: WheelEvent) {
       e.preventDefault();
       const delta = e.deltaY > 0 ? -0.1 : 0.1;
@@ -222,17 +258,16 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
         return next;
       });
     }
-
     area.addEventListener("wheel", onWheel, { passive: false });
     return () => area.removeEventListener("wheel", onWheel);
   }, []);
 
-  // ── Arrasto para pan (mouse) ──────────────────────────────────────────────
+  // ── Mouse: pan (só no overlay — quando zoom > 1) ─────────────────────────
   const onMouseDown = useCallback((e: React.MouseEvent) => {
-    if (zoom <= 1) return;
     isPanning.current = true;
+    setIsGesturing(true);
     panStart.current = { mx: e.clientX, my: e.clientY, ox: pan.x, oy: pan.y };
-  }, [zoom, pan]);
+  }, [pan]);
 
   const onMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isPanning.current) return;
@@ -243,10 +278,13 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
     setPan(clampPan(raw.x, raw.y, zoom));
   }, [zoom, clampPan]);
 
-  const stopPan = useCallback(() => { isPanning.current = false; }, []);
+  const stopPan = useCallback(() => {
+    isPanning.current = false;
+    setIsGesturing(false);
+  }, []);
 
-  // ── Pinch-to-zoom (touch) ─────────────────────────────────────────────────
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
+  // ── Touch: pinch inicial quando zoom = 1 (no areaRef) ─────────────────────
+  const onTouchStartArea = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 2) {
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
@@ -254,9 +292,8 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
     }
   }, []);
 
-  const onTouchMove = useCallback((e: React.TouchEvent) => {
+  const onTouchMoveArea = useCallback((e: React.TouchEvent) => {
     if (e.touches.length !== 2) return;
-    e.preventDefault?.();
     const dx   = e.touches[0].clientX - e.touches[1].clientX;
     const dy   = e.touches[0].clientY - e.touches[1].clientY;
     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -269,6 +306,52 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
     });
   }, []);
 
+  // ── Touch: overlay quando zoom > 1 (pan + pinch sem conflito com FlipBook) ─
+  const onTouchStartZoomed = useCallback((e: React.TouchEvent) => {
+    setIsGesturing(true);
+    if (e.touches.length === 2) {
+      touchPanning.current = false;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchDist.current = Math.sqrt(dx * dx + dy * dy);
+    } else if (e.touches.length === 1) {
+      touchPanning.current = true;
+      touchPanStart.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        ox: pan.x,
+        oy: pan.y,
+      };
+    }
+  }, [pan]);
+
+  const onTouchMoveZoomed = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      touchPanning.current = false;
+      const dx   = e.touches[0].clientX - e.touches[1].clientX;
+      const dy   = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const ratio = dist / (pinchDist.current || dist);
+      pinchDist.current = dist;
+      setZoom((z) => {
+        const next = clampZoom(z * ratio);
+        if (next <= 1) setPan({ x: 0, y: 0 });
+        return next;
+      });
+    } else if (e.touches.length === 1 && touchPanning.current) {
+      const raw = {
+        x: touchPanStart.current.ox + e.touches[0].clientX - touchPanStart.current.x,
+        y: touchPanStart.current.oy + e.touches[0].clientY - touchPanStart.current.y,
+      };
+      setPan(clampPan(raw.x, raw.y, zoom));
+    }
+  }, [zoom, clampPan]);
+
+  const onTouchEndZoomed = useCallback(() => {
+    touchPanning.current = false;
+    setIsGesturing(false);
+  }, []);
+
   // ── Pula para página inicial quando vindo de link do índice ──────────────
   useEffect(() => {
     if (!ready || !initialPage || initialPage <= 1) return;
@@ -276,7 +359,7 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
     bookRef.current?.pageFlip().turnToPage(idx);
     setCurrentPage(idx);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready]); // intencionalmente só dispara quando o livro fica pronto
+  }, [ready]);
 
   // ── Busca páginas + registra visualização ────────────────────────────────
   useEffect(() => {
@@ -285,7 +368,6 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
       .then((d) => {
         if (Array.isArray(d.urls) && d.urls.length > 0) {
           setPages(d.urls);
-          // Registra a leitura (fire & forget — não bloqueia o leitor)
           fetch(`/api/editions/${slug}/view`, { method: "POST" }).catch(() => {});
         } else {
           setError("Nenhuma página encontrada para esta edição.");
@@ -311,7 +393,6 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
   const flipNext = useCallback(() => bookRef.current?.pageFlip().flipNext("bottom"), []);
   const flipPrev = useCallback(() => bookRef.current?.pageFlip().flipPrev("bottom"), []);
 
-  // Reseta zoom ao virar página
   const handleFlip = useCallback((e: { data: number }) => {
     setCurrentPage(e.data);
     resetZoom();
@@ -320,13 +401,11 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
   // ── Teclado ───────────────────────────────────────────────────────────────
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      // Zoom: Ctrl + / Ctrl −  ou  + / −  quando sem foco em input
       if (e.ctrlKey || e.metaKey) {
         if (e.key === "=" || e.key === "+") { e.preventDefault(); zoomIn(); return; }
         if (e.key === "-")                  { e.preventDefault(); zoomOut(); return; }
         if (e.key === "0")                  { e.preventDefault(); resetZoom(); return; }
       }
-      // Navegação (só quando zoom = 1)
       if (zoom > 1) return;
       if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === "PageDown") flipNext();
       if (e.key === "ArrowLeft"  || e.key === "ArrowUp"   || e.key === "PageUp")   flipPrev();
@@ -399,21 +478,27 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
           borderBottom: "1px solid rgba(28,42,62,0.8)",
         }}
       >
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="font-['Barlow_Condensed'] font-black text-white text-[18px] leading-none shrink-0" style={{ letterSpacing: "0.04em" }}>
+        {/* Esquerda: logo + título */}
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <span
+            className="font-['Barlow_Condensed'] font-black text-white text-[18px] leading-none shrink-0"
+            style={{ letterSpacing: "0.04em" }}
+          >
             MAGNUM
           </span>
           <span className="text-[#2a3a4e] shrink-0 mx-1">|</span>
           <span className="text-[#7a9ab5] text-[13px] truncate">{editionTitle}</span>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Direita: página, zoom indicator, favorito, fechar */}
+        <div className="flex items-center gap-2 shrink-0">
           {ready && (
             <span className="text-[#526888] text-[11px] tabular-nums hidden sm:block">
               {displayRight ? `${displayLeft}–${displayRight}` : `${displayLeft}`} / {pages.length}
             </span>
           )}
-          {/* Indicador de zoom no top bar (visível quando ampliado) */}
+
+          {/* Indicador de zoom */}
           {isZoomed && (
             <button
               onClick={resetZoom}
@@ -423,6 +508,35 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
               {zoomPct}% ✕
             </button>
           )}
+
+          {/* Botão Favoritar */}
+          {isLoggedIn && editionId && (
+            <button
+              onClick={toggleFavorite}
+              disabled={favLoading}
+              title={isFavorited ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+              className={`w-8 h-8 flex items-center justify-center rounded transition-all ${
+                isFavorited
+                  ? "text-[#ff1f1f] bg-[#ff1f1f]/15 hover:bg-[#ff1f1f]/25"
+                  : "text-[#526888] hover:text-[#ff1f1f] hover:bg-white/8"
+              } ${favLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill={isFavorited ? "currentColor" : "none"}
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+              </svg>
+            </button>
+          )}
+
+          {/* Fechar */}
           <button
             onClick={() => router.push(backUrl)}
             className="w-8 h-8 flex items-center justify-center rounded text-[#526888] hover:text-white hover:bg-white/8 transition-colors text-[15px]"
@@ -437,16 +551,36 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
       <div
         ref={areaRef}
         className="flex-1 flex items-center justify-center overflow-hidden relative"
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={stopPan}
-        onMouseLeave={stopPan}
-        onDoubleClick={isZoomed ? resetZoom : undefined}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        style={{ cursor: isZoomed ? (isPanning.current ? "grabbing" : "grab") : "default" }}
+        onTouchStart={isZoomed ? undefined : onTouchStartArea}
+        onTouchMove={isZoomed ? undefined : onTouchMoveArea}
       >
-        {/* Seta esquerda — fora do zoom wrapper, sempre acessível */}
+        {/*
+          ── Overlay transparente (apenas quando zoomed) ──────────────────
+          Fica sobre o livro e captura TODOS os eventos de mouse/touch,
+          impedindo que o FlipBook receba toques e cause tremido.
+          touchAction: "none" evita scroll/zoom nativo do browser.
+        */}
+        {isZoomed && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 20,
+              touchAction: "none",
+              cursor: "grab",
+            }}
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={stopPan}
+            onMouseLeave={stopPan}
+            onDoubleClick={resetZoom}
+            onTouchStart={onTouchStartZoomed}
+            onTouchMove={onTouchMoveZoomed}
+            onTouchEnd={onTouchEndZoomed}
+          />
+        )}
+
+        {/* Seta esquerda */}
         {!isZoomed && (
           <button
             onClick={flipPrev}
@@ -465,7 +599,9 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
             transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
             transformOrigin: "center center",
             willChange: "transform",
-            transition: isPanning.current ? "none" : "transform 0.15s ease",
+            // Sem transition durante gestos para evitar lag/tremido
+            // Com transition suave nos cliques de zoom (+/-) e reset
+            transition: isGesturing ? "none" : "transform 0.12s ease",
           }}
         >
           <HTMLFlipBook
@@ -480,10 +616,10 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
             startZIndex={1}
             maxShadowOpacity={0.5}
             clickEventForward={false}
-            useMouseEvents={!isZoomed}      // desativa drag-flip quando em zoom
+            useMouseEvents={!isZoomed}
             swipeDistance={isMobile ? 20 : 30}
             showPageCorners={!isMobile && !isZoomed}
-            disableFlipByClick={isZoomed}   // click não vira página quando ampliado
+            disableFlipByClick={isZoomed}
             mobileScrollSupport={false}
             autoSize={false}
             minWidth={150}
@@ -514,11 +650,11 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
           </button>
         )}
 
-        {/* Dica de zoom (aparece brevemente ao entrar em modo zoom) */}
+        {/* Dica de zoom */}
         {isZoomed && (
           <div
             className="absolute bottom-3 left-1/2 -translate-x-1/2 pointer-events-none"
-            style={{ zIndex: 20 }}
+            style={{ zIndex: 21 }}
           >
             <span className="text-[#526888] text-[10px] bg-black/60 px-2 py-1 rounded">
               arraste para mover · duplo-clique ou Ctrl+0 para resetar
@@ -572,11 +708,7 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
         <div className="w-px h-5 bg-[#1c2a3e]" />
 
         {/* ── Ir para página ───────────────────────── */}
-        <form
-          onSubmit={handleGotoSubmit}
-          className="flex items-center gap-1"
-          title="Ir para a página"
-        >
+        <form onSubmit={handleGotoSubmit} className="flex items-center gap-1" title="Ir para a página">
           <label className="text-[#3a4a5e] text-[10px] uppercase tracking-wider hidden md:block shrink-0">
             ir
           </label>
@@ -611,7 +743,6 @@ export default function Reader({ slug, editionTitle, backUrl, initialPage }: Rea
           −
         </button>
 
-        {/* Percentual — clicável para resetar */}
         <button
           onClick={resetZoom}
           className={`min-w-[44px] h-7 flex items-center justify-center rounded text-[11px] font-bold tabular-nums transition-colors ${

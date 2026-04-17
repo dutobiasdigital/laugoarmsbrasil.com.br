@@ -53,7 +53,9 @@ export default async function LerEdicaoPage({
 
   // 2. Busca edição + acesso em paralelo
   let edition: Edition | null = null;
-  let canRead = false;
+  let canRead      = false;
+  let dbUserId: string | null = null;
+  let isFavorited  = false;
 
   try {
     const [editionRes, userRes] = await Promise.all([
@@ -62,7 +64,7 @@ export default async function LerEdicaoPage({
         { headers: HEADERS, cache: "no-store" }
       ),
       fetch(
-        `${BASE}/users?authId=eq.${user.id}&select=role,subscriptions(status)&limit=1`,
+        `${BASE}/users?authId=eq.${user.id}&select=id,role,subscriptions(status)&limit=1`,
         { headers: HEADERS, cache: "no-store" }
       ),
     ]);
@@ -72,6 +74,7 @@ export default async function LerEdicaoPage({
 
     const users  = await userRes.json();
     const dbUser = Array.isArray(users) ? users[0] : null;
+    dbUserId     = dbUser?.id ?? null;
 
     const isAdmin  = dbUser?.role === "ADMIN";
     const activeSub =
@@ -95,6 +98,16 @@ export default async function LerEdicaoPage({
             p.metadata?.edition_slug === slug
         );
     }
+
+    // Verifica favorito
+    if (edition && dbUserId) {
+      const favRes = await fetch(
+        `${BASE}/user_favorites?userId=eq.${dbUserId}&contentType=eq.edition&contentId=eq.${edition.id}&select=id&limit=1`,
+        { headers: HEADERS, cache: "no-store" }
+      );
+      const favData = await favRes.json();
+      isFavorited = Array.isArray(favData) && favData.length > 0;
+    }
   } catch {
     // DB indisponível
   }
@@ -112,6 +125,9 @@ export default async function LerEdicaoPage({
       editionTitle={title}
       backUrl={`/edicoes/${slug}`}
       initialPage={initialPage}
+      editionId={edition.id}
+      isLoggedIn={true}
+      initialIsFavorited={isFavorited}
     />
   );
 }
