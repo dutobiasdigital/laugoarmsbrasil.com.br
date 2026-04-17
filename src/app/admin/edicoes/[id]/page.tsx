@@ -67,7 +67,7 @@ export default async function EditarEdicaoPage({
 
       (signed ?? []).forEach((s) => {
         if (!s.signedUrl) return;
-        const filename = s.path.split("/").pop() ?? "";
+        const filename = (s.path ?? "").split("/").pop() ?? "";
         if (filename === ed.editorialPageFile) editorialPageUrl = s.signedUrl;
         if (filename === ed.indexPageFile)     indexPageUrl     = s.signedUrl;
       });
