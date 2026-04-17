@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { slugify } from "@/lib/guia";
 
 const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
@@ -18,10 +17,10 @@ export async function GET(req: NextRequest) {
 
   let url: string;
   if (id) {
-    url = `${BASE}/guide_listings?id=eq.${id}&select=*&limit=1`;
+    url = `${BASE}/companies?id=eq.${id}&select=*&limit=1`;
   } else {
-    url = `${BASE}/guide_listings?select=*&order=createdAt.desc`;
-    if (status) url += `&status=eq.${status}`;
+    url = `${BASE}/companies?select=*&order=tradeName.asc`;
+    if (status) url += `&pipelineStatus=eq.${status}`;
   }
 
   const res  = await fetch(url, { headers: HEADERS, cache: "no-store" });
@@ -33,11 +32,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const base = slugify(`${body.name}-${body.city}`);
-    const slug = body.slug || `${base}-${Date.now().toString(36)}`;
-    const payload = { ...body, slug };
-    const res = await fetch(`${BASE}/guide_listings`, {
-      method: "POST", headers: HEADERS, body: JSON.stringify(payload),
+    const res = await fetch(`${BASE}/companies`, {
+      method: "POST", headers: HEADERS, body: JSON.stringify(body),
     });
     const data = await res.json();
     if (!res.ok) return NextResponse.json({ error: data.message ?? "Erro ao criar." }, { status: 500 });
@@ -50,10 +46,16 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const { id, ...rest } = body;
-    const res = await fetch(`${BASE}/guide_listings?id=eq.${id}`, {
+    const { id, status, ...rest } = body;
+    // GuiaQuickAction envia { id, status } — mapeamos para pipelineStatus
+    const updateData: Record<string, unknown> = {
+      ...rest,
+      ...(status !== undefined ? { pipelineStatus: status } : {}),
+      updatedAt: new Date().toISOString(),
+    };
+    const res = await fetch(`${BASE}/companies?id=eq.${id}`, {
       method: "PATCH", headers: HEADERS,
-      body: JSON.stringify({ ...rest, updatedAt: new Date().toISOString() }),
+      body: JSON.stringify(updateData),
     });
     const data = await res.json();
     if (!res.ok) return NextResponse.json({ error: data.message ?? "Erro ao atualizar." }, { status: 500 });
@@ -66,7 +68,7 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const { id } = await req.json();
-    const res = await fetch(`${BASE}/guide_listings?id=eq.${id}`, {
+    const res = await fetch(`${BASE}/companies?id=eq.${id}`, {
       method: "DELETE", headers: { ...HEADERS, "Prefer": "return=minimal" },
     });
     if (!res.ok) return NextResponse.json({ error: "Erro ao excluir." }, { status: 500 });

@@ -16,12 +16,14 @@ interface Advertiser {
   id: string;
   tradeName: string;
   legalName: string | null;
-  contact: string | null;
+  cnpj: string | null;
   phone: string | null;
   email: string | null;
   website: string | null;
   instagram: string | null;
   address: string | null;
+  city: string | null;
+  state: string | null;
   segment: string;
   logoUrl: string | null;
   coverImageUrl: string | null;
@@ -44,10 +46,9 @@ export default function EditarEmpresaPage() {
   const [coverImageUrl, setCoverImageUrl] = useState("");
 
   useEffect(() => {
-    fetch(`/api/admin/empresas`)
+    fetch(`/api/admin/empresas?id=${id}`)
       .then(r => r.json())
-      .then((list: Advertiser[]) => {
-        const found = list.find(e => e.id === id);
+      .then((found: Advertiser | null) => {
         if (found) {
           setEmp(found);
           setDescription(found.description ?? "");
@@ -125,8 +126,8 @@ export default function EditarEmpresaPage() {
               <input name="legalName" defaultValue={emp.legalName ?? ""} className={inputCls} />
             </div>
             <div>
-              <label className={labelCls}>Nome do Contato</label>
-              <input name="contact" defaultValue={emp.contact ?? ""} className={inputCls} />
+              <label className={labelCls}>CNPJ</label>
+              <input name="cnpj" defaultValue={emp.cnpj ?? ""} placeholder="00.000.000/0000-00" className={inputCls} />
             </div>
             <div>
               <label className={labelCls}>Telefone</label>

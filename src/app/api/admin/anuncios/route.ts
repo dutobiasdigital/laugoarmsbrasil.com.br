@@ -17,7 +17,7 @@ function boolField(v: unknown) {
 
 export async function GET() {
   const res = await fetch(
-    `${BASE}/advertisements?select=*,ad_impressions(count)&order=createdAt.desc`,
+    `${BASE}/advertisements?select=*,ad_impressions!adId(id)&order=createdAt.desc`,
     { headers: HEADERS, cache: "no-store" }
   );
   const data = await res.json();
@@ -90,6 +90,13 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const { id } = await req.json();
+
+    // Remove impressions first (FK constraint: ad_impressions.adId → advertisements.id)
+    await fetch(`${BASE}/ad_impressions?adId=eq.${id}`, {
+      method: "DELETE",
+      headers: { ...HEADERS, "Prefer": "return=minimal" },
+    });
+
     const res = await fetch(`${BASE}/advertisements?id=eq.${id}`, {
       method: "DELETE",
       headers: { ...HEADERS, "Prefer": "return=minimal" },

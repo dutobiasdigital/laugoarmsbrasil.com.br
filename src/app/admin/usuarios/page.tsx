@@ -45,8 +45,14 @@ const SORT_COL: Record<SortKey, string> = {
   createdAt: "createdAt",
 };
 
-const PER_PAGE = 20;
-const COLS     = "2fr 2fr 1fr 1.5fr 1fr 60px";
+const PER_PAGE    = 20;
+const COLS        = "2fr 2fr 1fr 1.5fr 1fr 60px";
+const HDR_COUNT   = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, Prefer: "count=exact" };
+
+function parseCR(r: Response) {
+  const n = parseInt(r.headers.get("Content-Range")?.split("/")?.[1] ?? "0", 10);
+  return isNaN(n) ? 0 : n;
+}
 
 export default async function AdminUsuariosPage({
   searchParams,
@@ -63,6 +69,7 @@ export default async function AdminUsuariosPage({
 
   let users: UserRow[] = [];
   let total = 0;
+  let statsTotal = 0, statsAssinantes = 0, statsAnunciantes = 0, statsClientes = 0;
 
   try {
     const subJoin  = tab === "assinantes"  ? "subscriptions!inner(status)" : "subscriptions(status)";
@@ -77,10 +84,23 @@ export default async function AdminUsuariosPage({
     ];
     if (q) qp.push(`or=(name.ilike.*${encodeURIComponent(q)}*,email.ilike.*${encodeURIComponent(q)}*)`);
 
-    const res = await fetch(`${BASE}/users?${qp.join("&")}`, { headers: HEADERS, cache: "no-store" });
-    const cr  = res.headers.get("Content-Range");
+    // Main list + 4 stat counts run in parallel
+    const [res, rTotal, rSub, rComp, rOrd] = await Promise.all([
+      fetch(`${BASE}/users?${qp.join("&")}`, { headers: HEADERS, cache: "no-store" }),
+      fetch(`${BASE}/users?select=id&limit=1`, { headers: HDR_COUNT, cache: "no-store" }),
+      fetch(`${BASE}/subscriptions?select=userId&status=eq.ACTIVE&limit=1`, { headers: HDR_COUNT, cache: "no-store" }),
+      fetch(`${BASE}/companies?select=userId&limit=1`, { headers: HDR_COUNT, cache: "no-store" }),
+      fetch(`${BASE}/shop_orders?select=userId&limit=1`, { headers: HDR_COUNT, cache: "no-store" }),
+    ]);
+
+    const cr = res.headers.get("Content-Range");
     total = parseInt(cr?.split("/")?.[1] ?? "0", 10);
     if (isNaN(total)) total = 0;
+
+    statsTotal       = parseCR(rTotal);
+    statsAssinantes  = parseCR(rSub);
+    statsAnunciantes = parseCR(rComp);
+    statsClientes    = parseCR(rOrd);
 
     const data = await res.json();
     users = (Array.isArray(data) ? data : []).map((u: Record<string, unknown>) => ({
@@ -140,6 +160,24 @@ export default async function AdminUsuariosPage({
       </div>
 
       <div className="bg-[#141d2c] h-px mb-6" />
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        {[
+          { label: "Total",        value: statsTotal,       color: "text-white",        sub: "usuários cadastrados"    },
+          { label: "Assinantes",   value: statsAssinantes,  color: "text-[#22c55e]",    sub: "assinaturas ativas"      },
+          { label: "Anunciantes",  value: statsAnunciantes, color: "text-[#a78bfa]",    sub: "empresas cadastradas"    },
+          { label: "Clientes",     value: statsClientes,    color: "text-[#60a5fa]",    sub: "pedidos na loja"         },
+        ].map(s => (
+          <div key={s.label} className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-4">
+            <p className={`font-['Barlow_Condensed'] font-bold text-[36px] leading-none ${s.color}`}>
+              {s.value.toLocaleString("pt-BR")}
+            </p>
+            <p className="text-[#526888] text-[12px] mt-1">{s.label}</p>
+            <p className="text-[#2a3a4e] text-[10px] mt-0.5">{s.sub}</p>
+          </div>
+        ))}
+      </div>
 
       {/* Omnisearch + filtros */}
       <Suspense fallback={<div className="h-[38px] mb-5 bg-[#141d2c] rounded-[6px] animate-pulse w-[300px]" />}>

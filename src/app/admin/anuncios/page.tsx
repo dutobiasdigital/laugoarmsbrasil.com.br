@@ -41,7 +41,7 @@ interface Ad {
   endsAt: string | null;
   clicks: number;
   createdAt: string;
-  ad_impressions: { count: number }[] | null;
+  ad_impressions: { id: string }[] | null;
 }
 
 function fmtDate(iso: string | null | undefined) {
@@ -77,7 +77,7 @@ export default async function AdminAnunciosPage({
 
   try {
     const params: string[] = [
-      "select=*,ad_impressions(count)",
+      "select=*,ad_impressions!adId(id)",
       `order=${SORT_COL[sortBy]}.${sortDir}.nullslast`,
     ];
     if (q)                    params.push(`or=(name.ilike.*${encodeURIComponent(q)}*,advertiser.ilike.*${encodeURIComponent(q)}*)`);
@@ -212,7 +212,7 @@ export default async function AdminAnunciosPage({
         ) : (
           ads.map((ad, i) => {
             const expired      = !!ad.endsAt && new Date(ad.endsAt) < now;
-            const impressions  = ad.ad_impressions?.[0]?.count ?? 0;
+            const impressions  = ad.ad_impressions?.length ?? 0;
             const statusBg     = expired ? "bg-[#1a1a0a] text-[#ef9f1b]"
                                : ad.active ? "bg-[#0f381f] text-[#22c55e]"
                                : "bg-[#141d2c] text-[#526888]";

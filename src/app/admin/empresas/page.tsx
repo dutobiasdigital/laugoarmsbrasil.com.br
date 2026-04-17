@@ -26,7 +26,15 @@ const PIPELINE_STYLE: Record<string, { bg: string; text: string; label: string }
   SUSPENDED:      { bg: "bg-[#380f0f]", text: "text-[#f87171]", label: "Suspenso"         },
 };
 
+const LISTING_TYPE_CFG: Record<string, { label: string; color: string }> = {
+  NONE:     { label: "—",         color: "text-[#2a3a4e]"                          },
+  FREE:     { label: "Free",      color: "bg-[#141d2c] text-[#526888]"             },
+  PREMIUM:  { label: "Premium",   color: "bg-[#1a1a40] text-[#818cf8]"             },
+  DESTAQUE: { label: "Destaque",  color: "bg-[#260a0a] text-[#ff1f1f]"             },
+};
+
 interface UserRow { name: string | null; email: string | null; }
+interface AdRow   { id: string; active: boolean; }
 interface Company {
   id: string;
   tradeName: string;
@@ -36,6 +44,7 @@ interface Company {
   listingType: string;
   createdAt: string;
   users: UserRow | UserRow[] | null;
+  advertisements: AdRow[] | null;
 }
 
 type SortKey = "tradeName" | "pipelineStatus" | "listingType" | "createdAt";
@@ -47,7 +56,7 @@ const SORT_COL: Record<SortKey, string> = {
 };
 
 const PER_PAGE = 30;
-const COLS     = "2fr 1.5fr 1fr 1fr 1fr 80px";
+const COLS     = "2fr 1.5fr 1fr 90px 110px 70px 100px";
 
 export default async function AdminEmpresasPage({
   searchParams,
@@ -84,7 +93,7 @@ export default async function AdminEmpresasPage({
 
   try {
     const qp: string[] = [
-      `select=id,tradeName,email,segment,pipelineStatus,listingType,createdAt,users(name,email)`,
+      `select=id,tradeName,email,segment,pipelineStatus,listingType,createdAt,users(name,email),advertisements!companyId(id,active)`,
       `order=${SORT_COL[sortBy]}.${sortDir}.nullslast`,
       `limit=${PER_PAGE}`,
       `offset=${(page - 1) * PER_PAGE}`,
@@ -148,12 +157,20 @@ export default async function AdminEmpresasPage({
             {total.toLocaleString("pt-BR")} empresa{total !== 1 ? "s" : ""} encontrada{total !== 1 ? "s" : ""}
           </p>
         </div>
-        <Link
-          href="/admin/empresas/nova"
-          className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[40px] px-5 flex items-center rounded-[6px] transition-colors"
-        >
-          + Nova Empresa
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/empresas/pipeline"
+            className="bg-[#141d2c] border border-[#1c2a3e] hover:border-[#526888] text-[#7a9ab5] hover:text-white text-[14px] font-semibold h-[40px] px-4 flex items-center rounded-[6px] transition-colors"
+          >
+            ◈ Pipeline
+          </Link>
+          <Link
+            href="/admin/empresas/nova"
+            className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[40px] px-5 flex items-center rounded-[6px] transition-colors"
+          >
+            + Nova Empresa
+          </Link>
+        </div>
       </div>
 
       <div className="bg-[#141d2c] h-px mb-6" />
@@ -200,8 +217,9 @@ export default async function AdminEmpresasPage({
           {thLink("tradeName",      "Empresa")}
           <span className="text-white">Dono</span>
           <span className="text-white">Segmento</span>
-          {thLink("listingType",    "Tipo")}
+          {thLink("listingType",    "Guia")}
           {thLink("pipelineStatus", "Pipeline")}
+          <span className="text-white">Banner</span>
           <span className="text-white">Ações</span>
         </div>
 
@@ -214,9 +232,12 @@ export default async function AdminEmpresasPage({
           </div>
         ) : (
           companies.map((c, i) => {
-            const ps = PIPELINE_STYLE[c.pipelineStatus] ?? PIPELINE_STYLE.REGISTERED;
-            // users pode ser objeto ou array dependendo do Supabase
-            const owner = Array.isArray(c.users) ? c.users[0] : c.users;
+            const ps        = PIPELINE_STYLE[c.pipelineStatus] ?? PIPELINE_STYLE.REGISTERED;
+            const ltCfg     = LISTING_TYPE_CFG[c.listingType] ?? LISTING_TYPE_CFG.NONE;
+            const owner     = Array.isArray(c.users) ? c.users[0] : c.users;
+            const ads       = Array.isArray(c.advertisements) ? c.advertisements : [];
+            const hasActiveBanner = ads.some(a => a.active);
+            const hasBanner       = ads.length > 0;
             const rowBg = i % 2 === 0 ? "bg-[#0e1520] hover:bg-white/[0.02]" : "bg-[#080c14] hover:bg-white/[0.015]";
 
             return (
@@ -241,15 +262,30 @@ export default async function AdminEmpresasPage({
                   {SEGMENT_LABELS[c.segment ?? ""] ?? c.segment ?? "—"}
                 </p>
 
-                {/* Tipo */}
-                <span className="inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold bg-[#141d2c] text-[#7a9ab5] w-fit">
-                  {c.listingType}
-                </span>
+                {/* Guia */}
+                {ltCfg.label === "—" ? (
+                  <span className="text-[#2a3a4e] text-[12px]">—</span>
+                ) : (
+                  <span className={`inline-flex items-center h-[20px] px-2 rounded-[2px] text-[10px] font-bold w-fit ${ltCfg.color}`}>
+                    {ltCfg.label}
+                  </span>
+                )}
 
                 {/* Pipeline */}
                 <span className={`inline-flex items-center h-[20px] px-2 rounded-full text-[10px] font-bold w-fit ${ps.bg} ${ps.text}`}>
                   {ps.label}
                 </span>
+
+                {/* Banner */}
+                {hasBanner ? (
+                  <span className={`inline-flex items-center h-[20px] px-2 rounded-[2px] text-[10px] font-bold w-fit ${
+                    hasActiveBanner ? "bg-[#0f2438] text-[#60a5fa]" : "bg-[#141d2c] text-[#526888]"
+                  }`}>
+                    {hasActiveBanner ? "Ativo" : "Inativo"}
+                  </span>
+                ) : (
+                  <span className="text-[#2a3a4e] text-[12px]">—</span>
+                )}
 
                 {/* Ações */}
                 <div className="flex items-center gap-2">
