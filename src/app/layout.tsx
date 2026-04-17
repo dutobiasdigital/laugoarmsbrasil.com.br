@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { CartProvider } from "@/contexts/CartContext";
 import CartDrawer from "@/components/CartDrawer";
 import AccessLogger from "@/components/AccessLogger";
+import ScrollToTop from "@/components/ScrollToTop";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -187,6 +188,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <AccessLogger />
             <CartDrawer />
             {children}
+            <ScrollToTop />
           </ThemeProvider>
         </CartProvider>
       </body>
