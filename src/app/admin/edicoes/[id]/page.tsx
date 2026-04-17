@@ -32,52 +32,56 @@ export default async function EditarEdicaoPage({
     isPublished: boolean;
     isOnNewstand: boolean;
     publishedAt: string | null;
-    editorialPageFile: string | null;
-    indexPageFile: string | null;
+    editorialPageFiles: string[] | null;
+    indexPageFiles: string[] | null;
   } | null = null;
 
   try {
     const res = await fetch(
-      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,editorial,tableOfContents,pageCount,coverImageUrl,pdfStoragePath,pageFlipUrl,isPublished,isOnNewstand,publishedAt,editorialPageFile,indexPageFile&limit=1`,
+      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,editorial,tableOfContents,pageCount,coverImageUrl,pdfStoragePath,pageFlipUrl,isPublished,isOnNewstand,publishedAt,editorialPageFiles,indexPageFiles&limit=1`,
       { headers: HEADERS, cache: "no-store" }
     );
     const data = await res.json();
     edition = Array.isArray(data) && data.length > 0 ? data[0] : null;
-  } catch {
-    // DB unavailable
-  }
+  } catch { /* DB unavailable */ }
 
   if (!edition) notFound();
   const ed = edition!;
 
-  // Gera signed URLs para as páginas marcadas (Editorial e Índice)
-  let editorialPageUrl: string | null = null;
-  let indexPageUrl: string | null = null;
+  // Gera signed URLs para todas as páginas marcadas
+  type MarkedPage = { filename: string; url: string };
+  let editorialPageUrls: MarkedPage[] = [];
+  let indexPageUrls: MarkedPage[]     = [];
 
-  if (ed.editorialPageFile || ed.indexPageFile) {
+  const allMarked = [
+    ...(ed.editorialPageFiles ?? []).map((f) => ({ type: "editorial" as const, f })),
+    ...(ed.indexPageFiles     ?? []).map((f) => ({ type: "index"     as const, f })),
+  ];
+
+  if (allMarked.length > 0) {
     try {
-      const admin = createAdminClient();
-      const paths: string[] = [];
-      if (ed.editorialPageFile) paths.push(`${ed.slug}/${ed.editorialPageFile}`);
-      if (ed.indexPageFile)     paths.push(`${ed.slug}/${ed.indexPageFile}`);
-
+      const admin  = createAdminClient();
+      const unique = [...new Set(allMarked.map((m) => m.f))];
+      const paths  = unique.map((f) => `${ed.slug}/${f}`);
       const { data: signed } = await admin.storage
         .from("edition-pages")
         .createSignedUrls(paths, 3600);
 
+      const signedMap: Record<string, string> = {};
       (signed ?? []).forEach((s) => {
-        if (!s.signedUrl) return;
-        const filename = (s.path ?? "").split("/").pop() ?? "";
-        if (filename === ed.editorialPageFile) editorialPageUrl = s.signedUrl;
-        if (filename === ed.indexPageFile)     indexPageUrl     = s.signedUrl;
+        const fn = (s.path ?? "").split("/").pop() ?? "";
+        if (s.signedUrl) signedMap[fn] = s.signedUrl;
       });
-    } catch {
-      // Storage indisponível — thumbnails serão omitidos
-    }
+
+      editorialPageUrls = (ed.editorialPageFiles ?? []).map((f) => ({ filename: f, url: signedMap[f] ?? "" }));
+      indexPageUrls     = (ed.indexPageFiles     ?? []).map((f) => ({ filename: f, url: signedMap[f] ?? "" }));
+    } catch { /* Storage indisponível */ }
   }
 
   const serialized = {
     ...ed,
+    editorialPageFiles: ed.editorialPageFiles ?? [],
+    indexPageFiles:     ed.indexPageFiles     ?? [],
     publishedAt: ed.publishedAt ? ed.publishedAt.slice(0, 10) : null,
   };
 
@@ -111,8 +115,8 @@ export default async function EditarEdicaoPage({
 
       <EditionEditForm
         edition={serialized}
-        editorialPageUrl={editorialPageUrl}
-        indexPageUrl={indexPageUrl}
+        editorialPageUrls={editorialPageUrls}
+        indexPageUrls={indexPageUrls}
       />
     </>
   );

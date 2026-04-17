@@ -15,6 +15,8 @@ const labelCls = "block text-[#7a9ab5] text-[12px] font-semibold mb-1.5";
 interface TocItem { page: string; title: string; category: string; }
 interface Category { id: string; name: string; slug: string; }
 
+type MarkedPage = { filename: string; url: string };
+
 interface Props {
   edition: {
     id: string;
@@ -31,11 +33,11 @@ interface Props {
     isPublished: boolean;
     isOnNewstand: boolean;
     publishedAt: string | null;
-    editorialPageFile?: string | null;
-    indexPageFile?: string | null;
+    editorialPageFiles?: string[];
+    indexPageFiles?: string[];
   };
-  editorialPageUrl?: string | null;
-  indexPageUrl?: string | null;
+  editorialPageUrls?: MarkedPage[];
+  indexPageUrls?: MarkedPage[];
 }
 
 function parseToc(raw: string | null): TocItem[] {
@@ -141,7 +143,7 @@ function HtmlToggle({
   );
 }
 
-export default function EditionEditForm({ edition, editorialPageUrl, indexPageUrl }: Props) {
+export default function EditionEditForm({ edition, editorialPageUrls = [], indexPageUrls = [] }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -321,53 +323,66 @@ export default function EditionEditForm({ edition, editorialPageUrl, indexPageUr
             )}
           </div>
 
-          {/* Páginas marcadas (Editorial / Índice) */}
-          {(editorialPageUrl || indexPageUrl || edition.editorialPageFile || edition.indexPageFile) && (
+          {/* Páginas marcadas (Editorial / Índice) — suporta múltiplas */}
+          {(editorialPageUrls.length > 0 || indexPageUrls.length > 0 ||
+            (edition.editorialPageFiles ?? []).length > 0 || (edition.indexPageFiles ?? []).length > 0) && (
             <div className="lg:col-span-2">
               <label className={labelCls}>Páginas Marcadas no Leitor</label>
-              <div className="flex gap-4 flex-wrap">
-                {(editorialPageUrl || edition.editorialPageFile) && (
+              <div className="flex gap-4 flex-wrap items-end">
+                {/* Editoriais */}
+                {(editorialPageUrls.length > 0 || (edition.editorialPageFiles ?? []).length > 0) && (
                   <div className="flex flex-col gap-1.5">
-                    <div className="relative w-[72px] h-[96px] bg-[#0d1422] rounded-[6px] overflow-hidden border border-[#ff1f1f]/30">
-                      {editorialPageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={editorialPageUrl} alt="Página Editorial" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[#2a3a5e] text-[10px]">sem prévia</div>
-                      )}
-                      <div className="absolute top-1 left-1 bg-[#ff1f1f] text-white text-[7px] font-bold px-1 py-[1px] rounded-[2px]">Ed.</div>
+                    <p className="text-[#ff6b6b] text-[10px] font-semibold">📝 Editorial</p>
+                    <div className="flex gap-2 flex-wrap">
+                      {(editorialPageUrls.length > 0 ? editorialPageUrls : (edition.editorialPageFiles ?? []).map((f) => ({ filename: f, url: "" }))).map((pg) => (
+                        <div key={pg.filename} className="flex flex-col gap-1">
+                          <div className="relative w-[60px] h-[80px] bg-[#0d1422] rounded-[4px] overflow-hidden border border-[#ff1f1f]/30">
+                            {pg.url ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={pg.url} alt={pg.filename} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-[#2a3a5e] text-[9px]">sem prévia</div>
+                            )}
+                            <div className="absolute top-0.5 left-0.5 bg-[#ff1f1f] text-white text-[6px] font-bold px-0.5 py-[1px] rounded-[2px]">Ed.</div>
+                          </div>
+                          <p className="text-[#7a9ab5] text-[9px] text-center font-mono">
+                            {pg.filename.replace(/page-(\d+)\..+/, "pág. $1")}
+                          </p>
+                        </div>
+                      ))}
                     </div>
-                    <p className="text-[#7a9ab5] text-[10px] text-center font-mono truncate w-[72px]">
-                      {edition.editorialPageFile
-                        ? edition.editorialPageFile.replace(/page-(\d+)\..+/, "pág. $1")
-                        : "—"}
-                    </p>
                   </div>
                 )}
-                {(indexPageUrl || edition.indexPageFile) && (
+                {/* Índices */}
+                {(indexPageUrls.length > 0 || (edition.indexPageFiles ?? []).length > 0) && (
                   <div className="flex flex-col gap-1.5">
-                    <div className="relative w-[72px] h-[96px] bg-[#0d1422] rounded-[6px] overflow-hidden border border-[#0ea5e9]/30">
-                      {indexPageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={indexPageUrl} alt="Página Índice" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[#2a3a5e] text-[10px]">sem prévia</div>
-                      )}
-                      <div className="absolute top-1 right-1 bg-[#0ea5e9] text-white text-[7px] font-bold px-1 py-[1px] rounded-[2px]">Índ.</div>
+                    <p className="text-[#38bdf8] text-[10px] font-semibold">📋 Índice</p>
+                    <div className="flex gap-2 flex-wrap">
+                      {(indexPageUrls.length > 0 ? indexPageUrls : (edition.indexPageFiles ?? []).map((f) => ({ filename: f, url: "" }))).map((pg) => (
+                        <div key={pg.filename} className="flex flex-col gap-1">
+                          <div className="relative w-[60px] h-[80px] bg-[#0d1422] rounded-[4px] overflow-hidden border border-[#0ea5e9]/30">
+                            {pg.url ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={pg.url} alt={pg.filename} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-[#2a3a5e] text-[9px]">sem prévia</div>
+                            )}
+                            <div className="absolute top-0.5 right-0.5 bg-[#0ea5e9] text-white text-[6px] font-bold px-0.5 py-[1px] rounded-[2px]">Índ.</div>
+                          </div>
+                          <p className="text-[#7a9ab5] text-[9px] text-center font-mono">
+                            {pg.filename.replace(/page-(\d+)\..+/, "pág. $1")}
+                          </p>
+                        </div>
+                      ))}
                     </div>
-                    <p className="text-[#7a9ab5] text-[10px] text-center font-mono truncate w-[72px]">
-                      {edition.indexPageFile
-                        ? edition.indexPageFile.replace(/page-(\d+)\..+/, "pág. $1")
-                        : "—"}
-                    </p>
                   </div>
                 )}
-                <div className="flex items-end pb-6">
+                <div className="flex items-end pb-1">
                   <a
                     href={`/admin/edicoes/${edition.id}/paginas`}
                     className="text-[#7a9ab5] hover:text-white text-[12px] transition-colors underline underline-offset-2"
                   >
-                    Gerenciar páginas →
+                    Gerenciar →
                   </a>
                 </div>
               </div>

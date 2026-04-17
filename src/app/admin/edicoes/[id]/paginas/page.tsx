@@ -17,31 +17,28 @@ export default async function PaginasEdicaoPage({
 }) {
   const { id } = await params;
 
-  // Busca dados da edição incluindo marcadores de página
   let edition: {
     id: string;
     title: string;
     slug: string;
     number: number | null;
     type: string;
-    editorialPageFile: string | null;
-    indexPageFile: string | null;
+    editorialPageFiles: string[] | null;
+    indexPageFiles: string[] | null;
   } | null = null;
 
   try {
     const res = await fetch(
-      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,editorialPageFile,indexPageFile&limit=1`,
+      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,editorialPageFiles,indexPageFiles&limit=1`,
       { headers: HEADERS, cache: "no-store" }
     );
     const data = await res.json();
     edition = Array.isArray(data) && data.length > 0 ? data[0] : null;
-  } catch {
-    // DB indisponível
-  }
+  } catch { /* DB indisponível */ }
 
   if (!edition) notFound();
 
-  // Busca páginas existentes no Storage e gera signed URLs
+  // Busca páginas no Storage e gera signed URLs
   let initialPages: { name: string; size: number; signedUrl: string }[] = [];
   try {
     const admin = createAdminClient();
@@ -69,9 +66,7 @@ export default async function PaginasEdicaoPage({
         signedUrl: signedMap[f.name] ?? "",
       }));
     }
-  } catch {
-    // bucket pode não existir ainda
-  }
+  } catch { /* bucket pode não existir ainda */ }
 
   const edLabel =
     edition.type === "SPECIAL"
@@ -105,7 +100,6 @@ export default async function PaginasEdicaoPage({
             {edLabel} — <span className="font-mono text-[#3a4a5e]">{edition.slug}</span>
           </p>
         </div>
-
         {initialPages.length > 0 && (
           <a
             href={`/ler/${edition.slug}`}
@@ -118,25 +112,25 @@ export default async function PaginasEdicaoPage({
         )}
       </div>
 
-      {/* Info box */}
+      {/* Info */}
       <div className="rounded-xl bg-[#0a0e18] border border-[#141d2c] p-4 mb-6 flex gap-3">
         <span className="text-xl shrink-0 mt-0.5">ℹ️</span>
         <div className="text-[#7a9ab5] text-[13px] leading-[22px]">
-          <strong className="text-white">Como funciona:</strong> Faça upload das páginas em
-          ordem (page-001.jpg, page-002.jpg…). Clique em qualquer página para ampliar,
-          excluir ou marcá-la como <strong className="text-[#ff6b6b]">Página Editorial</strong> ou{" "}
-          <strong className="text-[#38bdf8]">Página Índice</strong> — esses marcadores ficam
-          salvos no cadastro da edição.
+          <strong className="text-white">Como funciona:</strong> Clique em qualquer página para
+          ampliar, excluir ou marcá-la como{" "}
+          <strong className="text-[#ff6b6b]">Página Editorial</strong> ou{" "}
+          <strong className="text-[#38bdf8]">Página Índice</strong>. Você pode marcar
+          <strong className="text-white"> múltiplas páginas</strong> de cada tipo — ideal para
+          editoriais e índices com mais de uma página.
         </div>
       </div>
 
-      {/* Gerenciador */}
       <PagesManager
         slug={edition.slug}
         editionId={edition.id}
         initialPages={initialPages}
-        initialEditorialPage={edition.editorialPageFile}
-        initialIndexPage={edition.indexPageFile}
+        initialEditorialPages={edition.editorialPageFiles ?? []}
+        initialIndexPages={edition.indexPageFiles ?? []}
       />
     </>
   );

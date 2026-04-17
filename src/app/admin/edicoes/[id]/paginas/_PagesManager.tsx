@@ -13,8 +13,8 @@ interface Props {
   slug: string;
   editionId: string;
   initialPages: PageFile[];
-  initialEditorialPage: string | null;
-  initialIndexPage: string | null;
+  initialEditorialPages: string[];
+  initialIndexPages: string[];
 }
 
 function formatBytes(b: number) {
@@ -31,20 +31,20 @@ function pageLabel(name: string) {
 export default function PagesManager({
   slug,
   initialPages,
-  initialEditorialPage,
-  initialIndexPage,
+  initialEditorialPages,
+  initialIndexPages,
 }: Props) {
-  const [pages,        setPages]        = useState<PageFile[]>(initialPages);
-  const [editorialPg,  setEditorialPg]  = useState<string | null>(initialEditorialPage);
-  const [indexPg,      setIndexPg]      = useState<string | null>(initialIndexPage);
-  const [modal,        setModal]        = useState<PageFile | null>(null);
-  const [uploading,    setUploading]    = useState(false);
-  const [progress,     setProgress]     = useState<{ done: number; total: number } | null>(null);
-  const [error,        setError]        = useState<string | null>(null);
-  const [success,      setSuccess]      = useState<string | null>(null);
-  const [deleting,     setDeleting]     = useState<string | null>(null);
-  const [savingMarker, setSavingMarker] = useState<"editorial" | "index" | null>(null);
-  const [isDragging,   setIsDragging]   = useState(false);
+  const [pages,          setPages]          = useState<PageFile[]>(initialPages);
+  const [editorialPages, setEditorialPages] = useState<string[]>(initialEditorialPages);
+  const [indexPages,     setIndexPages]     = useState<string[]>(initialIndexPages);
+  const [modal,          setModal]          = useState<PageFile | null>(null);
+  const [uploading,      setUploading]      = useState(false);
+  const [progress,       setProgress]       = useState<{ done: number; total: number } | null>(null);
+  const [error,          setError]          = useState<string | null>(null);
+  const [success,        setSuccess]        = useState<string | null>(null);
+  const [deleting,       setDeleting]       = useState<string | null>(null);
+  const [savingMarker,   setSavingMarker]   = useState<"editorial" | "index" | null>(null);
+  const [isDragging,     setIsDragging]     = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Fecha modal com Escape
@@ -82,22 +82,15 @@ export default function PagesManager({
 
     let failed = 0;
     for (let i = 0; i < arr.length; i++) {
-      const file = arr[i];
+      const file    = arr[i];
       const pageNum = String(maxExisting + i + 1).padStart(3, "0");
-      const fd = new FormData();
+      const fd      = new FormData();
       fd.append("file", file);
       fd.append("pageNum", pageNum);
-
       try {
-        const res = await fetch(`/api/admin/edition-pages/${slug}`, {
-          method: "POST",
-          body: fd,
-        });
+        const res = await fetch(`/api/admin/edition-pages/${slug}`, { method: "POST", body: fd });
         if (!res.ok) failed++;
-      } catch {
-        failed++;
-      }
-
+      } catch { failed++; }
       setProgress({ done: i + 1, total: arr.length });
     }
 
@@ -122,7 +115,7 @@ export default function PagesManager({
     if (e.dataTransfer.files?.length) handleFiles(e.dataTransfer.files);
   };
 
-  // Delete (chamado pelo modal)
+  // Delete
   const handleDelete = useCallback(async (filename: string) => {
     setModal(null);
     if (!confirm(`Remover a página "${filename}"? Esta ação não pode ser desfeita.`)) return;
@@ -136,8 +129,8 @@ export default function PagesManager({
       });
       if (res.ok) {
         setPages((prev) => prev.filter((p) => p.name !== filename));
-        if (editorialPg === filename) setEditorialPg(null);
-        if (indexPg === filename)     setIndexPg(null);
+        setEditorialPages((prev) => prev.filter((f) => f !== filename));
+        setIndexPages((prev) => prev.filter((f) => f !== filename));
         setSuccess(`"${filename}" removida.`);
       } else {
         const d = await res.json();
@@ -147,22 +140,27 @@ export default function PagesManager({
       setError("Erro ao remover.");
     }
     setDeleting(null);
-  }, [slug, editorialPg, indexPg]);
+  }, [slug]);
 
-  // Marcar como Editorial ou Índice (toggle)
+  // Marcar / desmarcar (toggle add/remove do array)
   const handleMark = useCallback(async (type: "editorial" | "index", filename: string) => {
-    const current = type === "editorial" ? editorialPg : indexPg;
-    const newValue = current === filename ? null : filename;
+    const current  = type === "editorial" ? editorialPages : indexPages;
+    const isMarked = current.includes(filename);
+    const action   = isMarked ? "remove" : "add";
+
     setSavingMarker(type);
     try {
       const res = await fetch(`/api/admin/edition-pages/${slug}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, filename: newValue }),
+        body: JSON.stringify({ type, filename, action }),
       });
       if (res.ok) {
-        if (type === "editorial") setEditorialPg(newValue);
-        else                      setIndexPg(newValue);
+        const newArr = isMarked
+          ? current.filter((f) => f !== filename)
+          : [...new Set([...current, filename])];
+        if (type === "editorial") setEditorialPages(newArr);
+        else                      setIndexPages(newArr);
       } else {
         const d = await res.json();
         setError(d.error ?? "Erro ao salvar marcação.");
@@ -171,7 +169,7 @@ export default function PagesManager({
       setError("Erro ao salvar marcação.");
     }
     setSavingMarker(null);
-  }, [slug, editorialPg, indexPg]);
+  }, [slug, editorialPages, indexPages]);
 
   // Limpa mensagens após 4s
   useEffect(() => {
@@ -200,7 +198,6 @@ export default function PagesManager({
             <span className="text-[#ff1f1f] text-[15px] font-semibold">Solte para enviar</span>
           </div>
         )}
-
         <input
           ref={fileRef}
           type="file"
@@ -212,23 +209,14 @@ export default function PagesManager({
             e.target.value = "";
           }}
         />
-
-        <div className="w-12 h-12 rounded-full bg-[#141d2c] flex items-center justify-center text-2xl">
-          📄
-        </div>
-
+        <div className="w-12 h-12 rounded-full bg-[#141d2c] flex items-center justify-center text-2xl">📄</div>
         <div>
           <p className="text-white text-[14px] font-medium">
             {uploading ? "Enviando…" : "Arraste as páginas ou clique para selecionar"}
           </p>
-          <p className="text-[#526888] text-[12px] mt-1">
-            JPG, PNG ou WebP — múltiplos arquivos aceitos — máx. 50 MB cada
-          </p>
-          <p className="text-[#3a4a5e] text-[11px] mt-1">
-            Os arquivos são numerados automaticamente em ordem alfabética
-          </p>
+          <p className="text-[#526888] text-[12px] mt-1">JPG, PNG ou WebP — múltiplos arquivos aceitos — máx. 50 MB cada</p>
+          <p className="text-[#3a4a5e] text-[11px] mt-1">Os arquivos são numerados automaticamente em ordem alfabética</p>
         </div>
-
         {uploading && progress && (
           <div className="w-full max-w-xs">
             <div className="h-1.5 bg-[#1c2a3e] rounded-full overflow-hidden">
@@ -246,18 +234,14 @@ export default function PagesManager({
 
       {/* ── Mensagens ──────────────────────────────────────────────── */}
       {success && (
-        <div className="rounded-lg bg-[#0f381f] border border-[#22c55e]/30 px-4 py-3 text-[#22c55e] text-[13px]">
-          ✓ {success}
-        </div>
+        <div className="rounded-lg bg-[#0f381f] border border-[#22c55e]/30 px-4 py-3 text-[#22c55e] text-[13px]">✓ {success}</div>
       )}
       {error && (
-        <div className="rounded-lg bg-[#380f0f] border border-[#ff1f1f]/30 px-4 py-3 text-[#ff6b6b] text-[13px]">
-          ✕ {error}
-        </div>
+        <div className="rounded-lg bg-[#380f0f] border border-[#ff1f1f]/30 px-4 py-3 text-[#ff6b6b] text-[13px]">✕ {error}</div>
       )}
 
       {/* ── Cabeçalho da lista ──────────────────────────────────────── */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h2 className="text-white text-[15px] font-semibold">Páginas carregadas</h2>
           <p className="text-[#526888] text-[12px] mt-0.5">
@@ -266,21 +250,22 @@ export default function PagesManager({
               : "Nenhuma página cadastrada ainda"}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Legenda das marcações */}
-          {(editorialPg || indexPg) && (
-            <div className="flex items-center gap-2 text-[11px]">
-              {editorialPg && (
-                <span className="flex items-center gap-1 bg-[#ff1f1f]/10 border border-[#ff1f1f]/30 text-[#ff6b6b] px-2 py-0.5 rounded-[4px]">
-                  📝 {pageLabel(editorialPg)}
-                </span>
-              )}
-              {indexPg && (
-                <span className="flex items-center gap-1 bg-[#0ea5e9]/10 border border-[#0ea5e9]/30 text-[#38bdf8] px-2 py-0.5 rounded-[4px]">
-                  📋 {pageLabel(indexPg)}
-                </span>
-              )}
-            </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {editorialPages.length > 0 && (
+            <span className="flex items-center gap-1 bg-[#ff1f1f]/10 border border-[#ff1f1f]/30 text-[#ff6b6b] text-[11px] px-2 py-0.5 rounded-[4px]">
+              📝 {editorialPages.length} editorial{editorialPages.length > 1 ? "is" : ""}
+              <span className="text-[#ff1f1f]/50 text-[10px]">
+                ({editorialPages.map(pageLabel).join(", ")})
+              </span>
+            </span>
+          )}
+          {indexPages.length > 0 && (
+            <span className="flex items-center gap-1 bg-[#0ea5e9]/10 border border-[#0ea5e9]/30 text-[#38bdf8] text-[11px] px-2 py-0.5 rounded-[4px]">
+              📋 {indexPages.length} índice{indexPages.length > 1 ? "s" : ""}
+              <span className="text-[#0ea5e9]/50 text-[10px]">
+                ({indexPages.map(pageLabel).join(", ")})
+              </span>
+            </span>
           )}
           {pages.length > 0 && (
             <span className="bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] text-[11px] font-bold px-2.5 py-1 rounded-full">
@@ -294,8 +279,8 @@ export default function PagesManager({
       {pages.length > 0 && (
         <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2">
           {pages.map((page) => {
-            const isEditorial = editorialPg === page.name;
-            const isIndex     = indexPg === page.name;
+            const isEditorial = editorialPages.includes(page.name);
+            const isIndex     = indexPages.includes(page.name);
             const isDeleting  = deleting === page.name;
 
             return (
@@ -303,11 +288,10 @@ export default function PagesManager({
                 key={page.name}
                 onClick={() => setModal(page)}
                 disabled={isDeleting}
-                title={`${page.name}${isEditorial ? " · Página Editorial" : ""}${isIndex ? " · Página Índice" : ""}`}
+                title={`${page.name}${isEditorial ? " · Editorial" : ""}${isIndex ? " · Índice" : ""}`}
                 className="group relative bg-[#0d1422] rounded-lg overflow-hidden border border-[#1c2a3e] hover:border-[#ff1f1f]/50 transition-colors cursor-pointer disabled:opacity-40"
                 style={{ aspectRatio: "3/4" }}
               >
-                {/* Imagem da página */}
                 {page.signedUrl ? (
                   <Image
                     src={page.signedUrl}
@@ -325,29 +309,26 @@ export default function PagesManager({
                   </div>
                 )}
 
-                {/* Overlay escuro no hover */}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors" />
 
-                {/* Badge editorial */}
+                {/* Badge Editorial */}
                 {isEditorial && (
                   <div className="absolute top-1 left-1 bg-[#ff1f1f] text-white text-[7px] font-bold px-1 py-[1px] rounded-[2px] leading-tight z-10">
                     Ed.
                   </div>
                 )}
-
-                {/* Badge índice */}
+                {/* Badge Índice */}
                 {isIndex && (
-                  <div className="absolute top-1 right-1 bg-[#0ea5e9] text-white text-[7px] font-bold px-1 py-[1px] rounded-[2px] leading-tight z-10">
+                  <div className={`absolute text-white text-[7px] font-bold px-1 py-[1px] rounded-[2px] leading-tight z-10 bg-[#0ea5e9] ${isEditorial ? "top-5 left-1" : "top-1 right-1"}`}>
                     Índ.
                   </div>
                 )}
 
-                {/* Número da página (bottom, aparece no hover) */}
+                {/* Número (hover) */}
                 <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent py-1.5 px-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                   <p className="text-white text-[9px] font-bold text-center">{pageLabel(page.name)}</p>
                 </div>
 
-                {/* Spinner de delete */}
                 {isDeleting && (
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-20">
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
@@ -379,23 +360,19 @@ export default function PagesManager({
             className="relative bg-[#0e1520] border border-[#1c2a3e] rounded-[14px] overflow-hidden flex flex-col max-w-[520px] w-full shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Cabeçalho do modal */}
+            {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-[#141d2c]">
               <div>
-                <p className="text-white text-[14px] font-semibold">
-                  Página {pageLabel(modal.name)}
-                </p>
+                <p className="text-white text-[14px] font-semibold">Página {pageLabel(modal.name)}</p>
                 <p className="text-[#526888] text-[11px] font-mono">{modal.name} · {formatBytes(modal.size)}</p>
               </div>
               <button
                 onClick={() => setModal(null)}
                 className="w-[28px] h-[28px] flex items-center justify-center rounded-full bg-[#141d2c] border border-[#1c2a3e] hover:border-[#2a3a5e] text-[#7a9ab5] hover:text-white text-[14px] transition-colors"
-              >
-                ✕
-              </button>
+              >✕</button>
             </div>
 
-            {/* Imagem grande */}
+            {/* Imagem */}
             <div className="relative bg-[#070a12] flex items-center justify-center" style={{ minHeight: 320 }}>
               {modal.signedUrl ? (
                 <img
@@ -407,14 +384,12 @@ export default function PagesManager({
               ) : (
                 <div className="py-12 text-[#2a3a5e] text-[13px]">Sem prévia disponível</div>
               )}
-
-              {/* Badges sobrepostos na imagem */}
-              {editorialPg === modal.name && (
+              {editorialPages.includes(modal.name) && (
                 <div className="absolute top-2 left-2 bg-[#ff1f1f] text-white text-[10px] font-bold px-2 py-0.5 rounded-[4px]">
                   📝 Página Editorial
                 </div>
               )}
-              {indexPg === modal.name && (
+              {indexPages.includes(modal.name) && (
                 <div className="absolute top-2 right-2 bg-[#0ea5e9] text-white text-[10px] font-bold px-2 py-0.5 rounded-[4px]">
                   📋 Página Índice
                 </div>
@@ -423,39 +398,51 @@ export default function PagesManager({
 
             {/* Ações */}
             <div className="p-4 flex flex-col gap-2">
-              {/* Marcações */}
+              {/* Marcações — podem ser aplicadas simultaneamente e múltiplas vezes */}
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => handleMark("editorial", modal.name)}
                   disabled={savingMarker !== null}
                   className={`h-[40px] text-[12px] font-semibold rounded-[8px] border transition-colors disabled:opacity-50 ${
-                    editorialPg === modal.name
+                    editorialPages.includes(modal.name)
                       ? "bg-[#ff1f1f]/15 border-[#ff1f1f]/50 text-[#ff6b6b]"
                       : "bg-[#141d2c] border-[#1c2a3e] hover:border-[#ff1f1f]/40 text-[#7a9ab5] hover:text-white"
                   }`}
                 >
                   {savingMarker === "editorial"
                     ? "Salvando…"
-                    : editorialPg === modal.name
-                      ? "✓ Página Editorial"
+                    : editorialPages.includes(modal.name)
+                      ? "✓ Remover Editorial"
                       : "📝 Marcar como Editorial"}
                 </button>
                 <button
                   onClick={() => handleMark("index", modal.name)}
                   disabled={savingMarker !== null}
                   className={`h-[40px] text-[12px] font-semibold rounded-[8px] border transition-colors disabled:opacity-50 ${
-                    indexPg === modal.name
+                    indexPages.includes(modal.name)
                       ? "bg-[#0ea5e9]/15 border-[#0ea5e9]/50 text-[#38bdf8]"
                       : "bg-[#141d2c] border-[#1c2a3e] hover:border-[#0ea5e9]/40 text-[#7a9ab5] hover:text-white"
                   }`}
                 >
                   {savingMarker === "index"
                     ? "Salvando…"
-                    : indexPg === modal.name
-                      ? "✓ Página Índice"
+                    : indexPages.includes(modal.name)
+                      ? "✓ Remover Índice"
                       : "📋 Marcar como Índice"}
                 </button>
               </div>
+
+              {/* Contador de marcações desta edição */}
+              {(editorialPages.length > 0 || indexPages.length > 0) && (
+                <div className="flex gap-2 text-[10px] text-[#526888]">
+                  {editorialPages.length > 0 && (
+                    <span>📝 Editorial: {editorialPages.map(pageLabel).join(", ")}</span>
+                  )}
+                  {indexPages.length > 0 && (
+                    <span>📋 Índice: {indexPages.map(pageLabel).join(", ")}</span>
+                  )}
+                </div>
+              )}
 
               {/* Excluir */}
               <button
