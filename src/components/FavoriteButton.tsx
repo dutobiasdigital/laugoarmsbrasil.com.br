@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 interface FavoriteButtonProps {
-  contentType: "edition" | "product" | "guide_listing";
+  contentType: "edition" | "product" | "guide_listing" | "article";
   contentId: string;
   isLoggedIn: boolean;
   initialIsFavorited?: boolean;
