@@ -144,9 +144,13 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
                   </div>
                 )}
                 <div className="font-['Barlow_Condensed'] font-extrabold leading-[1.0]">
-                  <p className="text-[#dce8ff] text-5xl lg:text-[68px]">{slide.title}</p>
+                  <p className={`text-[#dce8ff] text-5xl lg:text-[68px] ${slide.titleHighlight ? "line-clamp-1" : "line-clamp-2"}`}>
+                    {slide.title}
+                  </p>
                   {slide.titleHighlight && (
-                    <p className="text-[#ff1f1f] text-5xl lg:text-[68px]">{slide.titleHighlight}</p>
+                    <p className="text-[#ff1f1f] text-5xl lg:text-[68px] line-clamp-1">
+                      {slide.titleHighlight}
+                    </p>
                   )}
                 </div>
                 {slide.text && (
