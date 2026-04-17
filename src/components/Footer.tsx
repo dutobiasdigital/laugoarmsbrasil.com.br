@@ -45,7 +45,6 @@ function IconLinkedin() {
   );
 }
 
-/* ── Social key → icon mapping ───────────────────────────────── */
 const SOCIAL_META = [
   { key: "social.instagram", label: "Instagram",   Icon: IconInstagram },
   { key: "social.facebook",  label: "Facebook",    Icon: IconFacebook  },
@@ -55,7 +54,6 @@ const SOCIAL_META = [
   { key: "social.linkedin",  label: "LinkedIn",    Icon: IconLinkedin  },
 ];
 
-/* ── Fetch social links from site_settings ────────────────────── */
 const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
@@ -65,10 +63,7 @@ async function getSocialLinks(): Promise<Record<string, string>> {
     const keys = SOCIAL_META.map((s) => s.key).join(",");
     const res = await fetch(
       `https://${PROJECT}.supabase.co/rest/v1/site_settings?key=in.(${keys})&select=key,value`,
-      {
-        headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` },
-        next: { revalidate: 60 },
-      }
+      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, next: { revalidate: 60 } }
     );
     const rows: { key: string; value: string | null }[] = await res.json();
     if (!Array.isArray(rows)) return {};
@@ -78,7 +73,30 @@ async function getSocialLinks(): Promise<Record<string, string>> {
   } catch { return {}; }
 }
 
-/* ── Footer component ─────────────────────────────────────────── */
+/* ── Nav column helper ────────────────────────────────────────── */
+function NavCol({ title, links }: { title: string; links: { href: string; label: string }[] }) {
+  return (
+    <div>
+      <p className="text-[10px] font-semibold text-[#526888] uppercase tracking-[1.8px] mb-3">
+        {title}
+      </p>
+      <ul className="space-y-2.5">
+        {links.map((link) => (
+          <li key={link.href}>
+            <Link
+              href={link.href}
+              className="text-[13px] text-[#7a9ab5] hover:text-white transition-colors leading-none"
+            >
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/* ── Footer ───────────────────────────────────────────────────── */
 export default async function Footer() {
   const socialLinks = await getSocialLinks();
   const activeSocial = SOCIAL_META
@@ -87,27 +105,29 @@ export default async function Footer() {
 
   return (
     <footer className="bg-[#070a12] border-t border-[#141d2c] mt-auto">
-      <div className="max-w-[1440px] mx-auto px-5 lg:px-20 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-6 gap-10 mb-10">
+      <div className="max-w-[1440px] mx-auto px-5 lg:px-20 py-10 sm:py-14">
 
-          {/* Brand */}
-          <div className="sm:col-span-2">
-            <div className="mb-4">
+        {/* ── Top section ── */}
+        <div className="flex flex-col sm:flex-row gap-8 sm:gap-12 mb-8 sm:mb-10">
+
+          {/* Brand block */}
+          <div className="flex flex-col items-center sm:items-start text-center sm:text-left sm:w-[220px] shrink-0">
+            <div className="mb-3">
               <Image
                 src="/logo.png"
                 alt="Revista Magnum"
-                width={200}
-                height={80}
-                className="h-[64px] w-auto object-contain"
+                width={160}
+                height={64}
+                className="h-[52px] w-auto object-contain"
               />
             </div>
-            <p className="text-xs text-white leading-relaxed max-w-[280px] mb-5">
+            <p className="text-[12px] text-[#526888] leading-relaxed max-w-[240px] mb-4">
               O maior acervo especializado em armas, munições e legislação do Brasil. Desde 1985.
             </p>
 
-            {/* Social icons — only show if configured in admin */}
+            {/* Social icons */}
             {activeSocial.length > 0 && (
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
                 {activeSocial.map(({ href, label, Icon }) => (
                   <a
                     key={label}
@@ -116,7 +136,7 @@ export default async function Footer() {
                     rel="noopener noreferrer"
                     aria-label={label}
                     title={label}
-                    className="social-btn w-[34px] h-[34px] rounded-full flex items-center justify-center text-[#7a9ab5] hover:text-white hover:bg-[#ff1f1f] hover:border-[#ff1f1f] border border-[#1c2a3e] transition-all duration-200"
+                    className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[#526888] hover:text-white hover:bg-[#ff1f1f] hover:border-[#ff1f1f] border border-[#1c2a3e] transition-all duration-200"
                   >
                     <Icon />
                   </a>
@@ -125,105 +145,66 @@ export default async function Footer() {
             )}
           </div>
 
-          {/* Revista */}
-          <div>
-            <p className="text-[10px] font-semibold text-[#7a9ab5] uppercase tracking-[2px] mb-3">
-              Revista
-            </p>
-            <ul className="space-y-2">
-              {[
+          {/* Separator — vertical on desktop, horizontal on mobile */}
+          <div className="hidden sm:block w-px bg-[#141d2c] self-stretch" />
+          <div className="block sm:hidden h-px bg-[#141d2c]" />
+
+          {/* Nav grid: 2×2 on mobile, 4 cols on desktop */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-7 flex-1">
+            <NavCol
+              title="Revista"
+              links={[
                 { href: "/edicoes", label: "Edições"  },
                 { href: "/blog",    label: "Blog"     },
                 { href: "/sobre",   label: "Sobre"    },
                 { href: "/anuncie", label: "Anuncie"  },
                 { href: "/contato", label: "Contato"  },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-xs text-white hover:text-[#7a9ab5] transition-colors">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Guia */}
-          <div>
-            <p className="text-[10px] font-semibold text-[#7a9ab5] uppercase tracking-[2px] mb-3">
-              Guia Comercial
-            </p>
-            <ul className="space-y-2">
-              {[
+              ]}
+            />
+            <NavCol
+              title="Guia Comercial"
+              links={[
                 { href: "/guia",                label: "Diretório"         },
                 { href: "/guia/cadastrar",      label: "Cadastrar empresa" },
                 { href: "/guia/busca",          label: "Busca"             },
                 { href: "/guia/armareiros",     label: "Armareiros"        },
                 { href: "/guia/clubes-de-tiro", label: "Clubes de Tiro"    },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-xs text-white hover:text-[#7a9ab5] transition-colors">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Conta */}
-          <div>
-            <p className="text-[10px] font-semibold text-[#7a9ab5] uppercase tracking-[2px] mb-3">
-              Conta
-            </p>
-            <ul className="space-y-2">
-              {[
+              ]}
+            />
+            <NavCol
+              title="Conta"
+              links={[
                 { href: "/assine",        label: "Assine"      },
                 { href: "/auth/login",    label: "Entrar"      },
                 { href: "/auth/cadastro", label: "Cadastrar"   },
                 { href: "/minha-conta",   label: "Minha conta" },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-xs text-white hover:text-[#7a9ab5] transition-colors">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Empresa */}
-          <div>
-            <p className="text-[10px] font-semibold text-[#7a9ab5] uppercase tracking-[2px] mb-3">
-              Empresa
-            </p>
-            <ul className="space-y-2">
-              {[
-                { href: "/termos",      label: "Termos de Uso"           },
-                { href: "/privacidade", label: "Política de Privacidade" },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-xs text-white hover:text-[#7a9ab5] transition-colors">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+              ]}
+            />
+            <NavCol
+              title="Legal"
+              links={[
+                { href: "/termos",      label: "Termos de Uso"    },
+                { href: "/privacidade", label: "Privacidade"      },
+              ]}
+            />
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="border-t border-[#0e1520] pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-[11px] text-[#7a9ab5]">
+        {/* ── Bottom bar ── */}
+        <div className="border-t border-[#0e1520] pt-5 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p className="text-[11px] text-[#526888] text-center sm:text-left">
             © {new Date().getFullYear()} Revista Magnum. Todos os direitos reservados.
           </p>
           <a
             href="https://arkelab.com.br"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[11px] text-[#7a9ab5] hover:text-white transition-colors"
+            className="text-[11px] text-[#526888] hover:text-white transition-colors"
           >
             Desenvolvido por arkeLAB
           </a>
         </div>
+
       </div>
     </footer>
   );
