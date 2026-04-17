@@ -5,28 +5,28 @@ import { useState, useEffect, useCallback } from "react";
 
 const SLIDES = [
   {
-    label: "Fundada em 1986 · Lançamento Digital",
-    lines: ["O Mundo", "das Armas,", "— Digital."],
-    lineColors: ["text-white", "text-white", "text-[#ff1f1f]"],
-    sub: "Para quem leva armas a sério.\nDesde antes de qualquer portal existir.",
-    cta: { href: "/edicoes", label: "Ver as 207 Edições →" },
-    ctaSecondary: { href: "/assine", label: "Ver planos" },
-  },
-  {
-    label: "207 Edições · Acervo Completo",
+    label: "207 Edições · Acervo Digital Completo",
     lines: ["O Maior", "Acervo", "— do Brasil."],
     lineColors: ["text-white", "text-white", "text-[#ff1f1f]"],
-    sub: "145 edições regulares + 62 especiais.\nTodo o conteúdo técnico num só lugar.",
+    sub: "40 anos de conteúdo técnico reunidos\nnuma só plataforma. Leia quando quiser.",
     cta: { href: "/edicoes", label: "Explorar o Acervo →" },
-    ctaSecondary: { href: "/edicoes?tipo=SPECIAL", label: "Edições Especiais" },
+    ctaSecondary: { href: "/edicoes?tipo=SPECIAL", label: "Ver Edições Especiais" },
   },
   {
-    label: "Conteúdo Técnico · Para Quem Entende",
-    lines: ["Armas.", "Balística.", "— Legislação."],
+    label: "Guia Comercial · Empresas do Setor",
+    lines: ["Armas.", "Acessórios.", "— Empresas."],
     lineColors: ["text-white", "text-white", "text-[#ff1f1f]"],
-    sub: "Informação especializada atualizada.\nLegislação CAC 2025/2026 sempre em dia.",
-    cta: { href: "/assine", label: "Assinar Agora →" },
-    ctaSecondary: { href: "/blog", label: "Ler o Blog" },
+    sub: "Encontre armeiros, clubes de tiro,\nimportadores e distribuidoras perto de você.",
+    cta: { href: "/guia", label: "Acessar o Guia →" },
+    ctaSecondary: { href: "/loja", label: "Ver a Loja" },
+  },
+  {
+    label: "Assinatura Digital · Acesso Imediato",
+    lines: ["Assine.", "Acesse.", "— Agora."],
+    lineColors: ["text-white", "text-white", "text-[#ff1f1f]"],
+    sub: "Acervo completo liberado na hora.\nSem frete. Sem espera. Direto no seu celular.",
+    cta: { href: "/assine", label: "Ver Planos de Assinatura →" },
+    ctaSecondary: { href: "/edicoes", label: "Conhecer o Acervo" },
   },
 ];
 
