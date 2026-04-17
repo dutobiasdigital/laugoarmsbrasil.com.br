@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import FavoriteButton from "@/components/FavoriteButton";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,9 @@ export default async function EdicaoDetalhePage({
   let isSubscriber = false;
   let hasSingleAccess = false;
   let userEmail: string | null = null;
+  let isLoggedIn = false;
+  let isFavorited = false;
+  let dbUserId: string | null = null;
 
   try {
     // Busca edição e auth em paralelo
@@ -49,14 +53,16 @@ export default async function EdicaoDetalhePage({
 
     // Verifica acesso do usuário
     if (user) {
+      isLoggedIn = true;
       userEmail = user.email ?? null;
 
       const userRes = await fetch(
-        `${BASE}/users?authId=eq.${user.id}&select=role,subscriptions(status)&limit=1`,
+        `${BASE}/users?authId=eq.${user.id}&select=id,role,subscriptions(status)&limit=1`,
         { headers: HEADERS, cache: "no-store" }
       );
       const users  = await userRes.json();
       const dbUser = Array.isArray(users) ? users[0] : null;
+      dbUserId = dbUser?.id ?? null;
 
       const isAdmin    = dbUser?.role === "ADMIN";
       const activeSub  = Array.isArray(dbUser?.subscriptions) && dbUser.subscriptions.some((s: { status: string }) => s.status === "ACTIVE");
@@ -74,6 +80,16 @@ export default async function EdicaoDetalhePage({
           (p: { metadata?: { edition_slug?: string } }) => p.metadata?.edition_slug === slug
         );
       }
+    }
+
+    // Verifica favorito
+    if (dbUserId && edition) {
+      const favRes = await fetch(
+        `${BASE}/user_favorites?userId=eq.${dbUserId}&contentType=eq.edition&contentId=eq.${edition.id}&select=id&limit=1`,
+        { headers: HEADERS, cache: "no-store" }
+      );
+      const favData = await favRes.json();
+      isFavorited = Array.isArray(favData) && favData.length > 0;
     }
 
     // Edições relacionadas
@@ -230,6 +246,18 @@ export default async function EdicaoDetalhePage({
                   🔒 Assinatura ou acesso avulso por 30 dias
                 </p>
               )}
+
+              {/* Favoritar */}
+              <div className="pt-1">
+                <FavoriteButton
+                  contentType="edition"
+                  contentId={edition.id}
+                  isLoggedIn={isLoggedIn}
+                  initialIsFavorited={isFavorited}
+                  size="md"
+                  label={isFavorited ? "Favoritado" : "Favoritar"}
+                />
+              </div>
             </div>
           </div>
         </section>

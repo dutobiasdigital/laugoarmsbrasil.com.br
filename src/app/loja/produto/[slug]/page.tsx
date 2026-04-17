@@ -2,10 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import FavoriteButton from "@/components/FavoriteButton";
 import ProductGallery from "@/components/loja/ProductGallery";
 import AddToCartButton from "@/components/loja/AddToCartButton";
 import ProductContentTabs from "@/components/loja/ProductContentTabs";
 import ViewTracker from "@/components/ViewTracker";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +61,8 @@ export default async function ProdutoPage({ params }: { params: Promise<{ slug: 
   let extraImages: ProductImage[] = [];
   let productPdfs: ProductPdf[]   = [];
   let related: RelatedProduct[]   = [];
+  let isLoggedIn = false;
+  let isFavorited = false;
 
   try {
     const res = await fetch(
@@ -72,6 +76,29 @@ export default async function ProdutoPage({ params }: { params: Promise<{ slug: 
   } catch { /* DB unavailable */ }
 
   if (!product) notFound();
+
+  // Verifica auth e favorito
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user && product) {
+      isLoggedIn = true;
+      const userRes = await fetch(
+        `${BASE}/users?authId=eq.${user.id}&select=id&limit=1`,
+        { headers: HEADERS, cache: "no-store" }
+      );
+      const users = await userRes.json();
+      const dbUser = Array.isArray(users) ? users[0] : null;
+      if (dbUser) {
+        const favRes = await fetch(
+          `${BASE}/user_favorites?userId=eq.${dbUser.id}&contentType=eq.product&contentId=eq.${product.id}&select=id&limit=1`,
+          { headers: HEADERS, cache: "no-store" }
+        );
+        const favData = await favRes.json();
+        isFavorited = Array.isArray(favData) && favData.length > 0;
+      }
+    }
+  } catch { /* ignore */ }
 
   // Fetch extra images + PDFs in parallel
   try {
@@ -189,6 +216,18 @@ export default async function ProdutoPage({ params }: { params: Promise<{ slug: 
               <h1 className="font-['Barlow_Condensed'] font-extrabold text-[#dce8ff] text-[40px] lg:text-[52px] leading-[1.0]">
                 {product.name}
               </h1>
+
+              {/* Favoritar */}
+              <div className="-mt-2">
+                <FavoriteButton
+                  contentType="product"
+                  contentId={product.id}
+                  isLoggedIn={isLoggedIn}
+                  initialIsFavorited={isFavorited}
+                  size="sm"
+                  label={isFavorited ? "Favoritado" : "Favoritar"}
+                />
+              </div>
 
               {/* Widget interativo (AddToCartButton contém preço, variações, qty, botão) */}
               <AddToCartButton

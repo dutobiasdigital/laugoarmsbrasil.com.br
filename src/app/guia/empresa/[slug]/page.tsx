@@ -3,7 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import FavoriteButton from "@/components/FavoriteButton";
 import { PLAN_LABELS, categoryBySegment } from "@/lib/guia";
+import { createClient } from "@/lib/supabase/server";
 import GuiaViewTracker from "./GuiaViewTracker";
 import WhatsAppModal from "./_WhatsAppModal";
 import PhoneReveal from "./_PhoneReveal";
@@ -93,8 +95,36 @@ export async function generateMetadata(
 
 export default async function EmpresaPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [company, mapsKey] = await Promise.all([getCompany(slug), getMapsKey()]);
+  const supabase = await createClient();
+  const [{ data: { user } }, company, mapsKey] = await Promise.all([
+    supabase.auth.getUser(),
+    getCompany(slug),
+    getMapsKey(),
+  ]);
   if (!company) notFound();
+
+  // Verifica favorito
+  let isLoggedIn = false;
+  let isFavorited = false;
+  if (user) {
+    isLoggedIn = true;
+    try {
+      const userRes = await fetch(
+        `https://${PROJECT}.supabase.co/rest/v1/users?authId=eq.${user.id}&select=id&limit=1`,
+        { headers: H, cache: "no-store" }
+      );
+      const users = await userRes.json();
+      const dbUser = Array.isArray(users) ? users[0] : null;
+      if (dbUser) {
+        const favRes = await fetch(
+          `https://${PROJECT}.supabase.co/rest/v1/user_favorites?userId=eq.${dbUser.id}&contentType=eq.guide_listing&contentId=eq.${company.id}&select=id&limit=1`,
+          { headers: H, cache: "no-store" }
+        );
+        const favData = await favRes.json();
+        isFavorited = Array.isArray(favData) && favData.length > 0;
+      }
+    } catch { /* noop */ }
+  }
 
   const cat        = categoryBySegment(company.segment);
   const pl         = PLAN_LABELS[company.listingType] ?? PLAN_LABELS["FREE"];
@@ -224,6 +254,17 @@ export default async function EmpresaPage({ params }: { params: Promise<{ slug: 
                   {company.description}
                 </p>
               )}
+
+              <div className="mt-4">
+                <FavoriteButton
+                  contentType="guide_listing"
+                  contentId={company.id}
+                  isLoggedIn={isLoggedIn}
+                  initialIsFavorited={isFavorited}
+                  size="md"
+                  label={isFavorited ? "Empresa favoritada" : "Favoritar empresa"}
+                />
+              </div>
             </div>
 
             {/* Right: contact panel */}
