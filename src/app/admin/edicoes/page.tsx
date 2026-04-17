@@ -305,29 +305,72 @@ export default async function AdminEdicoesPage({
         )}
 
         {/* Paginação */}
-        {totalPages > 1 && (
-          <div className="px-5 py-3 flex items-center justify-between border-t border-[#141d2c]">
-            <p className="text-white text-[13px]">
-              {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, total)} de{" "}
-              {total.toLocaleString("pt-BR")} edições
-            </p>
-            <div className="flex items-center gap-1.5">
-              {Array.from({ length: Math.min(totalPages, 8) }, (_, i) => i + 1).map((p) => (
-                <Link
-                  key={p}
-                  href={`/admin/edicoes${qs({ ...baseParams, ordem, pagina: String(p) })}`}
-                  className={`w-[30px] h-[30px] flex items-center justify-center rounded-[4px] text-[13px] font-semibold transition-colors ${
-                    p === page
-                      ? "bg-[#ff1f1f] text-white"
-                      : "bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
-                  }`}
-                >
-                  {p}
-                </Link>
-              ))}
+        {totalPages > 1 && (() => {
+          // Monta array de itens: número de página ou "…"
+          const items: (number | "…")[] = [];
+          const WING = 2; // páginas ao redor da atual
+
+          for (let p = 1; p <= totalPages; p++) {
+            const isFirst   = p === 1;
+            const isLast    = p === totalPages;
+            const nearCur   = Math.abs(p - page) <= WING;
+            if (isFirst || isLast || nearCur) {
+              items.push(p);
+            } else if (items[items.length - 1] !== "…") {
+              items.push("…");
+            }
+          }
+
+          const btnBase = "h-[30px] flex items-center justify-center rounded-[4px] text-[13px] font-semibold transition-colors";
+
+          return (
+            <div className="px-5 py-3 flex items-center justify-between border-t border-[#141d2c] flex-wrap gap-2">
+              <p className="text-white text-[13px]">
+                {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, total)} de{" "}
+                {total.toLocaleString("pt-BR")} edições
+              </p>
+              <div className="flex items-center gap-1">
+                {/* Anterior */}
+                {page > 1 ? (
+                  <Link
+                    href={`/admin/edicoes${qs({ ...baseParams, ordem, pagina: String(page - 1) })}`}
+                    className={`${btnBase} w-[30px] bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white`}
+                  >‹</Link>
+                ) : (
+                  <span className={`${btnBase} w-[30px] bg-[#0e1520] border border-[#141d2c] text-[#2a3a4e] cursor-default`}>‹</span>
+                )}
+
+                {items.map((item, i) =>
+                  item === "…" ? (
+                    <span key={`ellipsis-${i}`} className={`${btnBase} w-[24px] text-[#2a3a4e]`}>…</span>
+                  ) : (
+                    <Link
+                      key={item}
+                      href={`/admin/edicoes${qs({ ...baseParams, ordem, pagina: String(item) })}`}
+                      className={`${btnBase} min-w-[30px] px-1 ${
+                        item === page
+                          ? "bg-[#ff1f1f] text-white"
+                          : "bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
+                      }`}
+                    >
+                      {item}
+                    </Link>
+                  )
+                )}
+
+                {/* Próxima */}
+                {page < totalPages ? (
+                  <Link
+                    href={`/admin/edicoes${qs({ ...baseParams, ordem, pagina: String(page + 1) })}`}
+                    className={`${btnBase} w-[30px] bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white`}
+                  >›</Link>
+                ) : (
+                  <span className={`${btnBase} w-[30px] bg-[#0e1520] border border-[#141d2c] text-[#2a3a4e] cursor-default`}>›</span>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </>
   );
