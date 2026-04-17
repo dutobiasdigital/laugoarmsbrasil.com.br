@@ -6,7 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 const SLIDES = [
   {
     label: "207 Edições · Acervo Digital Completo",
-    lines: ["O Maior", "Acervo", "— do Brasil."],
+    lines: ["O Maior", "Acervo", "do Brasil."],
     lineColors: ["text-white", "text-white", "text-[#ff1f1f]"],
     sub: "40 anos de conteúdo técnico reunidos\nnuma só plataforma. Leia quando quiser.",
     cta: { href: "/edicoes", label: "Explorar o Acervo →" },
@@ -14,7 +14,7 @@ const SLIDES = [
   },
   {
     label: "Guia Comercial · Empresas do Setor",
-    lines: ["Armas.", "Acessórios.", "— Empresas."],
+    lines: ["Armas.", "Acessórios.", "Empresas."],
     lineColors: ["text-white", "text-white", "text-[#ff1f1f]"],
     sub: "Encontre armeiros, clubes de tiro,\nimportadores e distribuidoras perto de você.",
     cta: { href: "/guia", label: "Acessar o Guia →" },
@@ -22,7 +22,7 @@ const SLIDES = [
   },
   {
     label: "Assinatura Digital · Acesso Imediato",
-    lines: ["Assine.", "Acesse.", "— Agora."],
+    lines: ["Assine.", "Acesse.", "Agora."],
     lineColors: ["text-white", "text-white", "text-[#ff1f1f]"],
     sub: "Acervo completo liberado na hora.\nSem frete. Sem espera. Direto no seu celular.",
     cta: { href: "/assine", label: "Ver Planos de Assinatura →" },
@@ -46,45 +46,35 @@ export default function WelcomeBanner() {
   const prev = useCallback(() => goTo((current - 1 + SLIDES.length) % SLIDES.length), [current, goTo]);
   const next = useCallback(() => goTo((current + 1) % SLIDES.length), [current, goTo]);
 
-  // Auto-advance a cada 6s
+  // Auto-advance a cada 10s
   useEffect(() => {
-    const timer = setInterval(() => {
-      next();
-    }, 6000);
+    const timer = setInterval(() => next(), 10000);
     return () => clearInterval(timer);
   }, [next]);
 
   const slide = SLIDES[current];
 
   return (
-    <section className="hero-metal relative overflow-hidden min-h-[520px] lg:min-h-[580px] flex items-center">
+    <section className="hero-metal relative overflow-hidden min-h-[380px] lg:min-h-[420px] flex items-center">
 
       {/* ── Grade decorativa ──────────────────────────────────── */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
         style={{ backgroundImage: "repeating-linear-gradient(0deg,#7a9ab5 0,transparent 1px,transparent 64px),repeating-linear-gradient(90deg,#7a9ab5 0,transparent 1px,transparent 64px)" }} />
 
-      {/* ── Glow vermelho — centro esquerda ───────────────────── */}
-      <div className="absolute top-1/2 -translate-y-1/2 -left-10 w-[600px] h-[600px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(255,31,31,0.09) 0%, transparent 65%)" }} />
+      {/* ── Glow vermelho — centro ────────────────────────────── */}
+      <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(255,31,31,0.07) 0%, transparent 65%)" }} />
 
-      {/* ── Glow azul-aço — inferior direita ──────────────────── */}
-      <div className="absolute -bottom-20 right-[10%] w-[500px] h-[400px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(122,154,181,0.04) 0%, transparent 70%)" }} />
+      {/* ── Layout principal — centrado ───────────────────────── */}
+      <div className="relative z-10 w-full px-5 lg:px-20 py-6 lg:py-8 flex flex-col items-center">
 
-      {/* ── Stripe vermelha vertical ──────────────────────────── */}
-      <div className="hidden lg:block absolute left-[calc(5rem-1px)] top-[15%] bottom-[15%] w-[2px] rounded-full pointer-events-none"
-        style={{ background: "linear-gradient(180deg, transparent, rgba(255,31,31,0.5) 20%, rgba(255,31,31,0.5) 80%, transparent)" }} />
-
-      {/* ── Layout principal ──────────────────────────────────── */}
-      <div className="relative z-10 w-full px-5 lg:px-20 py-8 lg:py-10 flex items-center gap-12">
-
-        {/* ── Conteúdo — fade-in por key (sem piscar o fundo) ────── */}
+        {/* ── Conteúdo — fade puro por key ─────────────────────── */}
         <div
           key={current}
-          className="animate-fade-slide-in flex-1 max-w-[640px]"
+          className="animate-fade-slide-in w-full max-w-[600px] text-center"
         >
           {/* Label */}
-          <div className="flex items-center gap-2.5 mb-4">
+          <div className="flex items-center justify-center gap-2.5 mb-4">
             <div className="w-[6px] h-[6px] bg-[#ff1f1f] rounded-full" />
             <span className="text-[#ff1f1f] text-[11px] font-bold tracking-[2.5px] uppercase">
               {slide.label}
@@ -92,22 +82,22 @@ export default function WelcomeBanner() {
           </div>
 
           {/* Headline */}
-          <h1 className="font-['Barlow_Condensed'] font-extrabold leading-[0.90] mb-4 select-none">
+          <h1 className="font-['Barlow_Condensed'] font-extrabold leading-[0.90] mb-5 select-none">
             {slide.lines.map((line, i) => (
               <span key={i} className={`block ${slide.lineColors[i]}`}
-                style={{ fontSize: "clamp(48px, 6.5vw, 88px)" }}>
+                style={{ fontSize: "clamp(52px, 7vw, 96px)" }}>
                 {line}
               </span>
             ))}
           </h1>
 
           {/* Subheadline */}
-          <p className="text-[#7a9ab5] text-[15px] leading-relaxed max-w-[480px] mb-5 whitespace-pre-line">
+          <p className="text-[#7a9ab5] text-[15px] leading-relaxed mb-6 whitespace-pre-line">
             {slide.sub}
           </p>
 
           {/* CTAs */}
-          <div className="flex items-center gap-3 flex-wrap mb-6">
+          <div className="flex items-center justify-center gap-3 flex-wrap mb-7">
             <Link
               href={slide.cta.href}
               className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-bold px-7 py-3.5 rounded transition-colors"
@@ -124,7 +114,7 @@ export default function WelcomeBanner() {
           </div>
 
           {/* Stats */}
-          <div className="flex items-center flex-wrap gap-0">
+          <div className="flex items-center justify-center flex-wrap gap-0">
             {STATS.map((stat, i) => (
               <div
                 key={i}
@@ -132,7 +122,7 @@ export default function WelcomeBanner() {
                 style={{ borderLeft: i === 0 ? "none" : "1px solid rgba(20,29,44,1)" }}
               >
                 <span className="font-['Barlow_Condensed'] font-extrabold text-white leading-none"
-                  style={{ fontSize: "clamp(26px, 3vw, 36px)" }}>
+                  style={{ fontSize: "clamp(24px, 2.8vw, 34px)" }}>
                   {stat.value}
                 </span>
                 <span className="text-[#526888] text-[11px] leading-snug whitespace-pre-line">
@@ -143,37 +133,10 @@ export default function WelcomeBanner() {
           </div>
         </div>
 
-        {/* ── Coluna direita — badge (desktop) ──────────────────── */}
-        <div className="hidden lg:flex flex-col items-center justify-center shrink-0 select-none pointer-events-none"
-          style={{ width: "34%" }}>
-          <div className="relative flex items-center justify-center w-[220px] h-[220px]">
-            {/* Anel externo */}
-            <div className="absolute inset-0 rounded-full"
-              style={{ border: "1px solid rgba(28,42,62,0.8)" }} />
-            {/* Anel interno */}
-            <div className="absolute inset-[20px] rounded-full"
-              style={{ border: "1px solid rgba(255,31,31,0.12)" }} />
-            {/* Conteúdo central */}
-            <div className="flex flex-col items-center gap-1 relative z-10">
-              <span className="font-['Barlow_Condensed'] font-extrabold text-white text-[64px] leading-none">40</span>
-              <span className="text-[#ff1f1f] text-[12px] font-bold tracking-[3px] uppercase">Anos</span>
-              <div className="w-10 h-[1px] bg-[#1c2a3e] my-1" />
-              <span className="text-[#526888] text-[10px] font-semibold tracking-[1.5px]">1986 — 2026</span>
-            </div>
-          </div>
-          {/* Label abaixo */}
-          <div className="mt-4 flex flex-col items-center gap-1">
-            <div className="w-[1px] h-6 bg-[#1c2a3e]" />
-            <span className="text-[#1c2a3e] text-[9px] font-bold tracking-[3px] uppercase">
-              Maior Acervo Digital do Brasil
-            </span>
-          </div>
-        </div>
-
       </div>
 
-      {/* ── Controles ─────────────────────────────────────────── */}
-      <div className="absolute bottom-6 left-5 lg:left-20 z-20 flex items-center gap-4">
+      {/* ── Controles — centrados ─────────────────────────────── */}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
 
         {/* Setinha esquerda */}
         <button
@@ -219,10 +182,11 @@ export default function WelcomeBanner() {
             <path d="M4 2l4 4-4 4" />
           </svg>
         </button>
+
       </div>
 
       {/* ── Hashtag ───────────────────────────────────────────── */}
-      <div className="absolute bottom-6 right-6 lg:right-20 z-10">
+      <div className="absolute bottom-5 right-6 lg:right-10 z-10">
         <span className="text-[#1c2a3e] text-[11px] font-semibold tracking-[2px] uppercase">
           #RevistaMagnum
         </span>

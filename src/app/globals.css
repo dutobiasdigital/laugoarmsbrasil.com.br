@@ -39,11 +39,11 @@ body {
 
 /* Slide content fade-in suave (sem piscar o fundo) */
 @keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 .animate-fade-slide-in {
-  animation: fadeSlideIn 0.40s ease-out both;
+  animation: fadeSlideIn 0.80s ease both;
 }
 
 @keyframes metalShimmer {
