@@ -46,17 +46,53 @@ const CAT_GRADIENTS = [
   "from-[#121008] to-[#0e1520]",
 ];
 
+type StatProduct = {
+  product_slug: string; product_name: string;
+  mainImageUrl: string | null; basePrice: number;
+  total_views?: number; total_sold?: number;
+};
+
+function formatCurrency(cents: number) {
+  return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
 export default async function LojaPage() {
   let categories: ShopCategory[] = [];
   let products: ShopProduct[]    = [];
+  let mostViewed: StatProduct[]  = [];
+  let mostSold: StatProduct[]    = [];
 
   try {
-    const [catRes, prodRes] = await Promise.all([
+    const [catRes, prodRes, viewStatsRes, salesRes] = await Promise.all([
       fetch(`${BASE}/shop_categories?isActive=eq.true&select=id,title,slug,description,sortOrder&order=sortOrder.asc`, { headers: HEADERS, cache: "no-store" }),
       fetch(`${BASE}/shop_products?isActive=eq.true&select=id,name,slug,basePrice,mainImageUrl,isFeatured,hasVariations,stock,categoryId,category:shop_categories(title,slug)&order=isFeatured.desc,name.asc`, { headers: HEADERS, cache: "no-store" }),
+      fetch(`${BASE}/product_view_stats?order=total_views.desc&limit=5&select=product_slug,total_views`, { headers: HEADERS, cache: "no-store" }),
+      fetch(`${BASE}/product_sales_stats?order=total_sold.desc&limit=5&select=product_slug,product_name,mainImageUrl,basePrice,total_sold`, { headers: HEADERS, cache: "no-store" }),
     ]);
     if (catRes.ok)  { const d = await catRes.json();  if (Array.isArray(d)) categories = d; }
     if (prodRes.ok) { const d = await prodRes.json(); if (Array.isArray(d)) products   = d; }
+
+    // Mais visualizados: busca slugs → detalhes dos produtos
+    if (viewStatsRes.ok) {
+      const stats: { product_slug: string; total_views: number }[] = await viewStatsRes.json();
+      if (stats.length > 0) {
+        const slugs = stats.map(s => s.product_slug).join(",");
+        const detRes = await fetch(`${BASE}/shop_products?slug=in.(${slugs})&isActive=eq.true&select=slug,name,mainImageUrl,basePrice`, { headers: HEADERS, cache: "no-store" });
+        if (detRes.ok) {
+          const dets: { slug: string; name: string; mainImageUrl: string | null; basePrice: number }[] = await detRes.json();
+          mostViewed = stats.map(s => {
+            const d = dets.find(p => p.slug === s.product_slug);
+            return d ? { product_slug: d.slug, product_name: d.name, mainImageUrl: d.mainImageUrl, basePrice: d.basePrice, total_views: s.total_views } : null;
+          }).filter(Boolean) as StatProduct[];
+        }
+      }
+    }
+
+    // Mais vendidos: direto da view
+    if (salesRes.ok) {
+      const d = await salesRes.json();
+      if (Array.isArray(d)) mostSold = d;
+    }
   } catch { /* DB unavailable */ }
 
   // Map: categoryId → first product imageUrl
@@ -250,6 +286,92 @@ export default async function LojaPage() {
             <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[28px]">Em breve</p>
             <p className="text-[#526888] text-[14px] text-center max-w-xs">Estamos preparando produtos incríveis para você.</p>
           </div>
+        )}
+
+        {/* ── Mais Visualizados & Mais Vendidos ────────────────── */}
+        {(mostViewed.length > 0 || mostSold.length > 0) && (
+          <section className="px-5 lg:px-20 py-12 border-t border-[#0e1520]">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-[3px] h-6 bg-[#ff1f1f] rounded-full" />
+              <h2 className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[30px] leading-none">
+                Tendências da Loja
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Mais Visualizados */}
+              {mostViewed.length > 0 && (
+                <div className="bg-[#0a0f1a] border border-[#141d2c] rounded-[14px] p-5">
+                  <div className="flex items-center gap-2 mb-5 pb-3 border-b border-[#141d2c]">
+                    <span className="text-[14px]">👁</span>
+                    <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[18px]">Mais Visualizados</p>
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    {mostViewed.map((p, i) => (
+                      <Link key={p.product_slug} href={`/loja/produto/${p.product_slug}`}
+                        className="group flex items-center gap-3 hover:opacity-80 transition-opacity">
+                        <span className="font-['Barlow_Condensed'] font-extrabold text-[#ff1f1f] text-[20px] w-7 shrink-0 tabular-nums leading-none"
+                          style={{ color: "var(--brand,#ff1f1f)" }}>
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <div className="w-10 h-10 rounded-[6px] bg-[#141d2c] shrink-0 overflow-hidden">
+                          {p.mainImageUrl
+                            // eslint-disable-next-line @next/next/no-img-element
+                            ? <img src={p.mainImageUrl} alt={p.product_name} className="w-full h-full object-cover" />
+                            : null}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[#dce8ff] text-[13px] leading-snug line-clamp-1 group-hover:text-white transition-colors">
+                            {p.product_name}
+                          </p>
+                          <p className="text-[#526888] text-[11px] font-mono">{formatCurrency(p.basePrice)}</p>
+                        </div>
+                        <span className="text-[#526888] text-[11px] font-semibold shrink-0 group-hover:text-[#ff1f1f] transition-colors">
+                          {p.total_views?.toLocaleString("pt-BR")} views
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Mais Vendidos */}
+              {mostSold.length > 0 && (
+                <div className="bg-[#0a0f1a] border border-[#141d2c] rounded-[14px] p-5">
+                  <div className="flex items-center gap-2 mb-5 pb-3 border-b border-[#141d2c]">
+                    <span className="text-[14px]">🏆</span>
+                    <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[18px]">Mais Vendidos</p>
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    {mostSold.map((p, i) => (
+                      <Link key={p.product_slug} href={`/loja/produto/${p.product_slug}`}
+                        className="group flex items-center gap-3 hover:opacity-80 transition-opacity">
+                        <span className="font-['Barlow_Condensed'] font-extrabold text-[20px] w-7 shrink-0 tabular-nums leading-none"
+                          style={{ color: "var(--brand,#ff1f1f)" }}>
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <div className="w-10 h-10 rounded-[6px] bg-[#141d2c] shrink-0 overflow-hidden">
+                          {p.mainImageUrl
+                            // eslint-disable-next-line @next/next/no-img-element
+                            ? <img src={p.mainImageUrl} alt={p.product_name} className="w-full h-full object-cover" />
+                            : null}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[#dce8ff] text-[13px] leading-snug line-clamp-1 group-hover:text-white transition-colors">
+                            {p.product_name}
+                          </p>
+                          <p className="text-[#526888] text-[11px] font-mono">{formatCurrency(p.basePrice)}</p>
+                        </div>
+                        <span className="text-[#526888] text-[11px] font-semibold shrink-0 group-hover:text-[#ff1f1f] transition-colors">
+                          {p.total_sold?.toLocaleString("pt-BR")} vendas
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
         )}
 
         {/* ── CTA final ────────────────────────────────────────── */}

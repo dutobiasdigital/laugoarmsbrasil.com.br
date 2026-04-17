@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import ProductGallery from "@/components/loja/ProductGallery";
 import AddToCartButton from "@/components/loja/AddToCartButton";
 import ProductContentTabs from "@/components/loja/ProductContentTabs";
+import ViewTracker from "@/components/ViewTracker";
 
 export const dynamic = "force-dynamic";
 
@@ -116,6 +117,8 @@ export default async function ProdutoPage({ params }: { params: Promise<{ slug: 
   return (
     <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
+      {/* View tracking — dispara silenciosamente no client */}
+      <ViewTracker endpoint={`/api/loja/produto/${product.slug}/view`} />
 
       <div className="mt-16 flex-1">
         {/* Breadcrumb */}

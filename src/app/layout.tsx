@@ -92,6 +92,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   const gtmId              = cfg["integrations.gtm_id"]               ?? "";
   const ga4Id              = cfg["integrations.ga4_id"]               ?? "";
+  const gAdsId             = cfg["integrations.google_ads_id"]        ?? "";
+  const gAdsLabel          = cfg["integrations.google_ads_label"]     ?? "";
   const pixelId            = cfg["integrations.meta_pixel_id"]        ?? "";
   const hotjarId           = cfg["integrations.hotjar_id"]            ?? "";
   const clarityId          = cfg["integrations.clarity_id"]           ?? "";
@@ -131,6 +133,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Script src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`} strategy="afterInteractive" />
             <Script id="ga4-init" strategy="afterInteractive">
               {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${ga4Id}');`}
+            </Script>
+          </>
+        )}
+
+        {/* ── Google Ads (standalone, sem GTM) ── */}
+        {gAdsId && !gtmId && (
+          <>
+            <Script src={`https://www.googletagmanager.com/gtag/js?id=${gAdsId}`} strategy="afterInteractive" />
+            <Script id="gads-init" strategy="afterInteractive">
+              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gAdsId}');${gAdsLabel ? `gtag('event','conversion',{'send_to':'${gAdsId}/${gAdsLabel}'});` : ""}`}
             </Script>
           </>
         )}

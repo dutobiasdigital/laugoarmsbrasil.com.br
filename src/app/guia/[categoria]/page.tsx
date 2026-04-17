@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import CategoryViewTracker from "@/components/CategoryViewTracker";
 import { CATEGORIES, STATES, PLAN_LABELS, categoryBySlug } from "@/lib/guia";
 
 export const dynamic = "force-dynamic";
@@ -62,6 +63,11 @@ export default async function CategoriaPage({
   return (
     <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
+      {/* Rastreia visualização da categoria do guia */}
+      <CategoryViewTracker
+        category={categoria}
+        endpoint="/api/guia/categoria/view"
+      />
       <main className="flex-1 pt-16">
 
         {/* Breadcrumb */}

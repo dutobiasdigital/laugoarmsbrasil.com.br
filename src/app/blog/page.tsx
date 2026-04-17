@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import CategoryViewTracker from "@/components/CategoryViewTracker";
 
 export const dynamic = "force-dynamic";
 
@@ -119,6 +120,14 @@ export default async function BlogPage({
   return (
     <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
+
+      {/* Rastreia clique em categoria (só quando filtro está ativo) */}
+      {categoria && (
+        <CategoryViewTracker
+          category={categoria}
+          endpoint="/api/blog/categoria/view"
+        />
+      )}
 
       {/* ── Hero — estilo GUIA ─────────────────────────────────── */}
       <section className="hero-metal px-5 lg:px-20 pt-14 pb-10 border-b border-[#141d2c] mt-16">

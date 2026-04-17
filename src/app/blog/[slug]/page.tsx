@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ViewTracker from "@/components/ViewTracker";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -109,6 +110,9 @@ export default async function BlogArtigoPage({
           )}
         </div>
       </section>
+
+      {/* View tracking — dispara silenciosamente no client */}
+      <ViewTracker endpoint={`/api/articles/${post.slug}/view`} />
 
       <main className="flex-1">
 

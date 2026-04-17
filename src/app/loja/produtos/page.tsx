@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import CategoryViewTracker from "@/components/CategoryViewTracker";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +63,13 @@ export default async function ProdutosPage({
   return (
     <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
+      {/* Rastreia clique em categoria de produto */}
+      {categoria && (
+        <CategoryViewTracker
+          category={categoria}
+          endpoint="/api/loja/categoria/view"
+        />
+      )}
 
       <div className="mt-16">
         {/* Breadcrumb */}
