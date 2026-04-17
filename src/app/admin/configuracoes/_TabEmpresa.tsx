@@ -353,26 +353,100 @@ function TabDados({ settings }: Props) {
 }
 
 /* ── Sub-componente: Design System ─────────────────────────────── */
+
+/** Keys que o layout.tsx realmente lê para montar as CSS vars */
 const DESIGN_KEYS = [
+  // Logotipos
   "site.logo_url", "site.logo_dark_url", "site.favicon_url",
-  "brand.cor_primaria", "brand.cor_secundaria", "brand.cor_acento",
-  "brand.fonte_titulo", "brand.fonte_corpo",
+  // Marca
+  "brand.color_primary", "brand.color_hover",
+  // Tipografia
+  "brand.font_heading",
+  // Dark palette
+  "brand.dark.bg_base", "brand.dark.bg_subtle", "brand.dark.bg_card",
+  "brand.dark.bg_elevated", "brand.dark.border", "brand.dark.border_mid",
+  "brand.dark.text", "brand.dark.text_heading", "brand.dark.text_muted", "brand.dark.text_subtle",
+  // Light palette
+  "brand.light.bg_base", "brand.light.bg_subtle", "brand.light.bg_card",
+  "brand.light.bg_elevated", "brand.light.border", "brand.light.border_mid",
+  "brand.light.text", "brand.light.text_heading", "brand.light.text_muted", "brand.light.text_subtle",
 ];
+
+const DEFAULTS: Record<string, string> = {
+  "brand.color_primary":      "#ff1f1f",
+  "brand.color_hover":        "#cc0000",
+  "brand.font_heading":       "barlow",
+  "brand.dark.bg_base":       "#070a12",
+  "brand.dark.bg_subtle":     "#0a0f1a",
+  "brand.dark.bg_card":       "#0e1520",
+  "brand.dark.bg_elevated":   "#141d2c",
+  "brand.dark.border":        "#141d2c",
+  "brand.dark.border_mid":    "#1c2a3e",
+  "brand.dark.text":          "#d4d4da",
+  "brand.dark.text_heading":  "#dce8ff",
+  "brand.dark.text_muted":    "#7a9ab5",
+  "brand.dark.text_subtle":   "#526888",
+  "brand.light.bg_base":      "#f1f5f9",
+  "brand.light.bg_subtle":    "#f8fafc",
+  "brand.light.bg_card":      "#ffffff",
+  "brand.light.bg_elevated":  "#e2e8f0",
+  "brand.light.border":       "#cbd5e1",
+  "brand.light.border_mid":   "#94a3b8",
+  "brand.light.text":         "#334155",
+  "brand.light.text_heading": "#1e293b",
+  "brand.light.text_muted":   "#475569",
+  "brand.light.text_subtle":  "#64748b",
+};
+
+const FONT_OPTIONS = [
+  { value: "barlow",     label: "Barlow Condensed",  sample: "font-['Barlow_Condensed']" },
+  { value: "oswald",     label: "Oswald",             sample: "font-['Oswald']" },
+  { value: "bebas",      label: "Bebas Neue",         sample: "font-['Bebas_Neue']" },
+  { value: "montserrat", label: "Montserrat",         sample: "font-['Montserrat']" },
+  { value: "playfair",   label: "Playfair Display",   sample: "font-['Playfair_Display']" },
+];
+
+function ColorRow({
+  k, label, hint, values, set,
+}: { k: string; label: string; hint?: string; values: Record<string, string>; set: (k: string, v: string) => void }) {
+  const val = values[k] || DEFAULTS[k] || "#000000";
+  return (
+    <div>
+      <label className={labelCls}>{label}</label>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={val}
+          onChange={e => set(k, e.target.value)}
+          className="w-[40px] h-[40px] rounded-[6px] border border-[#1c2a3e] bg-transparent cursor-pointer p-0.5 shrink-0"
+        />
+        <input
+          type="text"
+          value={val}
+          onChange={e => set(k, e.target.value)}
+          maxLength={9}
+          className="bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[13px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] flex-1 font-mono transition-colors"
+        />
+        <div
+          className="w-[40px] h-[40px] rounded-[6px] border border-[#1c2a3e] shrink-0"
+          style={{ background: val }}
+        />
+      </div>
+      {hint && <p className="text-[#526888] text-[11px] mt-1">{hint}</p>}
+    </div>
+  );
+}
 
 function TabDesign({ settings }: Props) {
   const [values, setValues] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {};
-    for (const k of DESIGN_KEYS) init[k] = settings[k] ?? "";
-    if (!init["brand.cor_primaria"])   init["brand.cor_primaria"]   = "#ff1f1f";
-    if (!init["brand.cor_secundaria"]) init["brand.cor_secundaria"] = "#0e1520";
-    if (!init["brand.cor_acento"])     init["brand.cor_acento"]     = "#7a9ab5";
-    if (!init["brand.fonte_titulo"])   init["brand.fonte_titulo"]   = "Barlow Condensed";
-    if (!init["brand.fonte_corpo"])    init["brand.fonte_corpo"]    = "Inter";
+    for (const k of DESIGN_KEYS) init[k] = settings[k] ?? DEFAULTS[k] ?? "";
     return init;
   });
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved]   = useState(false);
-  const [error, setError]   = useState<string | null>(null);
+  const [saving, setSaving]   = useState(false);
+  const [saved,  setSaved]    = useState(false);
+  const [error,  setError]    = useState<string | null>(null);
+  const [mode,   setMode]     = useState<"dark" | "light">("dark");
 
   function set(k: string, v: string) { setValues((p) => ({ ...p, [k]: v })); }
 
@@ -385,112 +459,186 @@ function TabDesign({ settings }: Props) {
     if (r.ok) setTimeout(() => setSaved(false), 3000);
   }
 
+  const fontLabel = FONT_OPTIONS.find(f => f.value === values["brand.font_heading"])?.label ?? "Barlow Condensed";
+  const fontClass = FONT_OPTIONS.find(f => f.value === values["brand.font_heading"])?.sample ?? "font-['Barlow_Condensed']";
+
+  const prefix = `brand.${mode}`;
+  const bgBase     = values[`${prefix}.bg_base`]      || DEFAULTS[`${prefix}.bg_base`];
+  const bgCard     = values[`${prefix}.bg_card`]      || DEFAULTS[`${prefix}.bg_card`];
+  const bgElevated = values[`${prefix}.bg_elevated`]  || DEFAULTS[`${prefix}.bg_elevated`];
+  const borderMid  = values[`${prefix}.border_mid`]   || DEFAULTS[`${prefix}.border_mid`];
+  const textHead   = values[`${prefix}.text_heading`] || DEFAULTS[`${prefix}.text_heading`];
+  const textMuted  = values[`${prefix}.text_muted`]   || DEFAULTS[`${prefix}.text_muted`];
+  const brand      = values["brand.color_primary"]    || DEFAULTS["brand.color_primary"];
+
   return (
-    <form onSubmit={handleSave} className="flex flex-col gap-6 max-w-[720px]">
+    <form onSubmit={handleSave} className="flex flex-col gap-6 max-w-[780px]">
       <div>
         <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[26px] leading-none mb-1">Design System</h2>
-        <p className="text-[#526888] text-[13px]">Identidade visual da marca — logotipos, cores e tipografia.</p>
+        <p className="text-[#526888] text-[13px]">
+          Todas as cores e tipografia aplicadas em tempo real ao site via CSS vars do <code className="text-[#7a9ab5]">layout.tsx</code>.
+        </p>
       </div>
 
-      {error && <div className="bg-[#2d0a0a] border border-[#ff1f1f] rounded-[8px] px-4 py-3 text-[#ff6b6b] text-[13px]">{error}</div>}
+      {error && (
+        <div className="bg-[#2d0a0a] border border-[#ff1f1f] rounded-[8px] px-4 py-3 text-[#ff6b6b] text-[13px]">{error}</div>
+      )}
 
-      {/* Logotipos */}
+      {/* ── Logotipos ─────────────────────────────────── */}
       <section className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] p-6 flex flex-col gap-4">
         <h3 className="font-['Barlow_Condensed'] font-bold text-white text-[18px] pb-2 border-b border-[#141d2c]">🖼️ Logotipos</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={labelCls}>Logo (versão clara / padrão)</label>
-            <input value={values["site.logo_url"]} onChange={e => set("site.logo_url", e.target.value)}
+            <label className={labelCls}>Logo (fundo escuro — padrão)</label>
+            <input value={values["site.logo_url"] ?? ""} onChange={e => set("site.logo_url", e.target.value)}
               type="url" placeholder="https://..." className={inputCls} />
             {values["site.logo_url"] && (
-              <div className="mt-2 bg-white rounded-[6px] p-3 flex items-center justify-center h-[60px]">
+              <div className="mt-2 bg-[#070a12] rounded-[6px] p-3 flex items-center justify-center h-[60px] border border-[#141d2c]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={values["site.logo_url"]} alt="Logo preview" className="max-h-full max-w-full object-contain" />
               </div>
             )}
           </div>
           <div>
-            <label className={labelCls}>Logo (versão escura / fundo claro)</label>
-            <input value={values["site.logo_dark_url"]} onChange={e => set("site.logo_dark_url", e.target.value)}
+            <label className={labelCls}>Logo (fundo claro)</label>
+            <input value={values["site.logo_dark_url"] ?? ""} onChange={e => set("site.logo_dark_url", e.target.value)}
               type="url" placeholder="https://..." className={inputCls} />
             {values["site.logo_dark_url"] && (
-              <div className="mt-2 bg-[#141d2c] rounded-[6px] p-3 flex items-center justify-center h-[60px]">
+              <div className="mt-2 bg-white rounded-[6px] p-3 flex items-center justify-center h-[60px]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={values["site.logo_dark_url"]} alt="Logo dark preview" className="max-h-full max-w-full object-contain" />
+                <img src={values["site.logo_dark_url"]} alt="Logo light preview" className="max-h-full max-w-full object-contain" />
               </div>
             )}
           </div>
         </div>
-        <div className="max-w-[240px]">
+        <div className="max-w-[280px]">
           <label className={labelCls}>Favicon (URL)</label>
-          <input value={values["site.favicon_url"]} onChange={e => set("site.favicon_url", e.target.value)}
+          <input value={values["site.favicon_url"] ?? ""} onChange={e => set("site.favicon_url", e.target.value)}
             type="url" placeholder="https://.../favicon.ico" className={inputCls} />
         </div>
       </section>
 
-      {/* Cores */}
+      {/* ── Cores da Marca ────────────────────────────── */}
       <section className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] p-6 flex flex-col gap-4">
-        <h3 className="font-['Barlow_Condensed'] font-bold text-white text-[18px] pb-2 border-b border-[#141d2c]">🎨 Paleta de Cores</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            { key: "brand.cor_primaria",   label: "Cor Primária",   hint: "Botões, links e destaques" },
-            { key: "brand.cor_secundaria", label: "Cor Secundária", hint: "Fundos e elementos neutros" },
-            { key: "brand.cor_acento",     label: "Cor de Acento",  hint: "Destaques secundários" },
-          ].map(({ key, label, hint }) => (
-            <div key={key}>
-              <label className={labelCls}>{label}</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={values[key] || "#000000"}
-                  onChange={e => set(key, e.target.value)}
-                  className="w-[40px] h-[40px] rounded-[6px] border border-[#1c2a3e] bg-transparent cursor-pointer p-0.5"
-                />
-                <input
-                  type="text"
-                  value={values[key]}
-                  onChange={e => set(key, e.target.value)}
-                  placeholder="#ff1f1f"
-                  maxLength={7}
-                  className="bg-[#070a12] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] flex-1 font-mono transition-colors"
-                />
-              </div>
-              <p className="text-[#526888] text-[11px] mt-1">{hint}</p>
-            </div>
-          ))}
+        <h3 className="font-['Barlow_Condensed'] font-bold text-white text-[18px] pb-2 border-b border-[#141d2c]">
+          🎨 Cor da Marca
+          <span className="ml-2 text-[#526888] text-[13px] font-normal">→ <code>--brand</code></span>
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <ColorRow k="brand.color_primary" label="Cor Primária (--brand)" hint="Botões, links, destaques e todos os elementos brand" values={values} set={set} />
+          <ColorRow k="brand.color_hover"   label="Cor Hover (--brand-hover)" hint="Tom mais escuro ao passar o mouse" values={values} set={set} />
         </div>
       </section>
 
-      {/* Tipografia */}
+      {/* ── Tipografia ─────────────────────────────────── */}
       <section className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] p-6 flex flex-col gap-4">
-        <h3 className="font-['Barlow_Condensed'] font-bold text-white text-[18px] pb-2 border-b border-[#141d2c]">🔤 Tipografia</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <h3 className="font-['Barlow_Condensed'] font-bold text-white text-[18px] pb-2 border-b border-[#141d2c]">
+          🔤 Tipografia
+          <span className="ml-2 text-[#526888] text-[13px] font-normal">→ <code>--font-heading</code></span>
+        </h3>
+        <div className="max-w-[360px]">
+          <label className={labelCls}>Fonte para títulos e headings</label>
+          <select
+            value={values["brand.font_heading"] || "barlow"}
+            onChange={e => set("brand.font_heading", e.target.value)}
+            className={selectCls}
+          >
+            {FONT_OPTIONS.map(f => (
+              <option key={f.value} value={f.value}>{f.label}</option>
+            ))}
+          </select>
+          <p className="text-[#526888] text-[11px] mt-1">Todas as fontes já estão carregadas via Google Fonts no layout.</p>
+        </div>
+        <div className="bg-[#141d2c] rounded-[8px] p-4 flex flex-col gap-2">
+          <p className="text-[#526888] text-[11px] font-semibold uppercase tracking-wide">Pré-visualização</p>
+          <p className={`${fontClass} font-bold text-white text-[32px] leading-tight`}>
+            Revista Magnum — Título H1
+          </p>
+          <p className={`${fontClass} font-bold text-[#7a9ab5] text-[20px]`}>
+            Sub-heading e destaques com {fontLabel}
+          </p>
+        </div>
+      </section>
+
+      {/* ── Paleta de Cores (Dark / Light) ─────────────── */}
+      <section className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] overflow-hidden">
+        {/* Tabs dark / light */}
+        <div className="flex border-b border-[#141d2c]">
+          {(["dark", "light"] as const).map(m => (
+            <button key={m} type="button" onClick={() => setMode(m)}
+              className={`flex-1 h-[44px] text-[13px] font-semibold transition-colors ${
+                mode === m ? "bg-[#141d2c] text-white" : "text-[#526888] hover:text-[#7a9ab5]"
+              }`}
+            >
+              {m === "dark" ? "🌙 Modo Escuro" : "☀️ Modo Claro"}
+            </button>
+          ))}
+        </div>
+
+        <div className="p-6 flex flex-col gap-5">
+          <p className="text-[#526888] text-[12px]">
+            Todas estas cores são injetadas como CSS vars no <code className="text-[#7a9ab5]">:root</code> {mode === "dark" ? "(padrão)" : "(html.light)"} pelo <code className="text-[#7a9ab5]">layout.tsx</code>.
+          </p>
+
+          {/* Fundos */}
           <div>
-            <label className={labelCls}>Fonte para títulos</label>
-            <input value={values["brand.fonte_titulo"]} onChange={e => set("brand.fonte_titulo", e.target.value)}
-              placeholder="Barlow Condensed" className={inputCls} />
-            <p className="text-[#526888] text-[11px] mt-1">Nome exato da fonte (Google Fonts ou local)</p>
+            <p className="text-[#7a9ab5] text-[11px] font-semibold uppercase tracking-[0.8px] mb-3">Fundos</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <ColorRow k={`${prefix}.bg_base`}     label="--bg-base"     hint="Fundo da página" values={values} set={set} />
+              <ColorRow k={`${prefix}.bg_subtle`}   label="--bg-subtle"   hint="Fundo sutil"    values={values} set={set} />
+              <ColorRow k={`${prefix}.bg_card`}     label="--bg-card"     hint="Cards"          values={values} set={set} />
+              <ColorRow k={`${prefix}.bg_elevated`} label="--bg-elevated" hint="Elevado/labels" values={values} set={set} />
+            </div>
           </div>
+
+          {/* Bordas */}
           <div>
-            <label className={labelCls}>Fonte para corpo de texto</label>
-            <input value={values["brand.fonte_corpo"]} onChange={e => set("brand.fonte_corpo", e.target.value)}
-              placeholder="Inter" className={inputCls} />
-            <p className="text-[#526888] text-[11px] mt-1">Usada em parágrafos, labels e textos gerais</p>
+            <p className="text-[#7a9ab5] text-[11px] font-semibold uppercase tracking-[0.8px] mb-3">Bordas</p>
+            <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 max-w-[360px]">
+              <ColorRow k={`${prefix}.border`}     label="--border"     hint="Borda sutil" values={values} set={set} />
+              <ColorRow k={`${prefix}.border_mid`} label="--border-mid" hint="Borda média" values={values} set={set} />
+            </div>
+          </div>
+
+          {/* Textos */}
+          <div>
+            <p className="text-[#7a9ab5] text-[11px] font-semibold uppercase tracking-[0.8px] mb-3">Textos</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <ColorRow k={`${prefix}.text`}         label="--text-primary" hint="Corpo principal" values={values} set={set} />
+              <ColorRow k={`${prefix}.text_heading`} label="--text-heading" hint="Títulos"         values={values} set={set} />
+              <ColorRow k={`${prefix}.text_muted`}   label="--text-muted"   hint="Labels/subtítulo" values={values} set={set} />
+              <ColorRow k={`${prefix}.text_subtle`}  label="--text-subtle"  hint="Dicas/placeholders" values={values} set={set} />
+            </div>
+          </div>
+
+          {/* Preview */}
+          <div
+            className="rounded-[10px] border p-5 flex flex-col gap-3"
+            style={{ background: bgBase, borderColor: borderMid }}
+          >
+            <p className="text-[10px] font-semibold uppercase tracking-[1px]" style={{ color: textMuted }}>
+              Preview — {mode === "dark" ? "Modo Escuro" : "Modo Claro"}
+            </p>
+            <div className="rounded-[8px] p-4 flex flex-col gap-2" style={{ background: bgCard, border: `1px solid ${borderMid}` }}>
+              <p className={`${fontClass} font-bold text-[22px] leading-none`} style={{ color: textHead }}>
+                Título do Card
+              </p>
+              <p className="text-[13px]" style={{ color: textMuted }}>Texto descritivo do conteúdo do card.</p>
+              <button
+                type="button"
+                className="self-start mt-1 px-4 h-[34px] rounded-[6px] text-white text-[13px] font-semibold"
+                style={{ background: brand }}
+              >
+                Ação Primária
+              </button>
+            </div>
+            <div className="flex gap-3">
+              {[bgCard, bgElevated, brand].map((c, i) => (
+                <div key={i} className="w-8 h-8 rounded-[6px] border" style={{ background: c, borderColor: borderMid }} />
+              ))}
+            </div>
           </div>
         </div>
-        {(values["brand.fonte_titulo"] || values["brand.fonte_corpo"]) && (
-          <div className="bg-[#141d2c] rounded-[8px] p-4 flex flex-col gap-2">
-            <p className="text-[#526888] text-[11px] font-semibold uppercase tracking-wide">Pré-visualização</p>
-            <p style={{ fontFamily: values["brand.fonte_titulo"] || "inherit" }}
-              className="text-white text-[22px] leading-tight">
-              Revista Magnum — Título
-            </p>
-            <p style={{ fontFamily: values["brand.fonte_corpo"] || "inherit" }}
-              className="text-[#7a9ab5] text-[14px]">
-              Texto de corpo com a fonte configurada para parágrafos e descrições gerais do site.
-            </p>
-          </div>
-        )}
       </section>
 
       <div className="flex items-center gap-3 sticky bottom-0 bg-[#070a12]/90 backdrop-blur py-3 -mx-1 px-1">
@@ -498,7 +646,7 @@ function TabDesign({ settings }: Props) {
           className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[14px] font-semibold h-[44px] px-8 rounded-[6px] transition-colors">
           {saving ? "Salvando..." : "Salvar Design System"}
         </button>
-        {saved && <p className="text-[#22c55e] text-[13px] font-medium">✓ Salvo com sucesso!</p>}
+        {saved && <p className="text-[#22c55e] text-[13px] font-medium">✓ Salvo! Aguarde ~60s para refletir no site.</p>}
       </div>
     </form>
   );
