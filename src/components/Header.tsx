@@ -115,7 +115,7 @@ export default async function Header() {
         )}
 
         {/* Hamburguer — só mobile */}
-        <MobileMenu isLoggedIn={!!user} />
+        <MobileMenu isLoggedIn={!!user} logoUrl={logos.dark} />
       </div>
     </header>
   );
