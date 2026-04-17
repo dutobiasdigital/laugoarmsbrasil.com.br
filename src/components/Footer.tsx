@@ -183,8 +183,8 @@ export default async function Footer() {
             <NavCol
               title="Legal"
               links={[
-                { href: "/termos",      label: "Termos de Uso"    },
-                { href: "/privacidade", label: "Privacidade"      },
+                { href: "/termos-de-uso",            label: "Termos de Uso"       },
+                { href: "/politica-de-privacidade",  label: "Política de Privacidade" },
               ]}
             />
           </div>

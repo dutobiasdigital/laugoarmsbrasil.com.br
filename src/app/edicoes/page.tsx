@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import FooterMinimal from "@/components/FooterMinimal";
 import AdBanner from "@/components/AdBanner";
 import EditionSearch from "./_EditionSearch";
+import { getModuleConfig } from "@/lib/module-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -27,8 +28,6 @@ interface Edition {
   type: string; pageCount: number | null; summary: string | null;
 }
 
-const ITEMS_PER_PAGE = 16;
-
 function buildSearchFilter(q: string): string {
   if (!q) return "";
   const t = encodeURIComponent(q);
@@ -43,11 +42,20 @@ export default async function EdicoesPage({
 }: {
   searchParams: Promise<{ tipo?: string; pagina?: string; q?: string; view?: string }>;
 }) {
-  const { tipo, pagina, q: rawQ, view: rawView } = await searchParams;
+  const [{ tipo, pagina, q: rawQ, view: rawView }, modConfig] = await Promise.all([
+    searchParams,
+    getModuleConfig("revistas"),
+  ]);
   const q      = rawQ?.trim() ?? "";
   const view   = rawView === "list" ? "list" : "grid";
   const page   = Math.max(1, parseInt(pagina ?? "1", 10));
-  const offset = (page - 1) * ITEMS_PER_PAGE;
+
+  const ITEMS_PER_PAGE = modConfig.itemsPerPage;
+  const infiniteScroll = modConfig.infiniteScroll;
+
+  // Infinite scroll: busca acumulada a partir de offset 0
+  const limit  = infiniteScroll ? page * ITEMS_PER_PAGE : ITEMS_PER_PAGE;
+  const offset = infiniteScroll ? 0 : (page - 1) * ITEMS_PER_PAGE;
 
   let editions: Edition[] = [];
   let total        = 0;
@@ -62,7 +70,7 @@ export default async function EdicoesPage({
 
     const [edRes, regRes, spRes] = await Promise.all([
       fetch(
-        `${BASE}/editions?isPublished=eq.true${typeFilter}${searchFilter}&order=publishedAt.desc&limit=${ITEMS_PER_PAGE}&offset=${offset}&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount,summary`,
+        `${BASE}/editions?isPublished=eq.true${typeFilter}${searchFilter}&order=publishedAt.desc&limit=${limit}&offset=${offset}&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount,summary`,
         { headers: HEADERS, cache: "no-store" }
       ),
       fetch(`${BASE}/editions?isPublished=eq.true&type=eq.REGULAR&select=id`,
@@ -82,6 +90,7 @@ export default async function EdicoesPage({
   }
 
   const totalPages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
+  const hasMore    = infiniteScroll && (page * ITEMS_PER_PAGE) < total;
   const totalAll   = totalRegular + totalSpecial;
 
   // Group by year (only when NOT searching)
@@ -276,46 +285,62 @@ export default async function EdicoesPage({
           )}
 
           {/* Paginação */}
-          {totalPages > 1 && (() => {
-            const WING = 2;
-            const items: (number | "…")[] = [];
-            for (let p = 1; p <= totalPages; p++) {
-              if (p === 1 || p === totalPages || Math.abs(p - page) <= WING) {
-                items.push(p);
-              } else if (items[items.length - 1] !== "…") {
-                items.push("…");
-              }
-            }
-            const btnBase = "h-[32px] flex items-center justify-center rounded-[4px] text-[13px] font-semibold transition-colors";
-            return (
-              <div className="flex items-center gap-1 mt-4">
-                {page > 1 ? (
-                  <Link href={pageHref(page - 1)} className={`${btnBase} w-[32px] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white`}>‹</Link>
-                ) : (
-                  <span className={`${btnBase} w-[32px] border border-[#141d2c] text-[#2a3a4e] cursor-default`}>‹</span>
-                )}
-                {items.map((item, i) =>
-                  item === "…" ? (
-                    <span key={`e-${i}`} className={`${btnBase} w-[24px] text-[#2a3a4e]`}>…</span>
-                  ) : (
-                    <Link key={item} href={pageHref(item)}
-                      className={`${btnBase} min-w-[32px] px-1 ${
-                        item === page
-                          ? "bg-[#ff1f1f] text-white"
-                          : "border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
-                      }`}>
-                      {item}
-                    </Link>
-                  )
-                )}
-                {page < totalPages ? (
-                  <Link href={pageHref(page + 1)} className={`${btnBase} w-[32px] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white`}>›</Link>
-                ) : (
-                  <span className={`${btnBase} w-[32px] border border-[#141d2c] text-[#2a3a4e] cursor-default`}>›</span>
-                )}
+          {infiniteScroll ? (
+            /* ── Scroll infinito: botão "Carregar mais" ── */
+            hasMore && (
+              <div className="flex justify-center mt-6">
+                <Link
+                  href={pageHref(page + 1)}
+                  className="bg-[#0e1520] border border-[#1c2a3e] hover:border-[#ff1f1f] text-[#7a9ab5] hover:text-white text-[14px] font-semibold h-[44px] px-8 rounded-[8px] transition-colors flex items-center gap-2"
+                >
+                  <span>Carregar mais edições</span>
+                  <span className="text-[#526888] text-[12px]">({total - page * ITEMS_PER_PAGE} restantes)</span>
+                </Link>
               </div>
-            );
-          })()}
+            )
+          ) : (
+            /* ── Paginação numerada ── */
+            totalPages > 1 && (() => {
+              const WING = 2;
+              const items: (number | "…")[] = [];
+              for (let p = 1; p <= totalPages; p++) {
+                if (p === 1 || p === totalPages || Math.abs(p - page) <= WING) {
+                  items.push(p);
+                } else if (items[items.length - 1] !== "…") {
+                  items.push("…");
+                }
+              }
+              const btnBase = "h-[32px] flex items-center justify-center rounded-[4px] text-[13px] font-semibold transition-colors";
+              return (
+                <div className="flex items-center gap-1 mt-4">
+                  {page > 1 ? (
+                    <Link href={pageHref(page - 1)} className={`${btnBase} w-[32px] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white`}>‹</Link>
+                  ) : (
+                    <span className={`${btnBase} w-[32px] border border-[#141d2c] text-[#2a3a4e] cursor-default`}>‹</span>
+                  )}
+                  {items.map((item, i) =>
+                    item === "…" ? (
+                      <span key={`e-${i}`} className={`${btnBase} w-[24px] text-[#2a3a4e]`}>…</span>
+                    ) : (
+                      <Link key={item} href={pageHref(item)}
+                        className={`${btnBase} min-w-[32px] px-1 ${
+                          item === page
+                            ? "bg-[#ff1f1f] text-white"
+                            : "border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
+                        }`}>
+                        {item}
+                      </Link>
+                    )
+                  )}
+                  {page < totalPages ? (
+                    <Link href={pageHref(page + 1)} className={`${btnBase} w-[32px] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white`}>›</Link>
+                  ) : (
+                    <span className={`${btnBase} w-[32px] border border-[#141d2c] text-[#2a3a4e] cursor-default`}>›</span>
+                  )}
+                </div>
+              );
+            })()
+          )}
         </div>
 
         {/* Sidebar */}

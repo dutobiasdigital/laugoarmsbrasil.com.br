@@ -2,6 +2,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CategoryViewTracker from "@/components/CategoryViewTracker";
+import { getModuleConfig } from "@/lib/module-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -9,8 +10,6 @@ export const metadata = {
   title: "Blog — Revista Magnum",
   description: "Artigos, avaliações e análises sobre armas, munições e legislação.",
 };
-
-const ITEMS_PER_PAGE = 6;
 
 const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
@@ -22,8 +21,14 @@ export default async function BlogPage({
 }: {
   searchParams: Promise<{ categoria?: string; pagina?: string }>;
 }) {
-  const { categoria, pagina } = await searchParams;
+  const [{ categoria, pagina }, modConfig] = await Promise.all([
+    searchParams,
+    getModuleConfig("blog"),
+  ]);
   const page = Math.max(1, parseInt(pagina ?? "1", 10));
+
+  const ITEMS_PER_PAGE = modConfig.itemsPerPage;
+  const infiniteScroll = modConfig.infiniteScroll;
 
   type ArticleItem = {
     id: string; title: string; slug: string; excerpt: string | null;
@@ -39,7 +44,10 @@ export default async function BlogPage({
 
   try {
     const showFeatured = page === 1 && !categoria;
-    const offset = showFeatured ? 1 : (page - 1) * ITEMS_PER_PAGE;
+    // Infinite scroll: accumula a partir do offset base (1 se tem featured, 0 se não)
+    const baseOffset = showFeatured ? 1 : 0;
+    const limit  = infiniteScroll ? page * ITEMS_PER_PAGE : ITEMS_PER_PAGE;
+    const offset = infiniteScroll ? baseOffset : (showFeatured ? 1 : (page - 1) * ITEMS_PER_PAGE);
 
     const catFilter = categoria
       ? `&article_categories.name=eq.${encodeURIComponent(categoria)}`
@@ -53,8 +61,8 @@ export default async function BlogPage({
       : null;
 
     const articlesUrl = categoria
-      ? `${BASE}/articles?status=eq.PUBLISHED${catFilter}&order=publishedAt.desc&limit=${ITEMS_PER_PAGE}&offset=${offset}&select=id,title,slug,excerpt,featureImageUrl,publishedAt,isExclusive,authorName,category:article_categories${embedSuffix}(name)`
-      : `${BASE}/articles?status=eq.PUBLISHED&order=publishedAt.desc&limit=${ITEMS_PER_PAGE}&offset=${offset}&select=${articleSelect}`;
+      ? `${BASE}/articles?status=eq.PUBLISHED${catFilter}&order=publishedAt.desc&limit=${limit}&offset=${offset}&select=id,title,slug,excerpt,featureImageUrl,publishedAt,isExclusive,authorName,category:article_categories${embedSuffix}(name)`
+      : `${BASE}/articles?status=eq.PUBLISHED&order=publishedAt.desc&limit=${limit}&offset=${offset}&select=${articleSelect}`;
 
     const categoriesUrl = `${BASE}/article_categories?select=name&order=name.asc`;
 
@@ -112,6 +120,7 @@ export default async function BlogPage({
   }
 
   const totalPages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
+  const hasMore    = infiniteScroll && (page * ITEMS_PER_PAGE + (featured ? 1 : 0)) < total;
   const allCategories = ["Todos", ...categories];
 
   const catHref = (cat: string) =>
@@ -275,22 +284,38 @@ export default async function BlogPage({
           )}
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-1.5">
-              {Array.from({ length: Math.min(totalPages, 8) }, (_, i) => i + 1).map((p) => (
+          {infiniteScroll ? (
+            /* ── Scroll infinito: botão "Carregar mais" ── */
+            hasMore && (
+              <div className="flex justify-center">
                 <Link
-                  key={p}
-                  href={`/blog?${categoria ? `categoria=${encodeURIComponent(categoria)}&` : ""}pagina=${p}`}
-                  className={`w-[36px] h-[36px] flex items-center justify-center rounded-[4px] text-[14px] font-semibold transition-colors ${
-                    p === page
-                      ? "bg-[#ff1f1f] text-white"
-                      : "bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
-                  }`}
+                  href={`/blog?${categoria ? `categoria=${encodeURIComponent(categoria)}&` : ""}pagina=${page + 1}`}
+                  className="bg-[#0e1520] border border-[#1c2a3e] hover:border-[#ff1f1f] text-[#7a9ab5] hover:text-white text-[14px] font-semibold h-[44px] px-8 rounded-[8px] transition-colors flex items-center gap-2"
                 >
-                  {p}
+                  <span>Carregar mais artigos</span>
+                  <span className="text-[#526888] text-[12px]">({total - page * ITEMS_PER_PAGE - (featured ? 1 : 0)} restantes)</span>
                 </Link>
-              ))}
-            </div>
+              </div>
+            )
+          ) : (
+            /* ── Paginação numerada ── */
+            totalPages > 1 && (
+              <div className="flex items-center justify-center gap-1.5">
+                {Array.from({ length: Math.min(totalPages, 8) }, (_, i) => i + 1).map((p) => (
+                  <Link
+                    key={p}
+                    href={`/blog?${categoria ? `categoria=${encodeURIComponent(categoria)}&` : ""}pagina=${p}`}
+                    className={`w-[36px] h-[36px] flex items-center justify-center rounded-[4px] text-[14px] font-semibold transition-colors ${
+                      p === page
+                        ? "bg-[#ff1f1f] text-white"
+                        : "bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
+                    }`}
+                  >
+                    {p}
+                  </Link>
+                ))}
+              </div>
+            )
           )}
         </div>
       </main>
