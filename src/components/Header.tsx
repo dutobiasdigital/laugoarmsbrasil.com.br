@@ -54,14 +54,17 @@ export default async function Header() {
 
       {/* Nav */}
       <nav className="hidden lg:flex items-center gap-7">
+        <Link href="/" className="text-[#7a9ab5] hover:text-white text-[13px] font-semibold transition-colors">
+          HOME
+        </Link>
+        <NavEditionsDropdown />
         {[
-          { href: "/", label: "HOME" },
-          { href: "/guia", label: "GUIA" },
-          { href: "/loja", label: "LOJA" },
-          { href: "/assine", label: "ASSINE" },
+          { href: "/guia",    label: "GUIA"    },
+          { href: "/loja",    label: "LOJA"    },
+          { href: "/assine",  label: "ASSINE"  },
           { href: "/anuncie", label: "ANUNCIE" },
-          { href: "/blog", label: "BLOG" },
-          { href: "/sobre", label: "SOBRE" },
+          { href: "/blog",    label: "BLOG"    },
+          { href: "/sobre",   label: "SOBRE"   },
           { href: "/contato", label: "CONTATO" },
         ].map((item) => (
           <Link
@@ -72,7 +75,6 @@ export default async function Header() {
             {item.label}
           </Link>
         ))}
-        <NavEditionsDropdown />
       </nav>
 
       <div className="flex-1" />

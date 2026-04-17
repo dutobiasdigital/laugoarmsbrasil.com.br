@@ -24,15 +24,13 @@ export const metadata = {
 interface Edition {
   id: string; title: string; number: number | null; slug: string;
   coverImageUrl: string | null; publishedAt: string | null;
-  type: string; pageCount: number | null;
+  type: string; pageCount: number | null; summary: string | null;
 }
 
 const ITEMS_PER_PAGE = 16;
 
-/** Builds PostgREST OR-filter for full-text search across edition fields */
 function buildSearchFilter(q: string): string {
   if (!q) return "";
-  // Encode the term; use %25 so PostgREST receives literal % wildcards
   const t = encodeURIComponent(q);
   const p = `%25${t}%25`;
   const numQ = parseInt(q, 10);
@@ -43,10 +41,11 @@ function buildSearchFilter(q: string): string {
 export default async function EdicoesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tipo?: string; pagina?: string; q?: string }>;
+  searchParams: Promise<{ tipo?: string; pagina?: string; q?: string; view?: string }>;
 }) {
-  const { tipo, pagina, q: rawQ } = await searchParams;
+  const { tipo, pagina, q: rawQ, view: rawView } = await searchParams;
   const q      = rawQ?.trim() ?? "";
+  const view   = rawView === "list" ? "list" : "grid";
   const page   = Math.max(1, parseInt(pagina ?? "1", 10));
   const offset = (page - 1) * ITEMS_PER_PAGE;
 
@@ -63,7 +62,7 @@ export default async function EdicoesPage({
 
     const [edRes, regRes, spRes] = await Promise.all([
       fetch(
-        `${BASE}/editions?isPublished=eq.true${typeFilter}${searchFilter}&order=publishedAt.desc&limit=${ITEMS_PER_PAGE}&offset=${offset}&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount`,
+        `${BASE}/editions?isPublished=eq.true${typeFilter}${searchFilter}&order=publishedAt.desc&limit=${ITEMS_PER_PAGE}&offset=${offset}&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount,summary`,
         { headers: HEADERS, cache: "no-store" }
       ),
       fetch(`${BASE}/editions?isPublished=eq.true&type=eq.REGULAR&select=id`,
@@ -98,39 +97,65 @@ export default async function EdicoesPage({
   }
   const years = Object.keys(byYear).sort((a, b) => Number(b) - Number(a));
 
-  const tabHref = (t?: string) =>
-    t ? `/edicoes?tipo=${t}${q ? `&q=${encodeURIComponent(q)}` : ""}` : `/edicoes${q ? `?q=${encodeURIComponent(q)}` : ""}`;
+  /** Monta href preservando todos os params atuais exceto o que está sendo alterado */
+  function buildHref(overrides: Record<string, string | undefined>) {
+    const params: Record<string, string> = {};
+    if (tipo)  params.tipo   = tipo;
+    if (q)     params.q      = q;
+    if (pagina && pagina !== "1") params.pagina = pagina;
+    if (view !== "grid") params.view = view;
+    Object.entries(overrides).forEach(([k, v]) => {
+      if (v === undefined || v === "" || v === "grid") delete params[k];
+      else params[k] = v;
+    });
+    const qs = new URLSearchParams(params).toString();
+    return `/edicoes${qs ? `?${qs}` : ""}`;
+  }
+
+  const tabHref = (t?: string) => buildHref({ tipo: t, pagina: "1" });
+  const viewHref = (v: string) => buildHref({ view: v, pagina: "1" });
+  const pageHref = (p: number) => buildHref({ pagina: String(p) });
 
   return (
     <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
 
-      {/* Page hero */}
-      <div className="hero-metal border-b border-[#141d2c] h-[100px] flex items-center px-5 lg:px-20 mt-16">
-        <div className="flex flex-col gap-1">
-          <h1 className="font-['Barlow_Condensed'] font-extrabold text-[#dce8ff] text-[36px] leading-none">
-            Edições
-          </h1>
-          <p className="text-[#526888] text-[13px]">
-            {totalRegular} edições regulares · {totalSpecial} edições especiais · {totalAll} no total
-          </p>
+      {/* ── Hero — estilo GUIA ─────────────────────────────────── */}
+      <section className="hero-metal px-5 lg:px-20 pt-14 pb-12 border-b border-[#141d2c] mt-16">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-[6px] h-[6px] bg-[#ff1f1f] rounded-full" />
+          <span className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase">
+            Acervo
+          </span>
         </div>
-        <div className="flex-1" />
-        {/* Search input — wrapped in Suspense because it uses useSearchParams */}
-        <Suspense fallback={
-          <div className="bg-[#141d2c] border border-[#1c2a3e] rounded-md h-[38px] w-[220px]" />
-        }>
-          <EditionSearch initialQuery={q} />
-        </Suspense>
-      </div>
+        <div className="flex flex-col lg:flex-row lg:items-end gap-6 lg:gap-0">
+          <div className="flex-1">
+            <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[52px] lg:text-[64px] leading-[0.95] mb-4 max-w-[700px]">
+              O maior acervo de revistas de armas do Brasil
+            </h1>
+            <p className="text-[#7a9ab5] text-[16px] leading-[26px] max-w-[520px]">
+              {totalRegular} edições regulares e {totalSpecial} edições especiais —
+              {" "}{totalAll} revistas disponíveis no acervo digital.
+            </p>
+          </div>
+          {/* Search */}
+          <div className="lg:ml-10 shrink-0">
+            <Suspense fallback={
+              <div className="bg-[#141d2c] border border-[#1c2a3e] rounded-[8px] h-[52px] w-[280px]" />
+            }>
+              <EditionSearch initialQuery={q} />
+            </Suspense>
+          </div>
+        </div>
+      </section>
 
-      {/* Filters */}
+      {/* ── Tabs de filtro + toggle de visualização ─────────────── */}
       <div className="bg-[#070a12] border-b border-[#141d2c] h-[52px] flex items-center px-5 lg:px-20">
-        <div className="flex items-center">
+        <div className="flex items-center flex-1">
           {[
-            { label: "Todas",    count: totalAll,     href: tabHref(),           active: !tipo },
-            { label: "Normais",  count: totalRegular, href: tabHref("normais"),  active: tipo === "normais"   },
-            { label: "Especiais",count: totalSpecial, href: tabHref("especiais"),active: tipo === "especiais" },
+            { label: "Todas",     count: totalAll,     href: tabHref(),            active: !tipo          },
+            { label: "Normais",   count: totalRegular, href: tabHref("normais"),   active: tipo === "normais"   },
+            { label: "Especiais", count: totalSpecial, href: tabHref("especiais"), active: tipo === "especiais" },
           ].map((tab) => (
             <Link key={tab.label} href={tab.href}
               className={`flex items-center gap-1.5 px-5 h-[52px] border-b-2 transition-colors ${
@@ -144,15 +169,50 @@ export default async function EdicoesPage({
               }`}>{tab.count}</span>
             </Link>
           ))}
+          {q && (
+            <p className="ml-5 text-[#526888] text-[13px] hidden sm:block">
+              {total} resultado{total !== 1 ? "s" : ""} para{" "}
+              <span className="text-white font-semibold">&ldquo;{q}&rdquo;</span>
+            </p>
+          )}
         </div>
 
-        {/* Search result count */}
-        {q && (
-          <p className="ml-5 text-[#526888] text-[13px]">
-            {total} resultado{total !== 1 ? "s" : ""} para{" "}
-            <span className="text-white font-semibold">&ldquo;{q}&rdquo;</span>
-          </p>
-        )}
+        {/* Toggle grid / lista */}
+        <div className="flex items-center gap-1 shrink-0">
+          <Link
+            href={viewHref("grid")}
+            title="Visualização em grade"
+            className={`w-[34px] h-[34px] flex items-center justify-center rounded-[6px] transition-colors ${
+              view === "grid"
+                ? "bg-[#ff1f1f] text-white"
+                : "bg-[#141d2c] border border-[#1c2a3e] text-[#526888] hover:text-white"
+            }`}
+          >
+            {/* 2×2 grid icon */}
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+              <rect x="0" y="0" width="6.5" height="6.5" rx="1" fill="currentColor"/>
+              <rect x="8.5" y="0" width="6.5" height="6.5" rx="1" fill="currentColor"/>
+              <rect x="0" y="8.5" width="6.5" height="6.5" rx="1" fill="currentColor"/>
+              <rect x="8.5" y="8.5" width="6.5" height="6.5" rx="1" fill="currentColor"/>
+            </svg>
+          </Link>
+          <Link
+            href={viewHref("list")}
+            title="Visualização em lista"
+            className={`w-[34px] h-[34px] flex items-center justify-center rounded-[6px] transition-colors ${
+              view === "list"
+                ? "bg-[#ff1f1f] text-white"
+                : "bg-[#141d2c] border border-[#1c2a3e] text-[#526888] hover:text-white"
+            }`}
+          >
+            {/* list icon */}
+            <svg width="15" height="12" viewBox="0 0 15 12" fill="none">
+              <rect x="0" y="0" width="15" height="2.5" rx="1" fill="currentColor"/>
+              <rect x="0" y="4.75" width="15" height="2.5" rx="1" fill="currentColor"/>
+              <rect x="0" y="9.5" width="15" height="2.5" rx="1" fill="currentColor"/>
+            </svg>
+          </Link>
+        </div>
       </div>
 
       {/* Ad leaderboard */}
@@ -160,13 +220,13 @@ export default async function EdicoesPage({
         <AdBanner position="EDITIONS_TOP" bannerSize="LEADERBOARD" />
       </div>
 
-      {/* Content row */}
-      <div className="flex gap-10 px-5 lg:px-20 pt-12 pb-16 items-start">
+      {/* ── Conteúdo ─────────────────────────────────────────────── */}
+      <div className="flex gap-10 px-5 lg:px-20 pt-10 pb-16 items-start">
 
         {/* Main */}
         <div className="flex flex-col gap-8 flex-1 min-w-0">
 
-          {/* Search: flat grid */}
+          {/* Resultados de busca */}
           {q && (
             <>
               {editions.length === 0 ? (
@@ -178,15 +238,19 @@ export default async function EdicoesPage({
                     Tente outro termo — título, número, editorial ou conteúdo do índice.
                   </p>
                 </div>
+              ) : view === "list" ? (
+                <div className="flex flex-col gap-3">
+                  {editions.map((ed) => <EditionListItem key={ed.id} edition={ed} />)}
+                </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {editions.map((edition) => <EditionCard key={edition.id} edition={edition} />)}
+                  {editions.map((ed) => <EditionCard key={ed.id} edition={ed} />)}
                 </div>
               )}
             </>
           )}
 
-          {/* Normal: grouped by year */}
+          {/* Agrupado por ano */}
           {!q && (
             <>
               {years.length === 0 ? (
@@ -196,47 +260,62 @@ export default async function EdicoesPage({
                   <div key={year} className="flex flex-col gap-4">
                     <p className="text-white text-[13px] font-semibold tracking-[1px]">{year}</p>
                     <div className="bg-[#141d2c] h-px w-full" />
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {byYear[year].map((edition) => <EditionCard key={edition.id} edition={edition} />)}
-                    </div>
+                    {view === "list" ? (
+                      <div className="flex flex-col gap-3">
+                        {byYear[year].map((ed) => <EditionListItem key={ed.id} edition={ed} />)}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {byYear[year].map((ed) => <EditionCard key={ed.id} edition={ed} />)}
+                      </div>
+                    )}
                   </div>
                 ))
               )}
             </>
           )}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center gap-1 mt-4">
-              {page > 1 && (
-                <Link href={`/edicoes?${tipo ? `tipo=${tipo}&` : ""}${q ? `q=${encodeURIComponent(q)}&` : ""}pagina=${page - 1}`}
-                  className="border border-[#1c2a3e] text-[#7a9ab5] hover:text-white text-[13px] font-semibold px-3 py-2 rounded transition-colors">
-                  ‹
-                </Link>
-              )}
-              {Array.from({ length: Math.min(totalPages, 12) }, (_, i) => i + 1).map((p) => {
-                if (p > 3 && p < totalPages - 1 && Math.abs(p - page) > 1) {
-                  if (p === 4) return <span key={p} className="text-[#1c2a3e] px-1">...</span>;
-                  return null;
-                }
-                return (
-                  <Link key={p}
-                    href={`/edicoes?${tipo ? `tipo=${tipo}&` : ""}${q ? `q=${encodeURIComponent(q)}&` : ""}pagina=${p}`}
-                    className={`text-[13px] font-semibold px-3 py-2 rounded transition-colors ${
-                      p === page ? "bg-[#ff1f1f] text-white" : "border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
-                    }`}>
-                    {p}
-                  </Link>
-                );
-              })}
-              {page < totalPages && (
-                <Link href={`/edicoes?${tipo ? `tipo=${tipo}&` : ""}${q ? `q=${encodeURIComponent(q)}&` : ""}pagina=${page + 1}`}
-                  className="border border-[#1c2a3e] text-[#7a9ab5] hover:text-white text-[13px] font-semibold px-3 py-2 rounded transition-colors">
-                  ›
-                </Link>
-              )}
-            </div>
-          )}
+          {/* Paginação */}
+          {totalPages > 1 && (() => {
+            const WING = 2;
+            const items: (number | "…")[] = [];
+            for (let p = 1; p <= totalPages; p++) {
+              if (p === 1 || p === totalPages || Math.abs(p - page) <= WING) {
+                items.push(p);
+              } else if (items[items.length - 1] !== "…") {
+                items.push("…");
+              }
+            }
+            const btnBase = "h-[32px] flex items-center justify-center rounded-[4px] text-[13px] font-semibold transition-colors";
+            return (
+              <div className="flex items-center gap-1 mt-4">
+                {page > 1 ? (
+                  <Link href={pageHref(page - 1)} className={`${btnBase} w-[32px] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white`}>‹</Link>
+                ) : (
+                  <span className={`${btnBase} w-[32px] border border-[#141d2c] text-[#2a3a4e] cursor-default`}>‹</span>
+                )}
+                {items.map((item, i) =>
+                  item === "…" ? (
+                    <span key={`e-${i}`} className={`${btnBase} w-[24px] text-[#2a3a4e]`}>…</span>
+                  ) : (
+                    <Link key={item} href={pageHref(item)}
+                      className={`${btnBase} min-w-[32px] px-1 ${
+                        item === page
+                          ? "bg-[#ff1f1f] text-white"
+                          : "border border-[#1c2a3e] text-[#7a9ab5] hover:text-white"
+                      }`}>
+                      {item}
+                    </Link>
+                  )
+                )}
+                {page < totalPages ? (
+                  <Link href={pageHref(page + 1)} className={`${btnBase} w-[32px] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white`}>›</Link>
+                ) : (
+                  <span className={`${btnBase} w-[32px] border border-[#141d2c] text-[#2a3a4e] cursor-default`}>›</span>
+                )}
+              </div>
+            );
+          })()}
         </div>
 
         {/* Sidebar */}
@@ -261,7 +340,7 @@ export default async function EdicoesPage({
   );
 }
 
-/* ── Card component (shared) ──────────────────────────────────── */
+/* ── Card — visualização em GRADE ──────────────────────────────── */
 function EditionCard({ edition }: { edition: Edition }) {
   const isSpecial = edition.type === "SPECIAL";
   return (
@@ -270,7 +349,6 @@ function EditionCard({ edition }: { edition: Edition }) {
         href={`/edicoes/${edition.slug}`}
         className="group relative rounded-[13px] overflow-hidden flex flex-col bg-[#0a0f1a] h-full"
       >
-        {/* Cover */}
         <div className="relative aspect-[3/4] overflow-hidden">
           {edition.coverImageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -289,7 +367,6 @@ function EditionCard({ edition }: { edition: Edition }) {
           <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#141416] to-transparent" />
         </div>
 
-        {/* Info */}
         <div className="flex flex-col gap-1 px-3.5 pt-2 pb-4"
           style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%)" }}>
           <div className="flex items-center gap-1.5">
@@ -321,5 +398,83 @@ function EditionCard({ edition }: { edition: Edition }) {
         )}
       </Link>
     </div>
+  );
+}
+
+/* ── Item — visualização em LISTA ──────────────────────────────── */
+function EditionListItem({ edition }: { edition: Edition }) {
+  const isSpecial = edition.type === "SPECIAL";
+  const publishMeta = edition.publishedAt
+    ? new Date(edition.publishedAt).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })
+    : null;
+
+  return (
+    <Link
+      href={`/edicoes/${edition.slug}`}
+      className="group flex bg-[#0e1520] border border-[#141d2c] hover:border-[#ff1f1f]/25 rounded-[12px] overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-black/40"
+    >
+      {/* Capa */}
+      <div className="w-[100px] sm:w-[120px] shrink-0 relative overflow-hidden bg-[#0a0e18]">
+        {edition.coverImageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={edition.coverImageUrl}
+            alt={edition.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            style={{ aspectRatio: "3/4", display: "block" }}
+          />
+        ) : (
+          <div className={`w-full h-full min-h-[133px] flex items-center justify-center ${isSpecial ? "bg-[#cc0000]/15" : "bg-white/[0.03]"}`}>
+            <p className={`font-['Barlow_Condensed'] font-extrabold text-[20px] ${isSpecial ? "text-[#ff1f1f]/30" : "text-white/10"}`}>
+              {edition.number ? `Nº ${edition.number}` : "—"}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Informações */}
+      <div className="flex flex-col justify-between gap-3 p-4 sm:p-5 flex-1 min-w-0">
+        <div className="flex flex-col gap-2">
+          {/* Tipo + data */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`text-[9px] font-bold tracking-[0.8px] uppercase px-1.5 py-[2px] rounded-[3px] ${
+              isSpecial
+                ? "bg-[#ff1f1f]/20 text-[#ff6b6b] border border-[#ff1f1f]/30"
+                : "bg-white/5 text-white/40 border border-white/10"
+            }`}>
+              {isSpecial ? "Especial" : "Regular"}
+            </span>
+            {edition.number && !isSpecial && (
+              <span className="text-[9px] font-semibold text-white/30">#{edition.number}</span>
+            )}
+            {publishMeta && (
+              <span className="text-[#526888] text-[11px]">{publishMeta}</span>
+            )}
+            {edition.pageCount && (
+              <span className="text-[#3a4a5e] text-[11px]">· {edition.pageCount} págs.</span>
+            )}
+          </div>
+
+          {/* Título */}
+          <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[22px] sm:text-[26px] leading-tight group-hover:text-white/90 transition-colors">
+            {edition.number ? `Revista Magnum — Edição ${edition.number}` : edition.title}
+          </h2>
+
+          {/* Chamada */}
+          {edition.summary && (
+            <p className="text-[#7a9ab5] text-[13px] leading-[20px] line-clamp-2 sm:line-clamp-3">
+              {edition.summary}
+            </p>
+          )}
+        </div>
+
+        {/* Botão */}
+        <div>
+          <span className="inline-flex items-center gap-2 bg-[#ff1f1f] group-hover:bg-[#cc0000] text-white text-[12px] font-semibold h-[34px] px-4 rounded-[6px] transition-colors">
+            <span>📖</span> Ler Edição
+          </span>
+        </div>
+      </div>
+    </Link>
   );
 }

@@ -102,138 +102,137 @@ export default async function EdicaoDetalhePage({
       <Header />
 
       <main className="flex-1 pt-16">
-        {/* Breadcrumb */}
-        <div className="px-5 lg:px-20 pt-7 pb-2">
-          <Link href="/edicoes" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">
-            ← Edições
-          </Link>
-        </div>
-
-        {/* Hero */}
-        <div className="px-5 lg:px-20 py-8 flex flex-col lg:flex-row gap-10">
-          {/* Cover */}
-          <div className="w-full max-w-[280px] mx-auto lg:mx-0 shrink-0 rounded-[8px] overflow-hidden border border-[#1c2a3e] shadow-2xl shadow-black/70 bg-[#0a0e18]">
-            {edition.coverImageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={edition.coverImageUrl}
-                alt={edition.title}
-                className="w-full h-auto block"
-              />
-            ) : (
-              <div className={`aspect-[3/4] flex items-center justify-center ${isSpecial ? "bg-[#cc0000]/20" : "bg-[#141d2c]"}`}>
-                <p className={`font-['Barlow_Condensed'] font-bold text-[28px] ${isSpecial ? "text-[#ff1f1f]/40" : "text-[#1c2a3e]"}`}>
-                  {edition.number ? `Nº ${edition.number}` : "—"}
-                </p>
-              </div>
-            )}
+        {/* ── Hero — estilo GUIA ─────────────────────────────────── */}
+        <section className="hero-metal px-5 lg:px-20 pt-10 pb-12 border-b border-[#141d2c]">
+          {/* Breadcrumb */}
+          <div className="mb-6">
+            <Link href="/edicoes" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">
+              ← Edições
+            </Link>
           </div>
 
-          {/* Info */}
-          <div className="flex flex-col gap-4 flex-1">
-            {/* Badges */}
-            <div className="flex items-center gap-2">
-              <span className={`text-[10px] font-semibold tracking-[1px] px-2 py-[3px] rounded-[2px] ${
-                isSpecial ? "bg-[#ff1f1f] text-white" : "bg-[#141d2c] text-[#7a9ab5]"
-              }`}>
-                {isSpecial ? "ESPECIAL" : "REGULAR"}
-              </span>
-              {edition.number && !isSpecial && (
-                <span className="text-[10px] font-bold bg-[#ff1f1f] text-white px-2 py-[3px] rounded-[2px]">
-                  Nº {edition.number}
-                </span>
-              )}
-              {hasSingleAccess && !isSubscriber && (
-                <span className="text-[10px] font-bold bg-[#0f381f] text-[#22c55e] px-2 py-[3px] rounded-[2px]">
-                  ACESSO ATIVO 30 DIAS
-                </span>
+          {/* Cover + Info */}
+          <div className="flex flex-col lg:flex-row gap-10">
+            {/* Cover */}
+            <div className="w-full max-w-[260px] mx-auto lg:mx-0 shrink-0 rounded-[8px] overflow-hidden border border-[#1c2a3e] shadow-2xl shadow-black/70 bg-[#0a0e18]">
+              {edition.coverImageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={edition.coverImageUrl}
+                  alt={edition.title}
+                  className="w-full h-auto block"
+                />
+              ) : (
+                <div className={`aspect-[3/4] flex items-center justify-center ${isSpecial ? "bg-[#cc0000]/20" : "bg-[#141d2c]"}`}>
+                  <p className={`font-['Barlow_Condensed'] font-bold text-[28px] ${isSpecial ? "text-[#ff1f1f]/40" : "text-[#1c2a3e]"}`}>
+                    {edition.number ? `Nº ${edition.number}` : "—"}
+                  </p>
+                </div>
               )}
             </div>
 
-            {/* Title */}
-            <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[56px] leading-[60px]">
-              {edition.title}
-            </h1>
-
-            {/* Meta */}
-            {(publishMeta || edition.pageCount) && (
-              <p className="text-[#7a9ab5] text-[14px]">
-                {publishMeta}{edition.pageCount ? ` · ${edition.pageCount} páginas` : ""}
-              </p>
-            )}
-
-            <div className="bg-[#141d2c] h-px w-full" />
-
-            {/* Editorial */}
-            {edition.editorial && (
-              <div className="border-l-2 border-[#ff1f1f]/60 pl-5 py-2 rounded-r-sm"
-                style={{ background: "linear-gradient(90deg, rgba(255,31,31,0.05) 0%, transparent 70%)" }}>
-                <p className="text-[#ff1f1f] text-[9px] font-bold tracking-[2px] uppercase mb-3">Editorial</p>
-                <div
-                  className="text-[#8fb8d4] text-[15px] leading-[28px]"
-                  dangerouslySetInnerHTML={{ __html: edition.editorial }}
-                />
+            {/* Info */}
+            <div className="flex flex-col gap-4 flex-1">
+              {/* Badges */}
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] font-semibold tracking-[1px] px-2 py-[3px] rounded-[2px] ${
+                  isSpecial ? "bg-[#ff1f1f] text-white" : "bg-[#141d2c] text-[#7a9ab5]"
+                }`}>
+                  {isSpecial ? "ESPECIAL" : "REGULAR"}
+                </span>
+                {edition.number && !isSpecial && (
+                  <span className="text-[10px] font-bold bg-[#ff1f1f] text-white px-2 py-[3px] rounded-[2px]">
+                    Nº {edition.number}
+                  </span>
+                )}
+                {hasSingleAccess && !isSubscriber && (
+                  <span className="text-[10px] font-bold bg-[#0f381f] text-[#22c55e] px-2 py-[3px] rounded-[2px]">
+                    ACESSO ATIVO 30 DIAS
+                  </span>
+                )}
               </div>
-            )}
 
-            {/* CTAs */}
-            <div className="flex flex-wrap items-center gap-3 mt-2">
-              {canRead ? (
-                (() => {
-                  // Leitor nativo: /ler/{slug} (novo sistema)
-                  // URL externa (legado): pageFlipUrl que começa com http
-                  const isExternalUrl =
-                    edition.pageFlipUrl?.startsWith("http://") ||
-                    edition.pageFlipUrl?.startsWith("https://");
+              {/* Title */}
+              <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[52px] lg:text-[64px] leading-[0.95]">
+                {edition.title}
+              </h1>
 
-                  if (isExternalUrl) {
-                    // Edição com viewer legado externo — mantém comportamento original
+              {/* Meta */}
+              {(publishMeta || edition.pageCount) && (
+                <p className="text-[#7a9ab5] text-[15px]">
+                  {publishMeta}{edition.pageCount ? ` · ${edition.pageCount} páginas` : ""}
+                </p>
+              )}
+
+              <div className="bg-[#1c2a3e] h-px w-full" />
+
+              {/* Editorial */}
+              {edition.editorial && (
+                <div className="border-l-2 border-[#ff1f1f]/60 pl-5 py-2 rounded-r-sm"
+                  style={{ background: "linear-gradient(90deg, rgba(255,31,31,0.05) 0%, transparent 70%)" }}>
+                  <p className="text-[#ff1f1f] text-[9px] font-bold tracking-[2px] uppercase mb-3">Editorial</p>
+                  <div
+                    className="text-[#8fb8d4] text-[15px] leading-[28px]"
+                    dangerouslySetInnerHTML={{ __html: edition.editorial }}
+                  />
+                </div>
+              )}
+
+              {/* CTAs */}
+              <div className="flex flex-wrap items-center gap-3 mt-2">
+                {canRead ? (
+                  (() => {
+                    const isExternalUrl =
+                      edition.pageFlipUrl?.startsWith("http://") ||
+                      edition.pageFlipUrl?.startsWith("https://");
+
+                    if (isExternalUrl) {
+                      return (
+                        <a
+                          href={edition.pageFlipUrl!}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[48px] px-8 flex items-center justify-center rounded-[4px] transition-colors gap-2"
+                        >
+                          <span>📖</span> Ler Edição
+                        </a>
+                      );
+                    }
                     return (
-                      <a
-                        href={edition.pageFlipUrl!}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <Link
+                        href={`/ler/${slug}`}
                         className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[48px] px-8 flex items-center justify-center rounded-[4px] transition-colors gap-2"
                       >
                         <span>📖</span> Ler Edição
-                      </a>
+                      </Link>
                     );
-                  }
-                  // Leitor nativo integrado (rota /ler/[slug])
-                  return (
+                  })()
+                ) : (
+                  <>
                     <Link
-                      href={`/ler/${slug}`}
-                      className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[48px] px-8 flex items-center justify-center rounded-[4px] transition-colors gap-2"
+                      href="/assine"
+                      className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[48px] px-8 flex items-center justify-center rounded-[4px] transition-colors"
                     >
-                      <span>📖</span> Ler Edição
+                      Assine para Ler
                     </Link>
-                  );
-                })()
-              ) : (
-                <>
-                  <Link
-                    href="/assine"
-                    className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[48px] px-8 flex items-center justify-center rounded-[4px] transition-colors"
-                  >
-                    Assine para Ler
-                  </Link>
-                  <Link
-                    href={`/checkout?edicao=${slug}`}
-                    className="bg-[#0e1520] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] font-medium h-[48px] px-6 flex items-center justify-center rounded-[4px] transition-colors"
-                  >
-                    Comprar esta edição
-                  </Link>
-                </>
+                    <Link
+                      href={`/checkout?edicao=${slug}`}
+                      className="bg-[#0e1520] border border-[#1c2a3e] hover:border-zinc-500 text-[#d4d4da] text-[14px] font-medium h-[48px] px-6 flex items-center justify-center rounded-[4px] transition-colors"
+                    >
+                      Comprar esta edição
+                    </Link>
+                  </>
+                )}
+              </div>
+
+              {!canRead && (
+                <p className="text-white/50 text-[12px]">
+                  🔒 Assinatura ou acesso avulso por 30 dias
+                </p>
               )}
             </div>
-
-            {!canRead && (
-              <p className="text-white text-[12px]">
-                🔒 Assinatura ou acesso avulso por 30 dias
-              </p>
-            )}
           </div>
-        </div>
+        </section>
 
         {/* Table of Contents */}
         <div className="px-5 lg:px-20 pb-12">
