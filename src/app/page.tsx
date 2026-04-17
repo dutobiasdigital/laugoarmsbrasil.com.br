@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import AdBanner from "@/components/AdBanner";
 import HeroSlider from "@/components/HeroSlider";
 import EditionsFeaturedCarousel from "@/components/EditionsFeaturedCarousel";
+import WelcomeBanner from "@/components/WelcomeBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -161,96 +162,12 @@ export default async function HomePage() {
     <div className="min-h-screen bg-[#070a12] flex flex-col">
       <Header />
 
-      {/* Hero — slider ou estático */}
+      {/* Hero — slider, welcome banner ou estático */}
       <div className="mt-16">
         {heroSlides.length > 0 ? (
           <HeroSlider slides={heroSlides} />
         ) : (
-          <section className="hero-metal relative flex items-center px-5 lg:px-20 py-16 lg:py-0 lg:h-[600px] gap-6 overflow-hidden">
-            {/* Grade decorativa de fundo */}
-            <div className="absolute inset-0 opacity-[0.03]" style={{
-              backgroundImage: "repeating-linear-gradient(0deg, #7a9ab5 0px, transparent 1px, transparent 60px), repeating-linear-gradient(90deg, #7a9ab5 0px, transparent 1px, transparent 60px)",
-            }} />
-            {/* Glow vermelho diagonal */}
-            <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full opacity-[0.06]"
-              style={{ background: "radial-gradient(circle, #ff1f1f 0%, transparent 70%)" }} />
-            {/* Glow azul-aço */}
-            <div className="absolute -bottom-20 left-[30%] w-[500px] h-[400px] rounded-full opacity-[0.04]"
-              style={{ background: "radial-gradient(circle, #7a9ab5 0%, transparent 70%)" }} />
-
-            {/* Stripe vermelha */}
-            <div className="hidden lg:block w-[3px] h-[500px] rounded-full shrink-0"
-              style={{ background: "linear-gradient(180deg, transparent, #ff1f1f 30%, #ff1f1f 70%, transparent)" }} />
-            <div className="hidden lg:block w-8 shrink-0" />
-
-            {/* Texto */}
-            <div className="flex flex-col gap-5 flex-1 max-w-[680px] relative z-10">
-              <div className="inline-flex items-center gap-2 self-start">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#ff1f1f] animate-pulse" />
-                <span className="text-[#ff1f1f] text-[10px] font-bold tracking-[2px] uppercase">
-                  Última Edição
-                </span>
-              </div>
-
-              <div className="font-['Barlow_Condensed'] font-extrabold leading-[1.0]">
-                <p className="text-[#dce8ff] text-5xl lg:text-[68px]">Revista Magnum</p>
-                <p className="text-[#ff1f1f] text-5xl lg:text-[68px]">
-                  {featuredEdition?.number ? `Edição ${featuredEdition.number}` : "Acervo Digital"}
-                </p>
-              </div>
-
-              <p className="text-[#526888] text-[12px] font-mono tracking-wide">
-                {featuredEdition?.publishedAt
-                  ? `${new Date(featuredEdition.publishedAt).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })} · ${featuredEdition.pageCount ? `${featuredEdition.pageCount} páginas` : ""} · ${featuredEdition.type === "SPECIAL" ? "Edição Especial" : "Edição Regular"}`
-                  : "O maior acervo especializado do Brasil"}
-              </p>
-
-              <p className="text-[#7a9ab5] text-[15px] leading-relaxed max-w-xl">
-                Nesta edição: teste completo da Beretta APX-A1, guia de recarga para .308 Win, legislação CAC 2026 e cobertura dos principais lançamentos do mercado nacional e internacional.
-              </p>
-
-              <div className="flex items-center gap-3 flex-wrap pt-1">
-                <Link
-                  href={featuredEdition ? `/minha-conta/edicoes` : "/assine"}
-                  className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold px-7 py-3 rounded transition-colors"
-                >
-                  {featuredEdition?.number ? `Ler Edição ${featuredEdition.number}` : "Assinar agora"}
-                </Link>
-                <Link
-                  href="/edicoes"
-                  className="border border-[#1c2a3e] hover:border-[#7a9ab5]/50 text-[#7a9ab5] hover:text-white text-[14px] font-semibold px-6 py-3 rounded transition-colors"
-                >
-                  Ver Todas as Edições
-                </Link>
-              </div>
-            </div>
-
-            <div className="flex-1 hidden lg:block" />
-
-            {/* Cover com glow e sombra */}
-            <div className="hidden lg:block relative shrink-0 w-[260px] z-10">
-              <div className="absolute inset-0 scale-[1.15] blur-2xl opacity-30 rounded-xl"
-                style={{ background: "linear-gradient(145deg, #ff1f1f20, #1c2a3e, #070a12)" }} />
-              <div className="card-metal-border relative">
-                <div className="bg-[#0e1520] rounded-[13px] overflow-hidden aspect-[3/4]">
-                  {featuredEdition?.coverImageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={featuredEdition.coverImageUrl}
-                      alt={featuredEdition.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <p className="font-['Barlow_Condensed'] font-bold text-[#1c2a3e] text-[18px]">
-                        {featuredEdition?.number ? `EDIÇÃO ${featuredEdition.number}` : "MAGNUM"}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </section>
+          <WelcomeBanner />
         )}
       </div>
 
