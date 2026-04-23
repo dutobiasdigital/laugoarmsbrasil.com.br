@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FavoriteButton from "@/components/FavoriteButton";
 import EditorialExpandable from "./_EditorialExpandable";
+import EditionMediaModal from "./_EditionMediaModal";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,7 @@ interface Edition {
   coverImageUrl: string | null; publishedAt: string | null;
   type: string; pageCount: number | null; editorial: string | null;
   teaser: string | null; summary: string | null;
+  video_url: string | null; gallery_images: string | null;
   pageFlipUrl: string | null; tableOfContents: string | null;
 }
 interface RelatedEdition {
@@ -45,7 +47,7 @@ export default async function EdicaoDetalhePage({
     // Busca edição e auth em paralelo
     const supabase = await createClient();
     const [editionRes, { data: { user } }] = await Promise.all([
-      fetch(`${BASE}/editions?slug=eq.${slug}&isPublished=eq.true&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount,editorial,teaser,summary,pageFlipUrl,tableOfContents&limit=1`,
+      fetch(`${BASE}/editions?slug=eq.${slug}&isPublished=eq.true&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount,editorial,teaser,summary,video_url,gallery_images,pageFlipUrl,tableOfContents&limit=1`,
         { headers: HEADERS, cache: "no-store" }),
       supabase.auth.getUser(),
     ]);
@@ -110,6 +112,10 @@ export default async function EdicaoDetalhePage({
   if (!edition) notFound();
 
   const canRead  = isSubscriber || hasSingleAccess;
+
+  let galleryImages: { url: string; storage_path: string; order: number }[] = [];
+  try { galleryImages = JSON.parse(edition.gallery_images ?? "[]"); } catch { galleryImages = []; }
+  galleryImages = galleryImages.filter(img => img.url).sort((a, b) => a.order - b.order);
   const isSpecial = edition.type === "SPECIAL";
   const publishMeta = edition.publishedAt
     ? new Date(edition.publishedAt).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })
@@ -244,6 +250,12 @@ export default async function EdicaoDetalhePage({
                   🔒 Assinatura ou acesso avulso por 30 dias
                 </p>
               )}
+
+              {/* Vídeo + Galeria */}
+              <EditionMediaModal
+                videoUrl={edition.video_url ?? null}
+                galleryImages={galleryImages}
+              />
 
               {/* Chamada da Edição — abaixo dos botões */}
               {(edition.summary || edition.teaser) && (
