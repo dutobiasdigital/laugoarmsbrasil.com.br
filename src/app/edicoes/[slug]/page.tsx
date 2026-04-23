@@ -17,7 +17,7 @@ interface Edition {
   id: string; title: string; number: number | null; slug: string;
   coverImageUrl: string | null; publishedAt: string | null;
   type: string; pageCount: number | null; editorial: string | null;
-  teaser: string | null;
+  teaser: string | null; summary: string | null;
   pageFlipUrl: string | null; tableOfContents: string | null;
 }
 interface RelatedEdition {
@@ -45,7 +45,7 @@ export default async function EdicaoDetalhePage({
     // Busca edição e auth em paralelo
     const supabase = await createClient();
     const [editionRes, { data: { user } }] = await Promise.all([
-      fetch(`${BASE}/editions?slug=eq.${slug}&isPublished=eq.true&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount,editorial,teaser,pageFlipUrl,tableOfContents&limit=1`,
+      fetch(`${BASE}/editions?slug=eq.${slug}&isPublished=eq.true&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount,editorial,teaser,summary,pageFlipUrl,tableOfContents&limit=1`,
         { headers: HEADERS, cache: "no-store" }),
       supabase.auth.getUser(),
     ]);
@@ -184,14 +184,7 @@ export default async function EdicaoDetalhePage({
 
               <div className="bg-[#1c2a3e] h-px w-full" />
 
-              {/* Chamada da Edição */}
-              {edition.teaser && (
-                <p className="text-[#8fb8d4] text-[15px] leading-[28px]">
-                  {edition.teaser}
-                </p>
-              )}
-
-              {/* CTAs */}
+              {/* CTAs + Favoritar — mesma linha, mesmo tamanho */}
               <div className="flex flex-wrap items-center gap-3 mt-2">
                 {canRead ? (
                   (() => {
@@ -236,6 +229,14 @@ export default async function EdicaoDetalhePage({
                     </Link>
                   </>
                 )}
+                <FavoriteButton
+                  contentType="edition"
+                  contentId={edition.id}
+                  isLoggedIn={isLoggedIn}
+                  initialIsFavorited={isFavorited}
+                  size="lg"
+                  label={isFavorited ? "Favoritado" : "Favoritar"}
+                />
               </div>
 
               {!canRead && (
@@ -244,17 +245,12 @@ export default async function EdicaoDetalhePage({
                 </p>
               )}
 
-              {/* Favoritar */}
-              <div className="pt-1">
-                <FavoriteButton
-                  contentType="edition"
-                  contentId={edition.id}
-                  isLoggedIn={isLoggedIn}
-                  initialIsFavorited={isFavorited}
-                  size="md"
-                  label={isFavorited ? "Favoritado" : "Favoritar"}
-                />
-              </div>
+              {/* Chamada da Edição — abaixo dos botões */}
+              {(edition.summary || edition.teaser) && (
+                <p className="text-[#7a9ab5] text-[14px] leading-[24px] pt-1">
+                  {edition.summary ?? edition.teaser}
+                </p>
+              )}
             </div>
           </div>
         </section>

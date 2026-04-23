@@ -481,15 +481,14 @@ function EditionListItem({ edition }: { edition: Edition }) {
     <Link href={`/edicoes/${edition.slug}`}
       className="group flex bg-[#0e1520] border border-[#141d2c] hover:border-[#ff1f1f]/25 rounded-[12px] overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-black/40"
     >
-      <div className="w-[100px] sm:w-[120px] shrink-0 relative overflow-hidden bg-[#0a0e18]">
+      <div className="w-[100px] sm:w-[120px] shrink-0 aspect-[3/4] relative overflow-hidden bg-[#0a0e18]">
         {edition.coverImageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={edition.coverImageUrl} alt={edition.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            style={{ aspectRatio: "3/4", display: "block" }}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className={`w-full h-full min-h-[133px] flex items-center justify-center ${isSpecial ? "bg-[#cc0000]/15" : "bg-white/[0.03]"}`}>
+          <div className={`absolute inset-0 flex items-center justify-center ${isSpecial ? "bg-[#cc0000]/15" : "bg-white/[0.03]"}`}>
             <p className={`font-['Barlow_Condensed'] font-extrabold text-[20px] ${isSpecial ? "text-[#ff1f1f]/30" : "text-white/10"}`}>
               {edition.number ? `Nº ${edition.number}` : "—"}
             </p>
@@ -510,7 +509,7 @@ function EditionListItem({ edition }: { edition: Edition }) {
             {edition.number ? `Revista Magnum — Edição ${edition.number}` : edition.title}
           </h2>
           {edition.summary && (
-            <p className="text-[#7a9ab5] text-[13px] leading-[20px] line-clamp-2 sm:line-clamp-3">{edition.summary}</p>
+            <p className="text-[#7a9ab5] text-[13px] leading-[20px]">{edition.summary}</p>
           )}
         </div>
         <div>
