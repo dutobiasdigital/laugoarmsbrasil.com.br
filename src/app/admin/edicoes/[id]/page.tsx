@@ -40,11 +40,14 @@ export default async function EditarEdicaoPage({
     seoDescription: string | null;
     seoKeywords: string | null;
     canonicalUrl: string | null;
+    teaser: string | null;
+    video_url: string | null;
+    gallery_images: string | null;
   } | null = null;
 
   try {
     const res = await fetch(
-      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,summary,editorial,tableOfContents,pageCount,coverImageUrl,pdfStoragePath,pageFlipUrl,isPublished,isOnNewstand,isFeatured,publishedAt,editorialPageFiles,indexPageFiles,seoTitle,seoDescription,seoKeywords,canonicalUrl&limit=1`,
+      `${BASE}/editions?id=eq.${id}&select=id,title,slug,number,type,summary,editorial,tableOfContents,pageCount,coverImageUrl,pdfStoragePath,pageFlipUrl,isPublished,isOnNewstand,isFeatured,publishedAt,editorialPageFiles,indexPageFiles,seoTitle,seoDescription,seoKeywords,canonicalUrl,teaser,video_url,gallery_images&limit=1`,
       { headers: HEADERS, cache: "no-store" }
     );
     const data = await res.json();
@@ -89,6 +92,8 @@ export default async function EditarEdicaoPage({
     editorialPageFiles: ed.editorialPageFiles ?? [],
     indexPageFiles:     ed.indexPageFiles     ?? [],
     publishedAt:        ed.publishedAt ? ed.publishedAt.slice(0, 10) : null,
+    videoUrl:           ed.video_url     ?? null,
+    galleryImages:      ed.gallery_images ?? null,
   };
 
   return (

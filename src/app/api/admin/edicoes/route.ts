@@ -45,6 +45,9 @@ export async function POST(req: NextRequest) {
     const seoDescription   = str(body.seoDescription);
     const seoKeywords      = str(body.seoKeywords);
     const canonicalUrl     = str(body.canonicalUrl);
+    const teaser           = str(body.teaser);
+    const videoUrl         = str(body.videoUrl);
+    const galleryImages    = str(body.galleryImages) ?? "[]";
 
     if (isOnNewstand) {
       await fetch(`${BASE}/editions?isOnNewstand=eq.true`, {
@@ -61,6 +64,7 @@ export async function POST(req: NextRequest) {
         title, slug, number, type, summary, editorial, tableOfContents, pageCount,
         coverImageUrl, pdfStoragePath, pageFlipUrl, isPublished, isOnNewstand, isFeatured,
         publishedAt, seoTitle, seoDescription, seoKeywords, canonicalUrl,
+        teaser, video_url: videoUrl, gallery_images: galleryImages,
       }),
     });
     if (!res.ok) throw new Error(await res.text());
@@ -97,6 +101,9 @@ export async function PUT(req: NextRequest) {
     const seoDescription   = str(body.seoDescription);
     const seoKeywords      = str(body.seoKeywords);
     const canonicalUrl     = str(body.canonicalUrl);
+    const teaser           = str(body.teaser);
+    const videoUrl         = str(body.videoUrl);
+    const galleryImages    = str(body.galleryImages) ?? "[]";
 
     if (isOnNewstand) {
       await fetch(`${BASE}/editions?isOnNewstand=eq.true&id=neq.${id}`, {
@@ -113,6 +120,7 @@ export async function PUT(req: NextRequest) {
         title, slug, number, type, summary, editorial, tableOfContents, pageCount,
         coverImageUrl, pdfStoragePath, pageFlipUrl, isPublished, isOnNewstand, isFeatured,
         publishedAt, seoTitle, seoDescription, seoKeywords, canonicalUrl,
+        teaser, video_url: videoUrl, gallery_images: galleryImages,
       }),
     });
     if (!res.ok) throw new Error(await res.text());
