@@ -117,7 +117,7 @@ export default function TabIntegracoes({ settings }: Props) {
           className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[14px] font-semibold h-[44px] px-8 rounded-[6px] transition-colors">
           {saving ? "Salvando..." : "Salvar Integrações"}
         </button>
-        {saved && <p className="text-[#22c55e] text-[13px] font-medium">✓ Salvo! As alterações entram em vigor no próximo deploy.</p>}
+        {saved && <p className="text-[#22c55e] text-[13px] font-medium">✓ Salvo! As alterações entram em vigor em até 60 segundos.</p>}
       </div>
     </form>
   );
