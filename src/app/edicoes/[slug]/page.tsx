@@ -262,14 +262,12 @@ export default async function EdicaoDetalhePage({
         {/* Editorial — fora do hero, expansível */}
         {edition.editorial && (
           <div className="px-5 lg:px-20 py-10 border-b border-[#141d2c]">
-            <div className="max-w-[780px]">
-              <EditorialExpandable html={edition.editorial} />
-            </div>
+            <EditorialExpandable html={edition.editorial} />
           </div>
         )}
 
         {/* Table of Contents */}
-        <div className="px-5 lg:px-20 pb-12">
+        <div className="px-5 lg:px-20 pt-10 pb-12">
           <div className="flex items-center gap-4 mb-8">
             <div className="h-px flex-1 bg-[#1c2a3e]/50" />
             <span className="text-[#ff1f1f] text-[9px] font-bold tracking-[2.5px] uppercase shrink-0">Índice da Edição</span>
@@ -277,7 +275,7 @@ export default async function EdicaoDetalhePage({
           </div>
           <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(160deg, #0d1422 0%, #080c14 100%)", border: "1px solid rgba(255,255,255,0.04)" }}>
             {(() => {
-              let toc: { page: string; title: string; category: string }[] = [];
+              let toc: { page: string; title: string; category: string; author?: string; description?: string }[] = [];
               try { toc = JSON.parse(edition.tableOfContents ?? "[]"); } catch { toc = []; }
               if (toc.length === 0) {
                 return (
@@ -296,15 +294,25 @@ export default async function EdicaoDetalhePage({
 
                     const inner = (
                       <>
-                        <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f]/70 text-[18px] w-[32px] shrink-0 leading-none pt-0.5 text-right tabular-nums">
+                        <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f]/70 text-[24px] w-[40px] shrink-0 leading-none pt-1 text-right tabular-nums">
                           {item.page}
                         </span>
-                        <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                          <span className="text-[#b0c4d8] text-[13px] font-medium leading-snug group-hover:text-white transition-colors">
+                        <div className="flex flex-col gap-1 min-w-0 flex-1">
+                          <span className="text-[#dce8ff] text-[16px] font-semibold leading-snug group-hover:text-white transition-colors">
                             {item.title}
                           </span>
                           {item.category && (
-                            <span className="text-[#526888] text-[10px] tracking-wide">{item.category}</span>
+                            <span className="text-[#ff1f1f]/60 text-[10px] font-bold tracking-[1.5px] uppercase">{item.category}</span>
+                          )}
+                          {(item.author || item.description) && (
+                            <div className="flex flex-col gap-0.5 mt-1 pt-1 border-t border-[#1c2a3e]/50">
+                              {item.author && (
+                                <span className="text-[#7a9ab5] text-[12px]">Por {item.author}</span>
+                              )}
+                              {item.description && (
+                                <span className="text-[#526888] text-[12px] leading-snug">{item.description}</span>
+                              )}
+                            </div>
                           )}
                         </div>
                         {href && (
@@ -315,7 +323,7 @@ export default async function EdicaoDetalhePage({
                       </>
                     );
 
-                    const cls = `group flex items-start gap-4 px-6 py-3.5 ${
+                    const cls = `group flex items-start gap-5 px-6 py-5 ${
                       i % 2 === 0 ? "lg:border-r border-[#1c2a3e]/30" : ""
                     } border-b border-[#1c2a3e]/20 ${
                       href
