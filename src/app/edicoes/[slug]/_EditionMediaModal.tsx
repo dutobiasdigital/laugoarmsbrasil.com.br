@@ -54,33 +54,30 @@ export default function EditionMediaModal({ videoUrl, galleryImages }: Props) {
 
   return (
     <>
-      {/* ── Botões de acesso ── */}
-      <div className="flex flex-wrap gap-2">
-        {hasVideo && (
-          <button
-            onClick={() => openWith("video")}
-            className="flex items-center gap-2 h-[40px] px-5 rounded-[4px] border border-[#1c2a3e] bg-[#0e1520] hover:border-[#ff1f1f]/60 text-[#7a9ab5] hover:text-white text-[13px] font-semibold transition-all"
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <polygon points="5,3 19,12 5,21" />
-            </svg>
-            Assistir Vídeo
-          </button>
-        )}
-        {hasGallery && (
-          <button
-            onClick={() => openWith("gallery")}
-            className="flex items-center gap-2 h-[40px] px-5 rounded-[4px] border border-[#1c2a3e] bg-[#0e1520] hover:border-[#ff1f1f]/60 text-[#7a9ab5] hover:text-white text-[13px] font-semibold transition-all"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" stroke="none" />
-              <polyline points="21,15 16,10 5,21" />
-            </svg>
-            Ver Galeria
-            <span className="text-[10px] opacity-50 font-mono">({galleryImages.length})</span>
-          </button>
-        )}
-      </div>
+      {/* ── Botões inline (sem wrapper — pai controla o flex) ── */}
+      {hasVideo && (
+        <button
+          onClick={() => openWith("video")}
+          className="flex items-center gap-2 h-[48px] px-6 rounded-[4px] border border-[#1c2a3e] bg-[#0e1520] hover:border-[#ff1f1f]/60 text-[#7a9ab5] hover:text-white text-[14px] font-semibold transition-all"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <polygon points="5,3 19,12 5,21" />
+          </svg>
+          Vídeo
+        </button>
+      )}
+      {hasGallery && (
+        <button
+          onClick={() => openWith("gallery")}
+          className="flex items-center gap-2 h-[48px] px-6 rounded-[4px] border border-[#1c2a3e] bg-[#0e1520] hover:border-[#ff1f1f]/60 text-[#7a9ab5] hover:text-white text-[14px] font-semibold transition-all"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" stroke="none" />
+            <polyline points="21,15 16,10 5,21" />
+          </svg>
+          Galeria <span className="text-[11px] opacity-50 font-mono">({galleryImages.length})</span>
+        </button>
+      )}
 
       {/* ── Modal ── */}
       {open && (

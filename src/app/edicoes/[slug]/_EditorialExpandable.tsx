@@ -13,14 +13,17 @@ export default function EditorialExpandable({ html }: { html: string }) {
 
       <div className="relative">
         <div
-          className="text-[#8fb8d4] text-[15px] leading-[28px] overflow-hidden transition-[max-height] duration-500 ease-in-out"
-          style={{ maxHeight: expanded ? "2000px" : "196px" }}
+          className="text-[15px] leading-[28px] overflow-hidden transition-[max-height] duration-500 ease-in-out"
+          style={{
+            maxHeight: expanded ? "2000px" : "196px",
+            color: "var(--text-primary)",
+          }}
           dangerouslySetInnerHTML={{ __html: html }}
         />
         {!expanded && (
           <div
             className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none"
-            style={{ background: "linear-gradient(to top, #070a12 20%, transparent 100%)" }}
+            style={{ background: "linear-gradient(to top, var(--bg-base) 20%, transparent 100%)" }}
           />
         )}
       </div>
@@ -28,7 +31,7 @@ export default function EditorialExpandable({ html }: { html: string }) {
       <button
         onClick={() => setExpanded(e => !e)}
         className="mt-5 flex items-center gap-2 text-[13px] font-semibold transition-colors group"
-        style={{ color: expanded ? "#7a9ab5" : "#ff1f1f" }}
+        style={{ color: expanded ? "var(--text-muted)" : "#ff1f1f" }}
       >
         <span className="border border-current rounded-[4px] px-4 py-1.5 group-hover:bg-white/5 transition-colors">
           {expanded ? "Fechar editorial" : "Ler editorial completo"}

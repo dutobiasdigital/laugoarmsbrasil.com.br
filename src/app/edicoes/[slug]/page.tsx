@@ -122,7 +122,7 @@ export default async function EdicaoDetalhePage({
     : null;
 
   return (
-    <div className="min-h-screen bg-[#070a12] flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-base)" }}>
       <Header />
 
       <main className="flex-1 pt-16">
@@ -138,16 +138,18 @@ export default async function EdicaoDetalhePage({
           {/* Cover + Info */}
           <div className="flex flex-col lg:flex-row gap-10">
             {/* Cover */}
-            <div className="w-full max-w-[260px] mx-auto lg:mx-0 shrink-0 rounded-[8px] overflow-hidden border border-[#1c2a3e] shadow-2xl shadow-black/70 bg-[#0a0e18]">
+            <div className="w-full max-w-[260px] mx-auto lg:mx-0 shrink-0 shadow-2xl shadow-black/70">
               {edition.coverImageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={edition.coverImageUrl}
                   alt={edition.title}
-                  className="w-full h-auto block"
+                  className="w-full h-auto block rounded-[8px]"
+                  style={{ border: "1px solid var(--border-mid)" }}
                 />
               ) : (
-                <div className={`aspect-[3/4] flex items-center justify-center ${isSpecial ? "bg-[#cc0000]/20" : "bg-[#141d2c]"}`}>
+                <div className={`aspect-[3/4] flex items-center justify-center rounded-[8px] ${isSpecial ? "bg-[#cc0000]/20" : "bg-[#141d2c]"}`}
+                  style={{ border: "1px solid var(--border-mid)" }}>
                   <p className={`font-['Barlow_Condensed'] font-bold text-[28px] ${isSpecial ? "text-[#ff1f1f]/40" : "text-[#1c2a3e]"}`}>
                     {edition.number ? `Nº ${edition.number}` : "—"}
                   </p>
@@ -243,6 +245,10 @@ export default async function EdicaoDetalhePage({
                   size="lg"
                   label={isFavorited ? "Favoritado" : "Favoritar"}
                 />
+                <EditionMediaModal
+                  videoUrl={edition.video_url ?? null}
+                  galleryImages={galleryImages}
+                />
               </div>
 
               {!canRead && (
@@ -250,12 +256,6 @@ export default async function EdicaoDetalhePage({
                   🔒 Assinatura ou acesso avulso por 30 dias
                 </p>
               )}
-
-              {/* Vídeo + Galeria */}
-              <EditionMediaModal
-                videoUrl={edition.video_url ?? null}
-                galleryImages={galleryImages}
-              />
 
               {/* Chamada da Edição — abaixo dos botões */}
               {(edition.summary || edition.teaser) && (
@@ -281,7 +281,7 @@ export default async function EdicaoDetalhePage({
             <span className="text-[#ff1f1f] text-[9px] font-bold tracking-[2.5px] uppercase shrink-0">Índice da Edição</span>
             <div className="h-px flex-1 bg-[#1c2a3e]/50" />
           </div>
-          <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(160deg, #0d1422 0%, #080c14 100%)", border: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="rounded-xl overflow-hidden" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
             {(() => {
               let toc: { page: string; title: string; category: string; author?: string; description?: string }[] = [];
               try { toc = JSON.parse(edition.tableOfContents ?? "[]"); } catch { toc = []; }
@@ -293,7 +293,7 @@ export default async function EdicaoDetalhePage({
                 );
               }
               return (
-                <div className="grid grid-cols-1 lg:grid-cols-2 divide-y divide-[#1c2a3e]/30 lg:divide-y-0">
+                <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0" style={{ borderColor: "var(--border)" }}>
                   {toc.map((item, i) => {
                     const pageNum = parseInt(item.page, 10);
                     const href = canRead && !isNaN(pageNum)
@@ -306,19 +306,19 @@ export default async function EdicaoDetalhePage({
                           {item.page}
                         </span>
                         <div className="flex flex-col gap-1 min-w-0 flex-1">
-                          <span className="text-[#dce8ff] text-[16px] font-semibold leading-snug group-hover:text-white transition-colors">
+                          <span className="text-[16px] font-semibold leading-snug transition-colors" style={{ color: "var(--text-heading)" }}>
                             {item.title}
                           </span>
                           {item.category && (
-                            <span className="text-[#ff1f1f]/60 text-[10px] font-bold tracking-[1.5px] uppercase">{item.category}</span>
+                            <span className="text-[#ff1f1f]/70 text-[10px] font-bold tracking-[1.5px] uppercase">{item.category}</span>
                           )}
                           {(item.author || item.description) && (
-                            <div className="flex flex-col gap-0.5 mt-1 pt-1 border-t border-[#1c2a3e]/50">
+                            <div className="flex flex-col gap-0.5 mt-1 pt-1" style={{ borderTop: "1px solid var(--border)" }}>
                               {item.author && (
-                                <span className="text-[#7a9ab5] text-[12px]">Por {item.author}</span>
+                                <span className="text-[12px]" style={{ color: "var(--text-muted)" }}>Por {item.author}</span>
                               )}
                               {item.description && (
-                                <span className="text-[#526888] text-[12px] leading-snug">{item.description}</span>
+                                <span className="text-[12px] leading-snug" style={{ color: "var(--text-subtle)" }}>{item.description}</span>
                               )}
                             </div>
                           )}
@@ -332,19 +332,20 @@ export default async function EdicaoDetalhePage({
                     );
 
                     const cls = `group flex items-start gap-5 px-6 py-5 ${
-                      i % 2 === 0 ? "lg:border-r border-[#1c2a3e]/30" : ""
-                    } border-b border-[#1c2a3e]/20 ${
+                      i % 2 === 0 ? "lg:border-r" : ""
+                    } border-b ${
                       href
                         ? "cursor-pointer hover:bg-white/[0.02] transition-colors"
                         : ""
                     }`;
 
+                    const borderStyle = { borderColor: "var(--border)" };
                     return href ? (
-                      <Link key={i} href={href} className={cls}>
+                      <Link key={i} href={href} className={cls} style={borderStyle}>
                         {inner}
                       </Link>
                     ) : (
-                      <div key={i} className={cls}>
+                      <div key={i} className={cls} style={borderStyle}>
                         {inner}
                       </div>
                     );
