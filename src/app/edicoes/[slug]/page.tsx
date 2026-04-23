@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FavoriteButton from "@/components/FavoriteButton";
+import EditorialExpandable from "./_EditorialExpandable";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +17,7 @@ interface Edition {
   id: string; title: string; number: number | null; slug: string;
   coverImageUrl: string | null; publishedAt: string | null;
   type: string; pageCount: number | null; editorial: string | null;
+  teaser: string | null;
   pageFlipUrl: string | null; tableOfContents: string | null;
 }
 interface RelatedEdition {
@@ -43,7 +45,7 @@ export default async function EdicaoDetalhePage({
     // Busca edição e auth em paralelo
     const supabase = await createClient();
     const [editionRes, { data: { user } }] = await Promise.all([
-      fetch(`${BASE}/editions?slug=eq.${slug}&isPublished=eq.true&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount,editorial,pageFlipUrl,tableOfContents&limit=1`,
+      fetch(`${BASE}/editions?slug=eq.${slug}&isPublished=eq.true&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount,editorial,teaser,pageFlipUrl,tableOfContents&limit=1`,
         { headers: HEADERS, cache: "no-store" }),
       supabase.auth.getUser(),
     ]);
@@ -182,16 +184,11 @@ export default async function EdicaoDetalhePage({
 
               <div className="bg-[#1c2a3e] h-px w-full" />
 
-              {/* Editorial */}
-              {edition.editorial && (
-                <div className="border-l-2 border-[#ff1f1f]/60 pl-5 py-2 rounded-r-sm"
-                  style={{ background: "linear-gradient(90deg, rgba(255,31,31,0.05) 0%, transparent 70%)" }}>
-                  <p className="text-[#ff1f1f] text-[9px] font-bold tracking-[2px] uppercase mb-3">Editorial</p>
-                  <div
-                    className="text-[#8fb8d4] text-[15px] leading-[28px]"
-                    dangerouslySetInnerHTML={{ __html: edition.editorial }}
-                  />
-                </div>
+              {/* Chamada da Edição */}
+              {edition.teaser && (
+                <p className="text-[#8fb8d4] text-[15px] leading-[28px]">
+                  {edition.teaser}
+                </p>
               )}
 
               {/* CTAs */}
@@ -261,6 +258,15 @@ export default async function EdicaoDetalhePage({
             </div>
           </div>
         </section>
+
+        {/* Editorial — fora do hero, expansível */}
+        {edition.editorial && (
+          <div className="px-5 lg:px-20 py-10 border-b border-[#141d2c]">
+            <div className="max-w-[780px]">
+              <EditorialExpandable html={edition.editorial} />
+            </div>
+          </div>
+        )}
 
         {/* Table of Contents */}
         <div className="px-5 lg:px-20 pb-12">
