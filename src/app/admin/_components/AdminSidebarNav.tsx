@@ -79,9 +79,8 @@ const NAV: NavEntry[] = [
     { href: "/admin/paginas/menu", label: "Menu" },
   ]},
   { type: "section", key: "midias",      label: "Mídias",      icon: ICONS.photo,     children: [
-    { href: "/admin/midias",            label: "Listar" },
-    { href: "/admin/midias/nova",       label: "Adicionar" },
-    { href: "/admin/midias/categorias", label: "Categorias" },
+    { href: "/admin/midias",            label: "Biblioteca" },
+    { href: "/admin/midias/categorias", label: "Pastas" },
   ]},
   { type: "section", key: "sessoes",     label: "Sessões",     icon: ICONS.cube,      children: [
     { href: "/admin/sessoes",            label: "Listar" },
