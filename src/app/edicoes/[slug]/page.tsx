@@ -5,7 +5,9 @@ import Footer from "@/components/Footer";
 import FavoriteButton from "@/components/FavoriteButton";
 import EditorialExpandable from "./_EditorialExpandable";
 import EditionMediaModal from "./_EditionMediaModal";
+import MarkedPagesViewer from "./_MarkedPagesViewer";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +22,7 @@ interface Edition {
   type: string; pageCount: number | null; editorial: string | null;
   teaser: string | null; summary: string | null;
   video_url: string | null; gallery_images: string | null;
+  editorialPageFiles: string[] | null; indexPageFiles: string[] | null;
   pageFlipUrl: string | null; tableOfContents: string | null;
 }
 interface RelatedEdition {
@@ -47,7 +50,7 @@ export default async function EdicaoDetalhePage({
     // Busca edição e auth em paralelo
     const supabase = await createClient();
     const [editionRes, { data: { user } }] = await Promise.all([
-      fetch(`${BASE}/editions?slug=eq.${slug}&isPublished=eq.true&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount,editorial,teaser,summary,video_url,gallery_images,pageFlipUrl,tableOfContents&limit=1`,
+      fetch(`${BASE}/editions?slug=eq.${slug}&isPublished=eq.true&select=id,title,number,slug,coverImageUrl,publishedAt,type,pageCount,editorial,teaser,summary,video_url,gallery_images,editorialPageFiles,indexPageFiles,pageFlipUrl,tableOfContents&limit=1`,
         { headers: HEADERS, cache: "no-store" }),
       supabase.auth.getUser(),
     ]);
@@ -116,6 +119,18 @@ export default async function EdicaoDetalhePage({
   let galleryImages: { url: string; storage_path: string; order: number }[] = [];
   try { galleryImages = JSON.parse(edition.gallery_images ?? "[]"); } catch { galleryImages = []; }
   galleryImages = galleryImages.filter(img => img.url).sort((a, b) => a.order - b.order);
+
+  // Signed URLs para páginas marcadas (bucket privado)
+  let indexSignedUrls: string[] = [];
+  const indexFiles = edition.indexPageFiles ?? [];
+  if (indexFiles.length > 0) {
+    try {
+      const admin = createAdminClient();
+      const paths = indexFiles.map((f: string) => `${slug}/${f}`);
+      const { data } = await admin.storage.from("edition-pages").createSignedUrls(paths, 3600);
+      indexSignedUrls = (data ?? []).filter(d => d.signedUrl).map(d => d.signedUrl!);
+    } catch { indexSignedUrls = []; }
+  }
   const isSpecial = edition.type === "SPECIAL";
   const publishMeta = edition.publishedAt
     ? new Date(edition.publishedAt).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })
@@ -267,10 +282,17 @@ export default async function EdicaoDetalhePage({
           </div>
         </section>
 
-        {/* Editorial — fora do hero, expansível */}
-        {edition.editorial && (
+        {/* Editorial + Índice (páginas marcadas) */}
+        {(edition.editorial || indexSignedUrls.length > 0) && (
           <div className="px-5 lg:px-20 py-10 border-b border-[#141d2c]">
-            <EditorialExpandable html={edition.editorial} />
+            <div className="flex flex-col lg:flex-row gap-8 items-start">
+              {edition.editorial && (
+                <div className="flex-1 min-w-0">
+                  <EditorialExpandable html={edition.editorial} />
+                </div>
+              )}
+              <MarkedPagesViewer indexUrls={indexSignedUrls} />
+            </div>
           </div>
         )}
 
