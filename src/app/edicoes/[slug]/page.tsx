@@ -336,7 +336,7 @@ export default async function EdicaoDetalhePage({
           </div>
           <div className="rounded-xl overflow-hidden" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
             {(() => {
-              let toc: { page: string; title: string; category: string; author?: string; description?: string }[] = [];
+              let toc: { page: string; title: string; category?: string; categories?: string[]; author?: string; description?: string }[] = [];
               try { toc = JSON.parse(edition.tableOfContents ?? "[]"); } catch { toc = []; }
               if (toc.length === 0) {
                 return (
@@ -362,9 +362,12 @@ export default async function EdicaoDetalhePage({
                           <span className="text-[16px] font-semibold leading-snug transition-colors" style={{ color: "var(--text-heading)" }}>
                             {item.title}
                           </span>
-                          {item.category && (
-                            <span className="text-[#ff1f1f]/70 text-[10px] font-bold tracking-[1.5px] uppercase">{item.category}</span>
-                          )}
+                          {(() => {
+                            const cats = item.categories?.length ? item.categories : (item.category ? [item.category] : []);
+                            return cats.length > 0 ? (
+                              <span className="text-[#ff1f1f]/70 text-[10px] font-bold tracking-[1.5px] uppercase">{cats.join(" · ")}</span>
+                            ) : null;
+                          })()}
                           {(item.author || item.description) && (
                             <div className="flex flex-col gap-0.5 mt-1 pt-1" style={{ borderTop: "1px solid var(--border)" }}>
                               {item.author && (

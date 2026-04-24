@@ -18,7 +18,7 @@ const smallInput = "bg-[#0a0f1a] border border-[#1c2a3e] rounded-[4px] h-[32px] 
 interface TocItem {
   page: string;
   title: string;
-  category: string;
+  categories: string[];
   author: string;
   description: string;
 }
@@ -61,10 +61,10 @@ interface Props {
 function parseToc(raw: string | null): TocItem[] {
   try {
     const items = JSON.parse(raw ?? "[]");
-    return items.map((item: Partial<TocItem>) => ({
+    return items.map((item: Partial<TocItem> & { category?: string }) => ({
       page:        item.page        ?? "",
       title:       item.title       ?? "",
-      category:    item.category    ?? "",
+      categories:  item.categories  ?? (item.category ? [item.category] : []),
       author:      item.author      ?? "",
       description: item.description ?? "",
     }));
@@ -409,10 +409,23 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
   }
 
   function addTocItem() {
-    setTocItems((prev) => [...prev, { page: "", title: "", category: "", author: "", description: "" }]);
+    setTocItems((prev) => [...prev, { page: "", title: "", categories: [], author: "", description: "" }]);
   }
-  function updateTocItem(i: number, field: keyof TocItem, value: string) {
+  function updateTocItem(i: number, field: Exclude<keyof TocItem, "categories">, value: string) {
     setTocItems((prev) => prev.map((item, idx) => idx === i ? { ...item, [field]: value } : item));
+  }
+  function addCategoryToTocItem(i: number, cat: string) {
+    if (!cat) return;
+    setTocItems((prev) => prev.map((item, idx) =>
+      idx === i && !item.categories.includes(cat)
+        ? { ...item, categories: [...item.categories, cat] }
+        : item
+    ));
+  }
+  function removeCategoryFromTocItem(i: number, cat: string) {
+    setTocItems((prev) => prev.map((item, idx) =>
+      idx === i ? { ...item, categories: item.categories.filter((c) => c !== cat) } : item
+    ));
   }
   function removeTocItem(i: number) {
     setTocItems((prev) => prev.filter((_, idx) => idx !== i));
@@ -697,8 +710,8 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
 
           <div className="bg-[#0e1520] border border-[#141d2c] rounded-[8px] overflow-hidden">
             {/* Header */}
-            <div className="bg-[#141d2c] px-4 py-2 grid grid-cols-[96px_1fr_160px_36px] gap-3">
-              {["Página", "Título da Matéria", "Categoria", ""].map((h) => (
+            <div className="bg-[#141d2c] px-4 py-2 grid grid-cols-[96px_1fr_36px] gap-3">
+              {["Página", "Título da Matéria", ""].map((h) => (
                 <p key={h} className="text-white text-[10px] font-semibold tracking-[0.5px] uppercase">{h}</p>
               ))}
             </div>
@@ -708,34 +721,48 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
             ) : (
               tocItems.map((item, i) => (
                 <div key={i} className={`px-4 py-3 ${i > 0 ? "border-t-2 border-[#141d2c]" : ""}`}>
-                  {/* Linha 1: página · título · categoria · remover */}
-                  <div className="grid grid-cols-[96px_1fr_160px_36px] gap-3 items-center mb-2">
+                  {/* Linha 1: página · título · remover */}
+                  <div className="grid grid-cols-[96px_1fr_36px] gap-3 items-center mb-2">
                     <input type="number" placeholder="Ex: 4" value={item.page}
                       onChange={(e) => updateTocItem(i, "page", e.target.value)}
                       className="bg-[#141d2c] border border-[#1c2a3e] rounded-[4px] h-[34px] px-2.5 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full" />
                     <input type="text" placeholder="Título do artigo ou seção" value={item.title}
                       onChange={(e) => updateTocItem(i, "title", e.target.value)}
                       className="bg-[#141d2c] border border-[#1c2a3e] rounded-[4px] h-[34px] px-2.5 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full" />
-                    <select value={item.category} onChange={(e) => updateTocItem(i, "category", e.target.value)}
-                      className="bg-[#141d2c] border border-[#1c2a3e] rounded-[4px] h-[34px] px-2 text-[13px] text-[#d4d4da] focus:outline-none focus:border-[#ff1f1f] w-full">
-                      <option value="">Sem categoria</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.name}>{cat.name}</option>
-                      ))}
-                    </select>
                     <button type="button" onClick={() => removeTocItem(i)}
                       className="text-white hover:text-[#ff6b6b] text-[16px] h-[34px] flex items-center justify-center transition-colors">✕</button>
                   </div>
                   {/* Linha 2: autor · descrição */}
-                  <div className="grid grid-cols-[96px_1fr_1fr_36px] gap-3 items-center">
-                    <div /> {/* espaço alinhado com coluna Página */}
+                  <div className="grid grid-cols-[96px_1fr_1fr_36px] gap-3 items-center mb-2">
+                    <div />
                     <input type="text" placeholder="Autor" value={item.author}
                       onChange={(e) => updateTocItem(i, "author", e.target.value)}
                       className={smallInput} />
                     <input type="text" placeholder="Descrição curta da matéria" value={item.description}
                       onChange={(e) => updateTocItem(i, "description", e.target.value)}
-                      className={`${smallInput} col-span-1`} />
-                    <div /> {/* espaço alinhado com botão remover */}
+                      className={smallInput} />
+                    <div />
+                  </div>
+                  {/* Linha 3: categorias */}
+                  <div className="grid grid-cols-[96px_1fr_36px] gap-3 items-start">
+                    <div />
+                    <div className="flex flex-wrap gap-1.5 items-center min-h-[26px]">
+                      {item.categories.map((cat) => (
+                        <span key={cat} className="inline-flex items-center gap-1 bg-[#1c2a3e] text-[#7a9ab5] text-[11px] font-medium px-2 py-0.5 rounded">
+                          {cat}
+                          <button type="button" onClick={() => removeCategoryFromTocItem(i, cat)}
+                            className="text-[#526888] hover:text-[#ff6b6b] leading-none ml-0.5">×</button>
+                        </span>
+                      ))}
+                      <select value="" onChange={(e) => { addCategoryToTocItem(i, e.target.value); e.currentTarget.value = ""; }}
+                        className="bg-[#0a0f1a] border border-[#1c2a3e] rounded-[4px] h-[24px] px-1.5 text-[11px] text-[#526888] focus:outline-none focus:border-[#526888]">
+                        <option value="">+ categoria</option>
+                        {categories.filter((c) => !item.categories.includes(c.name)).map((cat) => (
+                          <option key={cat.id} value={cat.name}>{cat.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div />
                   </div>
                 </div>
               ))
