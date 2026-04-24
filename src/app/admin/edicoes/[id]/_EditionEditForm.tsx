@@ -346,6 +346,7 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pageZoomUrl, setPageZoomUrl] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editionNumber, setEditionNumber] = useState(String(edition.number ?? ""));
@@ -375,6 +376,13 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
 
   const folder = editionType === "REGULAR" ? "edicoes/regular" : "edicoes/especiais";
   const filename = editionNumber ? `ed${String(editionNumber).padStart(3, "0")}-capa` : undefined;
+
+  useEffect(() => {
+    if (!pageZoomUrl) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setPageZoomUrl(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [pageZoomUrl]);
 
   useEffect(() => {
     fetch("/api/admin/categorias")
@@ -552,7 +560,12 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
                     <div className="flex gap-2 flex-wrap">
                       {(editorialPageUrls.length > 0 ? editorialPageUrls : (edition.editorialPageFiles ?? []).map((f) => ({ filename: f, url: "" }))).map((pg) => (
                         <div key={pg.filename} className="flex flex-col gap-1">
-                          <div className="relative w-[60px] h-[80px] bg-[#0d1422] rounded-[4px] overflow-hidden border border-[#ff1f1f]/30">
+                          <button
+                            type="button"
+                            onClick={() => pg.url && setPageZoomUrl(pg.url)}
+                            disabled={!pg.url}
+                            className="group relative w-[60px] h-[80px] bg-[#0d1422] rounded-[4px] overflow-hidden border border-[#ff1f1f]/30 cursor-zoom-in disabled:cursor-default"
+                          >
                             {pg.url ? (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img src={pg.url} alt={pg.filename} className="w-full h-full object-cover" />
@@ -560,7 +573,8 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
                               <div className="w-full h-full flex items-center justify-center text-[#2a3a5e] text-[9px]">sem prévia</div>
                             )}
                             <div className="absolute top-0.5 left-0.5 bg-[#ff1f1f] text-white text-[6px] font-bold px-0.5 py-[1px] rounded-[2px]">Ed.</div>
-                          </div>
+                            {pg.url && <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all" />}
+                          </button>
                           <p className="text-[#7a9ab5] text-[9px] text-center font-mono">{pg.filename.replace(/page-(\d+)\..+/, "pág. $1")}</p>
                         </div>
                       ))}
@@ -573,7 +587,12 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
                     <div className="flex gap-2 flex-wrap">
                       {(indexPageUrls.length > 0 ? indexPageUrls : (edition.indexPageFiles ?? []).map((f) => ({ filename: f, url: "" }))).map((pg) => (
                         <div key={pg.filename} className="flex flex-col gap-1">
-                          <div className="relative w-[60px] h-[80px] bg-[#0d1422] rounded-[4px] overflow-hidden border border-[#0ea5e9]/30">
+                          <button
+                            type="button"
+                            onClick={() => pg.url && setPageZoomUrl(pg.url)}
+                            disabled={!pg.url}
+                            className="group relative w-[60px] h-[80px] bg-[#0d1422] rounded-[4px] overflow-hidden border border-[#0ea5e9]/30 cursor-zoom-in disabled:cursor-default"
+                          >
                             {pg.url ? (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img src={pg.url} alt={pg.filename} className="w-full h-full object-cover" />
@@ -581,7 +600,8 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
                               <div className="w-full h-full flex items-center justify-center text-[#2a3a5e] text-[9px]">sem prévia</div>
                             )}
                             <div className="absolute top-0.5 right-0.5 bg-[#0ea5e9] text-white text-[6px] font-bold px-0.5 py-[1px] rounded-[2px]">Índ.</div>
-                          </div>
+                            {pg.url && <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all" />}
+                          </button>
                           <p className="text-[#7a9ab5] text-[9px] text-center font-mono">{pg.filename.replace(/page-(\d+)\..+/, "pág. $1")}</p>
                         </div>
                       ))}
@@ -819,6 +839,30 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
           </div>
         </div>
       </form>
+
+      {/* Lightbox — zoom de páginas (editorial / índice) */}
+      {pageZoomUrl && (
+        <div
+          className="fixed inset-0 z-[500] flex items-center justify-center bg-black/90 backdrop-blur-sm p-6"
+          onClick={() => setPageZoomUrl(null)}
+        >
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={pageZoomUrl}
+              alt="Preview ampliado"
+              className="max-h-[88vh] max-w-[90vw] object-contain rounded-[8px] shadow-2xl"
+              draggable={false}
+            />
+            <button
+              type="button"
+              onClick={() => setPageZoomUrl(null)}
+              className="absolute -top-3 -right-3 w-[30px] h-[30px] bg-white/10 hover:bg-[#ff1f1f] text-white rounded-full flex items-center justify-center text-[13px] transition-colors"
+              aria-label="Fechar"
+            >✕</button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

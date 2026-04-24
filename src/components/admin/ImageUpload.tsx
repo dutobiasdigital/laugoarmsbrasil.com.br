@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 interface Props {
   folder: string;
@@ -28,7 +28,15 @@ export default function ImageUpload({ folder, filename, defaultUrl, inputName, a
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [zoom, setZoom] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!zoom) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setZoom(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [zoom]);
 
   async function handleFile(file: File) {
     setLoading(true);
@@ -75,6 +83,7 @@ export default function ImageUpload({ folder, filename, defaultUrl, inputName, a
   }
 
   return (
+    <>
     <div
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -93,10 +102,21 @@ export default function ImageUpload({ folder, filename, defaultUrl, inputName, a
       )}
       <div className={`flex gap-4 items-start transition-opacity ${isDragging ? "opacity-40" : ""}`}>
         {url ? (
-          <div className="w-[100px] h-[100px] bg-[#141d2c] rounded-[6px] overflow-hidden border border-[#1c2a3e] shrink-0">
+          <button
+            type="button"
+            onClick={() => setZoom(true)}
+            className="group w-[100px] h-[100px] bg-[#141d2c] rounded-[6px] overflow-hidden border border-[#1c2a3e] shrink-0 relative cursor-zoom-in"
+            title="Clique para ampliar"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={url} alt="Preview" className="w-full h-full object-cover" />
-          </div>
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center transition-all">
+              <svg className="opacity-0 group-hover:opacity-100 transition-opacity drop-shadow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+              </svg>
+            </div>
+          </button>
         ) : (
           <div className="w-[100px] h-[100px] bg-[#141d2c] rounded-[6px] border border-dashed border-[#1c2a3e] flex items-center justify-center shrink-0">
             <span className="text-white text-[24px]">🖼</span>
@@ -136,5 +156,25 @@ export default function ImageUpload({ folder, filename, defaultUrl, inputName, a
         </div>
       </div>
     </div>
+
+      {/* Zoom modal */}
+      {zoom && url && (
+        <div
+          className="fixed inset-0 z-[500] flex items-center justify-center bg-black/90 backdrop-blur-sm p-6"
+          onClick={() => setZoom(false)}
+        >
+          <div className="relative" onClick={e => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={url} alt="Preview ampliado" className="max-h-[88vh] max-w-[90vw] object-contain rounded-[8px] shadow-2xl" draggable={false} />
+            <button
+              type="button"
+              onClick={() => setZoom(false)}
+              className="absolute -top-3 -right-3 w-[30px] h-[30px] bg-white/10 hover:bg-[#ff1f1f] text-white rounded-full flex items-center justify-center text-[13px] transition-colors"
+              aria-label="Fechar"
+            >✕</button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
