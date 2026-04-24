@@ -29,6 +29,10 @@ interface RelatedEdition {
   id: string; title: string; number: number | null; slug: string;
   coverImageUrl: string | null; type: string;
 }
+interface NeighborEdition {
+  id: string; title: string; number: number | null; slug: string;
+  coverImageUrl: string | null; publishedAt: string | null;
+}
 
 export default async function EdicaoDetalhePage({
   params,
@@ -39,6 +43,8 @@ export default async function EdicaoDetalhePage({
 
   let edition: Edition | null = null;
   let related: RelatedEdition[] = [];
+  let prevEdition: NeighborEdition | null = null;
+  let nextEdition: NeighborEdition | null = null;
   let isSubscriber = false;
   let hasSingleAccess = false;
   let userEmail: string | null = null;
@@ -99,14 +105,39 @@ export default async function EdicaoDetalhePage({
       isFavorited = Array.isArray(favData) && favData.length > 0;
     }
 
-    // Edições relacionadas
+    // Edições relacionadas + anterior/próxima do mesmo tipo
     if (edition) {
-      const relRes = await fetch(
-        `${BASE}/editions?isPublished=eq.true&id=neq.${edition.id}&order=publishedAt.desc&select=id,title,number,slug,coverImageUrl,type&limit=5`,
-        { headers: HEADERS, cache: "no-store" }
-      );
+      const neighborSelect = "id,title,number,slug,coverImageUrl,publishedAt";
+      const [relRes, prevRes, nextRes] = await Promise.all([
+        fetch(
+          `${BASE}/editions?isPublished=eq.true&id=neq.${edition.id}&order=publishedAt.desc&select=id,title,number,slug,coverImageUrl,type&limit=5`,
+          { headers: HEADERS, cache: "no-store" }
+        ),
+        edition.number != null
+          ? fetch(
+              `${BASE}/editions?isPublished=eq.true&type=eq.${edition.type}&number=lt.${edition.number}&order=number.desc&select=${neighborSelect}&limit=1`,
+              { headers: HEADERS, cache: "no-store" }
+            )
+          : Promise.resolve(null),
+        edition.number != null
+          ? fetch(
+              `${BASE}/editions?isPublished=eq.true&type=eq.${edition.type}&number=gt.${edition.number}&order=number.asc&select=${neighborSelect}&limit=1`,
+              { headers: HEADERS, cache: "no-store" }
+            )
+          : Promise.resolve(null),
+      ]);
+
       const relData = await relRes.json();
       related = Array.isArray(relData) ? relData : [];
+
+      if (prevRes) {
+        const pd = await prevRes.json();
+        prevEdition = Array.isArray(pd) && pd.length > 0 ? pd[0] : null;
+      }
+      if (nextRes) {
+        const nd = await nextRes.json();
+        nextEdition = Array.isArray(nd) && nd.length > 0 ? nd[0] : null;
+      }
     }
   } catch {
     // DB unavailable
@@ -377,6 +408,90 @@ export default async function EdicaoDetalhePage({
             })()}
           </div>
         </div>
+
+        {/* Navegação anterior / próxima — mesmo tipo */}
+        {(prevEdition || nextEdition) && (
+          <div className="px-5 lg:px-20 py-10 border-t border-b border-[#141d2c]">
+            <div className="flex items-stretch gap-4">
+
+              {/* Esquerda — Próxima edição (mais recente) */}
+              <div className="flex-1 flex">
+                {nextEdition ? (
+                  <Link
+                    href={`/edicoes/${nextEdition.slug}`}
+                    className="group flex-1 flex items-center gap-4 rounded-[10px] px-5 py-4 border transition-colors hover:border-[#ff1f1f]/40"
+                    style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
+                  >
+                    <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                      <span className="text-[#ff1f1f] text-[9px] font-bold tracking-[2px] uppercase flex items-center gap-1">
+                        <span>←</span> Próxima edição
+                      </span>
+                      <p className="font-['Barlow_Condensed'] font-bold text-[18px] leading-snug line-clamp-2 group-hover:text-[#ff1f1f] transition-colors" style={{ color: "var(--text-heading)" }}>
+                        {nextEdition.number ? `Nº ${nextEdition.number}` : nextEdition.title}
+                      </p>
+                      {nextEdition.publishedAt && (
+                        <p className="text-[12px] font-mono" style={{ color: "var(--text-subtle)" }}>
+                          {new Date(nextEdition.publishedAt).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}
+                        </p>
+                      )}
+                    </div>
+                    {nextEdition.coverImageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={nextEdition.coverImageUrl}
+                        alt={nextEdition.title}
+                        className="w-[56px] h-[75px] object-cover rounded-[4px] shrink-0 shadow-md"
+                        style={{ border: "1px solid var(--border-mid)" }}
+                      />
+                    )}
+                  </Link>
+                ) : (
+                  <div className="flex-1" />
+                )}
+              </div>
+
+              {/* Divider vertical */}
+              <div className="w-px bg-[#1c2a3e] shrink-0 self-stretch" />
+
+              {/* Direita — Edição anterior (mais antiga) */}
+              <div className="flex-1 flex">
+                {prevEdition ? (
+                  <Link
+                    href={`/edicoes/${prevEdition.slug}`}
+                    className="group flex-1 flex items-center gap-4 rounded-[10px] px-5 py-4 border transition-colors hover:border-[#ff1f1f]/40"
+                    style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
+                  >
+                    {prevEdition.coverImageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={prevEdition.coverImageUrl}
+                        alt={prevEdition.title}
+                        className="w-[56px] h-[75px] object-cover rounded-[4px] shrink-0 shadow-md"
+                        style={{ border: "1px solid var(--border-mid)" }}
+                      />
+                    )}
+                    <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                      <span className="text-[#7a9ab5] text-[9px] font-bold tracking-[2px] uppercase flex items-center gap-1 justify-end">
+                        Edição anterior <span>→</span>
+                      </span>
+                      <p className="font-['Barlow_Condensed'] font-bold text-[18px] leading-snug line-clamp-2 text-right group-hover:text-[#ff1f1f] transition-colors" style={{ color: "var(--text-heading)" }}>
+                        {prevEdition.number ? `Nº ${prevEdition.number}` : prevEdition.title}
+                      </p>
+                      {prevEdition.publishedAt && (
+                        <p className="text-[12px] font-mono text-right" style={{ color: "var(--text-subtle)" }}>
+                          {new Date(prevEdition.publishedAt).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="flex-1" />
+                )}
+              </div>
+
+            </div>
+          </div>
+        )}
 
         {/* CTA Banner (para não assinantes) */}
         {!isSubscriber && !hasSingleAccess && (
