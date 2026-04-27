@@ -83,7 +83,7 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     const id               = body.id as string;
     const title            = body.title as string;
-    const slug             = body.slug as string;
+    const slug             = (body.slug as string) || toSlug(title);
     const number           = body.number ? Number(body.number) : null;
     const type             = (body.type as string) || "REGULAR";
     const summary          = str(body.summary);
