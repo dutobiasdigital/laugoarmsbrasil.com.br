@@ -1,11 +1,11 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SidebarNav from "./_components/SidebarNav";
 
 export const metadata = {
-  title: "Minha Conta — Revista Magnum",
+  title: "Minha Conta — Laúgo Arms Brasil",
 };
 
 const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";

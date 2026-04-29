@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import ImageUpload from "@/components/admin/ImageUpload";
@@ -282,7 +282,7 @@ export default function DesignForm({ cfg }: Props) {
           <div className="bg-[#0e1520] border border-[#141d2c] rounded-[10px] p-5">
             <p className="text-[#526888] text-[11px] font-semibold uppercase tracking-[1px] mb-3">Preview</p>
             <p style={{ fontFamily: FONTS.find(f => f.key === fontHeading)?.style }} className="text-white text-[48px] leading-none mb-2">
-              Revista Magnum
+              Laúgo Arms Brasil
             </p>
             <p style={{ fontFamily: FONTS.find(f => f.key === fontHeading)?.style }} className="text-[#7a9ab5] text-[24px] leading-none">
               Edição 207 — Especial

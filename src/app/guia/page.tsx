@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { CATEGORIES, PLAN_LABELS, categoryBySegment } from "@/lib/guia";
@@ -6,7 +6,7 @@ import { CATEGORIES, PLAN_LABELS, categoryBySegment } from "@/lib/guia";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Guia Comercial — Revista Magnum",
+  title: "Guia Comercial — Laúgo Arms Brasil",
   description: "O maior diretório especializado do setor de armas, tiro esportivo, caça e defesa do Brasil. Encontre armareiros, clubes, advogados e mais.",
 };
 
@@ -150,7 +150,7 @@ export default async function GuiaPage() {
             <div className="bg-[#141d2c] h-px mb-12" />
             <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase mb-2">Empresas em destaque</p>
             <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[36px] leading-none mb-8">
-              Parceiros do Guia Magnum
+              Parceiros do Guia
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {destaques.map((co) => (
@@ -169,7 +169,7 @@ export default async function GuiaPage() {
                 Apareça para 45 mil leitores qualificados
               </h2>
               <p className="text-[#7a9ab5] text-[16px] leading-[26px] mb-8">
-                O Guia Comercial da Revista Magnum é o único diretório especializado
+                O Laúgo Arms Brasil é o único diretório especializado
                 do setor no Brasil. Cadastre sua empresa e seja encontrado por
                 atiradores, colecionadores e profissionais da área.
               </p>
@@ -227,7 +227,7 @@ export default async function GuiaPage() {
                 );
               })}
               <p className="text-white text-[12px] text-center">
-                Entre em contato: <a href="mailto:publicidade@revistamagnum.com.br" className="text-[#7a9ab5] hover:text-white transition-colors">publicidade@revistamagnum.com.br</a>
+                Entre em contato: <a href="mailto:publicidade@laugoarmsbrasil.com.br" className="text-[#7a9ab5] hover:text-white transition-colors">publicidade@laugoarmsbrasil.com.br</a>
               </p>
             </div>
           </div>

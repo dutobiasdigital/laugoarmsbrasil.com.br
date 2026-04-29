@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 
@@ -21,7 +21,7 @@ export async function createArticle(_: unknown, formData: FormData) {
   const slug = (formData.get("slug") as string) || toSlug(title);
   const excerpt = (formData.get("excerpt") as string) || null;
   const content = (formData.get("content") as string) || "";
-  const authorName = (formData.get("authorName") as string) || "Redação Magnum";
+  const authorName = (formData.get("authorName") as string) || "Redação Laúgo";
   const featureImageUrl = (formData.get("featureImageUrl") as string) || null;
   const categoryId = formData.get("categoryId") as string;
   const isExclusive = formData.get("isExclusive") === "on";
@@ -69,7 +69,7 @@ export async function updateArticle(_: unknown, formData: FormData) {
   const slug = formData.get("slug") as string;
   const excerpt = (formData.get("excerpt") as string) || null;
   const content = (formData.get("content") as string) || "";
-  const authorName = (formData.get("authorName") as string) || "Redação Magnum";
+  const authorName = (formData.get("authorName") as string) || "Redação Laúgo";
   const featureImageUrl = (formData.get("featureImageUrl") as string) || null;
   const categoryId = formData.get("categoryId") as string;
   const isExclusive = formData.get("isExclusive") === "on";

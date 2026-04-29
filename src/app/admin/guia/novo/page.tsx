@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -42,12 +42,12 @@ export default function NovaEmpresaGuiaPage() {
   return (
     <>
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/guia" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">← Guia Magnum</Link>
+        <Link href="/admin/guia" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">← Guia</Link>
         <span className="text-[#141d2c]">/</span>
         <span className="text-[#d4d4da] text-[14px]">Nova Empresa</span>
       </div>
       <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">Nova Empresa no Guia</h1>
-      <p className="text-[#7a9ab5] text-[14px] mb-6">Preencha os dados para cadastrar a empresa no Guia Magnum.</p>
+      <p className="text-[#7a9ab5] text-[14px] mb-6">Preencha os dados para cadastrar a empresa no Guia.</p>
       <div className="bg-[#141d2c] h-px mb-6" />
 
       {error && <div className="bg-[#2d0a0a] border border-[#ff1f1f] rounded-[8px] px-4 py-3 mb-5 text-[#ff6b6b] text-[13px]">{error}</div>}
@@ -142,7 +142,7 @@ export default function NovaEmpresaGuiaPage() {
           <p className={sectionTtl}>Mensagem Padrão (WhatsApp)</p>
           <textarea
             name="whatsappMessage" rows={3}
-            placeholder="Ex: Olá! Vi sua empresa na Revista Magnum e gostaria de mais informações."
+            placeholder="Ex: Olá! Vi sua empresa na Laúgo Arms Brasil e gostaria de mais informações."
             className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] px-3 py-2.5 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full resize-none"
           />
         </div>

@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Suspense } from "react";
 import Header from "@/components/Header";
 import FooterMinimal from "@/components/FooterMinimal";
@@ -19,8 +19,8 @@ const HEADERS  = {
 };
 
 export const metadata = {
-  title: "Edições — Revista Magnum",
-  description: "Acervo completo da Revista Magnum — edições regulares e especiais.",
+  title: "Edições — Laúgo Arms Brasil",
+  description: "Acervo completo da Laúgo Arms Brasil — edições regulares e especiais.",
 };
 
 interface Edition {
@@ -506,7 +506,7 @@ function EditionListItem({ edition }: { edition: Edition }) {
             {edition.pageCount && <span className="text-[#3a4a5e] text-[11px]">· {edition.pageCount} págs.</span>}
           </div>
           <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[22px] sm:text-[26px] leading-tight group-hover:text-white/90 transition-colors">
-            {edition.number ? `Revista Magnum — Edição ${edition.number}` : edition.title}
+            {edition.number ? `Laúgo Arms Brasil — Edição ${edition.number}` : edition.title}
           </h2>
           {edition.summary && (
             <p className="text-[#7a9ab5] text-[13px] leading-[20px]">{edition.summary}</p>

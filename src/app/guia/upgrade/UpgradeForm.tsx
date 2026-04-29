@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -78,7 +78,7 @@ export default function UpgradeForm({
           O sistema de pagamentos ainda está sendo configurado. Entre em contato diretamente para contratar seu plano.
         </p>
         <a
-          href="mailto:publicidade@revistamagnum.com.br"
+          href="mailto:publicidade@laugoarmsbrasil.com.br"
           className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[44px] px-6 flex items-center justify-center rounded-[6px] transition-colors max-w-[260px] mx-auto"
         >
           Falar com nossa equipe →

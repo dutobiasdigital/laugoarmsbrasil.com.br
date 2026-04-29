@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { saveSettings, inputCls, labelCls } from "./_ConfiguracoesClient";
@@ -63,7 +63,7 @@ export default function TabNotificacoes({ settings }: Props) {
           <label className={labelCls}>E-mail(s) que recebem as notificações</label>
           <input value={values["notify.emails_destino"]}
             onChange={e => setValues(v => ({ ...v, "notify.emails_destino": e.target.value }))}
-            placeholder="admin@revistamagnum.com.br, editorial@revistamagnum.com.br"
+            placeholder="admin@laugoarmsbrasil.com.br, editorial@laugoarmsbrasil.com.br"
             className={inputCls} />
           <p className="text-white text-[11px] mt-1">Separe múltiplos e-mails por vírgula.</p>
         </div>

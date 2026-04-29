@@ -11,7 +11,7 @@ interface Props {
 }
 
 const DEFAULT_MSG =
-  "Olá! Vim pelo Guia Comercial da Revista Magnum e gostaria de mais informações sobre seus serviços.";
+  "Olá! Vim pelo Guia Comercial da Laúgo Arms Brasil e gostaria de mais informações sobre seus serviços.";
 
 export default function WhatsAppModal({
   companyId,
@@ -174,10 +174,10 @@ export default function WhatsAppModal({
 
             {/* ── Footer ── */}
             <div className="flex items-center justify-between gap-3 px-4 py-3" style={{ background: "#1f2c34" }}>
-              {/* Magnum logo — bottom right as requested */}
+              {/* Laúgo logo — bottom right as requested */}
               <div className="flex items-center gap-1.5 opacity-50">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo.png" alt="Revista Magnum" className="h-[18px] w-auto object-contain" style={{ filter: "brightness(0) invert(1)" }} />
+                <img src="/logo.png" alt="Laúgo Arms Brasil" className="h-[18px] w-auto object-contain" style={{ filter: "brightness(0) invert(1)" }} />
               </div>
 
               {/* Send button */}

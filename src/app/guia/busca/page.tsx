@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -40,7 +40,7 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { q } = await searchParams;
   return {
-    title: q ? `"${q}" — Busca no Guia Magnum` : "Busca — Guia Comercial Magnum",
+    title: q ? `"${q}" — Busca no Guia` : "Busca — Guia Comercial",
   };
 }
 

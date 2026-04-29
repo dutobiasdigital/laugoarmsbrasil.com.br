@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -99,7 +99,7 @@ export async function forgotPassword(
     const { sendPasswordResetEmail } = await import("@/lib/email");
 
     const admin = createAdminClient();
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://revistamagnum.com.br";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://laugoarmsbrasil.com.br";
 
     // Gera o link de recuperação via Admin API (bypass do e-mail padrão do Supabase)
     const { data, error } = await admin.auth.admin.generateLink({

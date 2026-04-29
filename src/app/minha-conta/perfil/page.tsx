@@ -1,10 +1,10 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import PerfilForm from "./_components/PerfilForm";
 import SenhaForm from "./_components/SenhaForm";
 
 export const metadata = {
-  title: "Dados Pessoais — Minha Conta · Revista Magnum",
+  title: "Dados Pessoais — Minha Conta · Laúgo Arms Brasil",
 };
 export const dynamic = "force-dynamic";
 

@@ -1,17 +1,17 @@
-import Header from "@/components/Header";
+﻿import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ContactForm from "./ContactForm";
 
 export const metadata = {
-  title: "Contato — Revista Magnum",
-  description: "Entre em contato com a equipe da Revista Magnum. Atendimento para assinantes, redação e publicidade.",
+  title: "Contato — Laúgo Arms Brasil",
+  description: "Entre em contato com a equipe da Laúgo Arms Brasil. Atendimento para assinantes, redação e publicidade.",
 };
 
 const CONTACTS = [
-  { icon: "✉", label: "E-mail geral", value: "contato@revistamagnum.com.br", href: "mailto:contato@revistamagnum.com.br" },
-  { icon: "📢", label: "Publicidade", value: "publicidade@revistamagnum.com.br", href: "mailto:publicidade@revistamagnum.com.br" },
-  { icon: "📰", label: "Redação", value: "redacao@revistamagnum.com.br", href: "mailto:redacao@revistamagnum.com.br" },
-  { icon: "💳", label: "Assinaturas", value: "assinaturas@revistamagnum.com.br", href: "mailto:assinaturas@revistamagnum.com.br" },
+  { icon: "✉", label: "E-mail geral", value: "contato@laugoarmsbrasil.com.br", href: "mailto:contato@laugoarmsbrasil.com.br" },
+  { icon: "📢", label: "Publicidade", value: "publicidade@laugoarmsbrasil.com.br", href: "mailto:publicidade@laugoarmsbrasil.com.br" },
+  { icon: "📰", label: "Redação", value: "redacao@laugoarmsbrasil.com.br", href: "mailto:redacao@laugoarmsbrasil.com.br" },
+  { icon: "💳", label: "Assinaturas", value: "assinaturas@laugoarmsbrasil.com.br", href: "mailto:assinaturas@laugoarmsbrasil.com.br" },
 ];
 
 export default function ContatoPage() {

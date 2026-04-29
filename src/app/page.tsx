@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AdBanner from "@/components/AdBanner";
@@ -9,7 +9,7 @@ import WelcomeBanner from "@/components/WelcomeBanner";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Revista Magnum — O Mundo das Armas em Suas Mãos",
+  title: "Laúgo Arms Brasil — O Mundo das Armas em Suas Mãos",
   description:
     "O maior acervo de publicações especializadas em armas, munições e legislação do Brasil. Assine e acesse todas as edições.",
 };
@@ -248,7 +248,7 @@ export default async function HomePage() {
                           )}
                         </div>
                         <p className="font-['Barlow_Condensed'] font-bold text-[#dce8ff] text-[17px] leading-snug line-clamp-2">
-                          {edition?.title ?? "Revista Magnum"}
+                          {edition?.title ?? "Laúgo Arms Brasil"}
                         </p>
                         <p className="text-[#526888] text-[11px] font-mono">
                           {edition?.publishedAt
@@ -350,7 +350,7 @@ export default async function HomePage() {
                       <img src={edition.coverImageUrl} alt={edition.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <p className="font-['Barlow_Condensed'] font-bold text-[#1c2a3e] text-[12px]">MAGNUM</p>
+                        <p className="font-['Barlow_Condensed'] font-bold text-[#1c2a3e] text-[12px]">LAÚGO</p>
                       </div>
                     )}
                     <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[#0a0f1a] to-transparent" />

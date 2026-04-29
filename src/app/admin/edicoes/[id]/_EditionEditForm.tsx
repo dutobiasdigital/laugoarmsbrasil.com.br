@@ -635,7 +635,7 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
           <div className="lg:col-span-2">
             <label className={labelCls}>Caminho do PDF (Storage)</label>
             <input name="pdfStoragePath" defaultValue={edition.pdfStoragePath ?? ""}
-              placeholder="edicoes/207/revista-magnum-207.pdf" className={inputCls} />
+              placeholder="edicoes/207/laugo-arms-207.pdf" className={inputCls} />
           </div>
 
           {/* Editorial */}
@@ -827,7 +827,7 @@ export default function EditionEditForm({ edition, editorialPageUrls = [], index
             <div>
               <label className="block text-[#7a9ab5] text-[12px] font-semibold mb-1.5">URL Canônica</label>
               <input value={canonicalUrl} onChange={(e) => setCanonicalUrl(e.target.value)} className={inputCls}
-                placeholder="https://revistamagnum.com.br/edicoes/... (opcional)" />
+                placeholder="https://laugoarmsbrasil.com.br/edicoes/... (opcional)" />
             </div>
           </div>
         </div>

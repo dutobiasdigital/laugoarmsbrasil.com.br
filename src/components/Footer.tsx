@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 
 /* ── Social icon SVGs ─────────────────────────────────────────── */
@@ -115,7 +115,7 @@ export default async function Footer() {
             <div className="mb-3">
               <Image
                 src="/logo.png"
-                alt="Revista Magnum"
+                alt="Laúgo Arms Brasil"
                 width={160}
                 height={64}
                 className="h-[52px] w-auto object-contain"
@@ -193,7 +193,7 @@ export default async function Footer() {
         {/* ── Bottom bar ── */}
         <div className="border-t border-[#0e1520] pt-5 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-[11px] text-[#526888] text-center sm:text-left">
-            © {new Date().getFullYear()} Revista Magnum. Todos os direitos reservados.
+            © {new Date().getFullYear()} Laúgo Arms Brasil. Todos os direitos reservados.
           </p>
           <a
             href="https://arkelab.com.br"

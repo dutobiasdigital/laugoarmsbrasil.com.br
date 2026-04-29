@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Geist, Geist_Mono, Barlow_Condensed, Oswald, Bebas_Neue, Montserrat, Playfair_Display } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { CartProvider } from "@/contexts/CartContext";
@@ -21,8 +21,8 @@ const montserrat = Montserrat({ variable: "--font-montserrat", subsets: ["latin"
 const playfairDisplay = Playfair_Display({ variable: "--font-playfair-display", subsets: ["latin"], weight: ["400","600","700"] });
 
 export const metadata: Metadata = {
-  title: "Revista Magnum — O Mundo das Armas em Suas Mãos",
-  description: "O maior acervo de publicações especializadas em armas, munições e legislação do Brasil.",
+  title: "Laúgo Arms Brasil — Catálogo de Produtos",
+  description: "Catálogo oficial de produtos Laúgo Arms Brasil.",
   icons: { icon: "/logo.png" },
 };
 

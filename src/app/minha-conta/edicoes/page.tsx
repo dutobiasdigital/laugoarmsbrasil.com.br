@@ -1,9 +1,9 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: "Edições — Minha Conta · Revista Magnum",
+  title: "Edições — Minha Conta · Laúgo Arms Brasil",
 };
 export const dynamic = "force-dynamic";
 
@@ -112,7 +112,7 @@ export default async function EdicoesPage() {
                     <div className="w-full h-full flex flex-col items-center justify-center p-4">
                       <div className="w-px h-8 bg-[#ff1f1f] mb-3" />
                       <div className="text-[9px] font-bold tracking-widest text-white text-center mb-2">
-                        REVISTA MAGNUM
+                        Laúgo Arms Brasil
                       </div>
                       {edition.number && (
                         <div className="text-3xl font-bold text-[#1c2a3e]">{edition.number}</div>

@@ -44,10 +44,10 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { categoria } = await params;
   const cat = categoryBySlug(categoria);
-  if (!cat) return { title: "Categoria — Guia Magnum" };
+  if (!cat) return { title: "Categoria — Guia" };
   return {
-    title: `${cat.label} — Guia Comercial Magnum`,
-    description: `${cat.desc}. Encontre as melhores empresas de ${cat.label} no Brasil no Guia Comercial da Revista Magnum.`,
+    title: `${cat.label} — Guia Comercial Laúgo`,
+    description: `${cat.desc}. Encontre as melhores empresas de ${cat.label} no Brasil no Guia Comercial da Laúgo Arms Brasil.`,
   };
 }
 

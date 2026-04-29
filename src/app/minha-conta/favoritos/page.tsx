@@ -1,9 +1,9 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: "Meus Favoritos — Minha Conta · Revista Magnum",
+  title: "Meus Favoritos — Minha Conta · Laúgo Arms Brasil",
 };
 export const dynamic = "force-dynamic";
 

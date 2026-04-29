@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
@@ -215,7 +215,7 @@ export default function WelcomeBanner() {
       {/* ── Hashtag ───────────────────────────────────────────── */}
       <div className="absolute bottom-5 right-6 lg:right-10 z-10">
         <span className="text-[#1c2a3e] text-[11px] font-semibold tracking-[2px] uppercase">
-          #RevistaMagnum
+          #LaugoArmsBrasil
         </span>
       </div>
 

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -56,13 +56,13 @@ export async function generateMetadata({
   const { plano, edicao } = await searchParams;
   if (plano) {
     const plan = await getPlan(plano);
-    return { title: plan ? `Assinar ${plan.name} — Revista Magnum` : "Checkout — Revista Magnum" };
+    return { title: plan ? `Assinar ${plan.name} — Laúgo Arms Brasil` : "Checkout — Laúgo Arms Brasil" };
   }
   if (edicao) {
     const edition = await getEdition(edicao);
-    return { title: edition ? `Comprar Edição ${edition.number ?? edition.title} — Revista Magnum` : "Checkout — Revista Magnum" };
+    return { title: edition ? `Comprar Edição ${edition.number ?? edition.title} — Laúgo Arms Brasil` : "Checkout — Laúgo Arms Brasil" };
   }
-  return { title: "Checkout — Revista Magnum" };
+  return { title: "Checkout — Laúgo Arms Brasil" };
 }
 
 export default async function CheckoutPage({

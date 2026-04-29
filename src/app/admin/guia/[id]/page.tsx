@@ -146,7 +146,7 @@ export default function EditarEmpresaGuiaPage() {
     <>
       {/* Breadcrumb + header */}
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/guia" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">← Guia Magnum</Link>
+        <Link href="/admin/guia" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">← Guia</Link>
         <span className="text-[#141d2c]">/</span>
         <span className="text-[#d4d4da] text-[14px]">{company.tradeName}</span>
       </div>
@@ -161,7 +161,7 @@ export default function EditarEmpresaGuiaPage() {
         </div>
       </div>
 
-      <p className="text-[#7a9ab5] text-[14px] mb-6">Edite os dados da empresa no Guia Magnum.</p>
+      <p className="text-[#7a9ab5] text-[14px] mb-6">Edite os dados da empresa no Guia.</p>
       <div className="bg-[#141d2c] h-px mb-6" />
 
       {msg && (
@@ -290,7 +290,7 @@ export default function EditarEmpresaGuiaPage() {
           <textarea
             name="whatsappMessage" rows={3}
             defaultValue={company.whatsappMessage ?? ""}
-            placeholder="Ex: Olá! Vi sua empresa na Revista Magnum e gostaria de mais informações."
+            placeholder="Ex: Olá! Vi sua empresa na Laúgo Arms Brasil e gostaria de mais informações."
             className={areaCls}
           />
         </div>

@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -155,7 +155,7 @@ export default async function SolicitacoesPage() {
 
               {/* Ações rápidas */}
               <div className="px-5 pb-3 flex gap-2">
-                <a href={`mailto:${req.email}?subject=Proposta de Publicidade — Revista Magnum`}
+                <a href={`mailto:${req.email}?subject=Proposta de Publicidade — Laúgo Arms Brasil`}
                   className="text-[#ff1f1f] hover:text-white text-[11px] font-semibold transition-colors">
                   Responder por e-mail →
                 </a>

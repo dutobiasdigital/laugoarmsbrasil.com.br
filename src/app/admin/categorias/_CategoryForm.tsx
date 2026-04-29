@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -161,7 +161,7 @@ export default function CategoryForm({ mode, initial }: Props) {
     setName(val);
     if (mode === "create") {
       setSlug(slugify(val));
-      if (!metaTitle) setMetaTitle(`${val} | Revista Magnum`);
+      if (!metaTitle) setMetaTitle(`${val} | Laúgo Arms Brasil`);
     }
   }
 
@@ -297,7 +297,7 @@ export default function CategoryForm({ mode, initial }: Props) {
                 value={metaTitle}
                 onChange={(e) => setMetaTitle(e.target.value)}
                 className={inputCls}
-                placeholder="Ex: Tiro Esportivo | Blog Revista Magnum"
+                placeholder="Ex: Tiro Esportivo | Blog Laúgo Arms Brasil"
                 maxLength={70}
               />
               <p className="text-[#526888] text-[11px] mt-1">

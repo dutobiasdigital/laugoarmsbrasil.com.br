@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -65,7 +65,7 @@ const NAV: NavEntry[] = [
   ]},
   { type: "section", key: "planos",      label: "Planos",      icon: ICONS.layers,    children: [
     { href: "/admin/planos",        label: "Assinatura Online", exact: true },
-    { href: "/admin/planos/guia",   label: "Guia Magnum" },
+    { href: "/admin/planos/guia",   label: "Guia" },
     { href: "/admin/planos/banner", label: "Banners" },
   ]},
   { type: "section", key: "conteudos",   label: "Conteúdos",   icon: ICONS.document,  children: [

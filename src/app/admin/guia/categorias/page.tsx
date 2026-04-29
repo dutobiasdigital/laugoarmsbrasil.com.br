@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+﻿export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import GuiaCategoriasClient from "./_GuiaCategoriasClient";
@@ -57,7 +57,7 @@ export default async function GuiaCategoriasPage() {
         </h1>
       </div>
       <p className="text-[#7a9ab5] text-[14px] mb-6">
-        Gerencie as categorias de anunciantes do Guia Comercial Magnum
+        Gerencie as categorias de anunciantes do Guia Comercial
       </p>
       <div className="bg-[#141d2c] h-px mb-6" />
 

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
 
     const { error: uploadError } = await supabase.storage
-      .from("magnum-media")
+      .from("laugo-media")
       .upload(storagePath, buffer, {
         contentType: "image/jpeg",
         upsert: true,
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { data: urlData } = supabase.storage
-      .from("magnum-media")
+      .from("laugo-media")
       .getPublicUrl(storagePath);
 
     // Bust cache by appending a timestamp query param

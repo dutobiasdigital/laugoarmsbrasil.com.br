@@ -1,9 +1,9 @@
-import Header from "@/components/Header";
+﻿import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AnuncieForm from "./AnuncieForm";
 
 export const metadata = {
-  title: "Anuncie na Revista Magnum — Mídia Kit",
+  title: "Anuncie na Laúgo Arms Brasil — Mídia Kit",
   description:
     "Alcance 45 mil leitores qualificados por mês: atiradores CAC, colecionadores e profissionais de segurança. Confira nossos formatos e solicite uma proposta.",
 };
@@ -74,7 +74,7 @@ const FORMATS = [
     name: "Large Mobile Banner",
     size: "320 × 100 px",
     position: "Mobile — Topo",
-    desc: "Exibido exclusivamente em smartphones. Mais de 60% do tráfego Magnum é mobile.",
+    desc: "Exibido exclusivamente em smartphones. Mais de 60% do tráfego Laúgo Arms é mobile.",
     badge: "Mobile first",
     badgeColor: "bg-[#0a1e1e] text-[#22d3d3]",
     price: "R$ 800",
@@ -113,7 +113,7 @@ const FAQS = [
   { q: "Quais formatos de arquivo são aceitos?", a: "Aceitamos PNG, JPG e GIF animado com até 2 MB. Para vídeos (MP4 autoplay mudo) e formatos ricos, consulte nossa equipe comercial." },
   { q: "Como funciona a medição de resultados?", a: "Você acessa um painel exclusivo com impressões únicas por sessão, cliques e CTR em tempo real. Relatórios mensais são enviados automaticamente por e-mail." },
   { q: "Existe restrição de categoria?", a: "Aceitamos anunciantes do setor de armas, munições, equipamentos táticos, seguros, acessórios e serviços legalizados. Não veiculamos conteúdo ilegal ou categorias vedadas pela legislação brasileira." },
-  { q: "Como funciona a entrega do material?", a: "Após a assinatura do contrato, você envia os arquivos para publicidade@revistamagnum.com.br. O banner entra no ar em até 48 horas úteis." },
+  { q: "Como funciona a entrega do material?", a: "Após a assinatura do contrato, você envia os arquivos para publicidade@laugoarmsbrasil.com.br. O banner entra no ar em até 48 horas úteis." },
 ];
 
 /* ─── Componente ─────────────────────────────────────────────── */
@@ -146,7 +146,7 @@ export default function AnunciePage() {
               className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[15px] font-semibold h-[52px] px-8 flex items-center justify-center rounded-[6px] transition-colors">
               Solicitar proposta →
             </a>
-            <a href="https://wa.me/5511999999999?text=Ol%C3%A1%2C%20gostaria%20de%20informa%C3%A7%C3%B5es%20sobre%20publicidade%20na%20Revista%20Magnum."
+            <a href="https://wa.me/5511999999999?text=Ol%C3%A1%2C%20gostaria%20de%20informa%C3%A7%C3%B5es%20sobre%20publicidade%20na%20Revista%20Laúgo."
               className="bg-[#0e1520] border border-[#1c2a3e] hover:border-zinc-600 text-[#d4d4da] text-[15px] font-medium h-[52px] px-8 flex items-center justify-center rounded-[6px] transition-colors gap-2">
               <span>💬</span> WhatsApp comercial
             </a>
@@ -176,7 +176,7 @@ export default function AnunciePage() {
           <div className="bg-[#141d2c] h-px mb-12" />
           <p className="text-[#ff1f1f] text-[11px] font-semibold tracking-[1.5px] uppercase mb-2">Perfil do leitor</p>
           <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[42px] leading-none mb-10">
-            Quem são os leitores da Magnum
+            Quem são nossos clientes
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
@@ -360,7 +360,7 @@ export default function AnunciePage() {
                   </div>
                   <div>
                     <p className="text-[#d4d4da] text-[14px] font-semibold">E-mail comercial</p>
-                    <p className="text-[#526888] text-[13px]">publicidade@revistamagnum.com.br</p>
+                    <p className="text-[#526888] text-[13px]">publicidade@laugoarmsbrasil.com.br</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">

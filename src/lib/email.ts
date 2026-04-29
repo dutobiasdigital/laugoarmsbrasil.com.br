@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+﻿import nodemailer from "nodemailer";
 
 const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
@@ -53,7 +53,7 @@ function wrapHtml(title: string, body: string): string {
           <tr>
             <td style="background:#ff1f1f;padding:20px 32px;">
               <p style="margin:0;font-family:'Arial Black',Arial,sans-serif;font-size:22px;font-weight:900;color:#ffffff;letter-spacing:2px;">
-                REVISTA MAGNUM
+                Laúgo Arms Brasil
               </p>
             </td>
           </tr>
@@ -67,8 +67,8 @@ function wrapHtml(title: string, body: string): string {
           <tr>
             <td style="padding:20px 32px;border-top:1px solid #141d2c;">
               <p style="margin:0;font-size:11px;color:#526888;text-align:center;">
-                © Revista Magnum · <a href="https://revistamagnum.com.br" style="color:#526888;text-decoration:none;">revistamagnum.com.br</a>
-                <br>Dúvidas? <a href="mailto:publicidade@revistamagnum.com.br" style="color:#526888;">publicidade@revistamagnum.com.br</a>
+                © Laúgo Arms Brasil · <a href="https://laugoarmsbrasil.com.br" style="color:#526888;text-decoration:none;">laugoarmsbrasil.com.br</a>
+                <br>Dúvidas? <a href="mailto:publicidade@laugoarmsbrasil.com.br" style="color:#526888;">publicidade@laugoarmsbrasil.com.br</a>
               </p>
             </td>
           </tr>
@@ -92,7 +92,7 @@ export async function sendEmail({
   const cfg = await getSmtpConfig();
   const transporter = await createTransporter();
   await transporter.sendMail({
-    from:    `"${cfg["smtp.from_name"] || "Revista Magnum"}" <${cfg["smtp.from_email"] || cfg["smtp.user"]}>`,
+    from:    `"${cfg["smtp.from_name"] || "Laúgo Arms Brasil"}" <${cfg["smtp.from_email"] || cfg["smtp.user"]}>`,
     replyTo: cfg["smtp.reply_to"] || cfg["smtp.from_email"] || cfg["smtp.user"],
     to,
     subject,
@@ -132,20 +132,20 @@ export async function sendPaymentConfirmationEmail({
 
   const ctaBtn = guiaSlug
     ? `<tr><td style="padding-top:24px;text-align:center;">
-        <a href="https://revistamagnum.com.br/guia/empresa/${guiaSlug}"
+        <a href="https://laugoarmsbrasil.com.br/guia/empresa/${guiaSlug}"
            style="background:#ff1f1f;color:#ffffff;text-decoration:none;font-weight:bold;font-size:15px;padding:14px 32px;border-radius:6px;display:inline-block;">
           Ver meu perfil no Guia →
         </a>
        </td></tr>`
     : editionSlug
     ? `<tr><td style="padding-top:24px;text-align:center;">
-        <a href="https://revistamagnum.com.br/edicoes/${editionSlug}"
+        <a href="https://laugoarmsbrasil.com.br/edicoes/${editionSlug}"
            style="background:#ff1f1f;color:#ffffff;text-decoration:none;font-weight:bold;font-size:15px;padding:14px 32px;border-radius:6px;display:inline-block;">
           Ler a edição agora →
         </a>
        </td></tr>`
     : `<tr><td style="padding-top:24px;text-align:center;">
-        <a href="https://revistamagnum.com.br/minha-conta"
+        <a href="https://laugoarmsbrasil.com.br/minha-conta"
            style="background:#ff1f1f;color:#ffffff;text-decoration:none;font-weight:bold;font-size:15px;padding:14px 32px;border-radius:6px;display:inline-block;">
           Acessar Minha Conta →
         </a>
@@ -206,7 +206,7 @@ export async function sendPaymentConfirmationEmail({
   await sendEmail({
     to:      payerEmail,
     subject: `✅ Pagamento confirmado — ${productLabel}`,
-    html:    wrapHtml("Pagamento confirmado — Revista Magnum", body),
+    html:    wrapHtml("Pagamento confirmado — Laúgo Arms Brasil", body),
     text:    `Olá ${payerName}, seu pagamento de ${amountStr} para ${productLabel} foi aprovado! Referência: ${externalRef}`,
   });
 }
@@ -257,15 +257,15 @@ export async function sendWelcomeEmail({
   name, email,
 }: { name: string; email: string }): Promise<void> {
   const fb = {
-    subject: "Bem-vindo à Revista Magnum, {{nome}}!",
-    body: `Olá, {{nome}}!\n\nSeja bem-vindo à Revista Magnum.\n\nSua conta foi criada com sucesso. Explore nossos planos de assinatura.\n\nEquipe Revista Magnum`,
+    subject: "Bem-vindo à Laúgo Arms Brasil, {{nome}}!",
+    body: `Olá, {{nome}}!\n\nSeja bem-vindo à Laúgo Arms Brasil.\n\nSua conta foi criada com sucesso. Explore nossos planos de assinatura.\n\nEquipe Laúgo Arms Brasil`,
   };
   const tpl  = await getEmailTemplate("boas_vindas", fb.subject, fb.body);
   const vars = { nome: name, email, data: new Date().toLocaleDateString("pt-BR") };
   await sendEmail({
     to:      email,
     subject: renderTemplate(tpl.subject, vars),
-    html:    wrapHtml("Boas-vindas — Revista Magnum", textToHtml(renderTemplate(tpl.body, vars))),
+    html:    wrapHtml("Boas-vindas — Laúgo Arms Brasil", textToHtml(renderTemplate(tpl.body, vars))),
     text:    renderTemplate(tpl.body, vars),
   });
 }
@@ -279,7 +279,7 @@ export async function sendPlanExpiringEmail({
   const days = Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 86_400_000));
   const fb   = {
     subject: "⚠ Sua assinatura expira em {{dias_restantes}} dias",
-    body:    `Olá, {{nome}}!\n\nSua assinatura {{plano}} expira em {{dias_restantes}} dias ({{data_expiracao}}).\n\nRenove agora: https://revistamagnum.com.br/assine\n\nEquipe Revista Magnum`,
+    body:    `Olá, {{nome}}!\n\nSua assinatura {{plano}} expira em {{dias_restantes}} dias ({{data_expiracao}}).\n\nRenove agora: https://laugoarmsbrasil.com.br/assine\n\nEquipe Laúgo Arms Brasil`,
   };
   const tpl  = await getEmailTemplate("plano_expirando", fb.subject, fb.body);
   const vars = {
@@ -289,12 +289,12 @@ export async function sendPlanExpiringEmail({
     valor:           (priceInCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
     data_expiracao:  new Date(expiresAt).toLocaleDateString("pt-BR"),
     dias_restantes:  String(days),
-    link_renovacao:  "https://revistamagnum.com.br/assine",
+    link_renovacao:  "https://laugoarmsbrasil.com.br/assine",
   };
   await sendEmail({
     to:      email,
     subject: renderTemplate(tpl.subject, vars),
-    html:    wrapHtml("Assinatura expirando — Revista Magnum", textToHtml(renderTemplate(tpl.body, vars))),
+    html:    wrapHtml("Assinatura expirando — Laúgo Arms Brasil", textToHtml(renderTemplate(tpl.body, vars))),
     text:    renderTemplate(tpl.body, vars),
   });
 }
@@ -305,14 +305,14 @@ export async function sendSubscriptionCancelledEmail({
 }: { name: string; email: string; planName: string }): Promise<void> {
   const fb = {
     subject: "Sua assinatura foi cancelada",
-    body:    `Olá, {{nome}}!\n\nSua assinatura {{plano}} foi encerrada em {{data_cancelamento}}.\n\nPara reativar: https://revistamagnum.com.br/assine\n\nEquipe Revista Magnum`,
+    body:    `Olá, {{nome}}!\n\nSua assinatura {{plano}} foi encerrada em {{data_cancelamento}}.\n\nPara reativar: https://laugoarmsbrasil.com.br/assine\n\nEquipe Laúgo Arms Brasil`,
   };
   const tpl  = await getEmailTemplate("assinatura_cancelada", fb.subject, fb.body);
   const vars = { nome: name, email, plano: planName, data_cancelamento: new Date().toLocaleDateString("pt-BR") };
   await sendEmail({
     to:      email,
     subject: renderTemplate(tpl.subject, vars),
-    html:    wrapHtml("Assinatura cancelada — Revista Magnum", textToHtml(renderTemplate(tpl.body, vars))),
+    html:    wrapHtml("Assinatura cancelada — Laúgo Arms Brasil", textToHtml(renderTemplate(tpl.body, vars))),
     text:    renderTemplate(tpl.body, vars),
   });
 }
@@ -330,8 +330,8 @@ export async function sendPasswordResetEmail({
   const displayName = name || email.split("@")[0];
 
   const fb = {
-    subject: "Redefinição de senha — Revista Magnum",
-    body: `Olá, {{nome}}!\n\nRecebemos uma solicitação para redefinir a senha da sua conta na Revista Magnum.\n\nClique no botão abaixo para criar uma nova senha. O link é válido por 24 horas.\n\nSe você não solicitou a redefinição de senha, ignore este e-mail com segurança.\n\nEquipe Revista Magnum`,
+    subject: "Redefinição de senha — Laúgo Arms Brasil",
+    body: `Olá, {{nome}}!\n\nRecebemos uma solicitação para redefinir a senha da sua conta na Laúgo Arms Brasil.\n\nClique no botão abaixo para criar uma nova senha. O link é válido por 24 horas.\n\nSe você não solicitou a redefinição de senha, ignore este e-mail com segurança.\n\nEquipe Laúgo Arms Brasil`,
   };
 
   const tpl  = await getEmailTemplate("recuperacao_senha", fb.subject, fb.body);
@@ -379,7 +379,7 @@ export async function sendPasswordResetEmail({
   await sendEmail({
     to:      email,
     subject: renderTemplate(tpl.subject, vars),
-    html:    wrapHtml("Redefinição de senha — Revista Magnum", bodyHtml),
+    html:    wrapHtml("Redefinição de senha — Laúgo Arms Brasil", bodyHtml),
     text:    `Olá ${displayName}, acesse este link para redefinir sua senha: ${resetLink} (válido por 24h)`,
   });
 }
@@ -390,7 +390,7 @@ export async function sendTestEmail(to: string, templateId?: string): Promise<vo
     const MOCK: Record<string, Record<string, string>> = {
       boas_vindas:          { nome: "João Teste", email: to, data: new Date().toLocaleDateString("pt-BR") },
       pagamento_confirmado: { nome: "João Teste", email: to, produto: "Assinatura Semestral", valor: "R$ 54,90", gateway: "Mercado Pago", referencia: "TEST-123456" },
-      plano_expirando:      { nome: "João Teste", email: to, plano: "Semestral", valor: "R$ 54,90", data_expiracao: new Date(Date.now() + 7 * 86400000).toLocaleDateString("pt-BR"), dias_restantes: "7", link_renovacao: "https://revistamagnum.com.br/assine" },
+      plano_expirando:      { nome: "João Teste", email: to, plano: "Semestral", valor: "R$ 54,90", data_expiracao: new Date(Date.now() + 7 * 86400000).toLocaleDateString("pt-BR"), dias_restantes: "7", link_renovacao: "https://laugoarmsbrasil.com.br/assine" },
       assinatura_cancelada: { nome: "João Teste", email: to, plano: "Semestral", data_cancelamento: new Date().toLocaleDateString("pt-BR") },
     };
     const FALLBACKS: Record<string, { subject: string; body: string }> = {
@@ -421,8 +421,8 @@ export async function sendTestEmail(to: string, templateId?: string): Promise<vo
   `;
   await sendEmail({
     to,
-    subject: "✅ Teste de e-mail — Revista Magnum",
-    html:    wrapHtml("Teste de e-mail — Revista Magnum", body),
-    text:    "E-mail de teste da Revista Magnum. SMTP configurado corretamente.",
+    subject: "✅ Teste de e-mail — Laúgo Arms Brasil",
+    html:    wrapHtml("Teste de e-mail — Laúgo Arms Brasil", body),
+    text:    "E-mail de teste da Laúgo Arms Brasil. SMTP configurado corretamente.",
   });
 }

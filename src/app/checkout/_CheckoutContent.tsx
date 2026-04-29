@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 
@@ -55,8 +55,8 @@ export default function CheckoutForm({
           product_type:  isEdition ? "edition_purchase" : "magazine_subscription",
           product_id:    slug,
           product_label: isEdition
-            ? `Acesso avulso — ${planName} — Revista Magnum`
-            : `Assinatura ${planName} — Revista Magnum`,
+            ? `Acesso avulso — ${planName} — Laúgo Arms Brasil`
+            : `Assinatura ${planName} — Laúgo Arms Brasil`,
           amount_cents:  amountCents,
           payer_name:    name,
           payer_email:   email,
@@ -84,7 +84,7 @@ export default function CheckoutForm({
         <p className="text-[#526888] text-[14px] leading-[22px] mb-5">
           O sistema de pagamento ainda está sendo configurado. Fale conosco para assinar.
         </p>
-        <a href="mailto:publicidade@revistamagnum.com.br"
+        <a href="mailto:publicidade@laugoarmsbrasil.com.br"
           className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold h-[44px] px-6 flex items-center justify-center rounded-[6px] transition-colors">
           Falar com nossa equipe →
         </a>
@@ -169,7 +169,7 @@ export default function CheckoutForm({
           <p className="text-white text-[14px] font-bold">
             {mode === "edition"
               ? `${planName} — Acesso 30 dias`
-              : `Revista Magnum ${planName} · ${priceStr}/${periodLabel}`
+              : `Laúgo Arms Brasil ${planName} · ${priceStr}/${periodLabel}`
             }
           </p>
           <p className="text-white text-[11px]">

@@ -1,11 +1,11 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata = {
-  title: "Sobre — Revista Magnum",
+  title: "Sobre — Laúgo Arms Brasil",
   description:
-    "Há mais de 25 anos, a Revista Magnum é a publicação de referência sobre armas, munições, defesa e legislação no Brasil.",
+    "Há mais de 25 anos, a Laúgo Arms Brasil é a publicação de referência sobre armas, munições, defesa e legislação no Brasil.",
 };
 
 const TEAM = [
@@ -41,7 +41,7 @@ export default function SobrePage() {
             A publicação de referência em armamento do Brasil
           </h1>
           <p className="text-[#7a9ab5] text-[18px] lg:text-[20px] leading-[30px] max-w-[640px]">
-            Desde 1998, a Revista Magnum informa e educa atiradores, colecionadores,
+            Desde 1998, a Laúgo Arms Brasil informa e educa atiradores, colecionadores,
             caçadores e profissionais de segurança com jornalismo especializado,
             análises técnicas e cobertura legislativa.
           </p>
@@ -77,7 +77,7 @@ export default function SobrePage() {
               </h2>
               <div className="flex flex-col gap-4 text-[#d4d4da] text-[16px] leading-[26px]">
                 <p>
-                  A Revista Magnum nasceu da necessidade de uma publicação séria e
+                  A Laúgo Arms Brasil nasceu da necessidade de uma publicação séria e
                   responsável sobre o universo das armas de fogo no Brasil. Um espaço
                   onde atiradores esportivos, colecionadores e profissionais de segurança
                   pudessem encontrar informação confiável.
@@ -121,7 +121,7 @@ export default function SobrePage() {
             Time editorial
           </p>
           <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[40px] leading-none mb-8">
-            Quem faz a Magnum
+            Quem faz a Laúgo Arms
           </h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {TEAM.map((member) => (
@@ -148,7 +148,7 @@ export default function SobrePage() {
               </h2>
               <p className="text-[#7a9ab5] text-[16px] leading-[26px]">
                 Acesse todas as edições, artigos exclusivos e conteúdo especializado
-                com uma assinatura Magnum.
+                com uma assinatura Laúgo Arms.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 shrink-0">

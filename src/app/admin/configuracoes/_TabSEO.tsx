@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { saveSettings, inputCls, labelCls, areaCls, selectCls } from "./_ConfiguracoesClient";
@@ -49,7 +49,7 @@ Disallow: /checkout
 Disallow: /conta
 Disallow: /loja/carrinho
 
-Sitemap: ${base || "https://revistamagnum.com.br"}/sitemap.xml`,
+Sitemap: ${base || "https://laugoarmsbrasil.com.br"}/sitemap.xml`,
 
   staging:
 `User-agent: *
@@ -163,7 +163,7 @@ export default function TabSEO({ settings }: Props) {
 
   const descLen = values["site.description"]?.length ?? 0;
   const descOk  = descLen >= 120 && descLen <= 160;
-  const canonBase = values["seo.canonical_base"] || "https://revistamagnum.com.br";
+  const canonBase = values["seo.canonical_base"] || "https://laugoarmsbrasil.com.br";
 
   /* robots.txt warnings */
   const robotsTxt = values["seo.robots_txt"] ?? "";
@@ -223,7 +223,7 @@ export default function TabSEO({ settings }: Props) {
               <div>
                 <label className={labelCls}>Nome do Site *</label>
                 <input value={values["site.name"]} onChange={e => set("site.name", e.target.value)}
-                  placeholder="Revista Magnum" className={inputCls} required />
+                  placeholder="Laúgo Arms Brasil" className={inputCls} required />
               </div>
               <div>
                 <label className={labelCls}>Slogan / Tagline</label>
@@ -351,7 +351,7 @@ export default function TabSEO({ settings }: Props) {
             <div>
               <label className={labelCls}>URL canônica base do site</label>
               <input value={values["seo.canonical_base"]} onChange={e => set("seo.canonical_base", e.target.value)}
-                placeholder="https://revistamagnum.com.br" type="url" className={inputCls} />
+                placeholder="https://laugoarmsbrasil.com.br" type="url" className={inputCls} />
               <p className="text-[#526888] text-[11px] mt-1">Sem barra no final. Usada para gerar canonicals e sitemap.</p>
             </div>
 

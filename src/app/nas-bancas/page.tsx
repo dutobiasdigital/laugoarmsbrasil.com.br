@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { notFound } from "next/navigation";
@@ -6,8 +6,8 @@ import { notFound } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Nas Bancas — Revista Magnum",
-  description: "Confira a edição atual da Revista Magnum disponível nas bancas.",
+  title: "Nas Bancas — Laúgo Arms Brasil",
+  description: "Confira a edição atual da Laúgo Arms Brasil disponível nas bancas.",
 };
 
 const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
@@ -63,7 +63,7 @@ export default async function NasBancasPage() {
               Nas Bancas
             </h1>
             <p className="text-[#7a9ab5] text-[16px] max-w-[560px]">
-              A edição mais recente da Revista Magnum, disponível nas bancas e na plataforma digital.
+              A edição mais recente da Laúgo Arms Brasil, disponível nas bancas e na plataforma digital.
             </p>
           </div>
         </div>
@@ -109,7 +109,7 @@ export default async function NasBancasPage() {
                       ) : (
                         <div className={`w-full h-full flex items-center justify-center ${isSpecial ? "bg-[#cc0000]/20" : "bg-white/5"}`}>
                           <p className="font-['Barlow_Condensed'] font-extrabold text-[48px] text-white/20">
-                            {edition.number ? `Nº ${edition.number}` : "MAGNUM"}
+                            {edition.number ? `Nº ${edition.number}` : "LAÚGO"}
                           </p>
                         </div>
                       )}

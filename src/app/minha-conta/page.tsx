@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
@@ -126,7 +126,7 @@ export default async function MinhaContaPage() {
           Olá, {firstName}
         </h1>
         <p className="text-[#7a9ab5] text-[15px]">
-          Bem-vindo ao seu painel de controle da Revista Magnum.
+          Bem-vindo ao seu painel de controle da Laúgo Arms Brasil.
         </p>
       </section>
 

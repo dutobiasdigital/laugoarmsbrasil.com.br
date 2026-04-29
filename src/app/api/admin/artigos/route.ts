@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 
 const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     const slug = (body.slug as string) || toSlug(title);
     const excerpt = (body.excerpt as string) || null;
     const content = (body.content as string) || "";
-    const authorName = (body.authorName as string) || "Redação Magnum";
+    const authorName = (body.authorName as string) || "Redação Laúgo";
     const featureImageUrl = (body.featureImageUrl as string) || null;
     const categoryId = body.categoryId as string;
     const isExclusive = body.isExclusive === "on" || body.isExclusive === true || body.isExclusive === "true";
@@ -68,7 +68,7 @@ export async function PUT(req: NextRequest) {
     const slug = body.slug as string;
     const excerpt = (body.excerpt as string) || null;
     const content = (body.content as string) || "";
-    const authorName = (body.authorName as string) || "Redação Magnum";
+    const authorName = (body.authorName as string) || "Redação Laúgo";
     const featureImageUrl = (body.featureImageUrl as string) || null;
     const featureImageAlt = (body.featureImageAlt as string) || null;
     const categoryId = body.categoryId as string;

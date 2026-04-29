@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { saveSettings } from "./_ConfiguracoesClient";
@@ -21,17 +21,17 @@ const TEMPLATES = [
     label:    "Boas-vindas",
     icon:     "🎉",
     desc:     "Enviado quando um novo usuário se cadastra.",
-    subject:  "Bem-vindo à Revista Magnum, {{nome}}!",
+    subject:  "Bem-vindo à Laúgo Arms Brasil, {{nome}}!",
     body:     `Olá, {{nome}}!
 
-Seja bem-vindo à Revista Magnum — o maior acervo sobre armamento civil do Brasil.
+Seja bem-vindo à Laúgo Arms Brasil — o maior acervo sobre armamento civil do Brasil.
 
 Sua conta foi criada com sucesso. Agora você pode explorar nossa plataforma e assinar um de nossos planos para acessar mais de 200 edições completas.
 
 Qualquer dúvida, estamos à disposição.
 
 Até logo,
-Equipe Revista Magnum`,
+Equipe Laúgo Arms Brasil`,
   },
   {
     id:       "pagamento_confirmado",
@@ -48,9 +48,9 @@ Valor:   {{valor}}
 Gateway: {{gateway}}
 Ref.:    {{referencia}}
 
-Aproveite seu acesso ao acervo completo da Revista Magnum.
+Aproveite seu acesso ao acervo completo da Laúgo Arms Brasil.
 
-Equipe Revista Magnum`,
+Equipe Laúgo Arms Brasil`,
   },
   {
     id:       "plano_expirando",
@@ -62,13 +62,13 @@ Equipe Revista Magnum`,
 
 Sua assinatura {{plano}} expira em {{dias_restantes}} dias ({{data_expiracao}}).
 
-Para continuar tendo acesso ao acervo completo da Revista Magnum, renove sua assinatura:
+Para continuar tendo acesso ao acervo completo da Laúgo Arms Brasil, renove sua assinatura:
 
 {{link_renovacao}}
 
 Qualquer dúvida, entre em contato conosco.
 
-Equipe Revista Magnum`,
+Equipe Laúgo Arms Brasil`,
   },
   {
     id:       "assinatura_cancelada",
@@ -82,9 +82,9 @@ Sua assinatura {{plano}} foi encerrada em {{data_cancelamento}}.
 
 Sentimos muito ver você partir. Se desejar reativar sua assinatura, acesse:
 
-https://revistamagnum.com.br/assine
+https://laugoarmsbrasil.com.br/assine
 
-Equipe Revista Magnum`,
+Equipe Laúgo Arms Brasil`,
   },
 ];
 
@@ -250,7 +250,7 @@ export default function TabEmailTemplates({ settings }: Props) {
               placeholder="Corpo do e-mail em texto simples. Use {{variavel}} para dados dinâmicos..."
             />
             <p className="text-white text-[11px] mt-1">
-              O e-mail será enviado em HTML com o layout padrão da Revista Magnum.
+              O e-mail será enviado em HTML com o layout padrão da Laúgo Arms Brasil.
               Quebras de linha são preservadas.
             </p>
           </div>

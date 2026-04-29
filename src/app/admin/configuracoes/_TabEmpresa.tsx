@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { saveSettings, inputCls, labelCls, areaCls, selectCls } from "./_ConfiguracoesClient";
@@ -122,7 +122,7 @@ function TabDados({ settings }: Props) {
             <input
               value={values["site.name"]}
               onChange={(e) => set("site.name", e.target.value)}
-              placeholder="Revista Magnum"
+              placeholder="Laúgo Arms Brasil"
               className={inputCls}
             />
           </div>
@@ -141,7 +141,7 @@ function TabDados({ settings }: Props) {
           <input
             value={values["site.domain"]}
             onChange={(e) => set("site.domain", e.target.value)}
-            placeholder="https://www.revistamagnum.com.br"
+            placeholder="https://www.laugoarmsbrasil.com.br"
             type="url"
             className={inputCls}
           />
@@ -162,7 +162,7 @@ function TabDados({ settings }: Props) {
             <input
               value={values["empresa.razao_social"]}
               onChange={(e) => set("empresa.razao_social", e.target.value)}
-              placeholder="Editora Magnum Ltda"
+              placeholder="Laúgo Arms Brasil Ltda"
               className={inputCls}
             />
           </div>
@@ -257,7 +257,7 @@ function TabDados({ settings }: Props) {
               value={values["empresa.email_geral"]}
               onChange={(e) => set("empresa.email_geral", e.target.value)}
               type="email"
-              placeholder="contato@revistamagnum.com.br"
+              placeholder="contato@laugoarmsbrasil.com.br"
               className={inputCls}
             />
           </div>
@@ -267,7 +267,7 @@ function TabDados({ settings }: Props) {
               value={values["empresa.email_comercial"]}
               onChange={(e) => set("empresa.email_comercial", e.target.value)}
               type="email"
-              placeholder="publicidade@revistamagnum.com.br"
+              placeholder="publicidade@laugoarmsbrasil.com.br"
               className={inputCls}
             />
           </div>
@@ -277,7 +277,7 @@ function TabDados({ settings }: Props) {
               value={values["empresa.email_suporte"]}
               onChange={(e) => set("empresa.email_suporte", e.target.value)}
               type="email"
-              placeholder="suporte@revistamagnum.com.br"
+              placeholder="suporte@laugoarmsbrasil.com.br"
               className={inputCls}
             />
           </div>
@@ -332,7 +332,7 @@ function TabDados({ settings }: Props) {
             value={values["empresa.copyright"]}
             onChange={(e) => set("empresa.copyright", e.target.value)}
             rows={2}
-            placeholder={`© ${new Date().getFullYear()} Revista Magnum. Todos os direitos reservados.`}
+            placeholder={`© ${new Date().getFullYear()} Laúgo Arms Brasil. Todos os direitos reservados.`}
             className={areaCls}
           />
         </div>
@@ -552,7 +552,7 @@ function TabDesign({ settings }: Props) {
         <div className="bg-[#141d2c] rounded-[8px] p-4 flex flex-col gap-2">
           <p className="text-[#526888] text-[11px] font-semibold uppercase tracking-wide">Pré-visualização</p>
           <p className={`${fontClass} font-bold text-white text-[32px] leading-tight`}>
-            Revista Magnum — Título H1
+            Laúgo Arms Brasil — Título H1
           </p>
           <p className={`${fontClass} font-bold text-[#7a9ab5] text-[20px]`}>
             Sub-heading e destaques com {fontLabel}

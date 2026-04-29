@@ -24,7 +24,7 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   return {
-    title: `Lendo edição — Revista Magnum`,
+    title: `Lendo edição — Laúgo Arms Brasil`,
     robots: "noindex, nofollow",
     other: { slug },
   };

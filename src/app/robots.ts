@@ -1,8 +1,8 @@
-import type { MetadataRoute } from "next";
+﻿import type { MetadataRoute } from "next";
 
 const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-const BASE_URL = "https://revistamagnum.com.br";
+const BASE_URL = "https://laugoarmsbrasil.com.br";
 
 async function getSeoSettings(): Promise<Record<string, string>> {
   try {

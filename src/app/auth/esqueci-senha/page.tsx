@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState } from "react";
 import { forgotPassword } from "@/actions/auth";
@@ -12,7 +12,7 @@ export default function EsqueciSenhaPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="text-2xl font-bold tracking-widest text-white mb-1 font-['Barlow_Condensed']">
-            REVISTA MAGNUM
+            Laúgo Arms Brasil
           </div>
           <div className="text-xs text-zinc-500 tracking-[0.2em] uppercase">
             Recuperar senha

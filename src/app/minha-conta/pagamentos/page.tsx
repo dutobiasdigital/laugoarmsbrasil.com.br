@@ -1,8 +1,8 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: "Pagamentos — Minha Conta · Revista Magnum",
+  title: "Pagamentos — Minha Conta · Laúgo Arms Brasil",
 };
 export const dynamic = "force-dynamic";
 

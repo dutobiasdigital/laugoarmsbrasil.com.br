@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -114,7 +114,7 @@ export default function NovaEdicaoPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
           <div className="lg:col-span-2">
             <label className={labelCls}>Título *</label>
-            <input name="title" required placeholder="Ex: Revista Magnum Nº 207" className={inputCls} />
+            <input name="title" required placeholder="Ex: Laúgo Arms Brasil Nº 207" className={inputCls} />
           </div>
           <div>
             <label className={labelCls}>Slug (URL)</label>
@@ -145,7 +145,7 @@ export default function NovaEdicaoPage() {
           </div>
           <div className="lg:col-span-2">
             <label className={labelCls}>Caminho do PDF (Storage)</label>
-            <input name="pdfStoragePath" placeholder="edicoes/207/revista-magnum-207.pdf" className={inputCls} />
+            <input name="pdfStoragePath" placeholder="edicoes/207/laugo-arms-207.pdf" className={inputCls} />
           </div>
           <div className="lg:col-span-2">
             <label className={labelCls}>Editorial / Descrição</label>

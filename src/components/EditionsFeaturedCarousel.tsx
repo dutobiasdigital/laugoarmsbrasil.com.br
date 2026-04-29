@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRef } from "react";
@@ -78,7 +78,7 @@ export default function EditionsFeaturedCarousel({ editions }: { editions: Editi
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-[#1c2a3e]">
                     <p className="font-['Barlow_Condensed'] font-bold text-[18px]">
-                      {ed.number ? `Nº ${ed.number}` : "MAGNUM"}
+                      {ed.number ? `Nº ${ed.number}` : "LAÚGO"}
                     </p>
                   </div>
                 )}

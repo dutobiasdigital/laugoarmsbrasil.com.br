@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { saveSettings, inputCls, labelCls, areaCls } from "./_ConfiguracoesClient";
@@ -241,7 +241,7 @@ function TabEcommerce({ settings }: Props) {
               value={values["editorial.mensagem_paywall"]}
               onChange={(e) => set("editorial.mensagem_paywall", e.target.value)}
               rows={3}
-              placeholder="Este conteúdo é exclusivo para assinantes. Assine agora e tenha acesso ilimitado à Revista Magnum."
+              placeholder="Este conteúdo é exclusivo para assinantes. Assine agora e tenha acesso ilimitado à Laúgo Arms Brasil."
               className={areaCls}
             />
           </div>

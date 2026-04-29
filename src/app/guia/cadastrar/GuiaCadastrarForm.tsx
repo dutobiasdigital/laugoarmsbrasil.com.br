@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -186,7 +186,7 @@ export default function GuiaCadastrarForm() {
         <div>
           <p className="text-[#d4d4da] text-[13px] font-semibold mb-0.5">Cadastro gratuito — plano FREE</p>
           <p className="text-[#526888] text-[12px]">
-            Seu cadastro será publicado no plano gratuito após aprovação manual. Para planos Premium (R$ 79/mês) ou Destaque (R$ 149/mês) com mais visibilidade, entre em contato: <a href="mailto:publicidade@revistamagnum.com.br" className="text-[#7a9ab5] hover:text-white transition-colors">publicidade@revistamagnum.com.br</a>
+            Seu cadastro será publicado no plano gratuito após aprovação manual. Para planos Premium (R$ 79/mês) ou Destaque (R$ 149/mês) com mais visibilidade, entre em contato: <a href="mailto:publicidade@laugoarmsbrasil.com.br" className="text-[#7a9ab5] hover:text-white transition-colors">publicidade@laugoarmsbrasil.com.br</a>
           </p>
         </div>
       </div>

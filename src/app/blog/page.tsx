@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CategoryViewTracker from "@/components/CategoryViewTracker";
@@ -8,7 +8,7 @@ import { getModuleConfig } from "@/lib/module-settings";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Blog — Revista Magnum",
+  title: "Blog — Laúgo Arms Brasil",
   description: "Artigos, avaliações e análises sobre armas, munições e legislação.",
 };
 

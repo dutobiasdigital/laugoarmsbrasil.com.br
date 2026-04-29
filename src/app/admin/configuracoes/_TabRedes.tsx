@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { saveSettings, inputCls, labelCls } from "./_ConfiguracoesClient";
@@ -6,14 +6,14 @@ import { saveSettings, inputCls, labelCls } from "./_ConfiguracoesClient";
 interface Props { settings: Record<string, string>; }
 
 const REDES = [
-  { key: "social.instagram",  label: "Instagram",  icon: "📸", placeholder: "https://instagram.com/revistamagnum",   hint: "URL completa do perfil" },
-  { key: "social.facebook",   label: "Facebook",   icon: "👤", placeholder: "https://facebook.com/revistamagnum",    hint: "URL completa da página" },
-  { key: "social.youtube",    label: "YouTube",    icon: "▶️", placeholder: "https://youtube.com/@revistamagnum",   hint: "URL do canal" },
-  { key: "social.tiktok",     label: "TikTok",     icon: "🎵", placeholder: "https://tiktok.com/@revistamagnum",    hint: "URL do perfil" },
-  { key: "social.twitter",    label: "X / Twitter",icon: "🐦", placeholder: "https://x.com/revistamagnum",          hint: "URL do perfil" },
-  { key: "social.linkedin",   label: "LinkedIn",   icon: "💼", placeholder: "https://linkedin.com/company/magnum",  hint: "URL da página da empresa" },
-  { key: "social.pinterest",  label: "Pinterest",  icon: "📌", placeholder: "https://pinterest.com/revistamagnum",  hint: "URL do perfil" },
-  { key: "social.telegram",   label: "Telegram",   icon: "✈️", placeholder: "https://t.me/revistamagnum",           hint: "Link do canal ou grupo" },
+  { key: "social.instagram",  label: "Instagram",  icon: "📸", placeholder: "https://instagram.com/laugoarmsbrasil",   hint: "URL completa do perfil" },
+  { key: "social.facebook",   label: "Facebook",   icon: "👤", placeholder: "https://facebook.com/laugoarmsbrasil",    hint: "URL completa da página" },
+  { key: "social.youtube",    label: "YouTube",    icon: "▶️", placeholder: "https://youtube.com/@laugoarmsbrasil",   hint: "URL do canal" },
+  { key: "social.tiktok",     label: "TikTok",     icon: "🎵", placeholder: "https://tiktok.com/@laugoarmsbrasil",    hint: "URL do perfil" },
+  { key: "social.twitter",    label: "X / Twitter",icon: "🐦", placeholder: "https://x.com/laugoarmsbrasil",          hint: "URL do perfil" },
+  { key: "social.linkedin",   label: "LinkedIn",   icon: "💼", placeholder: "https://linkedin.com/company/laugoarmsbrasil",  hint: "URL da página da empresa" },
+  { key: "social.pinterest",  label: "Pinterest",  icon: "📌", placeholder: "https://pinterest.com/laugoarmsbrasil",  hint: "URL do perfil" },
+  { key: "social.telegram",   label: "Telegram",   icon: "✈️", placeholder: "https://t.me/laugoarmsbrasil",           hint: "Link do canal ou grupo" },
   { key: "social.whatsapp",   label: "WhatsApp (número para botão)",icon: "💬", placeholder: "5511999999999",        hint: "Apenas números com DDI+DDD, sem espaços ou símbolos" },
 ];
 

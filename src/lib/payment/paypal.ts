@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PayPal Checkout Orders API v2
  * Ref: https://developer.paypal.com/api/orders/v2/
  */
@@ -55,7 +55,7 @@ export async function createPayPalOrder(
       },
     }],
     application_context: {
-      brand_name:          "Revista Magnum",
+      brand_name:          "Laúgo Arms Brasil",
       landing_page:        "NO_PREFERENCE",
       user_action:         "PAY_NOW",
       return_url:          params.returnUrl,

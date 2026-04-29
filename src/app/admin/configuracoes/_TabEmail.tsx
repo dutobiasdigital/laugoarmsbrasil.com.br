@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { saveSettings, inputCls, labelCls, selectCls } from "./_ConfiguracoesClient";
@@ -99,7 +99,7 @@ export default function TabEmail({ settings }: Props) {
         <div>
           <label className={labelCls}>Usuário (e-mail de login)</label>
           <input value={values["smtp.user"]} onChange={e => set("smtp.user", e.target.value)}
-            type="email" placeholder="noreply@revistamagnum.com.br" className={inputCls} />
+            type="email" placeholder="noreply@laugoarmsbrasil.com.br" className={inputCls} />
         </div>
         <div>
           <label className={labelCls}>Senha</label>
@@ -123,17 +123,17 @@ export default function TabEmail({ settings }: Props) {
           <div>
             <label className={labelCls}>Nome do Remetente</label>
             <input value={values["smtp.from_name"]} onChange={e => set("smtp.from_name", e.target.value)}
-              placeholder="Revista Magnum" className={inputCls} />
+              placeholder="Laúgo Arms Brasil" className={inputCls} />
           </div>
           <div>
             <label className={labelCls}>E-mail Remetente (From)</label>
             <input value={values["smtp.from_email"]} onChange={e => set("smtp.from_email", e.target.value)}
-              type="email" placeholder="noreply@revistamagnum.com.br" className={inputCls} />
+              type="email" placeholder="noreply@laugoarmsbrasil.com.br" className={inputCls} />
           </div>
           <div>
             <label className={labelCls}>E-mail de Resposta (Reply-To)</label>
             <input value={values["smtp.reply_to"]} onChange={e => set("smtp.reply_to", e.target.value)}
-              type="email" placeholder="contato@revistamagnum.com.br" className={inputCls} />
+              type="email" placeholder="contato@laugoarmsbrasil.com.br" className={inputCls} />
           </div>
         </div>
       </section>

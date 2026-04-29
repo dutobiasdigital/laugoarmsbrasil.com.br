@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FeaturedCarousel from "@/components/loja/FeaturedCarousel";
@@ -11,7 +11,7 @@ const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
 const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
 
 export const metadata = {
-  title: "Loja — Revista Magnum",
+  title: "Loja — Laúgo Arms Brasil",
   description: "Livros técnicos, acessórios e produtos especializados do mundo das armas.",
 };
 
@@ -134,7 +134,7 @@ export default async function LojaPage() {
               </div>
               <h1 className="font-['Barlow_Condensed'] font-extrabold leading-[0.95]">
                 <span className="text-[#dce8ff] text-[56px] lg:text-[80px] block">Loja</span>
-                <span className="text-[#ff1f1f] text-[56px] lg:text-[80px] block">Magnum</span>
+                <span className="text-[#ff1f1f] text-[56px] lg:text-[80px] block">Laúgo</span>
               </h1>
               <p className="text-[#7a9ab5] text-[15px] leading-relaxed max-w-md">
                 Equipamentos, livros técnicos e acessórios selecionados para o atirador profissional e o entusiasta de armas.

@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -8,7 +8,7 @@ const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
 export const metadata = {
-  title: "Assine — Revista Magnum",
+  title: "Assine — Laúgo Arms Brasil",
   description: "Acesso completo a 207 edições. Planos a partir de R$ 29,90/trimestre.",
 };
 
@@ -141,7 +141,7 @@ export default async function AssinePage() {
             </span>
           </div>
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[40px] lg:text-[56px] leading-[44px] lg:leading-[60px] text-center mb-4">
-            Assine a Revista Magnum
+            Assine a Laúgo Arms Brasil
           </h1>
           <p className="text-[#d4d4da] text-[16px] lg:text-[18px] text-center max-w-[760px]">
             Acesso completo a 207 edições · Novidades mensais · Leia em qualquer dispositivo

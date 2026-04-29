@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
@@ -31,10 +31,10 @@ export async function generateMetadata(
   { searchParams }: { searchParams: Promise<{ slug?: string }> }
 ): Promise<Metadata> {
   const { slug } = await searchParams;
-  if (!slug) return { title: "Upgrade — Guia Magnum" };
+  if (!slug) return { title: "Upgrade — Guia" };
   const listing = await getListing(slug);
   return {
-    title: `Upgrade ${listing?.name ?? ""} — Guia Comercial Magnum`,
+    title: `Upgrade ${listing?.name ?? ""} — Guia Comercial`,
   };
 }
 

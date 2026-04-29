@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { saveSettings, inputCls, labelCls } from "./_ConfiguracoesClient";
 
-const APP_URL = "https://revistamagnum.com.br";
+const APP_URL = "https://laugoarmsbrasil.com.br";
 
 interface Props { settings: Record<string, string>; }
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -56,7 +56,7 @@ export default function CategoryForm({ mode, initial }: Props) {
     setTitle(val);
     if (mode === "create") {
       setSlug(slugify(val));
-      if (!metaTitle) setMetaTitle(`${val} | Loja Revista Magnum`);
+      if (!metaTitle) setMetaTitle(`${val} | Loja Laúgo Arms Brasil`);
     }
   }
 
@@ -179,7 +179,7 @@ export default function CategoryForm({ mode, initial }: Props) {
                 value={metaTitle}
                 onChange={(e) => setMetaTitle(e.target.value)}
                 className={inputCls}
-                placeholder="Ex: Coldres para Pistolas e Revólveres | Loja Magnum"
+                placeholder="Ex: Coldres para Pistolas e Revólveres | Loja Laúgo Arms"
                 maxLength={70}
               />
               <p className="text-[#526888] text-[11px] mt-1">

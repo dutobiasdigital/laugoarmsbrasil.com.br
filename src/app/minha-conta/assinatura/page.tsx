@@ -1,9 +1,9 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: "Minha Assinatura — Minha Conta · Revista Magnum",
+  title: "Minha Assinatura — Minha Conta · Laúgo Arms Brasil",
 };
 export const dynamic = "force-dynamic";
 
@@ -83,7 +83,7 @@ export default async function MinhaAssinaturaPage() {
         </h1>
         <p className="text-[#7a9ab5] text-[15px]">
           {isActive
-            ? `${subscription!.subscription_plans?.name ?? "Plano Magnum"} — ${days} dia${days !== 1 ? "s" : ""} restante${days !== 1 ? "s" : ""}`
+            ? `${subscription!.subscription_plans?.name ?? "Plano Laúgo"} — ${days} dia${days !== 1 ? "s" : ""} restante${days !== 1 ? "s" : ""}`
             : "Detalhes e gerenciamento da sua assinatura"}
         </p>
       </section>
@@ -98,7 +98,7 @@ export default async function MinhaAssinaturaPage() {
             <div className="pl-5">
               <div className="flex items-center gap-3 mb-5">
                 <p className="text-white text-[18px] font-bold">
-                  {(subscription.subscription_plans as { name: string } | null)?.name ?? "Plano Magnum"}
+                  {(subscription.subscription_plans as { name: string } | null)?.name ?? "Plano Laúgo"}
                 </p>
                 {st && (
                   <span className={`text-[10px] font-bold px-2.5 py-[3px] rounded-full ${st.bg} ${st.text}`}>
@@ -175,9 +175,9 @@ export default async function MinhaAssinaturaPage() {
             <p className="text-white text-[12px] leading-[20px]">
               Você pode cancelar sua assinatura a qualquer momento. O acesso ao acervo permanece ativo
               até o final do período já pago. Para solicitar o cancelamento, entre em contato pelo e-mail{" "}
-              <a href="mailto:publicidade@revistamagnum.com.br"
+              <a href="mailto:publicidade@laugoarmsbrasil.com.br"
                 className="text-[#526888] hover:text-white transition-colors underline">
-                publicidade@revistamagnum.com.br
+                publicidade@laugoarmsbrasil.com.br
               </a>.
             </p>
           </div>
@@ -188,7 +188,7 @@ export default async function MinhaAssinaturaPage() {
           <p className="text-[40px] mb-4">📰</p>
           <p className="text-white text-[20px] font-bold mb-2">Nenhuma assinatura ativa</p>
           <p className="text-[#7a9ab5] text-[14px] leading-[22px] mb-6">
-            Assine a Revista Magnum e tenha acesso completo a mais de 200 edições do maior acervo
+            Assine a Laúgo Arms Brasil e tenha acesso completo a mais de 200 edições do maior acervo
             sobre armamento civil do Brasil.
           </p>
           <Link href="/assine"

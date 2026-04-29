@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   const { email, password, secret } = await request.json();
 
   // Simple secret to prevent abuse
-  if (secret !== "magnum2026reset") {
+  if (secret !== "laugo2026reset") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 
@@ -27,7 +27,7 @@ interface CartContextType {
 }
 
 const CartContext = createContext<CartContextType | null>(null);
-const STORAGE_KEY = "magnum_cart_v1";
+const STORAGE_KEY = "laugo_cart_v1";
 
 function itemKey(productId: string, variationId?: string) {
   return productId + "|" + (variationId ?? "");

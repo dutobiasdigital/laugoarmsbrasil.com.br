@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import GuiaCadastrarForm from "./GuiaCadastrarForm";
 
 export const metadata: Metadata = {
-  title: "Cadastrar Empresa — Guia Comercial Magnum",
+  title: "Cadastrar Empresa — Guia Comercial",
   description: "Cadastre sua empresa no maior diretório especializado do setor de armas, tiro esportivo e defesa do Brasil.",
 };
 
@@ -68,7 +68,7 @@ export default function CadastrarPage() {
                 <p className="text-[#7a9ab5] text-[13px] leading-[20px] mb-4">
                   Com o plano Premium ou Destaque você aparece no topo, com logo, mapa e badge exclusivo.
                 </p>
-                <a href="mailto:publicidade@revistamagnum.com.br"
+                <a href="mailto:publicidade@laugoarmsbrasil.com.br"
                   className="flex items-center justify-center gap-2 bg-[#ff1f1f]/10 hover:bg-[#ff1f1f]/20 border border-[#ff1f1f]/30 text-[#ff1f1f] text-[13px] font-semibold h-[40px] rounded-[6px] transition-colors">
                   Falar sobre planos pagos →
                 </a>

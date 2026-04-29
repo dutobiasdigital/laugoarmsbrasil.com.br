@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getPaymentIntentByRef } from "@/lib/payment/shared";
 
-export const metadata: Metadata = { title: "Pagamento Confirmado — Revista Magnum" };
+export const metadata: Metadata = { title: "Pagamento Confirmado — Laúgo Arms Brasil" };
 export const dynamic = "force-dynamic";
 
 export default async function PagamentoSucessoPage({

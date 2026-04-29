@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState } from "react";
 
@@ -116,7 +116,7 @@ export default function HeroManager({ initialSlides }: { initialSlides: HeroSlid
       type: "gradient",
       gradient: "linear-gradient(135deg, #070a12 0%, #0e1520 100%)",
     },
-    title: "Revista Magnum",
+    title: "Laúgo Arms Brasil",
     titleHighlight: "",
     subtitle: "Última Edição",
     text: "",
@@ -507,7 +507,7 @@ export default function HeroManager({ initialSlides }: { initialSlides: HeroSlid
                     onChange={(e) =>
                       updateSlide(slide.id, { title: e.target.value })
                     }
-                    placeholder="Revista Magnum"
+                    placeholder="Laúgo Arms Brasil"
                     className={"w-full " + inputCls}
                   />
                 </div>

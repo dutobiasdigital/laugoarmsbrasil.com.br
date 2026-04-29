@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
 
     // upsert: true para permitir substituição se mesmo nome
     const { error } = await supabase.storage
-      .from("magnum-media")
+      .from("laugo-media")
       .upload(storagePath, buffer, { contentType: file.type, upsert: true });
 
     if (error) {
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { data: urlData } = supabase.storage
-      .from("magnum-media")
+      .from("laugo-media")
       .getPublicUrl(storagePath);
 
     return NextResponse.json({ url: urlData.publicUrl });

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
@@ -96,7 +96,7 @@ export default function MobileMenu({
             {/* Logo */}
             <Link href="/" onClick={close} className="flex items-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={logoUrl} alt="Magnum" className="h-[44px] w-auto object-contain" />
+              <img src={logoUrl} alt="Laúgo Arms Brasil" className="h-[44px] w-auto object-contain" />
             </Link>
 
             {/* Botão fechar */}

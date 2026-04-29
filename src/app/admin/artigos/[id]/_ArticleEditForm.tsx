@@ -328,7 +328,7 @@ export default function ArticleEditForm({ article, categories }: Props) {
                 value={canonicalUrl}
                 onChange={(e) => setCanonicalUrl(e.target.value)}
                 className={inputCls}
-                placeholder="https://revistamagnum.com.br/blog/... (opcional)"
+                placeholder="https://laugoarmsbrasil.com.br/blog/... (opcional)"
               />
               <p className="text-[#526888] text-[11px] mt-1">Preencha apenas se este artigo for uma cópia de outro URL.</p>
             </div>

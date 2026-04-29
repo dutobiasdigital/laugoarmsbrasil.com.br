@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import PlanosGuiaClient from "./_PlanosGuiaClient";
 
 export const dynamic = "force-dynamic";
@@ -53,7 +53,7 @@ export default async function AdminPlanosGuiaPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">
-            Planos — Guia Magnum
+            Planos — Guia
           </h1>
           <p className="text-[#7a9ab5] text-[14px]">
             Gerencie os planos de listagem do Guia Comercial

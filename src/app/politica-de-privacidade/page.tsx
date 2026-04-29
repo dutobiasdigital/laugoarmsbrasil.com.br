@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Política de Privacidade — Revista Magnum",
-  description: "Saiba como a Revista Magnum coleta, usa e protege seus dados pessoais em conformidade com a LGPD.",
+  title: "Política de Privacidade — Laúgo Arms Brasil",
+  description: "Saiba como a Laúgo Arms Brasil coleta, usa e protege seus dados pessoais em conformidade com a LGPD.",
 };
 
 async function getPageContent() {
@@ -66,7 +66,7 @@ function PrivacidadeContent() {
       {[
         {
           title: "1. Controlador dos Dados",
-          body: "Empresa: Revista Magnum — Endereço: Rua Barão de Suruí, 164 — CEP 04612-120 — São Paulo/SP — E-mail: privacidade@revistamagnum.com.br — Telefone: (11) 5044-3924 — Site: https://revistamagnum.com.br",
+          body: "Empresa: Laúgo Arms Brasil — Endereço: Rua Barão de Suruí, 164 — CEP 04612-120 — São Paulo/SP — E-mail: privacidade@laugoarmsbrasil.com.br — Telefone: (11) 5044-3924 — Site: https://laugoarmsbrasil.com.br",
         },
         {
           title: "2. Dados Pessoais Coletados",
@@ -138,7 +138,7 @@ function PrivacidadeContent() {
         },
         {
           title: "9. Menores de Idade",
-          body: "Nossos serviços destinam-se exclusivamente a maiores de 18 anos. Não coletamos intencionalmente dados de menores. Caso identifique tal situação, entre em contato imediatamente em privacidade@revistamagnum.com.br.",
+          body: "Nossos serviços destinam-se exclusivamente a maiores de 18 anos. Não coletamos intencionalmente dados de menores. Caso identifique tal situação, entre em contato imediatamente em privacidade@laugoarmsbrasil.com.br.",
         },
         {
           title: "10. Alterações desta Política",
@@ -147,7 +147,7 @@ function PrivacidadeContent() {
         {
           title: "11. Contato e Encarregado (DPO)",
           items: [
-            "E-mail: privacidade@revistamagnum.com.br",
+            "E-mail: privacidade@laugoarmsbrasil.com.br",
             "Endereço: Rua Barão de Suruí, 164 — CEP 04612-120 — São Paulo/SP",
             "Telefone: (11) 5044-3924",
             "ANPD: www.gov.br/anpd — para registrar reclamações junto ao órgão regulador.",

@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getPaymentIntentByRef } from "@/lib/payment/shared";
 
-export const metadata: Metadata = { title: "Pagamento não realizado — Revista Magnum" };
+export const metadata: Metadata = { title: "Pagamento não realizado — Laúgo Arms Brasil" };
 export const dynamic = "force-dynamic";
 
 export default async function PagamentoErroPage({
@@ -93,7 +93,7 @@ export default async function PagamentoErroPage({
               </Link>
             )}
 
-            <a href="mailto:publicidade@revistamagnum.com.br"
+            <a href="mailto:publicidade@laugoarmsbrasil.com.br"
               className="text-[#526888] hover:text-white text-[13px] transition-colors">
               Precisa de ajuda? Entre em contato →
             </a>

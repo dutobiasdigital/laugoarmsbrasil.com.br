@@ -166,7 +166,7 @@ export default async function BlogArtigoPage({
             ) : (
               <>
                 <p className="text-[#d4d4da] text-[17px] leading-[28px] mb-4">
-                  {post.excerpt ?? "Leia o artigo completo com uma assinatura Magnum."}
+                  {post.excerpt ?? "Leia o artigo completo com uma assinatura Laúgo."}
                 </p>
                 <div className="h-[160px] bg-gradient-to-b from-transparent to-[#070a12] -mt-20 relative z-10" />
                 <div className="bg-[#0e1520] border-2 border-[#ff1f1f] rounded-xl p-6 lg:p-8 flex flex-col gap-4 mt-4">
@@ -175,7 +175,7 @@ export default async function BlogArtigoPage({
                     Conteúdo exclusivo para assinantes
                   </h2>
                   <p className="text-[#d4d4da] text-[16px] leading-[24px]">
-                    Este artigo é exclusivo para assinantes Magnum. Assine e acesse este e muitos outros artigos.
+                    Este artigo é exclusivo para assinantes Laúgo. Assine e acesse este e muitos outros artigos.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 mt-2">
                     <Link href="/assine" className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[16px] font-semibold h-[52px] px-6 flex items-center justify-center rounded-[8px] transition-colors">

@@ -177,7 +177,7 @@ export default function EditarEmpresaPage() {
               name="whatsappMessage"
               rows={3}
               defaultValue={emp.whatsappMessage ?? ""}
-              placeholder="Ex: Olá! Vi sua empresa na Revista Magnum e gostaria de mais informações."
+              placeholder="Ex: Olá! Vi sua empresa na Laúgo Arms Brasil e gostaria de mais informações."
               className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] px-3 py-2.5 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full resize-none"
             />
           </div>

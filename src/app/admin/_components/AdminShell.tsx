@@ -25,7 +25,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <Link href="/admin" className="flex items-center gap-2 shrink-0">
           <div className="w-[26px] h-[26px] bg-[#ff1f1f] rounded-[4px] shrink-0" />
           <span className={`font-['Barlow_Condensed'] font-bold text-white text-[18px] tracking-[2px] transition-opacity duration-200 ${collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"}`}>
-            MAGNUM
+            LAÚGO
           </span>
         </Link>
         {!collapsed && (

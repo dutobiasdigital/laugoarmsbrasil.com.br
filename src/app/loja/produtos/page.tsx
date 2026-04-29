@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CategoryViewTracker from "@/components/CategoryViewTracker";
@@ -11,8 +11,8 @@ const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
 const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
 
 export const metadata = {
-  title: "Todos os Produtos — Loja Magnum",
-  description: "Catálogo completo da Loja Magnum.",
+  title: "Todos os Produtos — Loja Laúgo Arms",
+  description: "Catálogo completo da Loja Laúgo Arms.",
 };
 
 interface ShopCategory { id: string; title: string; slug: string; sortOrder: number; }

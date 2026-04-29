@@ -484,7 +484,7 @@ export default function Reader({
             className="font-['Barlow_Condensed'] font-black text-white text-[18px] leading-none shrink-0"
             style={{ letterSpacing: "0.04em" }}
           >
-            MAGNUM
+            LAÚGO
           </span>
           <span className="text-[#2a3a4e] shrink-0 mx-1">|</span>
           <span className="text-[#7a9ab5] text-[13px] truncate">{editionTitle}</span>

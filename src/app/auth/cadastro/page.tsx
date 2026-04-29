@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useState } from "react";
 import { signup } from "@/actions/auth";
@@ -41,7 +41,7 @@ export default function CadastroPage() {
         <div className="flex items-center gap-2">
           <div className="w-[40px] h-[40px] bg-[#ff1f1f] rounded-[3px]" />
           <span className="font-['Barlow_Condensed'] font-bold text-white text-[24px] tracking-[3px]">
-            MAGNUM
+            LAÚGO
           </span>
         </div>
 
@@ -62,7 +62,7 @@ export default function CadastroPage() {
         {/* Mobile logo */}
         <div className="flex lg:hidden items-center gap-2 mb-8">
           <div className="w-[32px] h-[32px] bg-[#ff1f1f] rounded-[2px]" />
-          <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[22px] tracking-wide">MAGNUM</span>
+          <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[22px] tracking-wide">LAÚGO</span>
         </div>
 
         <div className="w-full max-w-[520px]">

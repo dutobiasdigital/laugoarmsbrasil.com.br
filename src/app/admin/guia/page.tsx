@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Suspense } from "react";
 import AdminSearchBar from "../_components/AdminSearchBar";
 import GuiaQuickAction from "./_GuiaQuickAction";
@@ -151,7 +151,7 @@ export default async function AdminGuiaPage({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">
-            Guia Magnum
+            Guia
           </h1>
           <p className="text-[#7a9ab5] text-[14px]">
             {statsTotal.toLocaleString("pt-BR")} empresa{statsTotal !== 1 ? "s" : ""} cadastrada{statsTotal !== 1 ? "s" : ""}

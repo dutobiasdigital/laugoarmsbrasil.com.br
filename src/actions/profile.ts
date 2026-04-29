@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -133,7 +133,7 @@ export async function requestPasswordReset(
     const { sendPasswordResetEmail } = await import("@/lib/email");
 
     const admin  = createAdminClient();
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://revistamagnum.com.br";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://laugoarmsbrasil.com.br";
 
     const { data, error } = await admin.auth.admin.generateLink({
       type: "recovery",

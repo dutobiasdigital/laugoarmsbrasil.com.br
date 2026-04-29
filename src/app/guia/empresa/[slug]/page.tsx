@@ -84,10 +84,10 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { slug } = await params;
   const company = await getCompany(slug);
-  if (!company) return { title: "Empresa — Guia Magnum" };
+  if (!company) return { title: "Empresa — Guia" };
   const cat = categoryBySegment(company.segment);
   return {
-    title: `${company.tradeName} — ${cat?.label ?? "Guia"} em ${company.city ?? ""}, ${company.state ?? ""} | Guia Magnum`,
+    title: `${company.tradeName} — ${cat?.label ?? "Guia"} em ${company.city ?? ""}, ${company.state ?? ""} | Guia`,
     description: company.description?.slice(0, 160) ??
       `${company.tradeName} é uma empresa de ${cat?.label ?? company.segment} localizada em ${company.city}, ${company.state}.`,
   };

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { saveSettings, inputCls, labelCls, areaCls } from "./_ConfiguracoesClient";
@@ -11,18 +11,18 @@ const DEFAULT_TERMOS = `<h1>Termos de Uso</h1>
 <p><strong>Última atualização:</strong> 17 de abril de 2026</p>
 
 <h2>1. Identificação da Empresa</h2>
-<p>A <strong>Revista Magnum</strong>, publicação especializada em armas de fogo, munições e legislação, com sede à <strong>Rua Barão de Suruí, 164 — CEP 04612-120 — São Paulo/SP</strong>, telefone (11) 5044-3924, e-mail contato@revistamagnum.com.br ("Empresa", "Nós").</p>
+<p>A <strong>Laúgo Arms Brasil</strong>, publicação especializada em armas de fogo, munições e legislação, com sede à <strong>Rua Barão de Suruí, 164 — CEP 04612-120 — São Paulo/SP</strong>, telefone (11) 5044-3924, e-mail contato@laugoarmsbrasil.com.br ("Empresa", "Nós").</p>
 
 <h2>2. Aceitação dos Termos</h2>
-<p>Ao acessar ou utilizar o site <strong>revistamagnum.com.br</strong> ("Site"), cadastrar-se como usuário, adquirir uma assinatura digital ou realizar qualquer compra em nossa loja, você ("Usuário") declara ter lido, compreendido e aceito integralmente estes Termos de Uso, bem como nossa Política de Privacidade.</p>
+<p>Ao acessar ou utilizar o site <strong>laugoarmsbrasil.com.br</strong> ("Site"), cadastrar-se como usuário, adquirir uma assinatura digital ou realizar qualquer compra em nossa loja, você ("Usuário") declara ter lido, compreendido e aceito integralmente estes Termos de Uso, bem como nossa Política de Privacidade.</p>
 <p>Caso não concorde com qualquer disposição destes Termos, pedimos que não utilize nossos serviços.</p>
 
 <h2>3. Serviços Oferecidos</h2>
 <p>O Site disponibiliza os seguintes serviços:</p>
 <ul>
-  <li><strong>Acervo Digital:</strong> acesso ao arquivo completo de edições da Revista Magnum, com mais de 207 edições regulares e especiais, mediante assinatura ativa;</li>
+  <li><strong>Acervo Digital:</strong> acesso ao arquivo completo de edições da Laúgo Arms Brasil, com mais de 207 edições regulares e especiais, mediante assinatura ativa;</li>
   <li><strong>Loja Online:</strong> comercialização de produtos físicos (coleções, back issues, produtos editoriais);</li>
-  <li><strong>Guia Comercial Magnum:</strong> diretório de empresas do setor de armas, munições e acessórios;</li>
+  <li><strong>Guia Comercial:</strong> diretório de empresas do setor de armas, munições e acessórios;</li>
   <li><strong>Blog e Conteúdo:</strong> artigos, notícias e análises sobre armas, legislação, tiro esportivo e colecionismo.</li>
 </ul>
 
@@ -59,7 +59,7 @@ const DEFAULT_TERMOS = `<h1>Termos de Uso</h1>
 </ul>
 
 <h2>8. Conteúdo sobre Armas de Fogo e Legislação</h2>
-<p>A Revista Magnum é uma publicação especializada voltada exclusivamente ao público legalmente habilitado: Colecionadores, Atiradores Desportivos e Caçadores (CAC), militares, policiais e demais profissionais autorizados.</p>
+<p>A Laúgo Arms Brasil é uma publicação especializada voltada exclusivamente ao público legalmente habilitado: Colecionadores, Atiradores Desportivos e Caçadores (CAC), militares, policiais e demais profissionais autorizados.</p>
 <p>Todo o conteúdo do Site é produzido com finalidade informativa, educacional e cultural, em conformidade com a legislação brasileira vigente (Lei nº 10.826/2003 — Estatuto do Desarmamento, Decreto nº 9.847/2019 e regulamentações do Exército Brasileiro). A Empresa não incentiva, facilita ou orienta a aquisição ilegal de armas ou munições.</p>
 
 <h2>9. Uso Proibido</h2>
@@ -85,7 +85,7 @@ const DEFAULT_TERMOS = `<h1>Termos de Uso</h1>
 <h2>13. Contato</h2>
 <p>Para dúvidas sobre estes Termos, entre em contato:</p>
 <ul>
-  <li><strong>E-mail:</strong> contato@revistamagnum.com.br</li>
+  <li><strong>E-mail:</strong> contato@laugoarmsbrasil.com.br</li>
   <li><strong>Telefone:</strong> (11) 5044-3924</li>
   <li><strong>Endereço:</strong> Rua Barão de Suruí, 164 — CEP 04612-120 — São Paulo/SP</li>
 </ul>`;
@@ -93,15 +93,15 @@ const DEFAULT_TERMOS = `<h1>Termos de Uso</h1>
 const DEFAULT_PRIVACIDADE = `<h1>Política de Privacidade</h1>
 <p><strong>Última atualização:</strong> 17 de abril de 2026</p>
 
-<p>A <strong>Revista Magnum</strong> ("Empresa", "Nós") está comprometida com a proteção da privacidade e dos dados pessoais de seus usuários, em conformidade com a <strong>Lei Geral de Proteção de Dados Pessoais</strong> (Lei nº 13.709/2018 — LGPD) e demais normas aplicáveis.</p>
+<p>A <strong>Laúgo Arms Brasil</strong> ("Empresa", "Nós") está comprometida com a proteção da privacidade e dos dados pessoais de seus usuários, em conformidade com a <strong>Lei Geral de Proteção de Dados Pessoais</strong> (Lei nº 13.709/2018 — LGPD) e demais normas aplicáveis.</p>
 
 <h2>1. Controlador dos Dados</h2>
 <p>
-  <strong>Empresa:</strong> Revista Magnum<br>
+  <strong>Empresa:</strong> Laúgo Arms Brasil<br>
   <strong>Endereço:</strong> Rua Barão de Suruí, 164 — CEP 04612-120 — São Paulo/SP<br>
-  <strong>E-mail:</strong> privacidade@revistamagnum.com.br<br>
+  <strong>E-mail:</strong> privacidade@laugoarmsbrasil.com.br<br>
   <strong>Telefone:</strong> (11) 5044-3924<br>
-  <strong>Site:</strong> https://revistamagnum.com.br
+  <strong>Site:</strong> https://laugoarmsbrasil.com.br
 </p>
 
 <h2>2. Dados Pessoais Coletados</h2>
@@ -181,7 +181,7 @@ const DEFAULT_PRIVACIDADE = `<h1>Política de Privacidade</h1>
   <li><strong>Solicitar a portabilidade</strong> dos seus dados para outro fornecedor;</li>
   <li><strong>Opor-se</strong> a tratamento realizado com base em interesse legítimo.</li>
 </ul>
-<p>Para exercer seus direitos, entre em contato: <strong>privacidade@revistamagnum.com.br</strong> — resposta em até 15 dias úteis.</p>
+<p>Para exercer seus direitos, entre em contato: <strong>privacidade@laugoarmsbrasil.com.br</strong> — resposta em até 15 dias úteis.</p>
 
 <h2>9. Cookies e Tecnologias de Rastreamento</h2>
 <ul>
@@ -199,7 +199,7 @@ const DEFAULT_PRIVACIDADE = `<h1>Política de Privacidade</h1>
 
 <h2>12. Contato e Encarregado (DPO)</h2>
 <ul>
-  <li><strong>E-mail:</strong> privacidade@revistamagnum.com.br</li>
+  <li><strong>E-mail:</strong> privacidade@laugoarmsbrasil.com.br</li>
   <li><strong>Endereço:</strong> Rua Barão de Suruí, 164 — CEP 04612-120 — São Paulo/SP</li>
   <li><strong>Telefone:</strong> (11) 5044-3924</li>
 </ul>

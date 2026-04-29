@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
@@ -281,7 +281,7 @@ function EditionListItem({ edition }: { edition: Edition }) {
           </div>
 
           <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[22px] sm:text-[26px] leading-tight group-hover:text-white/90 transition-colors">
-            {edition.number ? `Revista Magnum — Edição ${edition.number}` : edition.title}
+            {edition.number ? `Laúgo Arms Brasil — Edição ${edition.number}` : edition.title}
           </h2>
 
           {edition.summary && (

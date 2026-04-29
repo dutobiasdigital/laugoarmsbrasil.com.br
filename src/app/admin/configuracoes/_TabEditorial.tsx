@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { saveSettings, inputCls, labelCls, areaCls } from "./_ConfiguracoesClient";
@@ -81,7 +81,7 @@ export default function TabEditorial({ settings }: Props) {
             <label className={labelCls}>Mensagem de paywall</label>
             <textarea value={values["editorial.mensagem_paywall"]} onChange={e => set("editorial.mensagem_paywall", e.target.value)}
               rows={3}
-              placeholder="Este conteúdo é exclusivo para assinantes. Assine agora e tenha acesso ilimitado à Revista Magnum."
+              placeholder="Este conteúdo é exclusivo para assinantes. Assine agora e tenha acesso ilimitado à Laúgo Arms Brasil."
               className={areaCls} />
           </div>
         )}
@@ -99,12 +99,12 @@ export default function TabEditorial({ settings }: Props) {
           <div>
             <label className={labelCls}>URL — Termos de Uso</label>
             <input value={values["editorial.url_termos"]} onChange={e => set("editorial.url_termos", e.target.value)}
-              type="url" placeholder="https://revistamagnum.com.br/termos" className={inputCls} />
+              type="url" placeholder="https://laugoarmsbrasil.com.br/termos" className={inputCls} />
           </div>
           <div>
             <label className={labelCls}>URL — Política de Privacidade</label>
             <input value={values["editorial.url_privacidade"]} onChange={e => set("editorial.url_privacidade", e.target.value)}
-              type="url" placeholder="https://revistamagnum.com.br/privacidade" className={inputCls} />
+              type="url" placeholder="https://laugoarmsbrasil.com.br/privacidade" className={inputCls} />
           </div>
         </div>
         <div>
@@ -123,7 +123,7 @@ export default function TabEditorial({ settings }: Props) {
           <label className={labelCls}>Texto exibido ao final de cada artigo</label>
           <textarea value={values["editorial.rodape_artigo"]} onChange={e => set("editorial.rodape_artigo", e.target.value)}
             rows={3}
-            placeholder="© Revista Magnum. Reprodução proibida sem autorização. As opiniões expressas são de responsabilidade dos autores."
+            placeholder="© Laúgo Arms Brasil. Reprodução proibida sem autorização. As opiniões expressas são de responsabilidade dos autores."
             className={areaCls} />
         </div>
       </section>

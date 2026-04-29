@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Termos de Uso — Revista Magnum",
-  description: "Condições de uso do site, assinatura digital, loja e serviços da Revista Magnum.",
+  title: "Termos de Uso — Laúgo Arms Brasil",
+  description: "Condições de uso do site, assinatura digital, loja e serviços da Laúgo Arms Brasil.",
 };
 
 async function getPageContent() {
@@ -63,19 +63,19 @@ export default async function TermosDeUsoPage() {
 
 function TermosContent() {
   const sections: { title: string; body?: string; items?: string[] }[] = [
-    { title: "1. Identificação da Empresa", body: "A Revista Magnum, publicação especializada em armas de fogo, munições e legislação desde 1997, com sede à Rua Barão de Suruí, 164 — CEP 04612-120 — São Paulo/SP, telefone (11) 5044-3924, e-mail contato@revistamagnum.com.br." },
-    { title: "2. Aceitação dos Termos", body: "Ao acessar ou utilizar o site revistamagnum.com.br, cadastrar-se como usuário, adquirir uma assinatura digital ou realizar qualquer compra em nossa loja, você declara ter lido, compreendido e aceito integralmente estes Termos de Uso, bem como nossa Política de Privacidade." },
-    { title: "3. Serviços Oferecidos", items: ["Acervo Digital: acesso às mais de 207 edições regulares e especiais mediante assinatura ativa;", "Loja Online: comercialização de produtos físicos (coleções, back issues e produtos editoriais);", "Guia Comercial Magnum: diretório de empresas do setor de armas, munições e acessórios;", "Blog e Conteúdo: artigos, notícias e análises sobre armas, legislação, tiro esportivo e colecionismo."] },
-    { title: "4. Cadastro e Conta de Usuário", items: ["As informações fornecidas devem ser verdadeiras, completas e atualizadas;", "É necessário ter capacidade civil plena (maior de 18 anos) para contratar nossos serviços;", "O Usuário é responsável pela guarda e sigilo de sua senha;", "Em caso de uso não autorizado, notifique-nos imediatamente em contato@revistamagnum.com.br."] },
+    { title: "1. Identificação da Empresa", body: "A Laúgo Arms Brasil, publicação especializada em armas de fogo, munições e legislação desde 1997, com sede à Rua Barão de Suruí, 164 — CEP 04612-120 — São Paulo/SP, telefone (11) 5044-3924, e-mail contato@laugoarmsbrasil.com.br." },
+    { title: "2. Aceitação dos Termos", body: "Ao acessar ou utilizar o site laugoarmsbrasil.com.br, cadastrar-se como usuário, adquirir uma assinatura digital ou realizar qualquer compra em nossa loja, você declara ter lido, compreendido e aceito integralmente estes Termos de Uso, bem como nossa Política de Privacidade." },
+    { title: "3. Serviços Oferecidos", items: ["Acervo Digital: acesso às mais de 207 edições regulares e especiais mediante assinatura ativa;", "Loja Online: comercialização de produtos físicos (coleções, back issues e produtos editoriais);", "Guia Comercial: diretório de empresas do setor de armas, munições e acessórios;", "Blog e Conteúdo: artigos, notícias e análises sobre armas, legislação, tiro esportivo e colecionismo."] },
+    { title: "4. Cadastro e Conta de Usuário", items: ["As informações fornecidas devem ser verdadeiras, completas e atualizadas;", "É necessário ter capacidade civil plena (maior de 18 anos) para contratar nossos serviços;", "O Usuário é responsável pela guarda e sigilo de sua senha;", "Em caso de uso não autorizado, notifique-nos imediatamente em contato@laugoarmsbrasil.com.br."] },
     { title: "5. Assinatura Digital", body: "O acesso ao acervo está condicionado à assinatura ativa e devidamente paga, de uso pessoal e intransferível. O cancelamento pode ser solicitado a qualquer momento pelo painel da conta, mantendo o acesso até o final do período pago. Contratos eletrônicos têm direito de arrependimento de 7 dias corridos a partir da contratação, com reembolso integral (CDC, art. 49)." },
     { title: "6. Loja Online", body: "Compras na Loja Online estão sujeitas à disponibilidade de estoque e prazos de entrega informados no ato da compra. O direito de arrependimento em produtos físicos é de 7 dias corridos após o recebimento, conforme o Código de Defesa do Consumidor (Lei nº 8.078/1990)." },
     { title: "7. Propriedade Intelectual", body: "Todo o conteúdo disponível — textos, fotografias, ilustrações, logotipos, layouts, vídeos e edições digitais — é de propriedade exclusiva da Empresa ou de seus licenciantes, protegido pela Lei nº 9.610/1998. É vedada reprodução, cópia, distribuição ou sublicenciamento sem autorização prévia e expressa por escrito." },
-    { title: "8. Conteúdo sobre Armas de Fogo e Legislação", body: "A Revista Magnum destina-se exclusivamente ao público legalmente habilitado: Colecionadores, Atiradores Desportivos e Caçadores (CAC), militares, policiais e profissionais autorizados. Todo conteúdo é produzido com finalidade informativa, educacional e cultural, em conformidade com a Lei nº 10.826/2003 e o Decreto nº 9.847/2019." },
+    { title: "8. Conteúdo sobre Armas de Fogo e Legislação", body: "A Laúgo Arms Brasil destina-se exclusivamente ao público legalmente habilitado: Colecionadores, Atiradores Desportivos e Caçadores (CAC), militares, policiais e profissionais autorizados. Todo conteúdo é produzido com finalidade informativa, educacional e cultural, em conformidade com a Lei nº 10.826/2003 e o Decreto nº 9.847/2019." },
     { title: "9. Uso Proibido", items: ["Qualquer finalidade ilegal ou não autorizada;", "Acesso não autorizado a sistemas ou redes do Site;", "Transmissão de vírus, malware ou código malicioso;", "Violação de direitos de terceiros, incluindo privacidade e propriedade intelectual;", "Coleta de dados de outros usuários sem consentimento."] },
     { title: "10. Limitação de Responsabilidade", body: "A Empresa não se responsabiliza por interrupções temporárias decorrentes de manutenção, falhas técnicas, ataques cibernéticos ou força maior. As informações publicadas têm caráter meramente informativo e não constituem assessoria jurídica, técnica ou profissional." },
     { title: "11. Alterações dos Termos", body: "A Empresa pode modificar estes Termos a qualquer momento, com as alterações entrando em vigor na data de publicação no Site. Alterações substanciais serão comunicadas por e-mail aos usuários cadastrados com antecedência mínima de 15 dias." },
     { title: "12. Legislação Aplicável e Foro", body: "Estes Termos são regidos pelas leis da República Federativa do Brasil. Fica eleito o Foro da Comarca de São Paulo/SP para dirimir quaisquer controvérsias decorrentes deste instrumento, com renúncia expressa a qualquer outro, por mais privilegiado que seja." },
-    { title: "13. Contato", items: ["E-mail: contato@revistamagnum.com.br", "Telefone: (11) 5044-3924", "Endereço: Rua Barão de Suruí, 164 — CEP 04612-120 — São Paulo/SP"] },
+    { title: "13. Contato", items: ["E-mail: contato@laugoarmsbrasil.com.br", "Telefone: (11) 5044-3924", "Endereço: Rua Barão de Suruí, 164 — CEP 04612-120 — São Paulo/SP"] },
   ];
   return (
     <div className="flex flex-col">

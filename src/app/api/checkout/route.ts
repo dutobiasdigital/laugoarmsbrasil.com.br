@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { createPaymentIntent, updatePaymentIntent, getSettings } from "@/lib/payment/shared";
 import { createMPPreference } from "@/lib/payment/mercadopago";
 import { createStripeSession } from "@/lib/payment/stripe";
 import { createPSOrder } from "@/lib/payment/pagseguro";
 import { createPayPalOrder } from "@/lib/payment/paypal";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://revistamagnum.com.br";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://laugoarmsbrasil.com.br";
 
 export async function POST(req: NextRequest) {
   try {

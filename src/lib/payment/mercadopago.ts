@@ -1,4 +1,4 @@
-export interface MPPreference {
+﻿export interface MPPreference {
   id:                   string;
   init_point:           string;
   sandbox_init_point:   string;
@@ -35,7 +35,7 @@ export async function createMPPreference(params: {
       back_urls:             params.backUrls,
       auto_return:           "approved",
       notification_url:      params.notificationUrl,
-      statement_descriptor:  "REVISTA MAGNUM",
+      statement_descriptor:  "Laúgo Arms Brasil",
     }),
   });
 

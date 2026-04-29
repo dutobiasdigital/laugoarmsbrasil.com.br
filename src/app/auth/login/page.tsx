@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -52,7 +52,7 @@ export default function LoginPage() {
 
       // Se "Manter conectado" NÃO estiver marcado, assinar saída ao fechar o browser
       if (!keepConnected) {
-        sessionStorage.setItem("magnum_session_only", "1");
+        sessionStorage.setItem("laugo_session_only", "1");
         const supabaseRef = supabase;
         window.addEventListener(
           "pagehide",
@@ -60,7 +60,7 @@ export default function LoginPage() {
           { once: true }
         );
       } else {
-        sessionStorage.removeItem("magnum_session_only");
+        sessionStorage.removeItem("laugo_session_only");
       }
 
       // Hard redirect: garante que os cookies de sessão são lidos pelo servidor
@@ -81,7 +81,7 @@ export default function LoginPage() {
         <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-[#ff1f1f]" />
         <div className="flex items-center gap-2">
           <div className="w-[40px] h-[40px] bg-[#ff1f1f] rounded-[3px]" />
-          <span className="font-['Barlow_Condensed'] font-bold text-white text-[24px] tracking-[3px]">MAGNUM</span>
+          <span className="font-['Barlow_Condensed'] font-bold text-white text-[24px] tracking-[3px]">LAÚGO</span>
         </div>
         <div className="flex flex-col gap-6">
           <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[64px] leading-[68px]">
@@ -108,14 +108,14 @@ export default function LoginPage() {
         {/* Mobile logo */}
         <div className="flex lg:hidden items-center gap-2 mb-8">
           <div className="w-[32px] h-[32px] bg-[#ff1f1f] rounded-[2px]" />
-          <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[22px] tracking-wide">MAGNUM</span>
+          <span className="font-['Barlow_Condensed'] font-bold text-[#ff1f1f] text-[22px] tracking-wide">LAÚGO</span>
         </div>
 
         <div className="w-full max-w-[480px]">
           <h2 className="font-['Barlow_Condensed'] font-bold text-white text-[36px] leading-none mb-1.5">
             Entrar na sua conta
           </h2>
-          <p className="text-[#7a9ab5] text-[15px] mb-6">Acesse o acervo completo da Revista Magnum</p>
+          <p className="text-[#7a9ab5] text-[15px] mb-6">Acesse o acervo completo da Laúgo Arms Brasil</p>
           <div className="bg-[#141d2c] h-px mb-6" />
 
           {error && (
