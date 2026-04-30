@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 const inputCls =
   "bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#CB0A0E] w-full";
@@ -178,35 +179,15 @@ export default function CategoryForm({ mode, initial, allCategories = [] }: Prop
 
           {/* Imagem */}
           <div>
-            <label className={labelCls}>Imagem da Categoria (URL)</label>
-            <input
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className={inputCls}
-              placeholder="https://jpjhryhvdwxmluyswvli.supabase.co/storage/v1/object/public/laugo-media/..."
+            <label className={labelCls}>Imagem da Categoria</label>
+            <ImageUpload
+              folder="categorias"
+              filename={slug || slugify(title)}
+              defaultUrl={imageUrl}
+              inputName="_imageUrl_hidden"
+              aspectHint="Proporção sugerida: 16:9 ou 4:3 — mín. 800×450px. Arraste ou clique para enviar."
+              onUrlChange={setImageUrl}
             />
-            <p className="text-[#526888] text-[11px] mt-1">
-              Cole a URL de uma imagem da Biblioteca de Mídias.
-            </p>
-            {imageUrl && (
-              <div className="mt-3 relative w-full max-w-[320px] aspect-video bg-[#0a0f1a] rounded-[8px] overflow-hidden border border-[#1c2a3e]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={imageUrl}
-                  alt="Preview da imagem"
-                  className="w-full h-full object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setImageUrl("")}
-                  className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white text-[11px] px-2 py-1 rounded-[4px] transition-colors"
-                >
-                  Remover
-                </button>
-              </div>
-            )}
           </div>
 
           <div className="grid grid-cols-2 gap-5">
