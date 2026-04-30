@@ -10,7 +10,7 @@ async function getBrandLogo(): Promise<string> {
   try {
     const res = await fetch(
       `https://${PROJECT}.supabase.co/rest/v1/site_settings?key=in.(brand.logo_dark,brand.logo_main)&select=key,value`,
-      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, next: { revalidate: 60 } }
+      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, cache: "no-store" }
     );
     const rows: { key: string; value: string }[] = await res.json();
     const map: Record<string, string> = {};

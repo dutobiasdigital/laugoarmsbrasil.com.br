@@ -354,10 +354,10 @@ function TabDados({ settings }: Props) {
 
 /* ── Sub-componente: Design System ─────────────────────────────── */
 
-/** Keys que o layout.tsx realmente lê para montar as CSS vars */
+/** Keys que o layout.tsx / Header.tsx realmente lê para montar as CSS vars */
 const DESIGN_KEYS = [
   // Logotipos
-  "site.logo_url", "site.logo_dark_url", "site.favicon_url",
+  "brand.logo_dark", "brand.logo_light", "brand.favicon",
   // Marca
   "brand.color_primary", "brand.color_hover",
   // Tipografia
@@ -373,8 +373,8 @@ const DESIGN_KEYS = [
 ];
 
 const DEFAULTS: Record<string, string> = {
-  "brand.color_primary":      "#ff1f1f",
-  "brand.color_hover":        "#cc0000",
+  "brand.color_primary":      "#CB0A0E",
+  "brand.color_hover":        "#A00810",
   "brand.font_heading":       "barlow",
   "brand.dark.bg_base":       "#070a12",
   "brand.dark.bg_subtle":     "#0a0f1a",
@@ -399,7 +399,7 @@ const DEFAULTS: Record<string, string> = {
 };
 
 const FONT_OPTIONS = [
-  { value: "barlow",     label: "Barlow Condensed",  sample: "font-['Barlow_Condensed']" },
+  { value: "archivo",    label: "Archivo (padrão)",  sample: "font-['Archivo']" },
   { value: "oswald",     label: "Oswald",             sample: "font-['Oswald']" },
   { value: "bebas",      label: "Bebas Neue",         sample: "font-['Bebas_Neue']" },
   { value: "montserrat", label: "Montserrat",         sample: "font-['Montserrat']" },
@@ -459,8 +459,8 @@ function TabDesign({ settings }: Props) {
     if (r.ok) setTimeout(() => setSaved(false), 3000);
   }
 
-  const fontLabel = FONT_OPTIONS.find(f => f.value === values["brand.font_heading"])?.label ?? "Barlow Condensed";
-  const fontClass = FONT_OPTIONS.find(f => f.value === values["brand.font_heading"])?.sample ?? "font-['Barlow_Condensed']";
+  const fontLabel = FONT_OPTIONS.find(f => f.value === values["brand.font_heading"])?.label ?? "Archivo";
+  const fontClass = FONT_OPTIONS.find(f => f.value === values["brand.font_heading"])?.sample ?? "font-['Archivo']";
 
   const prefix = `brand.${mode}`;
   const bgBase     = values[`${prefix}.bg_base`]      || DEFAULTS[`${prefix}.bg_base`];
@@ -490,31 +490,31 @@ function TabDesign({ settings }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Logo (fundo escuro — padrão)</label>
-            <input value={values["site.logo_url"] ?? ""} onChange={e => set("site.logo_url", e.target.value)}
+            <input value={values["brand.logo_dark"] ?? ""} onChange={e => set("brand.logo_dark", e.target.value)}
               type="url" placeholder="https://..." className={inputCls} />
-            {values["site.logo_url"] && (
+            {values["brand.logo_dark"] && (
               <div className="mt-2 bg-[#070a12] rounded-[6px] p-3 flex items-center justify-center h-[60px] border border-[#141d2c]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={values["site.logo_url"]} alt="Logo preview" className="max-h-full max-w-full object-contain" />
+                <img src={values["brand.logo_dark"]} alt="Logo preview" className="max-h-full max-w-full object-contain" />
               </div>
             )}
           </div>
           <div>
             <label className={labelCls}>Logo (fundo claro)</label>
-            <input value={values["site.logo_dark_url"] ?? ""} onChange={e => set("site.logo_dark_url", e.target.value)}
+            <input value={values["brand.logo_light"] ?? ""} onChange={e => set("brand.logo_light", e.target.value)}
               type="url" placeholder="https://..." className={inputCls} />
-            {values["site.logo_dark_url"] && (
+            {values["brand.logo_light"] && (
               <div className="mt-2 bg-white rounded-[6px] p-3 flex items-center justify-center h-[60px]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={values["site.logo_dark_url"]} alt="Logo light preview" className="max-h-full max-w-full object-contain" />
+                <img src={values["brand.logo_light"]} alt="Logo light preview" className="max-h-full max-w-full object-contain" />
               </div>
             )}
           </div>
         </div>
         <div className="max-w-[280px]">
           <label className={labelCls}>Favicon (URL)</label>
-          <input value={values["site.favicon_url"] ?? ""} onChange={e => set("site.favicon_url", e.target.value)}
-            type="url" placeholder="https://.../favicon.ico" className={inputCls} />
+          <input value={values["brand.favicon"] ?? ""} onChange={e => set("brand.favicon", e.target.value)}
+            type="url" placeholder="https://.../favicon.webp" className={inputCls} />
         </div>
       </section>
 
@@ -539,7 +539,7 @@ function TabDesign({ settings }: Props) {
         <div className="max-w-[360px]">
           <label className={labelCls}>Fonte para títulos e headings</label>
           <select
-            value={values["brand.font_heading"] || "barlow"}
+            value={values["brand.font_heading"] || "archivo"}
             onChange={e => set("brand.font_heading", e.target.value)}
             className={selectCls}
           >
@@ -646,7 +646,7 @@ function TabDesign({ settings }: Props) {
           className="bg-[#ff1f1f] hover:bg-[#cc0000] disabled:opacity-50 text-white text-[14px] font-semibold h-[44px] px-8 rounded-[6px] transition-colors">
           {saving ? "Salvando..." : "Salvar Design System"}
         </button>
-        {saved && <p className="text-[#22c55e] text-[13px] font-medium">✓ Salvo! Aguarde ~60s para refletir no site.</p>}
+        {saved && <p className="text-[#22c55e] text-[13px] font-medium">✓ Salvo com sucesso!</p>}
       </div>
     </form>
   );

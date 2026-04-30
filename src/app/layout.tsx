@@ -26,19 +26,19 @@ const playfairDisplay = Playfair_Display({ variable: "--font-playfair-display", 
 export const metadata: Metadata = {
   title: "Laúgo Arms Brasil — Catálogo de Produtos",
   description: "Catálogo oficial de produtos Laúgo Arms Brasil.",
-  icons: { icon: "/logo.png" },
 };
 
 /* ── Lê settings do Supabase (cache 60s) ───────────────────── */
 async function getSiteSettings(): Promise<Record<string, string>> {
-  const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+  const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "";
   const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+  if (!PROJECT) return {};
   try {
     const res = await fetch(
       `https://${PROJECT}.supabase.co/rest/v1/site_settings?select=key,value`,
       {
         headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` },
-        next: { revalidate: 60 }, // cache 60s — settings não mudam com frequência
+        cache: "no-store",
       }
     );
     const rows: { key: string; value: string | null }[] = await res.json();
@@ -62,8 +62,8 @@ function buildDesignCss(cfg: Record<string, string>): string {
   const fontHeading = fontKeyMap[fontKey] ?? fontKeyMap.archivo;
 
   const darkVars = [
-    `--brand:${cfg["brand.color_primary"] || "#C99A3F"}`,
-    `--brand-hover:${cfg["brand.color_hover"] || "#B8862E"}`,
+    `--brand:${cfg["brand.color_primary"] || "#CB0A0E"}`,
+    `--brand-hover:${cfg["brand.color_hover"] || "#A00810"}`,
     `--bg-base:${cfg["brand.dark.bg_base"] || "#0A0A0B"}`,
     `--bg-subtle:${cfg["brand.dark.bg_subtle"] || "#111113"}`,
     `--bg-card:${cfg["brand.dark.bg_card"] || "#16161A"}`,
@@ -116,6 +116,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         {/* ── Design System — CSS vars from DB (brand, colors, fonts) ── */}
         <style dangerouslySetInnerHTML={{ __html: buildDesignCss(cfg) }} />
+
+        {/* ── Favicon dinâmico — lido do DB via brand.favicon ── */}
+        {cfg["brand.favicon"]
+          ? <link rel="icon" href={cfg["brand.favicon"]} />
+          : <link rel="icon" href="/favicon.ico" />
+        }
 
         {/* ── reCAPTCHA v3 site key (lido pelo useRecaptcha hook) ── */}
         {recaptchaSiteKey && <meta name="rcsk" content={recaptchaSiteKey} />}

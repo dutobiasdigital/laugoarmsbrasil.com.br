@@ -53,7 +53,6 @@ const NAV: NavEntry[] = [
     { href: "/admin/loja/pedidos",    label: "Pedidos" },
   ]},
   { type: "link", href: "/admin/midias",        label: "Mídias",       icon: ICONS.photo },
-  { type: "link", href: "/admin/design",        label: "Design System", icon: ICONS.layout },
   { type: "link", href: "/admin/configuracoes", label: "Configurações", icon: ICONS.cog },
 ];
 

@@ -74,17 +74,17 @@ body {
   animation: metalShimmer 14s ease infinite;
 }
 
-/* Borda linear-gradiente animada nos cards — gold */
+/* Borda linear-gradiente animada nos cards — brand */
 .card-metal-border {
   padding: 1px;
   border-radius: 2px;
   background: linear-gradient(
     135deg,
-    rgba(201, 154, 63, 0.5) 0%,
+    rgba(203, 10, 14, 0.5) 0%,
     rgba(38, 38, 44, 1) 22%,
     rgba(184, 184, 192, 0.2) 50%,
     rgba(38, 38, 44, 1) 78%,
-    rgba(201, 154, 63, 0.35) 100%
+    rgba(203, 10, 14, 0.35) 100%
   );
   background-size: 280% 280%;
   animation: borderFlow 6s ease infinite;
@@ -101,9 +101,9 @@ body {
    ═══════════════════════════════════════════════════════ */
 
 :root {
-  /* Brand — Laúgo Arms Gold */
-  --brand:           #C99A3F;
-  --brand-hover:     #B8862E;
+  /* Brand — Laúgo Arms Red */
+  --brand:           #CB0A0E;
+  --brand-hover:     #A00810;
   /* Dark palette — Tactical Premium */
   --bg-base:         #0A0A0B;
   --bg-subtle:       #111113;
@@ -138,14 +138,21 @@ html.light {
    brand changes saved in Admin → Design System.
    ─────────────────────────────────────────────────────── */
 
-/* Brand color — gold (#C99A3F) + legacy red (#ff1f1f) também mapeado */
+/* Brand color — Laúgo red (#CB0A0E) */
+[class~="bg-[#CB0A0E]"]             { background-color: var(--brand) !important; }
+[class~="text-[#CB0A0E]"]           { color: var(--brand) !important; }
+[class~="border-[#CB0A0E]"]         { border-color: var(--brand) !important; }
+[class~="bg-[#A00810]"]             { background-color: var(--brand-hover) !important; }
+[class*="hover:bg-[#CB0A0E]"]:hover { background-color: var(--brand) !important; }
+[class*="hover:bg-[#A00810]"]:hover { background-color: var(--brand-hover) !important; }
+/* Legacy gold (#C99A3F) → brand var */
 [class~="bg-[#C99A3F]"]             { background-color: var(--brand) !important; }
 [class~="text-[#C99A3F]"]           { color: var(--brand) !important; }
 [class~="border-[#C99A3F]"]         { border-color: var(--brand) !important; }
 [class~="bg-[#B8862E]"]             { background-color: var(--brand-hover) !important; }
 [class*="hover:bg-[#C99A3F]"]:hover { background-color: var(--brand) !important; }
 [class*="hover:bg-[#B8862E]"]:hover { background-color: var(--brand-hover) !important; }
-/* Legacy red → gold (bridge p/ componentes ainda com #ff1f1f hardcoded) */
+/* Legacy red (#ff1f1f) → brand var */
 [class~="bg-[#ff1f1f]"]             { background-color: var(--brand) !important; }
 [class~="text-[#ff1f1f]"]           { color: var(--brand) !important; }
 [class~="border-[#ff1f1f]"]         { border-color: var(--brand) !important; }
