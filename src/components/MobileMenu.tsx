@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const NAV_ITEMS = [
+const DEFAULT_NAV = [
   { href: "/",        label: "Home"    },
   { href: "/sobre",   label: "Sobre"   },
   { href: "/contato", label: "Contato" },
@@ -14,10 +14,13 @@ const NAV_ITEMS = [
 export default function MobileMenu({
   isLoggedIn,
   logoUrl,
+  navItems,
 }: {
   isLoggedIn: boolean;
   logoUrl: string;
+  navItems?: { href: string; label: string }[];
 }) {
+  const NAV_ITEMS = navItems ?? DEFAULT_NAV;
   const [open, setOpen]       = useState(false);
   const [visible, setVisible] = useState(false);
   const pathname              = usePathname();

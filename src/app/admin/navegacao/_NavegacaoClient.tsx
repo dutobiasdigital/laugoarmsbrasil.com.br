@@ -63,7 +63,7 @@ function parseMenu(json: string): MenuItem[] {
 function parseFooter(json: string): FooterCol[] {
   try {
     const arr = JSON.parse(json);
-    if (!Array.isArray(arr)) {
+    if (!Array.isArray(arr) || arr.length === 0) {
       return defaultFooterCols();
     }
     return arr.map((col: Partial<FooterCol>) => ({

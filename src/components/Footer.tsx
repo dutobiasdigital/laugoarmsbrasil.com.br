@@ -54,23 +54,43 @@ const SOCIAL_META = [
   { key: "social.linkedin",  label: "LinkedIn",    Icon: IconLinkedin  },
 ];
 
-const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
-async function getSocialLinks(): Promise<Record<string, string>> {
-  if (!SERVICE) return {};
+interface FooterColData { title: string; links: { label: string; url: string }[] }
+
+async function getFooterData(): Promise<{ social: Record<string, string>; cols: FooterColData[] }> {
+  if (!SERVICE) return { social: {}, cols: [] };
   try {
-    const keys = SOCIAL_META.map((s) => s.key).join(",");
+    const socialKeys = SOCIAL_META.map((s) => s.key).join(",");
     const res = await fetch(
-      `https://${PROJECT}.supabase.co/rest/v1/site_settings?key=in.(${keys})&select=key,value`,
-      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, next: { revalidate: 60 } }
+      `https://${PROJECT}.supabase.co/rest/v1/site_settings?key=in.(${socialKeys},nav.footer)&select=key,value`,
+      { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` }, cache: "no-store" }
     );
     const rows: { key: string; value: string | null }[] = await res.json();
-    if (!Array.isArray(rows)) return {};
-    const obj: Record<string, string> = {};
-    for (const r of rows) if (r.value?.trim()) obj[r.key] = r.value.trim();
-    return obj;
-  } catch { return {}; }
+    if (!Array.isArray(rows)) return { social: {}, cols: [] };
+
+    const social: Record<string, string> = {};
+    let cols: FooterColData[] = [];
+
+    for (const r of rows) {
+      if (!r.value?.trim()) continue;
+      if (r.key === "nav.footer") {
+        try {
+          const parsed = JSON.parse(r.value);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            cols = parsed.map((c: { title?: string; links?: { label: string; url: string }[] }) => ({
+              title: c.title ?? "",
+              links: Array.isArray(c.links) ? c.links.map((l) => ({ label: l.label, url: l.url })) : [],
+            }));
+          }
+        } catch { /* use empty */ }
+      } else {
+        social[r.key] = r.value.trim();
+      }
+    }
+    return { social, cols };
+  } catch { return { social: {}, cols: [] }; }
 }
 
 /* ── Nav column helper ────────────────────────────────────────── */
@@ -98,7 +118,7 @@ function NavCol({ title, links }: { title: string; links: { href: string; label:
 
 /* ── Footer ───────────────────────────────────────────────────── */
 export default async function Footer() {
-  const socialLinks = await getSocialLinks();
+  const { social: socialLinks, cols: footerCols } = await getFooterData();
   const activeSocial = SOCIAL_META
     .filter(({ key }) => !!socialLinks[key])
     .map(({ key, label, Icon }) => ({ href: socialLinks[key], label, Icon }));
@@ -149,44 +169,31 @@ export default async function Footer() {
           <div className="hidden sm:block w-px bg-[#141d2c] self-stretch" />
           <div className="block sm:hidden h-px bg-[#141d2c]" />
 
-          {/* Nav grid: 2×2 on mobile, 4 cols on desktop */}
+          {/* Nav grid — dinâmico via admin ou fallback padrão */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-7 flex-1">
-            <NavCol
-              title="Revista"
-              links={[
-                { href: "/edicoes", label: "Edições"  },
-                { href: "/blog",    label: "Blog"     },
-                { href: "/sobre",   label: "Sobre"    },
-                { href: "/anuncie", label: "Anuncie"  },
-                { href: "/contato", label: "Contato"  },
-              ]}
-            />
-            <NavCol
-              title="Guia Comercial"
-              links={[
-                { href: "/guia",                label: "Diretório"         },
-                { href: "/guia/cadastrar",      label: "Cadastrar empresa" },
-                { href: "/guia/busca",          label: "Busca"             },
-                { href: "/guia/armareiros",     label: "Armareiros"        },
-                { href: "/guia/clubes-de-tiro", label: "Clubes de Tiro"    },
-              ]}
-            />
-            <NavCol
-              title="Conta"
-              links={[
-                { href: "/assine",        label: "Assine"      },
-                { href: "/auth/login",    label: "Entrar"      },
-                { href: "/auth/cadastro", label: "Cadastrar"   },
-                { href: "/minha-conta",   label: "Minha conta" },
-              ]}
-            />
-            <NavCol
-              title="Legal"
-              links={[
-                { href: "/termos-de-uso",            label: "Termos de Uso"       },
-                { href: "/politica-de-privacidade",  label: "Política de Privacidade" },
-              ]}
-            />
+            {footerCols.length > 0
+              ? footerCols.map((col, i) => (
+                  <NavCol
+                    key={i}
+                    title={col.title}
+                    links={col.links.map((l) => ({ href: l.url, label: l.label }))}
+                  />
+                ))
+              : (
+                <>
+                  <NavCol title="Loja" links={[
+                    { href: "/loja",    label: "Produtos" },
+                    { href: "/sobre",   label: "Sobre"    },
+                    { href: "/anuncie", label: "Anuncie"  },
+                    { href: "/contato", label: "Contato"  },
+                  ]} />
+                  <NavCol title="Legal" links={[
+                    { href: "/termos-de-uso",           label: "Termos de Uso"           },
+                    { href: "/politica-de-privacidade", label: "Política de Privacidade" },
+                  ]} />
+                </>
+              )
+            }
           </div>
         </div>
 
