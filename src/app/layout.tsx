@@ -1,5 +1,5 @@
 ﻿import type { Metadata } from "next";
-import { Geist, Geist_Mono, Barlow_Condensed, Oswald, Bebas_Neue, Montserrat, Playfair_Display } from "next/font/google";
+import { Archivo, JetBrains_Mono, Oswald, Bebas_Neue, Montserrat, Playfair_Display } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { CartProvider } from "@/contexts/CartContext";
 import CartDrawer from "@/components/CartDrawer";
@@ -8,12 +8,15 @@ import ScrollToTop from "@/components/ScrollToTop";
 import AnalyticsScripts from "@/components/AnalyticsScripts";
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
-const barlowCondensed = Barlow_Condensed({
-  variable: "--font-barlow-condensed",
+const archivo = Archivo({
+  variable: "--font-archivo",
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 const oswald = Oswald({ variable: "--font-oswald", subsets: ["latin"], weight: ["400","600","700"] });
 const bebasNeue = Bebas_Neue({ variable: "--font-bebas-neue", subsets: ["latin"], weight: ["400"] });
@@ -48,28 +51,29 @@ async function getSiteSettings(): Promise<Record<string, string>> {
 
 function buildDesignCss(cfg: Record<string, string>): string {
   const fontKeyMap: Record<string, string> = {
-    barlow:     "'Barlow Condensed',sans-serif",
+    archivo:    "'Archivo',sans-serif",
     oswald:     "'Oswald',sans-serif",
     bebas:      "'Bebas Neue',sans-serif",
     montserrat: "'Montserrat',sans-serif",
     playfair:   "'Playfair Display',serif",
+    barlow:     "'Archivo',sans-serif", // fallback legacy → Archivo
   };
-  const fontKey = cfg["brand.font_heading"] || "barlow";
-  const fontHeading = fontKeyMap[fontKey] ?? fontKeyMap.barlow;
+  const fontKey = cfg["brand.font_heading"] || "archivo";
+  const fontHeading = fontKeyMap[fontKey] ?? fontKeyMap.archivo;
 
   const darkVars = [
-    `--brand:${cfg["brand.color_primary"] || "#ff1f1f"}`,
-    `--brand-hover:${cfg["brand.color_hover"] || "#cc0000"}`,
-    `--bg-base:${cfg["brand.dark.bg_base"] || "#070a12"}`,
-    `--bg-subtle:${cfg["brand.dark.bg_subtle"] || "#0a0f1a"}`,
-    `--bg-card:${cfg["brand.dark.bg_card"] || "#0e1520"}`,
-    `--bg-elevated:${cfg["brand.dark.bg_elevated"] || "#141d2c"}`,
-    `--border:${cfg["brand.dark.border"] || "#141d2c"}`,
-    `--border-mid:${cfg["brand.dark.border_mid"] || "#1c2a3e"}`,
-    `--text-primary:${cfg["brand.dark.text"] || "#d4d4da"}`,
-    `--text-heading:${cfg["brand.dark.text_heading"] || "#dce8ff"}`,
-    `--text-muted:${cfg["brand.dark.text_muted"] || "#7a9ab5"}`,
-    `--text-subtle:${cfg["brand.dark.text_subtle"] || "#526888"}`,
+    `--brand:${cfg["brand.color_primary"] || "#C99A3F"}`,
+    `--brand-hover:${cfg["brand.color_hover"] || "#B8862E"}`,
+    `--bg-base:${cfg["brand.dark.bg_base"] || "#0A0A0B"}`,
+    `--bg-subtle:${cfg["brand.dark.bg_subtle"] || "#111113"}`,
+    `--bg-card:${cfg["brand.dark.bg_card"] || "#16161A"}`,
+    `--bg-elevated:${cfg["brand.dark.bg_elevated"] || "#1C1C21"}`,
+    `--border:${cfg["brand.dark.border"] || "#26262C"}`,
+    `--border-mid:${cfg["brand.dark.border_mid"] || "#3A3A42"}`,
+    `--text-primary:${cfg["brand.dark.text"] || "#B8B8C0"}`,
+    `--text-heading:${cfg["brand.dark.text_heading"] || "#F4F4F6"}`,
+    `--text-muted:${cfg["brand.dark.text_muted"] || "#8A8A95"}`,
+    `--text-subtle:${cfg["brand.dark.text_subtle"] || "#5C5C66"}`,
     `--font-heading:${fontHeading}`,
   ].join(";");
 
@@ -106,7 +110,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang={cfg["site.language"] ?? "pt-BR"}
-      className={`${geistSans.variable} ${geistMono.variable} ${barlowCondensed.variable} ${oswald.variable} ${bebasNeue.variable} ${montserrat.variable} ${playfairDisplay.variable} h-full antialiased`}
+      className={`${archivo.variable} ${jetbrainsMono.variable} ${oswald.variable} ${bebasNeue.variable} ${montserrat.variable} ${playfairDisplay.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

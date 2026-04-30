@@ -74,17 +74,17 @@ body {
   animation: metalShimmer 14s ease infinite;
 }
 
-/* Borda linear-gradiente animada nos cards */
+/* Borda linear-gradiente animada nos cards — gold */
 .card-metal-border {
   padding: 1px;
-  border-radius: 14px;
+  border-radius: 2px;
   background: linear-gradient(
     135deg,
-    rgba(255, 31, 31, 0.45) 0%,
-    rgba(28, 42, 62, 1) 22%,
-    rgba(122, 154, 181, 0.35) 50%,
-    rgba(28, 42, 62, 1) 78%,
-    rgba(255, 31, 31, 0.3) 100%
+    rgba(201, 154, 63, 0.5) 0%,
+    rgba(38, 38, 44, 1) 22%,
+    rgba(184, 184, 192, 0.2) 50%,
+    rgba(38, 38, 44, 1) 78%,
+    rgba(201, 154, 63, 0.35) 100%
   );
   background-size: 280% 280%;
   animation: borderFlow 6s ease infinite;
@@ -101,22 +101,22 @@ body {
    ═══════════════════════════════════════════════════════ */
 
 :root {
-  /* Brand */
-  --brand:           #ff1f1f;
-  --brand-hover:     #cc0000;
-  /* Dark palette */
-  --bg-base:         #070a12;
-  --bg-subtle:       #0a0f1a;
-  --bg-card:         #0e1520;
-  --bg-elevated:     #141d2c;
-  --border:          #141d2c;
-  --border-mid:      #1c2a3e;
-  --text-primary:    #d4d4da;
-  --text-heading:    #dce8ff;
-  --text-muted:      #7a9ab5;
-  --text-subtle:     #526888;
+  /* Brand — Laúgo Arms Gold */
+  --brand:           #C99A3F;
+  --brand-hover:     #B8862E;
+  /* Dark palette — Tactical Premium */
+  --bg-base:         #0A0A0B;
+  --bg-subtle:       #111113;
+  --bg-card:         #16161A;
+  --bg-elevated:     #1C1C21;
+  --border:          #26262C;
+  --border-mid:      #3A3A42;
+  --text-primary:    #B8B8C0;
+  --text-heading:    #F4F4F6;
+  --text-muted:      #8A8A95;
+  --text-subtle:     #5C5C66;
   /* Typography */
-  --font-heading:    'Barlow Condensed', sans-serif;
+  --font-heading:    'Archivo', sans-serif;
 }
 
 /* ── Light mode variable overrides ─────────────────────── */
@@ -138,36 +138,53 @@ html.light {
    brand changes saved in Admin → Design System.
    ─────────────────────────────────────────────────────── */
 
-/* Brand color */
+/* Brand color — gold (#C99A3F) + legacy red (#ff1f1f) também mapeado */
+[class~="bg-[#C99A3F]"]             { background-color: var(--brand) !important; }
+[class~="text-[#C99A3F]"]           { color: var(--brand) !important; }
+[class~="border-[#C99A3F]"]         { border-color: var(--brand) !important; }
+[class~="bg-[#B8862E]"]             { background-color: var(--brand-hover) !important; }
+[class*="hover:bg-[#C99A3F]"]:hover { background-color: var(--brand) !important; }
+[class*="hover:bg-[#B8862E]"]:hover { background-color: var(--brand-hover) !important; }
+/* Legacy red → gold (bridge p/ componentes ainda com #ff1f1f hardcoded) */
 [class~="bg-[#ff1f1f]"]             { background-color: var(--brand) !important; }
 [class~="text-[#ff1f1f]"]           { color: var(--brand) !important; }
 [class~="border-[#ff1f1f]"]         { border-color: var(--brand) !important; }
 [class~="bg-[#cc0000]"]             { background-color: var(--brand-hover) !important; }
 [class*="hover:bg-[#ff1f1f]"]:hover { background-color: var(--brand) !important; }
-[class*="hover:bg-[#cc0000]"]:hover  { background-color: var(--brand-hover) !important; }
-[class*="bg-[#ff1f1f]/"]            { background-color: color-mix(in srgb, var(--brand) var(--tw-bg-opacity, 100%), transparent) !important; }
+[class*="hover:bg-[#cc0000]"]:hover { background-color: var(--brand-hover) !important; }
 
 /* Backgrounds */
+[class~="bg-[#0A0A0B]"]             { background-color: var(--bg-base) !important; }
 [class~="bg-[#070a12]"]             { background-color: var(--bg-base) !important; }
+[class~="bg-[#111113]"]             { background-color: var(--bg-subtle) !important; }
 [class~="bg-[#0a0f1a]"]             { background-color: var(--bg-subtle) !important; }
+[class~="bg-[#16161A]"]             { background-color: var(--bg-card) !important; }
 [class~="bg-[#0e1520]"]             { background-color: var(--bg-card) !important; }
+[class~="bg-[#1C1C21]"]             { background-color: var(--bg-elevated) !important; }
 [class~="bg-[#141d2c]"]             { background-color: var(--bg-elevated) !important; }
 [class~="bg-[#0a0e18]"]             { background-color: var(--bg-base) !important; }
 [class~="bg-[#1c2a3e]"]             { background-color: var(--border-mid) !important; }
 
 /* Borders */
+[class*="border-[#26262C]"]         { border-color: var(--border) !important; }
 [class*="border-[#141d2c]"]         { border-color: var(--border) !important; }
+[class*="border-[#3A3A42]"]         { border-color: var(--border-mid) !important; }
 [class*="border-[#1c2a3e]"]         { border-color: var(--border-mid) !important; }
 [class*="border-[#0e1520]"]         { border-color: var(--bg-card) !important; }
 
 /* Text */
+[class~="text-[#B8B8C0]"]           { color: var(--text-primary) !important; }
 [class~="text-[#d4d4da]"]           { color: var(--text-primary) !important; }
+[class~="text-[#F4F4F6]"]           { color: var(--text-heading) !important; }
 [class~="text-[#dce8ff]"]           { color: var(--text-heading) !important; }
+[class~="text-[#8A8A95]"]           { color: var(--text-muted) !important; }
 [class~="text-[#7a9ab5]"]           { color: var(--text-muted) !important; }
+[class~="text-[#5C5C66]"]           { color: var(--text-subtle) !important; }
 [class~="text-[#526888]"]           { color: var(--text-subtle) !important; }
 [class~="text-[#1c2a3e]"]           { color: var(--text-muted) !important; }
 
-/* Heading font */
+/* Heading font — Archivo */
+[class*="font-['Archivo']"]          { font-family: var(--font-heading) !important; }
 [class*="font-['Barlow_Condensed']"] { font-family: var(--font-heading) !important; }
 
 /* ═══════════════════════════════════════════════════════

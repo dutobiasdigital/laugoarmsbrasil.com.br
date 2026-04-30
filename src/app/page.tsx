@@ -183,7 +183,7 @@ export default async function HomePage() {
               {(featuredProducts.length > 0 ? featuredProducts : latestProducts).slice(0, 8).map((product) => (
                 <Link
                   key={product.id}
-                  href={`/loja/${product.slug}`}
+                  href={`/loja/produto/${product.slug}`}
                   className="group flex flex-col bg-[#0a0f1a] border border-[#141d2c] hover:border-[#ff1f1f]/30 rounded-[10px] overflow-hidden transition-all hover:shadow-[0_0_20px_rgba(255,31,31,0.06)]"
                 >
                   <div className="relative w-full aspect-square bg-[#0e1520] overflow-hidden">
@@ -250,7 +250,7 @@ export default async function HomePage() {
                 {latestProducts.slice(0, 4).map((product) => (
                   <Link
                     key={product.id}
-                    href={`/loja/${product.slug}`}
+                    href={`/loja/produto/${product.slug}`}
                     className="group flex flex-col bg-[#0a0f1a] border border-[#141d2c] hover:border-[#1c2a3e] rounded-[10px] overflow-hidden transition-all"
                   >
                     <div className="relative w-full aspect-square bg-[#0e1520] overflow-hidden">
