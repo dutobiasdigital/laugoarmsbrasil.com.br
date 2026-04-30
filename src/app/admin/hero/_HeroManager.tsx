@@ -15,7 +15,7 @@ export interface HeroSlide {
   titleHighlight?: string;
   subtitle?: string;
   text?: string;
-  button1: { label: string; href: string };
+  button1?: { label: string; href: string } | null;
   button2?: { label: string; href: string } | null;
   photo?: {
     url: string;
@@ -120,7 +120,7 @@ export default function HeroManager({ initialSlides }: { initialSlides: HeroSlid
     titleHighlight: "",
     subtitle: "Última Edição",
     text: "",
-    button1: { label: "Assinar agora", href: "/assine" },
+    button1: null,
     button2: null,
     photo: null,
   });
@@ -397,30 +397,56 @@ export default function HeroManager({ initialSlides }: { initialSlides: HeroSlid
                 {/* Button 1 */}
                 <div>
                   <label className="block text-[#7a9ab5] text-[12px] font-semibold mb-1.5">
-                    Botão 1 (obrigatório)
+                    Botão 1 (opcional)
                   </label>
-                  <div className="flex gap-2">
-                    <input
-                      value={slide.button1.label}
-                      onChange={(e) =>
+                  {slide.button1 ? (
+                    <div className="flex gap-2">
+                      <input
+                        value={slide.button1.label}
+                        onChange={(e) =>
+                          updateSlide(slide.id, {
+                            button1: {
+                              ...(slide.button1 as { label: string; href: string }),
+                              label: e.target.value,
+                            },
+                          })
+                        }
+                        placeholder="Label"
+                        className={inputCls + " flex-1"}
+                      />
+                      <input
+                        value={slide.button1.href}
+                        onChange={(e) =>
+                          updateSlide(slide.id, {
+                            button1: {
+                              ...(slide.button1 as { label: string; href: string }),
+                              href: e.target.value,
+                            },
+                          })
+                        }
+                        placeholder="/link"
+                        className={inputCls + " flex-1"}
+                      />
+                      <button
+                        onClick={() => updateSlide(slide.id, { button1: null })}
+                        className="text-[#526888] hover:text-[#ff6b6b] text-[18px] px-2"
+                        aria-label="Remover botão 1"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() =>
                         updateSlide(slide.id, {
-                          button1: { ...slide.button1, label: e.target.value },
+                          button1: { label: "Ver produtos", href: "/loja" },
                         })
                       }
-                      placeholder="Label"
-                      className={inputCls + " flex-1"}
-                    />
-                    <input
-                      value={slide.button1.href}
-                      onChange={(e) =>
-                        updateSlide(slide.id, {
-                          button1: { ...slide.button1, href: e.target.value },
-                        })
-                      }
-                      placeholder="/link"
-                      className={inputCls + " flex-1"}
-                    />
-                  </div>
+                      className="text-[#526888] hover:text-white text-[13px] border border-dashed border-[#1c2a3e] hover:border-[#526888] rounded-[6px] h-[36px] px-4 transition-colors"
+                    >
+                      + Adicionar botão 1
+                    </button>
+                  )}
                 </div>
 
                 {/* Button 2 */}
