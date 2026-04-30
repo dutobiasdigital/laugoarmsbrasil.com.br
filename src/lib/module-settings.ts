@@ -3,7 +3,7 @@
  * Usado pelas páginas públicas para respeitar as configurações do admin.
  */
 
-const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
 export interface ModuleConfig {
