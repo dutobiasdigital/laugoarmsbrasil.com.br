@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
 const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" };
@@ -9,7 +9,7 @@ function toSlug(str: string) {
   return str
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }
@@ -22,6 +22,8 @@ export async function POST(req: NextRequest) {
     const description = (body.description as string) || null;
     const isActive    = body.isActive === true || body.isActive === "true";
     const sortOrder   = Number(body.sortOrder ?? 0);
+    const imageUrl    = (body.imageUrl as string) || null;
+    const parentId    = (body.parentId as string) || null;
 
     if (!title) return NextResponse.json({ error: "Título obrigatório." }, { status: 400 });
 
@@ -32,7 +34,11 @@ export async function POST(req: NextRequest) {
     const res = await fetch(`${BASE}/shop_categories`, {
       method: "POST",
       headers: { ...HEADERS, Prefer: "return=representation" },
-      body: JSON.stringify({ title, slug, description, isActive, sortOrder, metaTitle, metaDescription, metaKeywords }),
+      body: JSON.stringify({
+        title, slug, description, isActive, sortOrder,
+        imageUrl, parentId,
+        metaTitle, metaDescription, metaKeywords,
+      }),
     });
     if (!res.ok) throw new Error(await res.text());
 
@@ -55,9 +61,12 @@ export async function PUT(req: NextRequest) {
     const description = (body.description as string) || null;
     const isActive    = body.isActive === true || body.isActive === "true";
     const sortOrder   = Number(body.sortOrder ?? 0);
+    const imageUrl    = (body.imageUrl as string) || null;
+    const parentId    = (body.parentId as string) || null;
 
     if (!id)    return NextResponse.json({ error: "ID obrigatório." }, { status: 400 });
     if (!title) return NextResponse.json({ error: "Título obrigatório." }, { status: 400 });
+    if (parentId === id) return NextResponse.json({ error: "Uma categoria não pode ser pai de si mesma." }, { status: 400 });
 
     const metaTitle       = (body.metaTitle as string) || null;
     const metaDescription = (body.metaDescription as string) || null;
@@ -66,7 +75,11 @@ export async function PUT(req: NextRequest) {
     const res = await fetch(`${BASE}/shop_categories?id=eq.${id}`, {
       method: "PATCH",
       headers: { ...HEADERS, Prefer: "return=representation" },
-      body: JSON.stringify({ title, slug, description, isActive, sortOrder, metaTitle, metaDescription, metaKeywords }),
+      body: JSON.stringify({
+        title, slug, description, isActive, sortOrder,
+        imageUrl, parentId,
+        metaTitle, metaDescription, metaKeywords,
+      }),
     });
     if (!res.ok) throw new Error(await res.text());
 
@@ -85,7 +98,20 @@ export async function DELETE(req: NextRequest) {
     const id   = body.id as string;
     if (!id) return NextResponse.json({ error: "ID obrigatório." }, { status: 400 });
 
-    // Check if any products reference this category
+    // Check for subcategories
+    const subRes = await fetch(
+      `${BASE}/shop_categories?parentId=eq.${id}&select=id&limit=1`,
+      { headers: { ...HEADERS, Prefer: "count=exact" }, cache: "no-store" }
+    );
+    const subCount = parseInt(subRes.headers.get("content-range")?.split("/")[1] ?? "0", 10);
+    if (subCount > 0) {
+      return NextResponse.json(
+        { error: "Não é possível excluir: existem subcategorias vinculadas." },
+        { status: 400 }
+      );
+    }
+
+    // Check for products
     const checkRes = await fetch(
       `${BASE}/shop_products?categoryId=eq.${id}&select=id&limit=1`,
       { headers: { ...HEADERS, Prefer: "count=exact" }, cache: "no-store" }

@@ -2,12 +2,23 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import CategoryForm from "../_CategoryForm";
+import CategoryForm, { type CategoryOption } from "../_CategoryForm";
 
-const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
 const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" };
+
+async function getAllCategories(): Promise<CategoryOption[]> {
+  try {
+    const res = await fetch(
+      `${BASE}/shop_categories?select=id,title,parentId&isActive=eq.true&order=sortOrder.asc,title.asc`,
+      { headers: HEADERS, cache: "no-store" }
+    );
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch { return []; }
+}
 
 export default async function EditarCategoriaPage({
   params,
@@ -16,41 +27,34 @@ export default async function EditarCategoriaPage({
 }) {
   const { id } = await params;
 
-  let category: {
-    id: string;
-    title: string;
-    slug: string;
-    description: string | null;
-    isActive: boolean;
-    sortOrder: number;
-    metaTitle: string | null;
-    metaDescription: string | null;
-    metaKeywords: string | null;
-  } | null = null;
+  const [categoryData, allCategories] = await Promise.all([
+    (async () => {
+      try {
+        const res = await fetch(
+          `${BASE}/shop_categories?id=eq.${id}&select=id,title,slug,description,imageUrl,parentId,isActive,sortOrder,metaTitle,metaDescription,metaKeywords&limit=1`,
+          { headers: HEADERS, cache: "no-store" }
+        );
+        const data = await res.json();
+        return Array.isArray(data) && data.length > 0 ? data[0] : null;
+      } catch { return null; }
+    })(),
+    getAllCategories(),
+  ]);
 
-  try {
-    const res = await fetch(
-      `${BASE}/shop_categories?id=eq.${id}&select=id,title,slug,description,isActive,sortOrder,metaTitle,metaDescription,metaKeywords&limit=1`,
-      { headers: HEADERS, cache: "no-store" }
-    );
-    const data = await res.json();
-    category = Array.isArray(data) && data.length > 0 ? data[0] : null;
-  } catch {
-    // DB unavailable
-  }
-
-  if (!category) notFound();
+  if (!categoryData) notFound();
 
   const initial = {
-    id: category.id,
-    title: category.title,
-    slug: category.slug,
-    description: category.description ?? "",
-    isActive: category.isActive,
-    sortOrder: category.sortOrder,
-    metaTitle: category.metaTitle ?? "",
-    metaDescription: category.metaDescription ?? "",
-    metaKeywords: category.metaKeywords ?? "",
+    id:              categoryData.id,
+    title:           categoryData.title,
+    slug:            categoryData.slug,
+    description:     categoryData.description ?? "",
+    imageUrl:        categoryData.imageUrl ?? "",
+    parentId:        categoryData.parentId ?? "",
+    isActive:        categoryData.isActive,
+    sortOrder:       categoryData.sortOrder,
+    metaTitle:       categoryData.metaTitle ?? "",
+    metaDescription: categoryData.metaDescription ?? "",
+    metaKeywords:    categoryData.metaKeywords ?? "",
   };
 
   return (
@@ -59,21 +63,21 @@ export default async function EditarCategoriaPage({
         <Link href="/admin/loja" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">
           Loja
         </Link>
-        <span className="text-[#141d2c]">/</span>
+        <span className="text-[#26262C]">/</span>
         <Link href="/admin/loja/categorias" className="text-[#7a9ab5] hover:text-white text-[14px] transition-colors">
           Categorias
         </Link>
-        <span className="text-[#141d2c]">/</span>
-        <span className="text-[#d4d4da] text-[14px] truncate max-w-[200px]">{category.title}</span>
+        <span className="text-[#26262C]">/</span>
+        <span className="text-[#d4d4da] text-[14px] truncate max-w-[200px]">{categoryData.title}</span>
       </div>
 
-      <h1 className="font-['Barlow_Condensed'] font-bold text-white text-[32px] leading-none mb-1">
+      <h1 className="font-['Archivo'] font-bold text-white text-[32px] leading-none mb-1">
         Editar Categoria
       </h1>
-      <p className="text-[#7a9ab5] text-[14px] mb-6">{category.title}</p>
-      <div className="bg-[#141d2c] h-px mb-6" />
+      <p className="text-[#7a9ab5] text-[14px] mb-6">{categoryData.title}</p>
+      <div className="bg-[#26262C] h-px mb-6" />
 
-      <CategoryForm mode="edit" initial={initial} />
+      <CategoryForm mode="edit" initial={initial} allCategories={allCategories} />
     </>
   );
 }
