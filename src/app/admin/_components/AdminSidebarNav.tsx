@@ -52,7 +52,10 @@ const NAV: NavEntry[] = [
     { href: "/admin/loja/categorias", label: "Categorias" },
     { href: "/admin/loja/pedidos",    label: "Pedidos" },
   ]},
-  { type: "link", href: "/admin/midias",        label: "Mídias",       icon: ICONS.photo },
+  { type: "link", href: "/admin/hero",       label: "Hero",      icon: ICONS.layout },
+  { type: "link", href: "/admin/galerias",   label: "Galerias",  icon: ICONS.photo },
+  { type: "link", href: "/admin/navegacao",  label: "Navegação", icon: ICONS.layers },
+  { type: "link", href: "/admin/midias",     label: "Mídias",    icon: ICONS.photo },
   { type: "link", href: "/admin/configuracoes", label: "Configurações", icon: ICONS.cog },
 ];
 
