@@ -46,47 +46,14 @@ const ICONS = {
 };
 
 const NAV: NavEntry[] = [
-  { type: "link", href: "/admin",               label: "Painel",        icon: ICONS.home,       exact: true },
-  { type: "link", href: "/admin/pagamentos",    label: "Pagamentos",    icon: ICONS.creditCard },
-  { type: "link", href: "/admin/visualizacoes", label: "Visualizações", icon: ICONS.chartBar },
-  { type: "link", href: "/admin/usuarios",  label: "Usuários",  icon: ICONS.users },
-  { type: "link", href: "/admin/empresas",  label: "Empresas",  icon: ICONS.building },
-  { type: "section", key: "guia",        label: "Guia Comercial", icon: ICONS.mapPin,    children: [
-    { href: "/admin/guia",            label: "Anunciantes" },
-    { href: "/admin/guia/categorias", label: "Categorias" },
-  ]},
-  { type: "section", key: "publicidade", label: "Publicidade", icon: ICONS.megaphone, children: [
-    { href: "/admin/anuncios", label: "Banners" },
-  ]},
-  { type: "section", key: "loja",        label: "Loja",        icon: ICONS.cart,      children: [
-    { href: "/admin/loja/pedidos",    label: "Pedidos" },
-    { href: "/admin/loja/categorias", label: "Categorias" },
+  { type: "link", href: "/admin", label: "Painel", icon: ICONS.home, exact: true },
+  { type: "section", key: "loja", label: "Loja", icon: ICONS.cart, children: [
     { href: "/admin/loja/produtos",   label: "Produtos" },
+    { href: "/admin/loja/categorias", label: "Categorias" },
+    { href: "/admin/loja/pedidos",    label: "Pedidos" },
   ]},
-  { type: "section", key: "planos",      label: "Planos",      icon: ICONS.layers,    children: [
-    { href: "/admin/planos",        label: "Assinatura Online", exact: true },
-    { href: "/admin/planos/guia",   label: "Guia" },
-    { href: "/admin/planos/banner", label: "Banners" },
-  ]},
-  { type: "section", key: "conteudos",   label: "Conteúdos",   icon: ICONS.document,  children: [
-    { href: "/admin/edicoes",    label: "Edições" },
-    { href: "/admin/artigos",    label: "Artigos" },
-    { href: "/admin/categorias", label: "Categorias" },
-  ]},
-  { type: "section", key: "paginas",     label: "Páginas",     icon: ICONS.layout,    children: [
-    { href: "/admin/paginas",      label: "Listar" },
-    { href: "/admin/paginas/nova", label: "Adicionar" },
-    { href: "/admin/paginas/menu", label: "Menu" },
-  ]},
-  { type: "section", key: "midias",      label: "Mídias",      icon: ICONS.photo,     children: [
-    { href: "/admin/midias",            label: "Biblioteca" },
-    { href: "/admin/midias/categorias", label: "Pastas" },
-  ]},
-  { type: "section", key: "sessoes",     label: "Sessões",     icon: ICONS.cube,      children: [
-    { href: "/admin/sessoes",            label: "Listar" },
-    { href: "/admin/sessoes/nova",       label: "Adicionar" },
-    { href: "/admin/sessoes/categorias", label: "Categorias" },
-  ]},
+  { type: "link", href: "/admin/midias",        label: "Mídias",       icon: ICONS.photo },
+  { type: "link", href: "/admin/design",        label: "Design System", icon: ICONS.layout },
   { type: "link", href: "/admin/configuracoes", label: "Configurações", icon: ICONS.cog },
 ];
 
