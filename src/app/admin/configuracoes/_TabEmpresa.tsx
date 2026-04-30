@@ -362,6 +362,10 @@ const DESIGN_KEYS = [
   "brand.color_primary", "brand.color_hover",
   // Tipografia
   "brand.font_heading",
+  // Fontes personalizadas (upload)
+  "brand.font_custom_1_name", "brand.font_custom_1_url",
+  "brand.font_custom_2_name", "brand.font_custom_2_url",
+  "brand.font_custom_3_name", "brand.font_custom_3_url",
   // Dark palette
   "brand.dark.bg_base", "brand.dark.bg_subtle", "brand.dark.bg_card",
   "brand.dark.bg_elevated", "brand.dark.border", "brand.dark.border_mid",
@@ -399,12 +403,95 @@ const DEFAULTS: Record<string, string> = {
 };
 
 const FONT_OPTIONS = [
-  { value: "archivo",    label: "Archivo (padrão)",  sample: "font-['Archivo']" },
-  { value: "oswald",     label: "Oswald",             sample: "font-['Oswald']" },
-  { value: "bebas",      label: "Bebas Neue",         sample: "font-['Bebas_Neue']" },
-  { value: "montserrat", label: "Montserrat",         sample: "font-['Montserrat']" },
-  { value: "playfair",   label: "Playfair Display",   sample: "font-['Playfair_Display']" },
+  { value: "archivo",     label: "Archivo (padrão)",     sample: "font-['Archivo']" },
+  { value: "oswald",      label: "Oswald",                sample: "font-['Oswald']" },
+  { value: "bebas",       label: "Bebas Neue",            sample: "font-['Bebas_Neue']" },
+  { value: "montserrat",  label: "Montserrat",            sample: "font-['Montserrat']" },
+  { value: "playfair",    label: "Playfair Display",      sample: "font-['Playfair_Display']" },
+  { value: "inter",       label: "Inter",                 sample: "font-['Inter']" },
+  { value: "raleway",     label: "Raleway",               sample: "font-['Raleway']" },
+  { value: "cinzel",      label: "Cinzel",                sample: "font-['Cinzel']" },
+  { value: "teko",        label: "Teko",                  sample: "font-['Teko']" },
+  { value: "dm-sans",     label: "DM Sans",               sample: "font-['DM_Sans']" },
+  { value: "barlow-cond", label: "Barlow Condensed",      sample: "font-['Barlow_Condensed']" },
+  { value: "custom1",     label: "Fonte Personalizada 1", sample: "" },
+  { value: "custom2",     label: "Fonte Personalizada 2", sample: "" },
+  { value: "custom3",     label: "Fonte Personalizada 3", sample: "" },
 ];
+
+function CustomFontSlot({
+  n, nameKey, urlKey, values, set,
+}: {
+  n: number; nameKey: string; urlKey: string;
+  values: Record<string, string>;
+  set: (k: string, v: string) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("folder", "fontes");
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.url) set(urlKey, data.url);
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  const currentUrl = values[urlKey] ?? "";
+  const currentName = values[nameKey] ?? "";
+
+  return (
+    <div className="flex flex-col gap-3 bg-[#070a12] border border-[#141d2c] rounded-[8px] p-4">
+      <p className="text-[#7a9ab5] text-[11px] font-semibold uppercase tracking-[0.8px]">
+        Fonte Personalizada {n}
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className={labelCls}>Nome da Fonte</label>
+          <input
+            value={currentName}
+            onChange={(e) => set(nameKey, e.target.value)}
+            placeholder={`Ex: MinhaFonte`}
+            className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#CB0A0E] w-full"
+          />
+          <p className="text-[#526888] text-[11px] mt-1">
+            Igual ao nome interno do arquivo de fonte.
+          </p>
+        </div>
+        <div>
+          <label className={labelCls}>Arquivo (.woff2, .ttf, .otf)</label>
+          <label
+            className={`flex items-center gap-2 cursor-pointer bg-[#141d2c] border border-[#1c2a3e] hover:border-[#CB0A0E] rounded-[6px] h-[40px] px-4 text-[13px] text-[#d4d4da] transition-colors w-full ${uploading ? "opacity-50 pointer-events-none" : ""}`}
+          >
+            <input
+              type="file"
+              accept=".woff,.woff2,.ttf,.otf"
+              className="sr-only"
+              onChange={handleFile}
+            />
+            <svg className="w-4 h-4 text-[#7a9ab5] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            {uploading ? "Enviando..." : currentUrl ? "Trocar arquivo" : "Escolher arquivo"}
+          </label>
+          {currentUrl && (
+            <p className="text-[#22c55e] text-[11px] mt-1 truncate" title={currentUrl}>
+              ✓ {currentUrl.split("/").pop()}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function ColorRow({
   k, label, hint, values, set,
@@ -459,8 +546,12 @@ function TabDesign({ settings }: Props) {
     if (r.ok) setTimeout(() => setSaved(false), 3000);
   }
 
-  const fontLabel = FONT_OPTIONS.find(f => f.value === values["brand.font_heading"])?.label ?? "Archivo";
-  const fontClass = FONT_OPTIONS.find(f => f.value === values["brand.font_heading"])?.sample ?? "font-['Archivo']";
+  const currentFontOpt = FONT_OPTIONS.find(f => f.value === values["brand.font_heading"]);
+  const fontLabel = currentFontOpt?.label ?? "Archivo";
+  const fontClass = currentFontOpt?.sample ?? "font-['Archivo']";
+  const isCustomFont = values["brand.font_heading"]?.startsWith("custom");
+  const customFontNum = isCustomFont ? parseInt(values["brand.font_heading"].slice(-1), 10) : null;
+  const customFontName = customFontNum ? (values[`brand.font_custom_${customFontNum}_name`] || null) : null;
 
   const prefix = `brand.${mode}`;
   const bgBase     = values[`${prefix}.bg_base`]      || DEFAULTS[`${prefix}.bg_base`];
@@ -543,21 +634,61 @@ function TabDesign({ settings }: Props) {
             onChange={e => set("brand.font_heading", e.target.value)}
             className={selectCls}
           >
-            {FONT_OPTIONS.map(f => (
-              <option key={f.value} value={f.value}>{f.label}</option>
-            ))}
+            <optgroup label="Google Fonts">
+              {FONT_OPTIONS.filter(f => !f.value.startsWith("custom")).map(f => (
+                <option key={f.value} value={f.value}>{f.label}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Fontes Personalizadas (upload)">
+              {FONT_OPTIONS.filter(f => f.value.startsWith("custom")).map(f => {
+                const num = f.value.slice(-1);
+                const uploaded = values[`brand.font_custom_${num}_name`];
+                return (
+                  <option key={f.value} value={f.value}>
+                    {uploaded ? `${f.label}: ${uploaded}` : `${f.label} (não configurada)`}
+                  </option>
+                );
+              })}
+            </optgroup>
           </select>
-          <p className="text-[#526888] text-[11px] mt-1">Todas as fontes já estão carregadas via Google Fonts no layout.</p>
+          <p className="text-[#526888] text-[11px] mt-1">Google Fonts carregadas automaticamente. Fontes personalizadas requerem upload abaixo.</p>
         </div>
         <div className="bg-[#141d2c] rounded-[8px] p-4 flex flex-col gap-2">
           <p className="text-[#526888] text-[11px] font-semibold uppercase tracking-wide">Pré-visualização</p>
-          <p className={`${fontClass} font-bold text-white text-[32px] leading-tight`}>
+          <p
+            className={`font-bold text-white text-[32px] leading-tight ${!isCustomFont ? fontClass : ""}`}
+            style={customFontName ? { fontFamily: `'${customFontName}',sans-serif` } : undefined}
+          >
             Laúgo Arms Brasil — Título H1
           </p>
-          <p className={`${fontClass} font-bold text-[#7a9ab5] text-[20px]`}>
-            Sub-heading e destaques com {fontLabel}
+          <p
+            className={`font-bold text-[#7a9ab5] text-[20px] ${!isCustomFont ? fontClass : ""}`}
+            style={customFontName ? { fontFamily: `'${customFontName}',sans-serif` } : undefined}
+          >
+            Sub-heading e destaques com {customFontName || fontLabel}
           </p>
         </div>
+      </section>
+
+      {/* ── Fontes Personalizadas ─────────────────────── */}
+      <section className="bg-[#0e1520] border border-[#141d2c] rounded-[12px] p-6 flex flex-col gap-4">
+        <h3 className="font-['Barlow_Condensed'] font-bold text-white text-[18px] pb-2 border-b border-[#141d2c]">
+          📁 Fontes Personalizadas
+          <span className="ml-2 text-[#526888] text-[13px] font-normal">Upload de .woff2 · .ttf · .otf</span>
+        </h3>
+        <p className="text-[#526888] text-[12px]">
+          Faça upload de até 3 fontes customizadas. Após o upload, selecione a fonte no campo acima e salve.
+        </p>
+        {[1, 2, 3].map((n) => (
+          <CustomFontSlot
+            key={n}
+            n={n}
+            nameKey={`brand.font_custom_${n}_name`}
+            urlKey={`brand.font_custom_${n}_url`}
+            values={values}
+            set={set}
+          />
+        ))}
       </section>
 
       {/* ── Paleta de Cores (Dark / Light) ─────────────── */}

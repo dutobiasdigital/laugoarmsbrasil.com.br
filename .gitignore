@@ -43,3 +43,6 @@ next-env.d.ts
 
 # claude code
 .claude/
+
+# user uploads (persist on server, not tracked in git)
+/public/uploads/

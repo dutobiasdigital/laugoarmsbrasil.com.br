@@ -1,5 +1,8 @@
 ﻿import type { Metadata } from "next";
-import { Archivo, JetBrains_Mono, Oswald, Bebas_Neue, Montserrat, Playfair_Display } from "next/font/google";
+import {
+  Archivo, JetBrains_Mono, Oswald, Bebas_Neue, Montserrat, Playfair_Display,
+  Inter, Raleway, Cinzel, Teko, DM_Sans, Barlow_Condensed,
+} from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { CartProvider } from "@/contexts/CartContext";
 import CartDrawer from "@/components/CartDrawer";
@@ -18,10 +21,16 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
-const oswald = Oswald({ variable: "--font-oswald", subsets: ["latin"], weight: ["400","600","700"] });
-const bebasNeue = Bebas_Neue({ variable: "--font-bebas-neue", subsets: ["latin"], weight: ["400"] });
-const montserrat = Montserrat({ variable: "--font-montserrat", subsets: ["latin"], weight: ["400","600","700","800"] });
+const oswald          = Oswald({ variable: "--font-oswald", subsets: ["latin"], weight: ["400","600","700"] });
+const bebasNeue       = Bebas_Neue({ variable: "--font-bebas-neue", subsets: ["latin"], weight: ["400"] });
+const montserrat      = Montserrat({ variable: "--font-montserrat", subsets: ["latin"], weight: ["400","600","700","800"] });
 const playfairDisplay = Playfair_Display({ variable: "--font-playfair-display", subsets: ["latin"], weight: ["400","600","700"] });
+const inter           = Inter({ variable: "--font-inter", subsets: ["latin"], weight: ["400","500","600","700","800"] });
+const raleway         = Raleway({ variable: "--font-raleway", subsets: ["latin"], weight: ["400","500","600","700","800"] });
+const cinzel          = Cinzel({ variable: "--font-cinzel", subsets: ["latin"], weight: ["400","600","700"] });
+const teko            = Teko({ variable: "--font-teko", subsets: ["latin"], weight: ["400","500","600","700"] });
+const dmSans          = DM_Sans({ variable: "--font-dm-sans", subsets: ["latin"], weight: ["400","500","600","700"] });
+const barlowCondensed = Barlow_Condensed({ variable: "--font-barlow-condensed", subsets: ["latin"], weight: ["400","500","600","700"] });
 
 export const metadata: Metadata = {
   title: "Laúgo Arms Brasil — Catálogo de Produtos",
@@ -49,17 +58,49 @@ async function getSiteSettings(): Promise<Record<string, string>> {
   } catch { return {}; }
 }
 
+function fontFormat(url: string): string {
+  const ext = url.split(".").pop()?.toLowerCase() ?? "";
+  if (ext === "woff") return "woff";
+  if (ext === "ttf") return "truetype";
+  if (ext === "otf") return "opentype";
+  return "woff2";
+}
+
 function buildDesignCss(cfg: Record<string, string>): string {
   const fontKeyMap: Record<string, string> = {
-    archivo:    "'Archivo',sans-serif",
-    oswald:     "'Oswald',sans-serif",
-    bebas:      "'Bebas Neue',sans-serif",
-    montserrat: "'Montserrat',sans-serif",
-    playfair:   "'Playfair Display',serif",
-    barlow:     "'Archivo',sans-serif", // fallback legacy → Archivo
+    archivo:        "'Archivo',sans-serif",
+    oswald:         "'Oswald',sans-serif",
+    bebas:          "'Bebas Neue',sans-serif",
+    montserrat:     "'Montserrat',sans-serif",
+    playfair:       "'Playfair Display',serif",
+    inter:          "'Inter',sans-serif",
+    raleway:        "'Raleway',sans-serif",
+    cinzel:         "'Cinzel',serif",
+    teko:           "'Teko',sans-serif",
+    "dm-sans":      "'DM Sans',sans-serif",
+    "barlow-cond":  "'Barlow Condensed',sans-serif",
+    barlow:         "'Archivo',sans-serif", // legacy fallback
   };
+
+  // Dynamic custom font families
+  for (let i = 1; i <= 3; i++) {
+    const name = cfg[`brand.font_custom_${i}_name`];
+    if (name) fontKeyMap[`custom${i}`] = `'${name}',sans-serif`;
+  }
+
   const fontKey = cfg["brand.font_heading"] || "archivo";
   const fontHeading = fontKeyMap[fontKey] ?? fontKeyMap.archivo;
+
+  // @font-face blocks for uploaded custom fonts
+  let customFontCss = "";
+  for (let i = 1; i <= 3; i++) {
+    const name = cfg[`brand.font_custom_${i}_name`];
+    const url  = cfg[`brand.font_custom_${i}_url`];
+    if (name && url) {
+      const fmt = fontFormat(url);
+      customFontCss += `@font-face{font-family:'${name}';src:url('${url}') format('${fmt}');font-display:swap;}`;
+    }
+  }
 
   const darkVars = [
     `--brand:${cfg["brand.color_primary"] || "#CB0A0E"}`,
@@ -90,7 +131,7 @@ function buildDesignCss(cfg: Record<string, string>): string {
     `--text-subtle:${cfg["brand.light.text_subtle"] || "#64748b"}`,
   ].join(";");
 
-  return `:root{${darkVars}}html.light{${lightVars}}`;
+  return `${customFontCss}:root{${darkVars}}html.light{${lightVars}}`;
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -110,7 +151,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang={cfg["site.language"] ?? "pt-BR"}
-      className={`${archivo.variable} ${jetbrainsMono.variable} ${oswald.variable} ${bebasNeue.variable} ${montserrat.variable} ${playfairDisplay.variable} h-full antialiased`}
+      className={`${archivo.variable} ${jetbrainsMono.variable} ${oswald.variable} ${bebasNeue.variable} ${montserrat.variable} ${playfairDisplay.variable} ${inter.variable} ${raleway.variable} ${cinzel.variable} ${teko.variable} ${dmSans.variable} ${barlowCondensed.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

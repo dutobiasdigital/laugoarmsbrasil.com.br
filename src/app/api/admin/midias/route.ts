@@ -1,20 +1,13 @@
-﻿import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { NextRequest, NextResponse } from "next/server";
+import path from "path";
+import fs from "fs/promises";
 
 export const dynamic = "force-dynamic";
 
-const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
 const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" };
-const BUCKET   = "laugo-media";
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-}
 
 function mimeToType(mime: string): string {
   if (mime.startsWith("image/")) return "image";
@@ -63,35 +56,32 @@ export async function GET(req: NextRequest) {
 
 // POST /api/admin/midias — upload file + save metadata
 export async function POST(req: NextRequest) {
-  const supabase = getSupabase();
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     if (!file) return NextResponse.json({ error: "Nenhum arquivo enviado." }, { status: 400 });
 
-    const folder   = (formData.get("folder") as string | null)?.trim() || "geral";
-    const title    = (formData.get("title") as string | null)?.trim() || "";
-    const altText  = (formData.get("alt_text") as string | null)?.trim() || "";
-    const ext      = file.name.split(".").pop()?.toLowerCase() ?? "bin";
-    const random   = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const storagePath = `midias/${folder}/${random}.${ext}`;
+    const folder  = (formData.get("folder")   as string | null)?.trim() || "geral";
+    const title   = (formData.get("title")    as string | null)?.trim() || "";
+    const altText = (formData.get("alt_text") as string | null)?.trim() || "";
+    const ext     = file.name.split(".").pop()?.toLowerCase() ?? "bin";
+    const random  = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const filename = `${random}.${ext}`;
+
+    const uploadsDir = path.join(process.cwd(), "public", "uploads", "midias", folder);
+    await fs.mkdir(uploadsDir, { recursive: true });
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    await fs.writeFile(path.join(uploadsDir, filename), buffer);
 
-    const { error: uploadError } = await supabase.storage
-      .from(BUCKET)
-      .upload(storagePath, buffer, { contentType: file.type, upsert: false });
+    const storagePath = `uploads/midias/${folder}/${filename}`;
+    const url         = `/uploads/midias/${folder}/${filename}`;
 
-    if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 });
-
-    const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(storagePath);
-
-    const fileType = mimeToType(file.type);
     const record = {
       filename:     file.name,
       storage_path: storagePath,
-      url:          urlData.publicUrl,
-      type:         fileType,
+      url,
+      type:         mimeToType(file.type),
       mime_type:    file.type,
       size_bytes:   file.size,
       alt_text:     altText || null,
@@ -106,8 +96,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!dbRes.ok) {
-      // rollback storage
-      await supabase.storage.from(BUCKET).remove([storagePath]);
+      await fs.unlink(path.join(uploadsDir, filename)).catch(() => {});
       throw new Error(await dbRes.text());
     }
 
@@ -120,21 +109,21 @@ export async function POST(req: NextRequest) {
 
 // DELETE /api/admin/midias — bulk delete
 export async function DELETE(req: NextRequest) {
-  const supabase = getSupabase();
   try {
     const body = await req.json();
     const ids: string[] = body.ids ?? [];
     if (!ids.length) return NextResponse.json({ error: "Nenhum ID informado." }, { status: 400 });
 
-    // fetch storage_path for each file
     const listRes = await fetch(
       `${BASE}/media_files?select=id,storage_path&id=in.(${ids.join(",")})`,
       { headers: HEADERS, cache: "no-store" }
     );
     const files: { id: string; storage_path: string }[] = await listRes.json();
 
-    const paths = files.map((f) => f.storage_path);
-    if (paths.length) await supabase.storage.from(BUCKET).remove(paths);
+    for (const f of files) {
+      const filePath = path.join(process.cwd(), "public", f.storage_path);
+      await fs.unlink(filePath).catch(() => {});
+    }
 
     for (const id of ids) {
       await fetch(`${BASE}/media_files?id=eq.${id}`, { method: "DELETE", headers: HEADERS });
