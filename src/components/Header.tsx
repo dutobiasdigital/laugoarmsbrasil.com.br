@@ -69,7 +69,7 @@ export default async function Header() {
 
       <Link href="/" className="flex items-center shrink-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={logoUrl} alt="Laúgo Arms Brasil" className="h-[52px] w-auto object-contain" />
+        <img src={logoUrl} alt="Laúgo Arms Brasil" className="w-auto max-w-[218px] md:max-w-[280px] h-auto object-contain" />
       </Link>
 
       <div className="w-12 shrink-0" />

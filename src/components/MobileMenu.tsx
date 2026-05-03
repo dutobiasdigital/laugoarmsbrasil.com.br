@@ -85,7 +85,7 @@ export default function MobileMenu({
           <div className="relative z-10 flex items-center justify-between px-6 h-16 shrink-0 border-b border-white/[0.05]">
             <Link href="/" onClick={close} className="flex items-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={logoUrl} alt="Laúgo Arms Brasil" className="h-[44px] w-auto object-contain" />
+              <img src={logoUrl} alt="Laúgo Arms Brasil" className="w-auto max-w-[218px] h-auto object-contain" />
             </Link>
             <button
               onClick={close}
