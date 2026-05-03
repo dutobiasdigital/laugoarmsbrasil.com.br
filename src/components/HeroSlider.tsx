@@ -16,7 +16,7 @@ export interface HeroSlide {
   titleHighlight?: string;
   subtitle?: string;
   text?: string;
-  button1: { label: string; href: string };
+  button1?: { label: string; href: string } | null;
   button2?: { label: string; href: string } | null;
   photo?: {
     url: string;
@@ -157,12 +157,14 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
                   <p className="text-[#7a9ab5] text-[15px] leading-relaxed max-w-xl">{slide.text}</p>
                 )}
                 <div className="flex items-center gap-3 flex-wrap pt-1">
-                  <Link
-                    href={slide.button1.href}
-                    className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold px-7 py-3 rounded transition-colors"
-                  >
-                    {slide.button1.label}
-                  </Link>
+                  {slide.button1 && (
+                    <Link
+                      href={slide.button1.href}
+                      className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[14px] font-semibold px-7 py-3 rounded transition-colors"
+                    >
+                      {slide.button1.label}
+                    </Link>
+                  )}
                   {slide.button2 && (
                     <Link
                       href={slide.button2.href}
