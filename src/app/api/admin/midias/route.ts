@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import path from "path";
-import fs from "fs/promises";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +6,9 @@ const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
 const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" };
+const BUCKET   = "laugo-media";
+const STORAGE  = `https://${PROJECT}.supabase.co/storage/v1/object`;
+const PUBLIC   = `https://${PROJECT}.supabase.co/storage/v1/object/public/${BUCKET}`;
 
 function mimeToType(mime: string): string {
   if (mime.startsWith("image/")) return "image";
@@ -19,6 +20,16 @@ function mimeToType(mime: string): string {
     mime.startsWith("text/")
   ) return "document";
   return "other";
+}
+
+function sanitizeName(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 // GET /api/admin/midias — list with filters + pagination
@@ -54,28 +65,39 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/admin/midias — upload file + save metadata
+// POST /api/admin/midias — upload file to Supabase Storage + save metadata
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     if (!file) return NextResponse.json({ error: "Nenhum arquivo enviado." }, { status: 400 });
 
-    const folder  = (formData.get("folder")   as string | null)?.trim() || "geral";
-    const title   = (formData.get("title")    as string | null)?.trim() || "";
-    const altText = (formData.get("alt_text") as string | null)?.trim() || "";
-    const ext     = file.name.split(".").pop()?.toLowerCase() ?? "bin";
-    const random  = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const folder   = sanitizeName((formData.get("folder") as string | null)?.trim() || "geral");
+    const title    = (formData.get("title")    as string | null)?.trim() || "";
+    const altText  = (formData.get("alt_text") as string | null)?.trim() || "";
+    const ext      = file.name.split(".").pop()?.toLowerCase() ?? "bin";
+    const random   = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const filename = `${random}.${ext}`;
-
-    const uploadsDir = path.join(process.cwd(), "public", "uploads", "midias", folder);
-    await fs.mkdir(uploadsDir, { recursive: true });
+    const storagePath = `midias/${folder}/${filename}`;
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    await fs.writeFile(path.join(uploadsDir, filename), buffer);
+    const storageRes = await fetch(`${STORAGE}/${BUCKET}/${storagePath}`, {
+      method: "POST",
+      headers: {
+        apikey:         SERVICE,
+        Authorization:  `Bearer ${SERVICE}`,
+        "Content-Type": file.type || "application/octet-stream",
+        "x-upsert":     "true",
+      },
+      body: buffer,
+    });
 
-    const storagePath = `uploads/midias/${folder}/${filename}`;
-    const url         = `/uploads/midias/${folder}/${filename}`;
+    if (!storageRes.ok) {
+      const err = await storageRes.text();
+      return NextResponse.json({ error: err }, { status: 500 });
+    }
+
+    const url = `${PUBLIC}/${storagePath}`;
 
     const record = {
       filename:     file.name,
@@ -95,10 +117,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(record),
     });
 
-    if (!dbRes.ok) {
-      await fs.unlink(path.join(uploadsDir, filename)).catch(() => {});
-      throw new Error(await dbRes.text());
-    }
+    if (!dbRes.ok) throw new Error(await dbRes.text());
 
     const [created] = await dbRes.json();
     return NextResponse.json({ file: created });
@@ -107,7 +126,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// DELETE /api/admin/midias — bulk delete
+// DELETE /api/admin/midias — bulk delete from Supabase Storage + DB
 export async function DELETE(req: NextRequest) {
   try {
     const body = await req.json();
@@ -120,9 +139,17 @@ export async function DELETE(req: NextRequest) {
     );
     const files: { id: string; storage_path: string }[] = await listRes.json();
 
-    for (const f of files) {
-      const filePath = path.join(process.cwd(), "public", f.storage_path);
-      await fs.unlink(filePath).catch(() => {});
+    const prefixes = files.map((f) => f.storage_path).filter(Boolean);
+    if (prefixes.length > 0) {
+      await fetch(`${STORAGE}/${BUCKET}`, {
+        method: "DELETE",
+        headers: {
+          apikey:         SERVICE,
+          Authorization:  `Bearer ${SERVICE}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prefixes }),
+      });
     }
 
     for (const id of ids) {

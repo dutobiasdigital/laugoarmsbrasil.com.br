@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import path from "path";
-import fs from "fs/promises";
 
 export const dynamic = "force-dynamic";
+
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "";
+const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const BUCKET   = "laugo-media";
+const STORAGE  = `https://${PROJECT}.supabase.co/storage/v1/object`;
+const PUBLIC   = `https://${PROJECT}.supabase.co/storage/v1/object/public/${BUCKET}`;
 
 function sanitizeName(name: string): string {
   return name
@@ -33,16 +37,26 @@ export async function POST(req: NextRequest) {
       ? `${fileBase}.${ext}`
       : `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-    const uploadsDir = folder
-      ? path.join(process.cwd(), "public", "uploads", folder)
-      : path.join(process.cwd(), "public", "uploads");
-
-    await fs.mkdir(uploadsDir, { recursive: true });
+    const storagePath = folder ? `${folder}/${safeName}` : safeName;
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    await fs.writeFile(path.join(uploadsDir, safeName), buffer);
+    const res = await fetch(`${STORAGE}/${BUCKET}/${storagePath}`, {
+      method: "POST",
+      headers: {
+        apikey:          SERVICE,
+        Authorization:   `Bearer ${SERVICE}`,
+        "Content-Type":  file.type || "application/octet-stream",
+        "x-upsert":      "true",
+      },
+      body: buffer,
+    });
 
-    const url = folder ? `/uploads/${folder}/${safeName}` : `/uploads/${safeName}`;
+    if (!res.ok) {
+      const err = await res.text();
+      return NextResponse.json({ error: err }, { status: 500 });
+    }
+
+    const url = `${PUBLIC}/${storagePath}`;
     return NextResponse.json({ url });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
