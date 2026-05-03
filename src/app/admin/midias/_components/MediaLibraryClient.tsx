@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MediaCard from "./MediaCard";
 import MediaDetailPanel from "./MediaDetailPanel";
 import MediaUploadZone from "./MediaUploadZone";
+import FolderManager from "./FolderManager";
 import type { MediaFile } from "./MediaUploadZone";
 
 interface Props {
   initialFiles: MediaFile[];
   initialTotal: number;
+  initialFolders: string[];
 }
 
 const TYPE_OPTIONS = [
@@ -20,14 +22,14 @@ const TYPE_OPTIONS = [
   { value: "other",    label: "Outros" },
 ];
 
-const FOLDER_OPTIONS = ["geral", "artigos", "edicoes", "loja", "banners", "hero"];
-
-export default function MediaLibraryClient({ initialFiles, initialTotal }: Props) {
+export default function MediaLibraryClient({ initialFiles, initialTotal, initialFolders }: Props) {
   const [files, setFiles]           = useState<MediaFile[]>(initialFiles);
   const [total, setTotal]           = useState(initialTotal);
   const [selected, setSelected]     = useState<MediaFile | null>(null);
   const [checked, setChecked]       = useState<Set<string>>(new Set());
   const [showUpload, setShowUpload] = useState(false);
+  const [showFolderMgr, setShowFolderMgr] = useState(false);
+  const [folders, setFolders]       = useState<string[]>(initialFolders);
   const [q, setQ]                   = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [folderFilter, setFolderFilter] = useState("");
@@ -36,6 +38,11 @@ export default function MediaLibraryClient({ initialFiles, initialTotal }: Props
   const [page, setPage]             = useState(1);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const PER_PAGE = 48;
+
+  // Garante que uploadFolder é válido quando a lista de pastas muda
+  useEffect(() => {
+    if (!folders.includes(uploadFolder)) setUploadFolder(folders[0] ?? "geral");
+  }, [folders, uploadFolder]);
 
   async function fetchFiles(opts?: { q?: string; type?: string; folder?: string; pagina?: number }) {
     setLoading(true);
@@ -141,7 +148,7 @@ export default function MediaLibraryClient({ initialFiles, initialTotal }: Props
             className={inputCls}
           >
             <option value="">Todas as pastas</option>
-            {FOLDER_OPTIONS.map((f) => <option key={f} value={f}>{f}</option>)}
+            {folders.map((f) => <option key={f} value={f}>{f}</option>)}
           </select>
           {(q || typeFilter || folderFilter) && (
             <button
@@ -161,6 +168,15 @@ export default function MediaLibraryClient({ initialFiles, initialTotal }: Props
                 {bulkDeleting ? "Excluindo…" : `Excluir ${checked.size} selecionado(s)`}
               </button>
             )}
+            <button
+              onClick={() => setShowFolderMgr(true)}
+              className="h-[38px] px-4 rounded-[6px] text-[13px] font-semibold bg-[#141d2c] border border-[#1c2a3e] text-[#7a9ab5] hover:text-white transition-colors flex items-center gap-1.5"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                <path d="M19.5 21a3 3 0 003-3v-4.5a3 3 0 00-3-3h-15a3 3 0 00-3 3V18a3 3 0 003 3h15zM1.5 10.146V6a3 3 0 013-3h5.379a2.25 2.25 0 011.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 013 3v1.146A4.483 4.483 0 0019.5 9h-15a4.483 4.483 0 00-3 1.146z" />
+              </svg>
+              Pastas
+            </button>
             <button
               onClick={() => setShowUpload((v) => !v)}
               className={`h-[38px] px-5 rounded-[6px] text-[13px] font-semibold transition-colors ${
@@ -184,7 +200,7 @@ export default function MediaLibraryClient({ initialFiles, initialTotal }: Props
                 onChange={(e) => setUploadFolder(e.target.value)}
                 className="bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[32px] px-2 text-[12px] text-[#d4d4da] focus:outline-none focus:border-[#526888]"
               >
-                {FOLDER_OPTIONS.map((f) => <option key={f} value={f}>{f}</option>)}
+                {folders.map((f) => <option key={f} value={f}>{f}</option>)}
               </select>
             </div>
             <MediaUploadZone folder={uploadFolder} onUploaded={handleUploaded} />
@@ -262,6 +278,15 @@ export default function MediaLibraryClient({ initialFiles, initialTotal }: Props
             onDeleted={handleDeleted}
           />
         </div>
+      )}
+
+      {/* Gerenciador de pastas */}
+      {showFolderMgr && (
+        <FolderManager
+          folders={folders}
+          onClose={() => setShowFolderMgr(false)}
+          onChanged={(updated) => { setFolders(updated); setShowFolderMgr(false); }}
+        />
       )}
     </div>
   );

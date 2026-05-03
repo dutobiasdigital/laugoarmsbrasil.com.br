@@ -2,32 +2,48 @@ import MediaLibraryClient from "./_components/MediaLibraryClient";
 
 export const dynamic = "force-dynamic";
 
-const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "mfefumwjzbzuqfyvpoeo";
+const PROJECT = process.env.SUPABASE_PROJECT_ID ?? "";
 const SERVICE  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 const BASE     = `https://${PROJECT}.supabase.co/rest/v1`;
 const HEADERS  = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" };
 
+const DEFAULT_FOLDERS = ["geral", "loja", "hero", "banners"];
+
 async function fetchInitial() {
   try {
-    const res = await fetch(
-      `${BASE}/media_files?select=*&order=created_at.desc&limit=48`,
-      { headers: { ...HEADERS, Prefer: "count=exact" }, cache: "no-store" }
-    );
-    const contentRange = res.headers.get("Content-Range");
+    const [filesRes, foldersRes] = await Promise.all([
+      fetch(
+        `${BASE}/media_files?select=*&order=created_at.desc&limit=48`,
+        { headers: { ...HEADERS, Prefer: "count=exact" }, cache: "no-store" }
+      ),
+      fetch(
+        `${BASE}/site_settings?key=eq.media.folders&select=value&limit=1`,
+        { headers: HEADERS, cache: "no-store" }
+      ),
+    ]);
+
+    const contentRange = filesRes.headers.get("Content-Range");
     let total = 0;
     if (contentRange) {
       const m = contentRange.match(/\/(\d+)$/);
       if (m) total = parseInt(m[1], 10);
     }
-    const files = await res.json();
-    return { files: Array.isArray(files) ? files : [], total };
+    const files = await filesRes.json();
+
+    let folders = DEFAULT_FOLDERS;
+    const foldersData = await foldersRes.json();
+    if (Array.isArray(foldersData) && foldersData.length > 0 && foldersData[0].value) {
+      try { folders = JSON.parse(foldersData[0].value); } catch { /* fallback */ }
+    }
+
+    return { files: Array.isArray(files) ? files : [], total, folders };
   } catch {
-    return { files: [], total: 0 };
+    return { files: [], total: 0, folders: DEFAULT_FOLDERS };
   }
 }
 
 export default async function AdminMidiasPage() {
-  const { files, total } = await fetchInitial();
+  const { files, total, folders } = await fetchInitial();
 
   return (
     <>
@@ -44,7 +60,7 @@ export default async function AdminMidiasPage() {
 
       <div className="bg-[#141d2c] h-px mb-6" />
 
-      <MediaLibraryClient initialFiles={files} initialTotal={total} />
+      <MediaLibraryClient initialFiles={files} initialTotal={total} initialFolders={folders} />
     </>
   );
 }
