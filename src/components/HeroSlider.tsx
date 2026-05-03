@@ -97,7 +97,6 @@ export default function HeroSlider({ slides, config: cfgProp }: HeroSliderProps)
         .hs-root { height: ${cfg.heightMobile}px; }
         @media(min-width:768px){ .hs-root { height: ${cfg.heightTablet}px; } }
         @media(min-width:1024px){ .hs-root { height: ${cfg.heightDesktop}px; } }
-        .hs-inner { height: 100%; }
       `}</style>
 
       <div className="hs-root relative overflow-hidden">
@@ -124,10 +123,10 @@ export default function HeroSlider({ slides, config: cfgProp }: HeroSliderProps)
           return (
             <div
               key={slide.id}
-              className={`${i === 0 ? "relative" : "absolute inset-0"} transition-all duration-700 ease-in-out ${slideClass(i, current, cfg.animation)}`}
+              className={`absolute inset-0 transition-all duration-700 ease-in-out ${slideClass(i, current, cfg.animation)}`}
             >
               <section
-                className={`hs-inner relative flex items-center px-5 lg:px-20 py-16 lg:py-0 gap-6 overflow-hidden ${isReversed ? "flex-row-reverse" : ""}`}
+                className={`h-full relative flex items-center px-5 lg:px-20 py-10 lg:py-0 gap-6 overflow-hidden ${isReversed ? "flex-row-reverse" : ""}`}
               >
                 {/* Responsive background layers */}
                 {bgs.map(({ bg, cls }, idx) => (
