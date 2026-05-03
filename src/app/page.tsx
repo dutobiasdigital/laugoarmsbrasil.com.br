@@ -2,7 +2,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AdBanner from "@/components/AdBanner";
-import HeroSlider from "@/components/HeroSlider";
+import HeroSlider, { DEFAULT_HERO_CONFIG, type HeroConfig } from "@/components/HeroSlider";
 import WelcomeBanner from "@/components/WelcomeBanner";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +47,7 @@ export default async function HomePage() {
   let latestProducts: ShopProduct[]   = [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let heroSlides: any[]               = [];
+  let heroConfig: HeroConfig          = { ...DEFAULT_HERO_CONFIG };
 
   try {
     const [catRes, featuredRes, latestRes, settingsRes] = await Promise.all([
@@ -63,7 +64,7 @@ export default async function HomePage() {
         { headers: HEADERS, cache: "no-store" }
       ),
       fetch(
-        `${BASE}/site_settings?key=eq.hero.slides&select=value&limit=1`,
+        `${BASE}/site_settings?key=in.(hero.slides,hero.config)&select=key,value`,
         { headers: HEADERS, cache: "no-store" }
       ),
     ]);
@@ -73,13 +74,17 @@ export default async function HomePage() {
     if (latestRes.ok)   { const d = await latestRes.json();   if (Array.isArray(d)) latestProducts    = d; }
 
     if (settingsRes.ok) {
-      const settingsData = await settingsRes.json();
-      const raw = settingsData?.[0]?.value;
-      if (raw) {
-        const parsed = JSON.parse(raw);
+      const settingsData: { key: string; value: string | null }[] = await settingsRes.json();
+      const slidesRow = Array.isArray(settingsData) ? settingsData.find((r) => r.key === "hero.slides") : null;
+      const configRow = Array.isArray(settingsData) ? settingsData.find((r) => r.key === "hero.config") : null;
+      if (slidesRow?.value) {
+        const parsed = JSON.parse(slidesRow.value);
         heroSlides = Array.isArray(parsed)
           ? parsed.filter((s: { active?: boolean }) => s.active).sort((a: { order?: number }, b: { order?: number }) => (a.order ?? 0) - (b.order ?? 0))
           : [];
+      }
+      if (configRow?.value) {
+        heroConfig = { ...DEFAULT_HERO_CONFIG, ...JSON.parse(configRow.value) };
       }
     }
   } catch {
@@ -93,7 +98,7 @@ export default async function HomePage() {
       {/* Hero */}
       <div className="mt-16">
         {heroSlides.length > 0 ? (
-          <HeroSlider slides={heroSlides} />
+          <HeroSlider slides={heroSlides} config={heroConfig} />
         ) : (
           <WelcomeBanner />
         )}
