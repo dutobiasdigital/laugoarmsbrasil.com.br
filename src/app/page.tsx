@@ -108,10 +108,10 @@ export default async function HomePage() {
         )}
       </div>
 
-      {/* Conteúdo HTML da Home */}
+      {/* Conteúdo HTML da Home — sem padding: o HTML controla o próprio layout */}
       {homeContent && (
         <div
-          className="px-5 lg:px-20 py-10 border-b border-[#0e1520] text-[#d4d4da] text-[15px] leading-[1.7] [&_h2]:text-white [&_h2]:text-[28px] [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-white [&_h3]:text-[20px] [&_h3]:font-bold [&_h3]:mb-2 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-1 [&_blockquote]:border-l-4 [&_blockquote]:border-[#ff1f1f] [&_blockquote]:pl-4 [&_blockquote]:text-[#7a9ab5] [&_a]:text-[#ff1f1f] [&_a]:underline [&_img]:max-w-full [&_img]:rounded-[6px] [&_img]:my-3"
+          className="overflow-hidden"
           dangerouslySetInnerHTML={{ __html: homeContent }}
         />
       )}
