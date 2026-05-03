@@ -47,6 +47,7 @@ export default async function HomePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let heroSlides: any[]               = [];
   let heroConfig: HeroConfig          = { ...DEFAULT_HERO_CONFIG };
+  let homeContent                     = "";
 
   try {
     const [catRes, featuredRes, latestRes, settingsRes] = await Promise.all([
@@ -63,7 +64,7 @@ export default async function HomePage() {
         { headers: HEADERS, cache: "no-store" }
       ),
       fetch(
-        `${BASE}/site_settings?key=in.(hero.slides,hero.config)&select=key,value`,
+        `${BASE}/site_settings?key=in.(hero.slides,hero.config,home.content)&select=key,value`,
         { headers: HEADERS, cache: "no-store" }
       ),
     ]);
@@ -74,8 +75,9 @@ export default async function HomePage() {
 
     if (settingsRes.ok) {
       const settingsData: { key: string; value: string | null }[] = await settingsRes.json();
-      const slidesRow = Array.isArray(settingsData) ? settingsData.find((r) => r.key === "hero.slides") : null;
-      const configRow = Array.isArray(settingsData) ? settingsData.find((r) => r.key === "hero.config") : null;
+      const slidesRow  = Array.isArray(settingsData) ? settingsData.find((r) => r.key === "hero.slides")   : null;
+      const configRow  = Array.isArray(settingsData) ? settingsData.find((r) => r.key === "hero.config")   : null;
+      const contentRow = Array.isArray(settingsData) ? settingsData.find((r) => r.key === "home.content")  : null;
       if (slidesRow?.value) {
         const parsed = JSON.parse(slidesRow.value);
         heroSlides = Array.isArray(parsed)
@@ -84,6 +86,9 @@ export default async function HomePage() {
       }
       if (configRow?.value) {
         heroConfig = { ...DEFAULT_HERO_CONFIG, ...JSON.parse(configRow.value) };
+      }
+      if (contentRow?.value) {
+        homeContent = contentRow.value;
       }
     }
   } catch {
@@ -102,6 +107,14 @@ export default async function HomePage() {
           <WelcomeBanner />
         )}
       </div>
+
+      {/* Conteúdo HTML da Home */}
+      {homeContent && (
+        <div
+          className="px-5 lg:px-20 py-10 border-b border-[#0e1520] text-[#d4d4da] text-[15px] leading-[1.7] [&_h2]:text-white [&_h2]:text-[28px] [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-white [&_h3]:text-[20px] [&_h3]:font-bold [&_h3]:mb-2 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-1 [&_blockquote]:border-l-4 [&_blockquote]:border-[#ff1f1f] [&_blockquote]:pl-4 [&_blockquote]:text-[#7a9ab5] [&_a]:text-[#ff1f1f] [&_a]:underline [&_img]:max-w-full [&_img]:rounded-[6px] [&_img]:my-3"
+          dangerouslySetInnerHTML={{ __html: homeContent }}
+        />
+      )}
 
       {/* ── Categorias ──────────────────────────────────────────────── */}
       {categories.length > 0 && (
