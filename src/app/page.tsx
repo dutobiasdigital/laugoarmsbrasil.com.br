@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import AdBanner from "@/components/AdBanner";
 import HeroSlider, { DEFAULT_HERO_CONFIG, type HeroConfig } from "@/components/HeroSlider";
 import WelcomeBanner from "@/components/WelcomeBanner";
 
@@ -102,11 +101,6 @@ export default async function HomePage() {
         ) : (
           <WelcomeBanner />
         )}
-      </div>
-
-      {/* Ad — HOME_TOP */}
-      <div className="bg-[#070a12] flex items-center justify-center py-3 shrink-0 border-y border-[#0e1520]">
-        <AdBanner position="HOME_TOP" bannerSize="LEADERBOARD" />
       </div>
 
       {/* ── Categorias ──────────────────────────────────────────────── */}
@@ -325,8 +319,6 @@ export default async function HomePage() {
 
         {/* ── Sidebar ──────────────────────────────────────────────── */}
         <aside className="hidden lg:flex flex-col gap-8 w-[300px] shrink-0">
-          <AdBanner position="HOME_SIDEBAR" bannerSize="MED_RECT" />
-
           {/* Categorias rápidas */}
           {categories.length > 0 && (
             <div className="bg-[#0e1520] border border-[#141d2c] rounded-lg p-5 flex flex-col gap-3">
@@ -354,8 +346,6 @@ export default async function HomePage() {
               </Link>
             </div>
           )}
-
-          <AdBanner position="HOME_SIDEBAR" bannerSize="HALF_PAGE" />
         </aside>
       </div>
 
