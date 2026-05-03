@@ -86,40 +86,6 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* ── HTML/Visual toggle ───────────────────────────────── */
-function HtmlToggle({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  const [mode, setMode] = useState<"visual" | "html">("visual");
-  return (
-    <div>
-      <div className="flex justify-end mb-1.5">
-        <div className="flex rounded-[6px] overflow-hidden border border-[#1c2a3e]">
-          {(["visual", "html"] as const).map((m) => (
-            <button key={m} type="button" onClick={() => setMode(m)}
-              className={`px-3 h-[28px] text-[11px] font-semibold transition-colors ${
-                mode === m ? "bg-[#ff1f1f] text-white" : "bg-[#141d2c] text-[#7a9ab5] hover:text-white"
-              }`}>
-              {m === "visual" ? "Visual" : "HTML"}
-            </button>
-          ))}
-        </div>
-      </div>
-      {mode === "visual" ? (
-        <RichEditor value={value} onChange={onChange} />
-      ) : (
-        <textarea rows={14} value={value} onChange={(e) => onChange(e.target.value)}
-          className="bg-[#070a12] border border-[#1c2a3e] rounded-[6px] px-3 py-2.5 text-[12px] text-[#22c55e] placeholder-white/30 focus:outline-none focus:border-[#ff1f1f] w-full resize-y font-mono leading-relaxed"
-          spellCheck={false} />
-      )}
-    </div>
-  );
-}
-
 /* ── Content tabs ─────────────────────────────────────── */
 interface ContentTab { id: string; title: string; content: string }
 
@@ -605,11 +571,11 @@ export default function ProductForm({ mode, categories, initial }: Props) {
 
           {/* Active editor */}
           {activeTab === "description" && (
-            <HtmlToggle value={description} onChange={setDescription} />
+            <RichEditor value={description} onChange={setDescription} />
           )}
           {contentTabs.map((tab) =>
             activeTab === tab.id ? (
-              <HtmlToggle key={tab.id} value={tab.content}
+              <RichEditor key={tab.id} value={tab.content}
                 onChange={(v) => updateTabContent(tab.id, v)} />
             ) : null
           )}

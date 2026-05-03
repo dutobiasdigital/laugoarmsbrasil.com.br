@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import ImageUpload from "@/components/admin/ImageUpload";
+
+const RichEditor = dynamic(() => import("@/components/admin/RichEditor"), { ssr: false });
 
 const inputCls =
   "bg-[#141d2c] border border-[#1c2a3e] rounded-[6px] h-[40px] px-3 text-[14px] text-[#d4d4da] placeholder-white/30 focus:outline-none focus:border-[#CB0A0E] w-full";
@@ -168,13 +171,7 @@ export default function CategoryForm({ mode, initial, allCategories = [] }: Prop
 
           <div>
             <label className={labelCls}>Descrição</label>
-            <textarea
-              rows={3}
-              value={description}
-              onChange={(e) => setDesc(e.target.value)}
-              className={textareaCls}
-              placeholder="Descrição da categoria para exibição na loja..."
-            />
+            <RichEditor value={description} onChange={setDesc} />
           </div>
 
           {/* Imagem */}

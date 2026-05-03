@@ -56,7 +56,10 @@ const NAV: NavEntry[] = [
   { type: "link", href: "/admin/hero",       label: "Hero",      icon: ICONS.layout },
   { type: "link", href: "/admin/home",       label: "Home",      icon: ICONS.pencil },
   { type: "link", href: "/admin/galerias",   label: "Galerias",  icon: ICONS.photo },
-  { type: "link", href: "/admin/artigos",    label: "Artigos",   icon: ICONS.document },
+  { type: "section", key: "artigos", label: "Artigos", icon: ICONS.document, children: [
+    { href: "/admin/artigos",            label: "Artigos" },
+    { href: "/admin/artigos/categorias", label: "Categorias" },
+  ]},
   { type: "link", href: "/admin/navegacao",  label: "Navegação", icon: ICONS.layers },
   { type: "link", href: "/admin/midias",     label: "Mídias",    icon: ICONS.photo },
   { type: "link", href: "/admin/configuracoes", label: "Configurações", icon: ICONS.cog },
