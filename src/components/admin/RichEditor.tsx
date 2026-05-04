@@ -152,7 +152,7 @@ export default function RichEditor({ value, onChange }: Props) {
         contentEditable={mode === "visual"}
         suppressContentEditableWarning
         onInput={() => { if (editorRef.current) onChange(editorRef.current.innerHTML); }}
-        className={`min-h-[600px] px-4 py-3 text-[#d4d4da] text-[14px] leading-[1.7] focus:outline-none [&_h2]:text-white [&_h2]:text-[24px] [&_h2]:font-bold [&_h2]:mb-2 [&_h3]:text-white [&_h3]:text-[18px] [&_h3]:font-bold [&_h3]:mb-2 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 [&_blockquote]:border-l-4 [&_blockquote]:border-[#ff1f1f] [&_blockquote]:pl-4 [&_blockquote]:text-[#7a9ab5] [&_a]:text-[#ff1f1f] [&_a]:underline [&_img]:max-w-full [&_img]:rounded-[4px] [&_img]:my-2 ${mode === "source" ? "hidden" : ""}`}
+        className={`min-h-[900px] px-4 py-3 text-[#d4d4da] text-[14px] leading-[1.7] focus:outline-none [&_h2]:text-white [&_h2]:text-[24px] [&_h2]:font-bold [&_h2]:mb-2 [&_h3]:text-white [&_h3]:text-[18px] [&_h3]:font-bold [&_h3]:mb-2 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 [&_blockquote]:border-l-4 [&_blockquote]:border-[#ff1f1f] [&_blockquote]:pl-4 [&_blockquote]:text-[#7a9ab5] [&_a]:text-[#ff1f1f] [&_a]:underline [&_img]:max-w-full [&_img]:rounded-[4px] [&_img]:my-2 ${mode === "source" ? "hidden" : ""}`}
       />
 
       {/* Source editor */}
@@ -164,7 +164,7 @@ export default function RichEditor({ value, onChange }: Props) {
             onChange(e.target.value);
           }}
           spellCheck={false}
-          className="w-full min-h-[600px] px-4 py-3 bg-[#070a12] text-[#7dd3fc] text-[13px] font-mono leading-[1.7] focus:outline-none resize-y border-0"
+          className="w-full min-h-[900px] px-4 py-3 bg-[#070a12] text-[#7dd3fc] text-[13px] font-mono leading-[1.7] focus:outline-none resize-y border-0"
           style={{ tabSize: 2 }}
         />
       )}
