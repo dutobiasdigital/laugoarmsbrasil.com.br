@@ -127,7 +127,7 @@ export default async function HomePage() {
               </h2>
             </div>
             <div className="flex-1" />
-            <Link href="/loja" className="text-[#ff1f1f] text-[13px] font-semibold hover:text-[#ff4444] transition-colors">
+            <Link href="/catalogo" className="text-[#ff1f1f] text-[13px] font-semibold hover:text-[#ff4444] transition-colors">
               Ver catálogo →
             </Link>
           </div>
@@ -136,7 +136,7 @@ export default async function HomePage() {
             {categories.map((cat) => (
               <Link
                 key={cat.id}
-                href={`/loja/categoria/${cat.slug}`}
+                href={`/catalogo?categoria=${cat.slug}`}
                 className="group flex flex-col bg-[#0a0f1a] border border-[#141d2c] hover:border-[#ff1f1f]/30 rounded-[10px] overflow-hidden transition-all hover:shadow-[0_0_20px_rgba(255,31,31,0.06)]"
               >
                 <div className="relative w-full aspect-video bg-[#0e1520] overflow-hidden">
@@ -186,7 +186,7 @@ export default async function HomePage() {
                 </h2>
               </div>
               <div className="flex-1" />
-              <Link href="/loja" className="text-[#ff1f1f] text-[13px] font-semibold hover:text-[#ff4444] transition-colors">
+              <Link href="/catalogo" className="text-[#ff1f1f] text-[13px] font-semibold hover:text-[#ff4444] transition-colors">
                 Ver todos →
               </Link>
             </div>
@@ -321,7 +321,7 @@ export default async function HomePage() {
                 Fale conosco
               </Link>
               <Link
-                href="/loja"
+                href="/catalogo"
                 className="bg-[#ff1f1f] hover:bg-[#cc0000] text-white text-[13px] font-semibold px-4 py-2.5 rounded transition-colors"
               >
                 Ver catálogo
@@ -344,7 +344,7 @@ export default async function HomePage() {
               {categories.slice(0, 6).map((cat) => (
                 <Link
                   key={cat.id}
-                  href={`/loja/categoria/${cat.slug}`}
+                  href={`/catalogo?categoria=${cat.slug}`}
                   className="flex items-center gap-2 text-[#7a9ab5] hover:text-white text-[13px] transition-colors group"
                 >
                   <span className="w-[4px] h-[4px] rounded-full bg-[#ff1f1f] shrink-0 group-hover:bg-white transition-colors" />
@@ -352,7 +352,7 @@ export default async function HomePage() {
                 </Link>
               ))}
               <Link
-                href="/loja"
+                href="/catalogo"
                 className="text-[#ff1f1f] text-[12px] font-semibold hover:text-[#ff4444] transition-colors pt-1 border-t border-[#141d2c]"
               >
                 Ver catálogo completo →
