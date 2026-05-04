@@ -455,7 +455,7 @@ export default function ProductForm({ mode, categories, initial }: Props) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="max-w-[960px]">
+      <form onSubmit={handleSubmit} className="w-full">
 
         {/* ── Informações básicas ── */}
         <SectionTitle>Informações Básicas</SectionTitle>

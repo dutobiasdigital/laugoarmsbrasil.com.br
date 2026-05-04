@@ -83,7 +83,7 @@ export default function ArticleCategoryForm({ mode, initial }: Props) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="max-w-[700px]">
+      <form onSubmit={handleSubmit} className="w-full">
 
         <div className="flex flex-col gap-5 mb-8">
 

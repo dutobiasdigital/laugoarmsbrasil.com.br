@@ -203,7 +203,7 @@ export default function CategoryForm({ mode, initial }: Props) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="max-w-[700px]">
+      <form onSubmit={handleSubmit} className="w-full">
 
         {/* ── Informações básicas ── */}
         <div className="flex flex-col gap-5 mb-8">
